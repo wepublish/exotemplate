@@ -9,6 +9,11 @@ export default defineNuxtConfig({
     enabled: true
   },
 
+  runtimeConfig: {
+    clockodoApiUser: process.env.CLOCKODO_API_USER,
+    clockodoApiKey: process.env.CLOCKODO_API_KEY
+  },
+
   css: ['~/assets/css/main.css'],
 
   routeRules: {
