@@ -38,7 +38,7 @@ export default defineEventHandler(async (event): Promise<{groups: GroupEntry[]}>
       params,
       headers: {
       'X-Clockodo-External-Application': 'Inside We.Publish Nuxt Application',
-      'X-ClockodoApiUser': config.clockodoApiUser,
+      'X-ClockodoApiUser': config.clockodoApiEmail,
       'X-ClockodoApiKey': config.clockodoApiKey,
       }
     })

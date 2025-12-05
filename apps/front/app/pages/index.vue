@@ -1,12 +1,26 @@
 <script setup lang="ts">
   const {data, error} = await useFetch('/api/clockodo/entryGroups')
+  const {data: jiraData, error: jiraError} = await useFetch('/api/jira/issues')
 </script>
 
 <template>
   <UContainer class="py-8">
     <h1 class="text-2xl font-bold">Inside We.Publish</h1>
+
+    <div v-if="jiraError" class="col-span-12">
+      <UError :error="jiraError" />
+    </div>
+
+
+    <div v-if="error" class="col-span-12">
+      <UError :error="error" />
+    </div>
     
     <div class="grid grid-cols-12 gap-4">
+      <div v-if="jiraData" class="col-span-12">
+        {{ jiraData }}
+      </div>
+
       <!-- Full width -->
       <div v-if="!!data?.groups.length" class="col-span-12 bg-primary-500/10 p-4 rounded border border-primary-500/20 flex items-center justify-center">
         <div class="grid grid-cols-12 gap-4">
@@ -15,10 +29,6 @@
           </div>
 
         </div>
-      </div>
-
-      <div v-if="error" class="col-span-12">
-        <UError :error="error" />
       </div>
     </div>
   </UContainer>

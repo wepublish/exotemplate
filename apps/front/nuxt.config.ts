@@ -10,8 +10,10 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    clockodoApiUser: process.env.CLOCKODO_API_USER,
-    clockodoApiKey: process.env.CLOCKODO_API_KEY
+    clockodoApiEmail: process.env.CLOCKODO_API_EMAIL,
+    clockodoApiKey: process.env.CLOCKODO_API_KEY,
+    jiraEmail: process.env.NUXT_JIRA_API_EMAIL,
+    jiraApiKey: process.env.NUXT_JIRA_API_KEY
   },
 
   css: ['~/assets/css/main.css'],
