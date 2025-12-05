@@ -1,6 +1,20 @@
 <script setup lang="ts">
-  const {data, error} = await useFetch('/api/clockodo/entryGroups')
+  interface TopUp {
+    hours: number
+  }
+
+  interface BillingPeriod {
+    name: string
+    from: Date
+    to: Date
+    topUps: TopUp[]
+  }
+
+
+  const {data: entryGroups, error: clError} = await useFetch('/api/clockodo/entryGroups')
   const {data: jiraData, error: jiraError} = await useFetch('/api/jira/issues')
+
+
 </script>
 
 <template>
@@ -12,8 +26,8 @@
     </div>
 
 
-    <div v-if="error" class="col-span-12">
-      <UError :error="error" />
+    <div v-if="clError" class="col-span-12">
+      <UError :error="clError" />
     </div>
     
     <div class="grid grid-cols-12 gap-4">
@@ -22,13 +36,8 @@
       </div>
 
       <!-- Full width -->
-      <div v-if="!!data?.groups.length" class="col-span-12 bg-primary-500/10 p-4 rounded border border-primary-500/20 flex items-center justify-center">
-        <div class="grid grid-cols-12 gap-4">
-          <div v-for="group in data.groups" class="col-span-6">
-            {{ group }}
-          </div>
-
-        </div>
+      <div v-if="!!entryGroups?.groups.length" class="col-span-12">
+        <EntryGroupComp :entry-groups="entryGroups.groups" />
       </div>
     </div>
   </UContainer>

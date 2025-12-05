@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-interface GroupEntry {
+export interface EntryGroup {
   group: string[]
   grouped_by: string[]
   name: string
@@ -14,11 +14,10 @@ interface GroupEntry {
   billable_amount: number
   duration: number
   restrictions: string[]
-  has_subgroups: boolean
-  subgroups: GroupEntry[]
+  sub_groups: EntryGroup[]
 }
 
-export default defineEventHandler(async (event): Promise<{groups: GroupEntry[]}> => {
+export default defineEventHandler(async (event): Promise<{groups: EntryGroup[]}> => {
   const config = useRuntimeConfig()
 
   // Default parameters for getEntrygroupsV2
@@ -26,7 +25,7 @@ export default defineEventHandler(async (event): Promise<{groups: GroupEntry[]}>
   const params = {
     time_since: '2025-01-01T00:00:00Z',
     time_until: '2025-12-31T00:00:00Z',
-    grouping: ['customers_id', 'services_id'], // Required: How to group the entries
+    grouping: ['customers_id', 'services_id', 'texts_id', 'day'], // Required: How to group the entries
     round_to_minutes: 15, // Optional: Rounding factor
     filter: {
       customers_id: 3294981
