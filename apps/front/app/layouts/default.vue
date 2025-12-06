@@ -11,11 +11,12 @@
   <UApp>
     <UHeader>
       <template #left>
-        <NuxtLink to="/">
-          <AppLogo class="w-auto h-6 shrink-0" />
-        </NuxtLink>
-
-        <TemplateMenu />
+        <img
+          src="@/assets/images/wep-logo.png"
+          alt="Logo"
+          class="h-8 w-auto"
+        >
+        <p class="text-2xl text-primary font-bold">Inside</p>
       </template>
 
       <template #right>
@@ -32,9 +33,11 @@
     </UHeader>
 
     <UMain>
-      <UContainer>
+      <UContainer class="pt-8">
+        <!-- not logged-in -->
         <AuthLoginForm v-if="showLoginForm" />
 
+        <!-- logged-in -->
         <slot v-else />
       </UContainer>
     </UMain>
@@ -50,7 +53,7 @@
 
       <template #right>
         <UButton
-          to="https://github.com/nuxt-ui-templates/starter"
+          to="https://github.com/wepublish/wepublish"
           target="_blank"
           icon="i-simple-icons-github"
           aria-label="GitHub"
@@ -61,7 +64,3 @@
     </UFooter>
   </UApp>
 </template>
-
-<style>
-
-</style>

@@ -3,16 +3,8 @@
 </script>
 
 <template>
-  <UContainer>
-    <UHeader>Dashboard</UHeader>
-
-    <UPageCard>
+  <UPageCard>
       User:
       {{ userStore.user }}
     </UPageCard>
-  </UContainer>
 </template>
-
-<style>
-
-</style>
