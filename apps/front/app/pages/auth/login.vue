@@ -8,18 +8,14 @@
     name: 'email',
     type: 'email',
     label: 'Email',
-    placeholder: 'Enter your email',
+    placeholder: 'Email eingeben',
     required: true
   }, {
     name: 'password',
-    label: 'Password',
+    label: 'Passwort',
     type: 'password',
-    placeholder: 'Enter your password',
+    placeholder: 'Passwort eingeben',
     required: true
-  }, {
-    name: 'remember',
-    label: 'Remember me',
-    type: 'checkbox'
   }]
 
   const schema = z.object({
@@ -55,7 +51,7 @@
         <UAuthForm
           :schema="schema"
           title="Login"
-          description="Enter your credentials to access your account."
+          description="Melde dich mit deinem Account für Inside We.Publish an."
           icon="i-lucide-user"
           :fields="fields"
           @submit="onSubmit"
