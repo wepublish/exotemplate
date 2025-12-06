@@ -22,10 +22,11 @@ export default defineEventHandler(async (event): Promise<{groups: EntryGroup[]}>
   const params = {
     time_since: '2025-01-01T00:00:00Z',
     time_until: '2025-12-31T00:00:00Z',
-    grouping: ['billable', 'services_id', 'texts_id', 'day'],
+    grouping: ['services_id', 'texts_id', 'day'],
     round_to_minutes: 15,
     filter: {
-      customers_id: 3294981
+      customers_id: 3294981,
+      billable: 2
     }
   }
 

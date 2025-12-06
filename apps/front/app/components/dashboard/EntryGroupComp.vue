@@ -8,22 +8,22 @@ import type { EntryGroup } from '~~/server/api/clockodo/entryGroups'
 </script>
 
 <template>
-  <div>
-    <div v-for="(entryGroup, index) of entryGroups" :key="index" class="grid grid-cols-12" >
-      <div class="col-span-12">
-        <div class="flex justify-between">
-          <div :class="(recursiveLevel || 0) >= 2 ? '' : 'text-3xl'">
-            {{ entryGroup.name }}
-          </div>
-          <UBadge v-if="entryGroup.duration" size="lg">
-            {{ (entryGroup.duration / 3600).toFixed(2) }}&nbsp;h
-          </UBadge>
-        </div>
+  <UAccordion :items="props.entryGroups">
+    <template #leading="{item}">
+      <div style="width: 100%;" class="flex justify-between text-start">
+        <p>{{ item.name }}</p>
+        <UBadge v-if="item.duration" size="lg">
+          {{ (item.duration / 3600).toFixed(2) }}&nbsp;h
+        </UBadge>
       </div>
-      
-      <div class="col-span-12 ml-2 pl-4 border-l border-gray-200 dark:border-gray-800 mt-1">
-        <EntryGroupComp :entry-groups="entryGroup.sub_groups" :recursive-level="(recursiveLevel || 0) + 1" />
-      </div>
-    </div>
-  </div>
+    </template>
+    <template #body="item">
+      <EntryGroupComp
+        v-if="!!item.item.sub_groups.length"
+        :entry-groups="item.item.sub_groups"
+        :recursive-level="(recursiveLevel || 0) + 1"
+        class="ml-2 pl-4 border-l border-gray-200 dark:border-gray-800"
+      />
+    </template>
+  </UAccordion>
 </template>

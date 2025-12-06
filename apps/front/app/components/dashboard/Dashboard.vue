@@ -56,8 +56,14 @@
       </UPageCard>
     </div>
 
+    <!-- budget of client -->
     <div class="col-span-12">
       <DashboardFinance :client-period-id="selectedClientPeriodId" :worked-hours="25.5" />
+    </div>
+
+    <!-- clockodo insights -->
+    <div class="col-span-12">
+      <DashboardClockodo />
     </div>
   </div>
 </template>
