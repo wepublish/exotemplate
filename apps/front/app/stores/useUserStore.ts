@@ -24,7 +24,7 @@ export const useUserStore = defineStore('useUserStore', () => {
 
       // load user
       user.value = await directus.request<CustomDirectusUser>(readMe({
-        fields: ['*', {accessToClients: [{Clients_id: ['*', {periods: [{Periods_id: ['*']}, {topUps: ['*']}]}]}]}]
+        fields: ['*', {accessToClients: [{Clients_id: ['*', {periods: ['*', {Periods_id: ['*']}, {topUps: ['*']}]}]}]}]
       }))
 
       toast.add({
