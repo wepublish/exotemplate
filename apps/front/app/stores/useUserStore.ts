@@ -36,7 +36,7 @@ export const useUserStore = defineStore('useUserStore', () => {
 
       // redirect to app in case we are logged in but initially called a auth/-component
       if (route.path.startsWith('/auth/')) {
-        await router.push('/index')
+        await router.push('/')
       }
     } catch (e) {
       console.log(e)

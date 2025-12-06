@@ -33,7 +33,7 @@
 
     await userStore.login({
       email: payload.data.email,
-      password: payload.data.email
+      password: payload.data.password
     })
   }
 </script>
