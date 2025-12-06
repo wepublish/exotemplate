@@ -16,11 +16,9 @@ export const useUserStore = defineStore('useUserStore', () => {
         await directus.login({ email, password })
       }
 
-      if (!directus.getToken()) {
-        toast.add({
-          color: 'error',
-          title: 'Missing Access Token'
-        })
+      const accessToken = await directus.getToken()
+
+      if (!accessToken) {
         return
       }
 
@@ -34,7 +32,7 @@ export const useUserStore = defineStore('useUserStore', () => {
         title: 'Erfolgreich eingeloggt.'
       })
 
-      // redirect to app in case we are logged in but initially called a auth/-component
+      // redirect to app in case we are logged-in but initially called a auth/-component
       if (route.path.startsWith('/auth/')) {
         await router.push('/')
       }
@@ -48,7 +46,26 @@ export const useUserStore = defineStore('useUserStore', () => {
     }
   }
 
+  async function logout() {
+    try {
+      await directus.logout()
+      user.value = undefined
+    } catch (e) {
+      toast.add({
+        color: 'error',
+        description: e as string
+      })
+    }
+  }
+
+  const loggedIn = computed<boolean>(() => {
+    return !!user.value
+  })
+
   return {
-    login
+    loggedIn,
+    login,
+    logout,
+    user
   }
 })
