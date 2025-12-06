@@ -1,4 +1,4 @@
-import {type CustomDirectusUser} from '@/../types/DirectusTypes'
+import {type ClientDirectusUser, type CustomDirectusUser, type Client} from '@/../types/DirectusTypes'
 import { readMe } from '@directus/sdk'
 
 export const useUserStore = defineStore('useUserStore', () => {
@@ -62,10 +62,16 @@ export const useUserStore = defineStore('useUserStore', () => {
     return !!user.value
   })
 
+  const clients = computed<Client[]>(() => {
+    const clientUsers = (user.value?.accessToClients || []) as ClientDirectusUser[]
+    return clientUsers.map(clientUser => clientUser.Clients_id as Client)
+  })
+
   return {
     loggedIn,
     login,
     logout,
-    user
+    user,
+    clients
   }
 })

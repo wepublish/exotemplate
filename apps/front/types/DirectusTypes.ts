@@ -60,6 +60,8 @@ export interface TopUp {
   amount: number;
   note: string | null;
   clientPeriod: number | ClientPeriod | null;
+  hourlyRate: number;
+  wepPercentage: number | null;
 }
 
 export interface CustomDirectusUser {

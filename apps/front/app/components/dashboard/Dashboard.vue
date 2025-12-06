@@ -1,17 +1,13 @@
 <script lang="ts" setup>
-  import type { Client, ClientDirectusUser, ClientPeriod, Period } from '~~/types/DirectusTypes'
+  import type { Client, ClientPeriod, Period } from '~~/types/DirectusTypes'
 
   const userStore = useUserStore()
 
   const selectedClientId = ref<string | undefined>(undefined)
   const selectedClientPeriodId = ref<number |undefined>(undefined)
 
-  const selectedClient = computed<Client | undefined>(() => clients.value?.find(client => client.id === selectedClientId.value))
-
-  const clients = computed<Client[]>(() => {
-    const clientUsers = (userStore.user?.accessToClients || []) as ClientDirectusUser[]
-    return clientUsers.map(clientUser => clientUser.Clients_id as Client)
-  })
+  const clients = computed<Client[]>(() => userStore.clients)
+  const selectedClient = computed<Client | undefined>(() => clients.value?.find(client => client.id === selectedClientId.value))  
 
   const clientPeriods = computed<{id: number, periodName: string | null}[]>(() => {
     return ((selectedClient.value?.periods || []) as ClientPeriod[]).map(clientPeriod => {
@@ -61,8 +57,7 @@
     </div>
 
     <div class="col-span-12">
-      <UPageCard>
-      </UPageCard>
+      <DashboardFinance :client-period-id="selectedClientPeriodId" :worked-hours="25.5" />
     </div>
   </div>
 </template>
