@@ -40,7 +40,15 @@
           Projekt und Abrechnungsperiode wählen
         </template>
         <template #body>
-          <USelectMenu v-model="selectedClientId" size="xl" :items="clients" value-key="id" label-key="name" placeholder="Projekt wählen" />
+          <USelectMenu
+            v-model="selectedClientId"
+            size="xl"
+            :items="clients"
+            value-key="id"
+            label-key="name"
+            placeholder="Projekt wählen"
+            @change="() => selectedClientPeriodId = undefined"  
+          />
           
           <USelectMenu
             v-model="selectedClientPeriodId"
