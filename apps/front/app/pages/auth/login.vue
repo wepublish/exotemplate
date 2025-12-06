@@ -2,7 +2,7 @@
   import * as z from 'zod'
   import type { FormSubmitEvent, AuthFormField } from '@nuxt/ui'
 
-  const toast = useToast()
+  const userStore = useUserStore()
 
   const fields: AuthFormField[] = [{
     name: 'email',
@@ -25,22 +25,16 @@
 
   type Schema = z.output<typeof schema>
 
-  function onSubmit(payload: FormSubmitEvent<Schema>) {
+  async function onSubmit(payload: FormSubmitEvent<Schema>) {
     const result = schema.safeParse(payload.data)
+    if (!result.success) {
+      return
+    }
 
-      if (!result.success) {
-        toast.add({
-        color: 'error',
-        title: 'Validation Error',
-        description: result.error.message
-        })
-        return
-      }
-
-      toast.add({
-        title: 'Success',
-        description: 'You have been logged in.'
-      })
+    await userStore.login({
+      email: payload.data.email,
+      password: payload.data.email
+    })
   }
 </script>
 

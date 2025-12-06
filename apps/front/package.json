@@ -11,11 +11,14 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
+    "@directus/sdk": "^20.2.0",
     "@iconify-json/lucide": "^1.2.74",
     "@iconify-json/simple-icons": "^1.2.59",
     "@nuxt/ui": "^4.2.1",
+    "@pinia/nuxt": "0.11.3",
     "axios": "^1.13.2",
     "nuxt": "^4.2.1",
+    "pinia": "^3.0.4",
     "zod": "^4.1.13"
   },
   "devDependencies": {
