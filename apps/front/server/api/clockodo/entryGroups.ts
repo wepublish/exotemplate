@@ -19,14 +19,11 @@ export interface EntryGroup {
 
 export default defineEventHandler(async (event): Promise<{groups: EntryGroup[]}> => {
   const config = useRuntimeConfig()
-
-  // Default parameters for getEntrygroupsV2
-  // Documentation: https://docs.clockodo.com/#tag/EntryGroup/operation/getEntrygroupsV2
   const params = {
     time_since: '2025-01-01T00:00:00Z',
     time_until: '2025-12-31T00:00:00Z',
-    grouping: ['customers_id', 'services_id', 'texts_id', 'day'], // Required: How to group the entries
-    round_to_minutes: 15, // Optional: Rounding factor
+    grouping: ['billable', 'services_id', 'texts_id', 'day'],
+    round_to_minutes: 15,
     filter: {
       customers_id: 3294981
     }
