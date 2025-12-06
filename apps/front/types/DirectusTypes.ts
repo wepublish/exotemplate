@@ -2,7 +2,6 @@ import type { DirectusUser } from "@directus/sdk";
 
 export interface Schema {
   Clients: Client[];
-  Clients_Clients: ClientClient[];
   Clients_Periods: ClientPeriod[];
   Clients_directus_users: ClientDirectusUser[];
   Periods: Period[];
@@ -20,14 +19,8 @@ export interface Client {
   user_updated: string | DirectusUser<Schema> | null;
   date_updated: string | null;
   name: string;
-  periods: string[] | ClientPeriod[];
   allowedUsers: string[] | ClientDirectusUser[];
-}
-
-export interface ClientClient {
-  id: number;
-  Clients_id: string | Client | null;
-  related_Clients_id: string | Client | null;
+  periods: string[] | ClientPeriod[];
 }
 
 export interface ClientPeriod {
@@ -51,7 +44,7 @@ export interface Period {
   date_created: string | null;
   user_updated: string | DirectusUser<Schema> | null;
   date_updated: string | null;
-  name: string;
+  name: string | null;
   from: string;
   to: string;
 }
@@ -70,7 +63,7 @@ export interface TopUp {
 }
 
 export interface CustomDirectusUser {
-  clients: string | null;
+  accessToClients: string[] | ClientDirectusUser[];
 }
 
 export interface DirectusSyncIdMap {
