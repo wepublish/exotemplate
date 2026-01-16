@@ -1,5 +1,17 @@
 <script lang="ts" setup>
-  const {data: entryGroups, error: clError} = await useFetch('/api/clockodo/entryGroups')
+  const props = defineProps<{
+    clockodoCustomerId?: string | null,
+    from?: string
+    to?: string
+  }>()
+
+  const {data: entryGroups, error: clError} = await useFetch('/api/clockodo/entryGroups', {
+    query: {
+      customer_id: props.clockodoCustomerId,
+      from: props.from,
+      to: props.to
+    }
+  })
   const {data: jiraData, error: jiraError} = await useFetch('/api/jira/issues')
 </script>
 
@@ -27,7 +39,3 @@
     </UPageCard>
   </div>
 </template>
-
-<style>
-
-</style>

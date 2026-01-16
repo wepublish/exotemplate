@@ -19,6 +19,8 @@ export interface Client {
   user_updated: string | DirectusUser<Schema> | null;
   date_updated: string | null;
   name: string;
+  clockodo_customer_id: string | null;
+  jira_short_code: string | null;
   allowedUsers: string[] | ClientDirectusUser[];
   periods: string[] | ClientPeriod[];
 }

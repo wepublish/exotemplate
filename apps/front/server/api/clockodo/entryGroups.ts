@@ -1,4 +1,5 @@
 import axios from 'axios'
+import {format} from 'date-fns'
 
 export interface EntryGroup {
   group: string[]
@@ -19,13 +20,23 @@ export interface EntryGroup {
 
 export default defineEventHandler(async (event): Promise<{groups: EntryGroup[]}> => {
   const config = useRuntimeConfig()
+
+  const {customer_id: customerId, from, to} = getQuery(event)
+
+  if (!customerId || !from || !to) {
+    throw new Error('customerId or fromParam or toParam not provided!')
+  }
+
+  const fromFormated = format(new Date(from as string), 'yyyy-MM-dd') + 'T00:00:00Z'
+  const toFormated = format(new Date(to as string), 'yyyy-MM-dd') + 'T00:00:00Z'
+
   const params = {
-    time_since: '2025-01-01T00:00:00Z',
-    time_until: '2025-12-31T00:00:00Z',
+    time_since: fromFormated,
+    time_until: toFormated,
     grouping: ['services_id', 'texts_id', 'day'],
     round_to_minutes: 15,
     filter: {
-      customers_id: 3294981,
+      customers_id: customerId,
       billable: 2
     }
   }
