@@ -19,8 +19,11 @@ export interface EntryGroup {
   billable_amount: number
   duration: number
   restrictions: string[]
-  jiraIssue: JiraIssue
   sub_groups: EntryGroup[]
+  
+  // decorating entries
+  jiraIssue?: JiraIssue
+  pastEntryGroup: EntryGroup
 }
 
 export interface EntryGroupParams {
@@ -45,10 +48,35 @@ export interface JiraIssue {
   }
 }
 
+// https://docs.clockodo.com/#tag/EntryGroup
+type ClockodoGrouping = ('billable' | 'customers_id' | 'day' | 'month' | 'is_lumpsum' | 'lumpsum_services_id' | 'projects_id' | 'services_id' | 'subprojects_id' | 'texts_id' | 'users_id' | 'week' | 'year')[]
+
+interface ClockodoPrams {
+  from: string | Date
+  to: string | Date
+  grouping?: ClockodoGrouping
+  filter: {
+    billable?: 2
+    customers_id: string | number
+    services_id?: string | number
+  }
+}
+
+
+const JIRA_ISSUE_GROUP_ID = '1100301'
+
 
 export default defineEventHandler(async (event): Promise<EntryGroup[]> => {
   try {
-    // TODO: authenticate with directus or move it to directus
+    // TODO 1: authenticate with directus or move it to directus
+    // DONE 2: decorate with past entries from clockodo
+    // TODO 2.2: check if date overlapps when fetching from clockodo
+    // TODO 3: make calculations front-end ready
+    // TODO 3.2: indicate in the UI the most recent time entries (e.g. one week in to the past) to probably not be consolidated.
+    // TODO 4: implement UI
+    // TODO 5: implement manual correction entries
+    // TODO 5: show all other work from we.publish not billed
+    // TODO 6: make sure jira api key will be renewed => calendar entry
 
     const {customer_id: customerId, from, to, jira_prefix: jiraPrefix} = getQuery(event)
 
@@ -56,9 +84,20 @@ export default defineEventHandler(async (event): Promise<EntryGroup[]> => {
       throw new Error('customerId, from, to or jiraPrefix param not provided!')
     }  
 
-    const entryGroupsWithinPeriod = await getGroupEntriesWithinPeriod(from as string, to as string, customerId as string)
+    const entryGroupsWithinPeriod = await getGroupEntriesFromClockodo({
+      from: from as string,
+      to: to as string,
+      filter: {
+        customers_id: customerId as string
+      }
+    })
 
-    await cleanAndDecorateJiraIssues(entryGroupsWithinPeriod, jiraPrefix as string)
+    await groupAndDecorateJiraIssues(
+      entryGroupsWithinPeriod,
+      jiraPrefix as string,
+      customerId as string,
+      new Date(from as string)
+    )
 
     // decorated and cleand within object as of params by reference
     return entryGroupsWithinPeriod.groups
@@ -73,9 +112,12 @@ export default defineEventHandler(async (event): Promise<EntryGroup[]> => {
   }
 })
 
-async function cleanAndDecorateJiraIssues (groups: EntryGroups, jiraPrefix: string): Promise<void> {
-  const JIRA_ISSUE_GROUP_ID = '1100301'
-  
+async function groupAndDecorateJiraIssues (
+  groups: EntryGroups,
+  jiraPrefix: string,
+  clockodoCustomerId: string,
+  timePeriodFrom: Date
+): Promise<void> {
   let jiraGroup = groups.groups.find(group => group.group === JIRA_ISSUE_GROUP_ID)
 
   if (!jiraGroup || !jiraGroup.sub_groups.length) {
@@ -86,25 +128,42 @@ async function cleanAndDecorateJiraIssues (groups: EntryGroups, jiraPrefix: stri
   mergeSameJiraIssues(jiraGroup, jiraPrefix)
 
   // decorate jira subgroups with estimated story points from jira
-  await decorateJiraIssues(jiraGroup, jiraPrefix)
+  await decorateWithJiraIssues(jiraGroup, jiraPrefix)
+  
+  // decorate jira subgroups with working hours delivered prior to the time period.
+  await decorateWithPastEntries(jiraGroup, jiraPrefix, clockodoCustomerId, timePeriodFrom)
 }
 
-async function decorateJiraIssues (jiraGroup: EntryGroup, jiraPrefix: string): Promise<void> {
-  const issueKeys = jiraGroup.sub_groups
-    .map(subGroup => subGroup.name)
-    .filter(subGroup => !!getJiraIssue(subGroup, jiraPrefix))
+/**
+ * get past entries (1 year back) from clockodo
+ * @param customerId 
+ * @param timePeriodFrom 
+ * @returns 
+ */
+async function decorateWithPastEntries (
+  jiraGroup: EntryGroup,
+  jiraPrefix: string,
+  customerId: string,
+  timePeriodFrom: Date
+): Promise<void> {
+  const from = new Date(new Date(timePeriodFrom).setMonth(timePeriodFrom.getMonth() - 12))
 
-  const estimatesFromJira = await getEstimatesFromJira(issueKeys)
-
-  // attach estimates
-  for (let estimate of estimatesFromJira) {
-    const existing = jiraGroup.sub_groups.find(subGroup => subGroup.name === estimate.key)
-    if (!existing) {
-      throw new Error(`Unexpected Error: Could not find jira key where it should exist. ${estimate.key}`)
+  const pastEntries = (await getGroupEntriesFromClockodo({
+    from,
+    to: timePeriodFrom,
+    grouping: ['services_id', 'texts_id'],
+    filter: {
+      customers_id: customerId,
+      services_id: JIRA_ISSUE_GROUP_ID
     }
+  })).groups?.[0].sub_groups
 
-    // assign the estimate from jira api
-    existing.jiraIssue = estimate
+  for (let jiraIssue of jiraGroup.sub_groups) {
+    const foundPastEntry = pastEntries.find(pastEntry => pastEntry !== undefined && getJiraIssue(pastEntry.name, jiraPrefix) === jiraIssue.name)
+
+    if (foundPastEntry) {
+      jiraIssue.pastEntryGroup = foundPastEntry
+    }
   }
 }
 
@@ -138,9 +197,56 @@ function mergeSameJiraIssues (jiraGroup: EntryGroup, jiraPrefix: string): void {
   // replace with clean subgroups
   jiraGroup.sub_groups = cleanSubGroups
 }
+async function decorateWithJiraIssues (jiraGroup: EntryGroup, jiraPrefix: string): Promise<void> {
+  const issueKeys = jiraGroup.sub_groups
+    .map(subGroup => subGroup.name)
+    .filter(subGroup => !!getJiraIssue(subGroup, jiraPrefix))
 
-function getJiraIssue (text: string | undefined, jiraPrefix: string): string | undefined {
-  return text?.match(new RegExp(`${jiraPrefix}-\\d+`))?.[0]
+  const estimatesFromJira = await getEstimatesFromJira(issueKeys)
+
+  // attach estimates
+  for (let estimate of estimatesFromJira) {
+    const existing = jiraGroup.sub_groups.find(subGroup => subGroup.name === estimate.key)
+    if (!existing) {
+      throw new Error(`Unexpected Error: Could not find jira key where it should exist. ${estimate.key}`)
+    }
+
+    // assign the estimate from jira api
+    existing.jiraIssue = estimate
+  }
+}
+
+async function getGroupEntriesFromClockodo (
+  {
+    from,
+    to,
+    grouping,
+    filter
+  }: ClockodoPrams
+): Promise<EntryGroups> {
+  const config = useRuntimeConfig()
+  const time_since = getClockodoDateFormat(from)
+  const time_until = getClockodoDateFormat(to)
+
+  const params = {
+    time_since,
+    time_until,
+    grouping: grouping || ['services_id', 'texts_id', 'day'] as ClockodoGrouping,
+    round_to_minutes: 15,
+    filter: {
+      billable: 2,
+      ...filter
+    }
+  }
+
+  return (await axios.get('https://my.clockodo.com/api/v2/entrygroups', {
+    params,
+    headers: {
+    'X-Clockodo-External-Application': 'Inside We.Publish Nuxt Application',
+    'X-ClockodoApiUser': config.clockodoApiEmail,
+    'X-ClockodoApiKey': config.clockodoApiKey,
+    }
+  })).data
 }
 
 async function getEstimatesFromJira (issueKeys: string[]): Promise<JiraIssue[]> {
@@ -206,33 +312,14 @@ async function getEstimatesFromJira (issueKeys: string[]): Promise<JiraIssue[]> 
   }
 }
 
-async function getGroupEntriesWithinPeriod (from: string | Date, to: string | Date, customerId: string | number): Promise<EntryGroups> {
-  const config = useRuntimeConfig()
-  const timeSince = getClockodoDateFormat(from)
-  const timeUntil = getClockodoDateFormat(to)
-
-  const params = {
-    time_since: timeSince,
-    time_until: timeUntil,
-    grouping: ['services_id', 'texts_id', 'day'],
-    round_to_minutes: 15,
-    filter: {
-      customers_id: customerId,
-      billable: 2
-    }
-  }
-
-
-  return (await axios.get('https://my.clockodo.com/api/v2/entrygroups', {
-    params,
-    headers: {
-    'X-Clockodo-External-Application': 'Inside We.Publish Nuxt Application',
-    'X-ClockodoApiUser': config.clockodoApiEmail,
-    'X-ClockodoApiKey': config.clockodoApiKey,
-    }
-  })).data
-}
+/**
+ * Helper functions
+ */
 
 function getClockodoDateFormat (date: string | Date): string {
   return format(new Date(date), 'yyyy-MM-dd') + 'T00:00:00Z'
+}
+
+function getJiraIssue (text: string | undefined, jiraPrefix: string): string | undefined {
+  return text?.match(new RegExp(`${jiraPrefix}-\\d+`))?.[0]
 }
