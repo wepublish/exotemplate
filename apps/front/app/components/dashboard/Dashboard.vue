@@ -5,7 +5,7 @@
 
   const selectedClientId = ref<string | undefined>(undefined)
   const selectedClientPeriodId = ref<number |undefined>(undefined)
-    const selectedClientPeriod = computed<ClientPeriod | undefined>(() => ((selectedClient.value?.periods || []) as ClientPeriod[]).find(period => period.id === selectedClientPeriodId.value))
+  // const selectedClientPeriod = computed<ClientPeriod | undefined>(() => ((selectedClient.value?.periods || []) as ClientPeriod[]).find(period => period.id === selectedClientPeriodId.value))
 
   const clients = computed<Client[]>(() => userStore.clients)
   const selectedClient = computed<Client | undefined>(() => clients.value?.find(client => client.id === selectedClientId.value))  
@@ -71,13 +71,8 @@
     </div>
 
     <!-- clockodo insights -->
-    <div class="col-span-12">
-      <DashboardClockodo
-        v-if="selectedClientPeriod"
-        :clockodo-customer-id="selectedClient?.clockodo_customer_id"
-        :from="(selectedClientPeriod?.Periods_id as Period).from"
-        :to="(selectedClientPeriod?.Periods_id as Period).to"
-      />
+    <div class="col-span-12" v-if="selectedClientPeriodId">
+      <DashboardClockodo :client-period-id="selectedClientPeriodId" />
     </div>
   </div>
 </template>

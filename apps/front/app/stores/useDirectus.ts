@@ -1,6 +1,7 @@
 import { authentication, createDirectus, rest, type AuthenticationData, type AuthenticationStorage } from '@directus/sdk'
 import { defineStore } from 'pinia'
 import type { Schema } from '~~/types/DirectusTypes'
+import axios from 'axios'
 
 export const useDirectus = defineStore('useDirectus', () => {
   const config = useRuntimeConfig()
@@ -27,7 +28,30 @@ export const useDirectus = defineStore('useDirectus', () => {
     .with(authentication('json', {storage: authLocalStorage()}))
     .with(rest())
 
-  return directus
+  async function getCustomEndpoint(uri: string, query: {[key: string]: string | number}) {
+    await addAuthorizationHeaderToAxios()
+
+    if (query) {
+      const serializedQuery = Object.entries(query)
+        .map(([key, value]) => `${key}=${(value)}`)
+        .join('&')
+      uri = `${uri}?${serializedQuery}`
+    }
+    
+    return await axios.get(`${API_URL()}/${uri}`)
+  }
+
+  async function addAuthorizationHeaderToAxios() {
+    const access_token = await directus.getToken()
+    if (access_token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`
+    }
+  }
+
+  return {
+    directus,
+    getCustomEndpoint
+  }
 })
 
 export const LOCAL_STORAGE_KEY = 'directus_storage'

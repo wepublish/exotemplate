@@ -1,0 +1,30 @@
+export interface EntryGroup {
+  group: string
+  grouped_by: string[]
+  name: string
+  revenue: number
+  budget: number
+  budget_is_hours: boolean
+  budget_is_strict: boolean
+  note: string
+  hourly_rate: number
+  billable: number
+  billable_amount: number
+  duration: number
+  restrictions: string[]
+  sub_groups: EntryGroup[]
+  
+  // decorating entries
+  jiraIssue?: JiraIssue
+  pastEntryGroup: EntryGroup
+}
+
+export interface JiraIssue {
+  expand: string
+  id: string
+  self: string
+  key: string,
+  fields: {
+    customfield_10028: string
+  }
+}

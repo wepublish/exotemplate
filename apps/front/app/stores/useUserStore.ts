@@ -2,7 +2,7 @@ import {type ClientDirectusUser, type CustomDirectusUser, type Client} from '@/.
 import { readMe } from '@directus/sdk'
 
 export const useUserStore = defineStore('useUserStore', () => {
-  const directus = useDirectus()
+  const {directus} = useDirectus()
   const toast = useToast()
   const route = useRoute()
   const router = useRouter()
