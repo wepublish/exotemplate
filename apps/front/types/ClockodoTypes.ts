@@ -1,3 +1,16 @@
+export interface EntryGroups {
+  groups: EntryGroup[]
+}
+
+export interface EntryGroupsWithSums extends EntryGroups {
+  sums: Sums
+}
+
+export interface Sums {
+  billableHours: number
+  nonBillableHours: number
+}
+
 export interface EntryGroup {
   group: string
   grouped_by: string[]

@@ -1,11 +1,13 @@
 <script lang="ts" setup>
+  import type { EntryGroupsWithSums } from '~~/types/ClockodoTypes'
+  import WorkLog from './WorkLog.vue'
   import type { Client, ClientPeriod, Period } from '~~/types/DirectusTypes'
 
   const userStore = useUserStore()
+  const {getCustomEndpoint} = useDirectus()
 
   const selectedClientId = ref<string | undefined>(undefined)
   const selectedClientPeriodId = ref<number |undefined>(undefined)
-  // const selectedClientPeriod = computed<ClientPeriod | undefined>(() => ((selectedClient.value?.periods || []) as ClientPeriod[]).find(period => period.id === selectedClientPeriodId.value))
 
   const clients = computed<Client[]>(() => userStore.clients)
   const selectedClient = computed<Client | undefined>(() => clients.value?.find(client => client.id === selectedClientId.value))  
@@ -30,6 +32,14 @@
     },
     {immediate: true}
   )
+
+  const dataLoaderKey = computed<string>(() => `clientPeriodId-${selectedClientPeriodId.value}`)
+  const {data: entryGroups} = await useAsyncData(dataLoaderKey, async () => {
+    if (!selectedClientPeriodId.value) {
+      return
+    }
+    return (await getCustomEndpoint('aggregatedHours', {clientPeriodId: selectedClientPeriodId.value})).data as Promise<EntryGroupsWithSums>
+  })
 
 </script>
 
@@ -67,12 +77,12 @@
 
     <!-- budget of client -->
     <div class="col-span-12">
-      <DashboardFinance :client-period-id="selectedClientPeriodId" :worked-hours="25.5" />
+      <DashboardFinance :client-period-id="selectedClientPeriodId" :working-sums="entryGroups?.sums" />
     </div>
 
     <!-- clockodo insights -->
     <div class="col-span-12" v-if="selectedClientPeriodId">
-      <DashboardClockodo :client-period-id="selectedClientPeriodId" />
+      <WorkLog :entry-groups="entryGroups" />
     </div>
   </div>
 </template>

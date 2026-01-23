@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+  import type { Sums } from '~~/types/ClockodoTypes'
   import type { ClientPeriod, TopUp } from '~~/types/DirectusTypes'
 
   interface HoursCalculated {
@@ -13,7 +14,7 @@
 
   const props = defineProps<{
     clientPeriodId: number | undefined
-    workedHours: number | undefined
+    workingSums: Sums | undefined
   }>()
 
   const selectedClientPeriod = computed<ClientPeriod | undefined>(() => {
@@ -62,7 +63,8 @@
         }, { totalHours: 0, hoursClient: 0, hoursWep: 0 })
   })
 
-  const hoursUsedPercentage = computed<number>(() => Math.round((props.workedHours || 0) * 100 / totalHours.value.hoursClient))
+  const hoursUsedPercentage = computed<number>(() => Math.round((props.workingSums?.billableHours || 0) * 100 / totalHours.value.hoursClient))
+  const availableHours = computed<number>(() => totalHours.value.hoursClient - (props.workingSums?.billableHours || 0))
 
 </script>
 
@@ -71,9 +73,14 @@
     <!-- top ups -->
     <UPageCard>
       <template #body>
-        <div class="flex justify-between w-full px-4">
+        <div class="flex justify-between w-full">
           <div class="font-bold">Top-Ups</div>
-          <div v-if="selectedClientPeriod" class="font-bold text-4xl text-primary">{{ (totalHours.hoursClient) }} h</div>
+          <div
+            v-if="selectedClientPeriod"
+            class="font-bold text-4xl text-primary"
+          >
+            {{ (totalHours.hoursClient) }} h
+          </div>
         </div>
         <UTable :data="topUpsForTable" />
       </template>
@@ -81,16 +88,25 @@
 
     <!-- progress -->
      <UPageCard class="flex-1">
-      <template #header>
-        Arbeitsfortschritt
-      </template>
-      <template #body v-if="selectedClientPeriod">
-        <UBanner v-if="hoursUsedPercentage >= 100" color="error" icon="i-material-symbols:exclamation" title="Stunden überzogen" />
-        <UProgress :model-value="hoursUsedPercentage" status size="2xl" class="w-100 mt-4" :color="hoursUsedPercentage >= 100 ? 'error' : 'primary'">
-          <template #status>
-            {{ props.workedHours }} / {{ totalHours.hoursClient }} Stunden
-          </template>
-        </UProgress>
+      <template #default v-if="selectedClientPeriod">
+        <div>
+          <div class="flex justify-between w-full" >
+            <div class="font-bold">Verfügbare Arbeitsstunden</div>
+            <div
+              class="font-bold text-4xl"
+              :class="availableHours < 0 ? 'text-error' : 'text-primary'"
+            >
+              {{ availableHours }} h
+            </div>
+          </div>
+  
+          <UProgress :model-value="hoursUsedPercentage" status size="2xl" class="w-full" :color="hoursUsedPercentage >= 100 ? 'error' : 'primary'">
+            <template #status>
+              {{ (props.workingSums?.billableHours || 0) }} / {{ totalHours.hoursClient }} h
+            </template>
+          </UProgress>
+
+        </div>
       </template>
      </UPageCard>
   </div>
