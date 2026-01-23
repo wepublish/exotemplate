@@ -37,7 +37,7 @@
   <div class="grid grid-cols-12 gap-4">
     <div class="col-span-12">
       <UPageCard>
-        <template #header>
+        <template #title>
           Projekt und Abrechnungsperiode wählen
         </template>
         <template #body>

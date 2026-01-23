@@ -44,7 +44,7 @@
 <template>
   <div class="flex-1 w-full">  
     <UPageCard>
-      <template #header>Arbeitsprotokoll</template>
+      <template #title>Arbeitsprotokoll</template>
       <template #default>
         <UTable
           ref="table"
@@ -53,27 +53,53 @@
           sticky
         >
           <template #jiraIssue-cell="{row}">
-            <div v-if="row.original.jiraIssue">
-              <p>
-                Jira Schätzung: {{ (row.original.jiraIssue)?.fields?.customfield_10028 || 0 }}
-              </p>
-              <br />
-              <p><b>Von We.Publish geleistet: 200 h</b></p>
-                <p>In Abrechnungsperiode: {{ getDuration((row.original.duration)) }} h</p>
-                <p>Vor Abrechnungsperiode: {{ getDuration((row.original.pastEntryGroup)?.duration || 0) }} h</p>
+            <div v-if="row.original.billability" class="grid grid-cols-2">
+              <!-- if jira estimation available -->
+              <div v-if="row.original.billability.durationJira > 0" class="col-span-2 grid grid-cols-2">
+                <div class="col-span-2 font-bold">
+                  Details Berechnungen
+                </div>
 
-              <br />
-              <p><b>Differenz: 80 h</b></p>
-              <p>Zu Lasten von We.Publish: - 40 h</p>
+                <div>
+                  Jira Schätzung
+                </div>
+                <div class="text-right">
+                  {{ getDuration(row.original.billability.durationJira) }} h
+                </div>
 
-              <br />
-              <p><b><u>Effektiv verrechenbar: 70 h</u></b></p>
+                <div>
+                  Vor Abrechnungsperiode gleistet
+                </div>
+                <div class="text-right">
+                  - {{ getDuration(row.original.billability.durationPast) }} h
+                </div>
+
+                <div class="border-t-2 border-b-2">
+                  Verfügbare Stunden
+                </div>
+                <div class="border-t-2 border-b-2 text-right">
+                  {{ getDuration(row.original.billability.diffJiraPast) }} h
+                </div>
+
+                <div>In Abrechnungsperiode gleistet</div>
+                <div class="text-right">{{ getDuration(row.original.billability.durationCurrent) }} h</div>
+
+                <div class="border-b-2">Davon 50% verrechenbar</div>
+                <div class="border-b-2 text-right">{{ getDuration(row.original.billability.diffForWepCharge) }}</div>
+              </div>
+
+              <div class="font-bold mt-2">
+                Total verrechenbar
+              </div>
+              <div class="font-bold text-right mt-2">
+                {{ getDuration(row.original.billability.billableTotal) }} h
+              </div>
             </div>
           </template>
 
           <template #duration-cell="{row}">
             <UBadge size="lg">
-              {{ getDuration(row.getValue('duration') as number) }} h
+              {{ getDuration(row.original?.billability?.billableTotal || row.original.duration) }} h
             </UBadge>
           </template>
 

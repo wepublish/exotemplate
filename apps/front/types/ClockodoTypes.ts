@@ -16,7 +16,17 @@ export interface EntryGroup {
   
   // decorating entries
   jiraIssue?: JiraIssue
-  pastEntryGroup: EntryGroup
+  pastEntryGroup?: EntryGroup
+  billability?: Billability
+}
+
+export interface Billability {
+  durationJira: number
+  durationCurrent: number
+  durationPast: number
+  diffJiraPast: number
+  diffForWepCharge: number
+  billableTotal: number
 }
 
 export interface JiraIssue {

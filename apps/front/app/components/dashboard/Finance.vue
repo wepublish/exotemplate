@@ -72,7 +72,7 @@
     <UPageCard>
       <template #body>
         <div class="flex justify-between w-full px-4">
-          <div>Top-Ups</div>
+          <div class="font-bold">Top-Ups</div>
           <div v-if="selectedClientPeriod" class="font-bold text-4xl text-primary">{{ (totalHours.hoursClient) }} h</div>
         </div>
         <UTable :data="topUpsForTable" />
