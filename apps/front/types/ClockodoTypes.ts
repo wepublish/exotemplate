@@ -22,10 +22,11 @@ export interface EntryGroup {
 
 export interface Billability {
   durationJira: number
-  durationCurrent: number
   durationPast: number
-  diffJiraPast: number
-  diffForWepCharge: number
+  jiraAvailable: number
+  durationCurrent: number
+  billableDirect: number
+  billablePart: number
   billableTotal: number
 }
 

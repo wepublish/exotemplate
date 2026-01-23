@@ -55,11 +55,7 @@
           <template #jiraIssue-cell="{row}">
             <div v-if="row.original.billability" class="grid grid-cols-2">
               <!-- if jira estimation available -->
-              <div v-if="row.original.billability.durationJira > 0" class="col-span-2 grid grid-cols-2">
-                <div class="col-span-2 font-bold">
-                  Details Berechnungen
-                </div>
-
+              <div class="col-span-2 grid grid-cols-2">
                 <div>
                   Jira Schätzung
                 </div>
@@ -74,18 +70,24 @@
                   - {{ getDuration(row.original.billability.durationPast) }} h
                 </div>
 
-                <div class="border-t-2 border-b-2">
-                  Verfügbare Stunden
+                <div class="border-t border-b">
+                  Verfügbare Jira-Stunden
                 </div>
-                <div class="border-t-2 border-b-2 text-right">
-                  {{ getDuration(row.original.billability.diffJiraPast) }} h
+                <div class="border-t border-b text-right">
+                  {{ getDuration(row.original.billability.jiraAvailable) }} h
                 </div>
 
-                <div>In Abrechnungsperiode gleistet</div>
-                <div class="text-right">{{ getDuration(row.original.billability.durationCurrent) }} h</div>
+                <div class="mt-4">In Abrechnungsperiode gleistet</div>
+                <div class="mt-4 text-right">{{ getDuration(row.original.billability.durationCurrent) }} h</div>
 
-                <div class="border-b-2">Davon 50% verrechenbar</div>
-                <div class="border-b-2 text-right">{{ getDuration(row.original.billability.diffForWepCharge) }}</div>
+                <div class="pl-3">Davon direkt verrechenbar</div>
+                <div class="text-right font-bold">+ {{ getDuration(row.original.billability.billableDirect) }} h</div>
+                
+                <div class="pl-3">Davon hälftig verrechenbar</div>
+                <div class="font-bold text-right">+ {{ getDuration(row.original.billability.billablePart) }} h</div>
+
+                <div class="border-b pl-3">Davon hälftig nicht verrechenbar</div>
+                <div class="border-b text-right">{{ getDuration(row.original.billability.billablePart) }} h</div>
               </div>
 
               <div class="font-bold mt-2">
