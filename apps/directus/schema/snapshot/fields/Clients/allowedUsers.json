@@ -1,0 +1,31 @@
+{
+  "collection": "Clients",
+  "field": "allowedUsers",
+  "type": "alias",
+  "meta": {
+    "collection": "Clients",
+    "conditions": null,
+    "display": null,
+    "display_options": null,
+    "field": "allowedUsers",
+    "group": null,
+    "hidden": false,
+    "interface": "list-m2m",
+    "note": null,
+    "options": {
+      "enableCreate": false,
+      "enableLink": true
+    },
+    "readonly": false,
+    "required": false,
+    "searchable": true,
+    "sort": 9,
+    "special": [
+      "m2m"
+    ],
+    "translations": null,
+    "validation": null,
+    "validation_message": null,
+    "width": "half"
+  }
+}

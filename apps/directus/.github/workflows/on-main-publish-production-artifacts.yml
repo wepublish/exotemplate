@@ -1,0 +1,25 @@
+name: Publish production docker image
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  date_sha_tag:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.image_tag.outputs.tag }}
+    steps:
+      - id: image_tag
+        run: echo "::set-output name=tag::$(date +%s)-${{ github.sha }}"
+
+  publish_production_docker:
+    needs: date_sha_tag
+    uses: ./.github/workflows/on-demand-publish-docker-image.yml
+    with:
+      tags: |
+        ghcr.io/wepublish/inside-backend:production-${{ needs.date_sha_tag.outputs.tag }}
+        ghcr.io/wepublish/inside-backend:production
+        default-route-openshift-image-registry.apps.os.wepublish.cloud/wepublish-inside/inside-backend:production
+    secrets: inherit

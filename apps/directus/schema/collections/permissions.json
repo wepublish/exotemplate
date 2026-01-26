@@ -1,0 +1,170 @@
+[
+  {
+    "collection": "Clients_directus_users",
+    "action": "read",
+    "permissions": {
+      "_and": [
+        {
+          "directus_users_id": {
+            "id": {
+              "_eq": "$CURRENT_USER"
+            }
+          }
+        }
+      ]
+    },
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "id",
+      "Clients_id",
+      "directus_users_id"
+    ],
+    "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
+    "_syncId": "820451b9-7915-425e-81ed-b61f0493ea3e"
+  },
+  {
+    "collection": "Clients_Periods",
+    "action": "read",
+    "permissions": {
+      "_and": [
+        {
+          "Clients_id": {
+            "allowedUsers": {
+              "directus_users_id": {
+                "id": {
+                  "_eq": "$CURRENT_USER"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "id",
+      "Clients_id",
+      "Periods_id",
+      "topUps"
+    ],
+    "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
+    "_syncId": "9152c0cb-80c9-4a8d-9a53-12f88bc15243"
+  },
+  {
+    "collection": "Clients",
+    "action": "read",
+    "permissions": {
+      "_and": [
+        {
+          "allowedUsers": {
+            "directus_users_id": {
+              "id": {
+                "_eq": "$CURRENT_USER"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "id",
+      "status",
+      "sort",
+      "date_created",
+      "date_updated",
+      "name",
+      "periods",
+      "allowedUsers",
+      "clockodo_customer_id",
+      "jira_short_code"
+    ],
+    "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
+    "_syncId": "1962465b-c65f-4e12-8df8-6cbb28e0885a"
+  },
+  {
+    "collection": "directus_users",
+    "action": "read",
+    "permissions": {
+      "_and": [
+        {
+          "id": {
+            "_eq": "$CURRENT_USER"
+          }
+        }
+      ]
+    },
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "first_name",
+      "last_name",
+      "email",
+      "role",
+      "policies",
+      "id",
+      "accessToClients"
+    ],
+    "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
+    "_syncId": "f1a05aa0-b343-4c97-af99-9b533a7044c2"
+  },
+  {
+    "collection": "Periods",
+    "action": "read",
+    "permissions": null,
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "name",
+      "from",
+      "to",
+      "status",
+      "sort",
+      "id",
+      "date_created",
+      "date_updated"
+    ],
+    "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
+    "_syncId": "b9ef4905-14e3-4e56-8d9d-d5478bd7e80b"
+  },
+  {
+    "collection": "TopUps",
+    "action": "read",
+    "permissions": {
+      "_and": [
+        {
+          "clientPeriod": {
+            "Clients_id": {
+              "allowedUsers": {
+                "directus_users_id": {
+                  "id": {
+                    "_eq": "$CURRENT_USER"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "id",
+      "status",
+      "sort",
+      "date_created",
+      "date_updated",
+      "amount",
+      "note",
+      "clientPeriod",
+      "hourlyRate",
+      "wepPercentage"
+    ],
+    "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
+    "_syncId": "858b8ba8-dabe-4671-9245-a96376633add"
+  }
+]

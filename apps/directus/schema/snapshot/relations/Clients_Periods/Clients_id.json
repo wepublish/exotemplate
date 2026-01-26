@@ -1,0 +1,25 @@
+{
+  "collection": "Clients_Periods",
+  "field": "Clients_id",
+  "related_collection": "Clients",
+  "meta": {
+    "junction_field": "Periods_id",
+    "many_collection": "Clients_Periods",
+    "many_field": "Clients_id",
+    "one_allowed_collections": null,
+    "one_collection": "Clients",
+    "one_collection_field": null,
+    "one_deselect_action": "nullify",
+    "one_field": "periods",
+    "sort_field": null
+  },
+  "schema": {
+    "table": "Clients_Periods",
+    "column": "Clients_id",
+    "foreign_key_table": "Clients",
+    "foreign_key_column": "id",
+    "constraint_name": "clients_periods_clients_id_foreign",
+    "on_update": "NO ACTION",
+    "on_delete": "SET NULL"
+  }
+}
