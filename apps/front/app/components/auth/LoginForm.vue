@@ -52,7 +52,7 @@
         :loading="loading"
         :schema="schema"
         title="Login"
-        description="Melde dich mit deinem Account für Inside We.Publish an."
+        description="Melde dich mit deinem Account für We.Publish ONE an."
         icon="i-lucide-user"
         :fields="fields"
         @submit="onSubmit"
