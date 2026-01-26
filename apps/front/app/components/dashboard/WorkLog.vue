@@ -73,7 +73,7 @@
                 <div class="mt-4">In Abrechnungsperiode gleistet</div>
                 <div class="mt-4 text-right">{{ secondsToHours(row.original.billability.durationCurrent) }} h</div>
 
-                <div class="pl-3">Davon direkt verrechenbar</div>
+                <div class="pl-3">Davon voll verrechenbar</div>
                 <div class="text-right font-bold">+ {{ secondsToHours(row.original.billability.billableDirect) }} h</div>
                 
                 <div class="pl-3">Davon hälftig verrechenbar</div>
