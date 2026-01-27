@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import type { TableColumn } from '@nuxt/ui'
+  import type { BreadcrumbItem, TableColumn } from '@nuxt/ui'
   import type {EntryGroup, EntryGroupsWithSums} from '../../../types/ClockodoTypes'
 
   const props = defineProps<{
@@ -8,7 +8,7 @@
 
   const {secondsToHours} = useHours()
 
-  const selectedEntryGroup = ref<EntryGroup | undefined>(undefined)
+  const entryGroupNavigation = ref<EntryGroup[]>([])
 
   const columns: TableColumn<EntryGroup>[] = [
     {
@@ -28,6 +28,21 @@
       header: 'Details'
     }
   ]
+
+  const selectedEntryGroup = computed<EntryGroup | undefined>(() => entryGroupNavigation.value.at(-1))
+
+  const breadCrums = computed<BreadcrumbItem[]>(() => entryGroupNavigation.value?.map(eg => ({
+    label: eg.name
+  })))
+
+  function navigateEntryGroup (entryGroup: EntryGroup | undefined): void {
+    if (!entryGroup || !entryGroup.sub_groups?.length) {
+      // reset navigation
+      entryGroupNavigation.value = []
+    } else {
+      entryGroupNavigation.value.push(entryGroup)
+    }
+  }
 </script>
 
 <template>
@@ -39,12 +54,25 @@
           <div class="font-bold text-4xl text-primary">{{ (props.entryGroups?.sums?.billableHours || 0) }} h</div>
         </div>
 
+        <div class="w-full">
+          <UBreadcrumb :items="breadCrums" />
+        </div>
+
         <UTable
           ref="table"
           :data="selectedEntryGroup?.sub_groups || entryGroups?.groups || []"
           :columns="columns"
           sticky
         >
+          <template #name-cell="row">
+            <span v-if="(row.row.original.grouped_by as unknown as string) === 'day'">
+              {{ new Date(row.row.original.name).toLocaleDateString('de', {dateStyle: 'medium'}) }}
+            </span>
+            <span v-else>
+              {{ row.row.original.name }}
+            </span>
+          </template>
+
           <template #jiraIssue-cell="{row}">
             <div v-if="row.original.billability" class="grid grid-cols-2">
               <!-- if jira estimation available -->
@@ -99,7 +127,8 @@
           </template>
 
           <template #expand-cell="{row}">
-            <UButton @click="selectedEntryGroup = row.original">Details anzeigen</UButton>
+            <UButton v-if="!!entryGroupNavigation.length" @click="entryGroupNavigation = []" class="mr-2" color="warning" variant="subtle">Zurück</UButton>
+            <UButton v-if="entryGroupNavigation.length < 2" @click="navigateEntryGroup(row.original)" variant="outline">Details anzeigen</UButton>
           </template>
         </UTable>
       </template>
