@@ -2,6 +2,7 @@
   import type { EntryGroupsWithSums } from '~~/types/ClockodoTypes'
   import WorkLog from './WorkLog.vue'
   import type { Client, ClientPeriod, Period } from '~~/types/DirectusTypes'
+import ManualWorkEntries from './ManualWorkEntries.vue'
 
   const userStore = useUserStore()
   const {getCustomEndpoint} = useDirectus()
@@ -83,6 +84,11 @@
     <!-- clockodo insights -->
     <div class="col-span-12" v-if="selectedClientPeriodId">
       <WorkLog :entry-groups="entryGroups" />
+    </div>
+
+    <!-- manual correction entries -->
+    <div class="col-span-12">
+      <ManualWorkEntries :client-period-id="selectedClientPeriodId" />
     </div>
   </div>
 </template>

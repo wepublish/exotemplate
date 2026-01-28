@@ -1,6 +1,6 @@
 <script lang="ts" setup>
   import type { Sums } from '~~/types/ClockodoTypes'
-  import type { ClientPeriod, TopUp } from '~~/types/DirectusTypes'
+  import type { ClientPeriod, ManualWorkEntry, TopUp } from '~~/types/DirectusTypes'
 
   interface HoursCalculated {
     totalHours: number,
@@ -10,22 +10,15 @@
 
   type TopUpsCalculated = TopUp & HoursCalculated
 
-  const userStore = useUserStore()
+  const clientPeriodComp = useUseClientPeriods()
+  const manualWorkComp = useManualWorkEntries()
 
   const props = defineProps<{
     clientPeriodId: number | undefined
     workingSums: Sums | undefined
   }>()
 
-  const selectedClientPeriod = computed<ClientPeriod | undefined>(() => {
-    if (!props.clientPeriodId) return undefined
-
-    for (const client of userStore.clients) {
-      const foundPeriod = client.periods.find(p => (p as ClientPeriod).id === props.clientPeriodId)
-      if (foundPeriod) return foundPeriod as ClientPeriod
-    }
-    return undefined
-  })
+  const selectedClientPeriod = computed<ClientPeriod | undefined>(() => clientPeriodComp.getClientPeriodById(props.clientPeriodId))
 
   const topUps = computed<TopUp[]>(() => (selectedClientPeriod.value?.topUps || []) as TopUp[])
 
@@ -53,7 +46,7 @@
     }
   }))
 
-  const totalHours = computed<HoursCalculated>(() => {
+  const totalTopUpHours = computed<HoursCalculated>(() => {
     return topUpsCalculated.value.reduce((acc, curr) => {
       return {
         totalHours: acc.totalHours + curr.totalHours,
@@ -63,8 +56,10 @@
         }, { totalHours: 0, hoursClient: 0, hoursWep: 0 })
   })
 
-  const hoursUsedPercentage = computed<number>(() => Math.round((props.workingSums?.billableHours || 0) * 100 / totalHours.value.hoursClient))
-  const availableHours = computed<number>(() => totalHours.value.hoursClient - (props.workingSums?.billableHours || 0))
+  const totalManualWorkHours = computed<number>(() => manualWorkComp.getSumByClientPeriod((selectedClientPeriod.value?.manualWorkEntries || []) as ManualWorkEntry[]))
+  const totalUsedHours = computed<number>(() => (props.workingSums?.billableHours || 0) + totalManualWorkHours.value)
+  const availableHours = computed<number>(() => totalTopUpHours.value.hoursClient - totalUsedHours.value)
+  const hoursUsedPercentage = computed<number>(() => totalUsedHours.value * 100 / totalTopUpHours.value.hoursClient)
 
 </script>
 
@@ -79,7 +74,7 @@
             v-if="selectedClientPeriod"
             class="font-bold text-4xl text-primary"
           >
-            {{ (totalHours.hoursClient) }} h
+            {{ (totalTopUpHours.hoursClient) }} h
           </div>
         </div>
         <UTable :data="topUpsForTable" />
@@ -102,10 +97,24 @@
   
           <UProgress :model-value="hoursUsedPercentage" status size="2xl" class="w-full" :color="hoursUsedPercentage >= 100 ? 'error' : 'primary'">
             <template #status>
-              {{ (props.workingSums?.billableHours || 0) }} / {{ totalHours.hoursClient }} h
+              {{ totalUsedHours }} / {{ availableHours }} h
             </template>
           </UProgress>
 
+          <div class="flex text-sm mt-4">
+            <div class="flex-1">
+              <p>Top-Ups</p>
+              <p>Arbeitsprotokoll</p>
+              <p class="border-b">Manuelle Korrekturen</p>
+              <p class="font-bold pt-1">Verfügbar</p>
+            </div>
+            <div class="text-right">
+              <p>{{ totalTopUpHours.hoursClient }} h</p>
+              <p>- {{ props.workingSums?.billableHours || 0 }} h</p>
+              <p class="border-b">- {{ totalManualWorkHours }} h</p>
+              <p class="font-bold pt-1">{{ availableHours }} h</p>
+            </div>
+          </div>
         </div>
       </template>
      </UPageCard>
