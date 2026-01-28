@@ -97,7 +97,7 @@
   
           <UProgress :model-value="hoursUsedPercentage" status size="2xl" class="w-full" :color="hoursUsedPercentage >= 100 ? 'error' : 'primary'">
             <template #status>
-              {{ totalUsedHours }} / {{ availableHours }} h
+              {{ totalUsedHours }} / {{ totalTopUpHours.hoursClient }} h
             </template>
           </UProgress>
 
