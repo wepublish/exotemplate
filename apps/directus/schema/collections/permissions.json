@@ -47,7 +47,8 @@
       "id",
       "Clients_id",
       "Periods_id",
-      "topUps"
+      "topUps",
+      "manualWorkEntries"
     ],
     "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
     "_syncId": "9152c0cb-80c9-4a8d-9a53-12f88bc15243"
@@ -110,6 +111,43 @@
     ],
     "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
     "_syncId": "f1a05aa0-b343-4c97-af99-9b533a7044c2"
+  },
+  {
+    "collection": "ManualWorkEntries",
+    "action": "read",
+    "permissions": {
+      "_and": [
+        {
+          "clientPeriod": {
+            "Clients_id": {
+              "allowedUsers": {
+                "directus_users_id": {
+                  "id": {
+                    "_eq": "$CURRENT_USER"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "id",
+      "sort",
+      "date_created",
+      "date_updated",
+      "status",
+      "date",
+      "title",
+      "hours",
+      "description",
+      "clientPeriod"
+    ],
+    "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
+    "_syncId": "e6af6ff4-1ea1-46b3-a998-71534e7a5939"
   },
   {
     "collection": "Periods",

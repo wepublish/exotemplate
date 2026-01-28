@@ -9,21 +9,16 @@
     "collection": "Clients_Periods",
     "color": null,
     "display_template": "{{Clients_id.name}} {{Periods_id.name}}",
-    "group": null,
-    "hidden": true,
+    "group": "Clients",
+    "hidden": false,
     "icon": "import_export",
     "item_duplication_fields": null,
     "note": null,
     "preview_url": null,
     "singleton": false,
-    "sort": 2,
+    "sort": 1,
     "sort_field": null,
-    "translations": [
-      {
-        "language": "en-US",
-        "translation": "TopUps"
-      }
-    ],
+    "translations": null,
     "unarchive_value": null,
     "versioning": false
   },

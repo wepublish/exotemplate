@@ -268,6 +268,7 @@ type Subscription {
   Clients_mutated(event: EventEnum): Clients_mutated
   Periods_mutated(event: EventEnum): Periods_mutated
   Clients_Periods_mutated(event: EventEnum): Clients_Periods_mutated
+  ManualWorkEntries_mutated(event: EventEnum): ManualWorkEntries_mutated
   Clients_directus_users_mutated(event: EventEnum): Clients_directus_users_mutated
 }
 
@@ -384,6 +385,8 @@ type Clients_Periods {
   Periods_id(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Periods
   topUps(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [TopUps]
   topUps_func: count_functions
+  manualWorkEntries(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [ManualWorkEntries]
+  manualWorkEntries_func: count_functions
 }
 
 type Clients_Periods_mutated {
@@ -1689,6 +1692,30 @@ type directus_webhooks_mutated {
   data: directus_webhooks
 }
 
+type ManualWorkEntries {
+  id: ID!
+  status: String
+  sort: Int
+  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  date_created: Date
+  date_created_func: datetime_functions
+  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  date_updated: Date
+  date_updated_func: datetime_functions
+  date: Date
+  date_func: date_functions
+  title: String
+  description: String
+  hours: Float
+  clientPeriod(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients_Periods
+}
+
+type ManualWorkEntries_mutated {
+  key: ID!
+  event: EventEnum
+  data: ManualWorkEntries
+}
+
 type Periods {
   id: ID!
   status: String
@@ -1957,6 +1984,8 @@ input Clients_Periods_filter {
   Periods_id: Periods_filter
   topUps: TopUps_quantifier_filter
   topUps_func: count_function_filter_operators
+  manualWorkEntries: ManualWorkEntries_quantifier_filter
+  manualWorkEntries_func: count_function_filter_operators
   _and: [Clients_Periods_filter]
   _or: [Clients_Periods_filter]
 }
@@ -1968,6 +1997,8 @@ input Clients_Periods_quantifier_filter {
   Periods_id: Periods_filter
   topUps: TopUps_quantifier_filter
   topUps_func: count_function_filter_operators
+  manualWorkEntries: ManualWorkEntries_quantifier_filter
+  manualWorkEntries_func: count_function_filter_operators
   _and: [Clients_Periods_filter]
   _or: [Clients_Periods_filter]
   _some: Clients_Periods_filter
@@ -2006,6 +2037,7 @@ input create_Clients_Periods_input {
   Clients_id: create_Clients_input
   Periods_id: create_Periods_input
   topUps: [create_TopUps_input]
+  manualWorkEntries: [create_ManualWorkEntries_input]
 }
 
 input create_directus_access_input {
@@ -2276,6 +2308,21 @@ input create_directus_webhooks_input {
   headers: JSON
   was_active_before_deprecation: Boolean!
   migrated_flow: create_directus_flows_input
+}
+
+input create_ManualWorkEntries_input {
+  id: ID
+  status: String
+  sort: Int
+  user_created: create_directus_users_input
+  date_created: Date
+  user_updated: create_directus_users_input
+  date_updated: Date
+  date: Date
+  title: String
+  description: String
+  hours: Float
+  clientPeriod: create_Clients_Periods_input
 }
 
 input create_Periods_input {
@@ -2901,6 +2948,49 @@ input id_filter_operators {
   _nempty: Boolean
 }
 
+input ManualWorkEntries_filter {
+  id: id_filter_operators
+  status: string_filter_operators
+  sort: number_filter_operators
+  user_created: directus_users_filter
+  date_created: date_filter_operators
+  date_created_func: datetime_function_filter_operators
+  user_updated: directus_users_filter
+  date_updated: date_filter_operators
+  date_updated_func: datetime_function_filter_operators
+  date: date_filter_operators
+  date_func: date_function_filter_operators
+  title: string_filter_operators
+  description: string_filter_operators
+  hours: number_filter_operators
+  clientPeriod: Clients_Periods_filter
+  _and: [ManualWorkEntries_filter]
+  _or: [ManualWorkEntries_filter]
+}
+
+""""""
+input ManualWorkEntries_quantifier_filter {
+  id: id_filter_operators
+  status: string_filter_operators
+  sort: number_filter_operators
+  user_created: directus_users_filter
+  date_created: date_filter_operators
+  date_created_func: datetime_function_filter_operators
+  user_updated: directus_users_filter
+  date_updated: date_filter_operators
+  date_updated_func: datetime_function_filter_operators
+  date: date_filter_operators
+  date_func: date_function_filter_operators
+  title: string_filter_operators
+  description: string_filter_operators
+  hours: number_filter_operators
+  clientPeriod: Clients_Periods_filter
+  _and: [ManualWorkEntries_filter]
+  _or: [ManualWorkEntries_filter]
+  _some: ManualWorkEntries_filter
+  _none: ManualWorkEntries_filter
+}
+
 input number_filter_operators {
   _eq: GraphQLStringOrFloat
   _neq: GraphQLStringOrFloat
@@ -3026,6 +3116,7 @@ input update_Clients_Periods_input {
   Clients_id: update_Clients_input
   Periods_id: update_Periods_input
   topUps: [update_TopUps_input]
+  manualWorkEntries: [update_ManualWorkEntries_input]
 }
 
 input update_directus_access_input {
@@ -3370,6 +3461,21 @@ input update_directus_webhooks_input {
   headers: JSON
   was_active_before_deprecation: Boolean
   migrated_flow: update_directus_flows_input
+}
+
+input update_ManualWorkEntries_input {
+  id: ID
+  status: String
+  sort: Int
+  user_created: update_directus_users_input
+  date_created: Date
+  user_updated: update_directus_users_input
+  date_updated: Date
+  date: Date
+  title: String
+  description: String
+  hours: Float
+  clientPeriod: update_Clients_Periods_input
 }
 
 input update_Periods_input {

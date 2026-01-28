@@ -1,13 +1,13 @@
 {
   "collection": "Clients_Periods",
-  "field": "topUps",
+  "field": "manualWorkEntries",
   "type": "alias",
   "meta": {
     "collection": "Clients_Periods",
     "conditions": null,
     "display": null,
     "display_options": null,
-    "field": "topUps",
+    "field": "manualWorkEntries",
     "group": null,
     "hidden": false,
     "interface": "list-o2m",
@@ -15,12 +15,13 @@
     "options": {
       "enableLink": true,
       "enableSelect": false,
-      "template": "{{amount}} {{date_created}}"
+      "sort": "date",
+      "template": "{{date}} | {{title}} | {{hours}}"
     },
     "readonly": false,
     "required": false,
     "searchable": true,
-    "sort": 4,
+    "sort": 5,
     "special": [
       "o2m"
     ],

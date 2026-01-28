@@ -3,7 +3,7 @@
   "info": {
     "title": "Dynamic API Specification",
     "description": "This is a dynamically generated API specification for all endpoints existing on the current project.",
-    "version": "a84ff8c8153f4b30f43aad6edc9a6de68529a923"
+    "version": "4f001cae148d440a7b37f65e39a531d258908619"
   },
   "servers": [
     {
@@ -9458,6 +9458,395 @@
         ]
       }
     },
+    "/items/ManualWorkEntries": {
+      "post": {
+        "summary": "Create an Item",
+        "description": "Create a new ManualWorkEntries item.",
+        "tags": [
+          "Items",
+          "ItemsManualWorkEntries"
+        ],
+        "operationId": "createItemsManualWorkEntries",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Meta"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ItemsManualWorkEntries"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/ItemsManualWorkEntries"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ItemsManualWorkEntries"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "get": {
+        "summary": "List Items",
+        "description": "List the ManualWorkEntries items.",
+        "tags": [
+          "Items",
+          "ItemsManualWorkEntries"
+        ],
+        "operationId": "readItemsManualWorkEntries",
+        "security": [
+          {
+            "Auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "#/components/schemas/ItemsManualWorkEntries"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/x-metadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update Multiple Items",
+        "description": "Update multiple ManualWorkEntries items at the same time.",
+        "tags": [
+          "Items",
+          "ItemsManualWorkEntries"
+        ],
+        "operationId": "updateItemsManualWorkEntries",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ItemsManualWorkEntries"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/ItemsManualWorkEntries"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ItemsManualWorkEntries"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Multiple Items",
+        "description": "Delete multiple existing ManualWorkEntries items.",
+        "tags": [
+          "Items",
+          "ItemsManualWorkEntries"
+        ],
+        "operationId": "deleteItemsManualWorkEntries",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/items/ManualWorkEntries/{id}": {
+      "get": {
+        "summary": "Retrieve an Item",
+        "description": "Retrieve a single ManualWorkEntries item by unique identifier.",
+        "tags": [
+          "Items",
+          "ItemsManualWorkEntries"
+        ],
+        "operationId": "readSingleItemsManualWorkEntries",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Version"
+          },
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/ItemsManualWorkEntries"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update an Item",
+        "description": "Update an existing ManualWorkEntries item.",
+        "tags": [
+          "Items",
+          "ItemsManualWorkEntries"
+        ],
+        "operationId": "updateSingleItemsManualWorkEntries",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "$ref": "#/components/schemas/ItemsManualWorkEntries"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/ItemsManualWorkEntries"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an Item",
+        "description": "Delete an existing ManualWorkEntries item.",
+        "tags": [
+          "Items",
+          "ItemsManualWorkEntries"
+        ],
+        "operationId": "deleteSingleItemsManualWorkEntries",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
     "/items/Clients_directus_users": {
       "post": {
         "summary": "Create an Item",
@@ -9990,6 +10379,10 @@
     {
       "name": "ItemsClientsPeriods",
       "x-collection": "Clients_Periods"
+    },
+    {
+      "name": "ItemsManualWorkEntries",
+      "x-collection": "ManualWorkEntries"
     },
     {
       "name": "ItemsClientsDirectusUsers",
@@ -12287,9 +12680,108 @@
                 }
               ]
             }
+          },
+          "manualWorkEntries": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "$ref": "#/components/schemas/ItemsManualWorkEntries"
+                }
+              ]
+            }
           }
         },
         "x-collection": "Clients_Periods"
+      },
+      "ItemsManualWorkEntries": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "nullable": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "nullable": false,
+            "type": "string"
+          },
+          "sort": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "user_created": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "$ref": "#/components/schemas/Users"
+              }
+            ]
+          },
+          "date_created": {
+            "nullable": true,
+            "type": "string",
+            "format": "timestamp"
+          },
+          "user_updated": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "$ref": "#/components/schemas/Users"
+              }
+            ]
+          },
+          "date_updated": {
+            "nullable": true,
+            "type": "string",
+            "format": "timestamp"
+          },
+          "date": {
+            "nullable": true,
+            "type": "string",
+            "format": "date"
+          },
+          "title": {
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "hours": {
+            "nullable": true,
+            "type": "number"
+          },
+          "clientPeriod": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "$ref": "#/components/schemas/ItemsClientsPeriods"
+              }
+            ]
+          }
+        },
+        "x-collection": "ManualWorkEntries",
+        "required": [
+          "id"
+        ]
       },
       "ItemsClientsDirectusUsers": {
         "type": "object",

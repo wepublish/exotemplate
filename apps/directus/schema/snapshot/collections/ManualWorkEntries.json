@@ -1,12 +1,12 @@
 {
-  "collection": "Periods",
+  "collection": "ManualWorkEntries",
   "meta": {
     "accountability": "all",
     "archive_app_filter": true,
     "archive_field": "status",
     "archive_value": "archived",
     "collapse": "open",
-    "collection": "Periods",
+    "collection": "ManualWorkEntries",
     "color": null,
     "display_template": null,
     "group": null,
@@ -16,13 +16,13 @@
     "note": null,
     "preview_url": null,
     "singleton": false,
-    "sort": 2,
+    "sort": 4,
     "sort_field": "sort",
     "translations": null,
     "unarchive_value": "draft",
     "versioning": false
   },
   "schema": {
-    "name": "Periods"
+    "name": "ManualWorkEntries"
   }
 }
