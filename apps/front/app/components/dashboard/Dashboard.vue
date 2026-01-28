@@ -35,7 +35,7 @@ import ManualWorkEntries from './ManualWorkEntries.vue'
   )
 
   const dataLoaderKey = computed<string>(() => `clientPeriodId-${selectedClientPeriodId.value}`)
-  const {data: entryGroups} = await useAsyncData(dataLoaderKey, async () => {
+  const {data: entryGroups, pending} = await useAsyncData(dataLoaderKey, async () => {
     if (!selectedClientPeriodId.value) {
       return
     }
@@ -76,18 +76,20 @@ import ManualWorkEntries from './ManualWorkEntries.vue'
       </UPageCard>
     </div>
 
+    <USkeleton v-if="pending" class="h-16 col-span-12" />
+
     <!-- budget of client -->
-    <div class="col-span-12">
+    <div class="col-span-12" v-if="selectedClientPeriodId && !pending">
       <DashboardFinance :client-period-id="selectedClientPeriodId" :working-sums="entryGroups?.sums" />
     </div>
 
     <!-- clockodo insights -->
-    <div class="col-span-12" v-if="selectedClientPeriodId">
+    <div class="col-span-12" v-if="selectedClientPeriodId && !pending">
       <WorkLog :entry-groups="entryGroups" />
     </div>
 
     <!-- manual correction entries -->
-    <div class="col-span-12">
+    <div class="col-span-12" v-if="selectedClientPeriodId && !pending">
       <ManualWorkEntries :client-period-id="selectedClientPeriodId" />
     </div>
   </div>

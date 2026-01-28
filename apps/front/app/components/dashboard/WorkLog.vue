@@ -14,6 +14,11 @@
     {
       accessorKey: 'name',
       header: 'Arbeit',
+      meta: {
+        style: {
+          td: 'max-width: 340px;'
+        }
+      }
     },
     {
       accessorKey: 'jiraIssue',
@@ -65,12 +70,12 @@
           sticky
         >
           <template #name-cell="row">
-            <span v-if="(row.row.original.grouped_by as unknown as string) === 'day'">
+            <p v-if="(row.row.original.grouped_by as unknown as string) === 'day'">
               {{ new Date(row.row.original.name).toLocaleDateString('de', {dateStyle: 'medium'}) }}
-            </span>
-            <span v-else>
+            </p>
+            <p v-else class="whitespace-normal">
               {{ row.row.original.name }}
-            </span>
+            </p>
           </template>
 
           <template #jiraIssue-cell="{row}">
