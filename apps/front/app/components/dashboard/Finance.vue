@@ -69,7 +69,7 @@
     <UPageCard>
       <template #body>
         <div class="flex justify-between w-full">
-          <div class="font-bold">Top-Ups</div>
+          <div class="font-bold">Zahlungen / Top-Ups</div>
           <div
             v-if="selectedClientPeriod"
             class="font-bold text-4xl text-primary"
@@ -103,7 +103,7 @@
 
           <div class="flex text-sm mt-4">
             <div class="flex-1">
-              <p>Top-Ups</p>
+              <p>Zahlungen / Top-Ups</p>
               <p>Arbeitsprotokoll</p>
               <p class="border-b">Manuelle Korrekturen</p>
               <p class="font-bold pt-1">Verfügbar</p>

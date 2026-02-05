@@ -2,7 +2,7 @@
   import type { EntryGroupsWithSums } from '~~/types/ClockodoTypes'
   import WorkLog from './WorkLog.vue'
   import type { Client, ClientPeriod, Period } from '~~/types/DirectusTypes'
-import ManualWorkEntries from './ManualWorkEntries.vue'
+  import ManualWorkEntries from './ManualWorkEntries.vue'
 
   const userStore = useUserStore()
   const {getCustomEndpoint} = useDirectus()
