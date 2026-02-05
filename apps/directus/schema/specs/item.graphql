@@ -3,10 +3,6 @@ type Query {
   directus_sync_id_map_by_id(id: ID!, version: String): directus_sync_id_map
   directus_sync_id_map_aggregated(groupBy: [String], filter: directus_sync_id_map_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_sync_id_map_aggregated!]!
   directus_sync_id_map_by_version(version: String!, id: ID!): version_directus_sync_id_map
-  TopUps(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [TopUps!]!
-  TopUps_by_id(id: ID!, version: String): TopUps
-  TopUps_aggregated(groupBy: [String], filter: TopUps_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [TopUps_aggregated!]!
-  TopUps_by_version(version: String!, id: ID!): version_TopUps
   Clients(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients!]!
   Clients_by_id(id: ID!, version: String): Clients
   Clients_aggregated(groupBy: [String], filter: Clients_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [Clients_aggregated!]!
@@ -19,6 +15,10 @@ type Query {
   Clients_Periods_by_id(id: ID!, version: String): Clients_Periods
   Clients_Periods_aggregated(groupBy: [String], filter: Clients_Periods_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [Clients_Periods_aggregated!]!
   Clients_Periods_by_version(version: String!, id: ID!): version_Clients_Periods
+  TopUps(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [TopUps!]!
+  TopUps_by_id(id: ID!, version: String): TopUps
+  TopUps_aggregated(groupBy: [String], filter: TopUps_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [TopUps_aggregated!]!
+  TopUps_by_version(version: String!, id: ID!): version_TopUps
   ManualWorkEntries(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [ManualWorkEntries!]!
   ManualWorkEntries_by_id(id: ID!, version: String): ManualWorkEntries
   ManualWorkEntries_aggregated(groupBy: [String], filter: ManualWorkEntries_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [ManualWorkEntries_aggregated!]!
@@ -32,14 +32,14 @@ type Query {
 type Mutation {
   create_directus_sync_id_map_items(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_sync_id_map_input!]): [directus_sync_id_map!]!
   create_directus_sync_id_map_item(data: create_directus_sync_id_map_input!): directus_sync_id_map
-  create_TopUps_items(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_TopUps_input!]): [TopUps!]!
-  create_TopUps_item(data: create_TopUps_input!): TopUps
   create_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Clients_input!]): [Clients!]!
   create_Clients_item(data: create_Clients_input!): Clients
   create_Periods_items(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Periods_input!]): [Periods!]!
   create_Periods_item(data: create_Periods_input!): Periods
   create_Clients_Periods_items(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Clients_Periods_input!]): [Clients_Periods!]!
   create_Clients_Periods_item(data: create_Clients_Periods_input!): Clients_Periods
+  create_TopUps_items(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_TopUps_input!]): [TopUps!]!
+  create_TopUps_item(data: create_TopUps_input!): TopUps
   create_ManualWorkEntries_items(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_ManualWorkEntries_input!]): [ManualWorkEntries!]!
   create_ManualWorkEntries_item(data: create_ManualWorkEntries_input!): ManualWorkEntries
   create_Clients_directus_users_items(filter: Clients_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Clients_directus_users_input!]): [Clients_directus_users!]!
@@ -47,9 +47,6 @@ type Mutation {
   update_directus_sync_id_map_items(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_sync_id_map_input!): [directus_sync_id_map!]!
   update_directus_sync_id_map_batch(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_sync_id_map_input!]): [directus_sync_id_map!]!
   update_directus_sync_id_map_item(id: ID!, data: update_directus_sync_id_map_input!): directus_sync_id_map
-  update_TopUps_items(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_TopUps_input!): [TopUps!]!
-  update_TopUps_batch(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_TopUps_input!]): [TopUps!]!
-  update_TopUps_item(id: ID!, data: update_TopUps_input!): TopUps
   update_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Clients_input!): [Clients!]!
   update_Clients_batch(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Clients_input!]): [Clients!]!
   update_Clients_item(id: ID!, data: update_Clients_input!): Clients
@@ -59,6 +56,9 @@ type Mutation {
   update_Clients_Periods_items(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Clients_Periods_input!): [Clients_Periods!]!
   update_Clients_Periods_batch(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Clients_Periods_input!]): [Clients_Periods!]!
   update_Clients_Periods_item(id: ID!, data: update_Clients_Periods_input!): Clients_Periods
+  update_TopUps_items(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_TopUps_input!): [TopUps!]!
+  update_TopUps_batch(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_TopUps_input!]): [TopUps!]!
+  update_TopUps_item(id: ID!, data: update_TopUps_input!): TopUps
   update_ManualWorkEntries_items(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_ManualWorkEntries_input!): [ManualWorkEntries!]!
   update_ManualWorkEntries_batch(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_ManualWorkEntries_input!]): [ManualWorkEntries!]!
   update_ManualWorkEntries_item(id: ID!, data: update_ManualWorkEntries_input!): ManualWorkEntries
@@ -67,14 +67,14 @@ type Mutation {
   update_Clients_directus_users_item(id: ID!, data: update_Clients_directus_users_input!): Clients_directus_users
   delete_directus_sync_id_map_items(ids: [ID]!): delete_many
   delete_directus_sync_id_map_item(id: ID!): delete_one
-  delete_TopUps_items(ids: [ID]!): delete_many
-  delete_TopUps_item(id: ID!): delete_one
   delete_Clients_items(ids: [ID]!): delete_many
   delete_Clients_item(id: ID!): delete_one
   delete_Periods_items(ids: [ID]!): delete_many
   delete_Periods_item(id: ID!): delete_one
   delete_Clients_Periods_items(ids: [ID]!): delete_many
   delete_Clients_Periods_item(id: ID!): delete_one
+  delete_TopUps_items(ids: [ID]!): delete_many
+  delete_TopUps_item(id: ID!): delete_one
   delete_ManualWorkEntries_items(ids: [ID]!): delete_many
   delete_ManualWorkEntries_item(id: ID!): delete_one
   delete_Clients_directus_users_items(ids: [ID]!): delete_many
@@ -104,10 +104,10 @@ type Subscription {
   directus_versions_mutated(event: EventEnum): directus_versions_mutated
   directus_comments_mutated(event: EventEnum): directus_comments_mutated
   directus_sync_id_map_mutated(event: EventEnum): directus_sync_id_map_mutated
-  TopUps_mutated(event: EventEnum): TopUps_mutated
   Clients_mutated(event: EventEnum): Clients_mutated
   Periods_mutated(event: EventEnum): Periods_mutated
   Clients_Periods_mutated(event: EventEnum): Clients_Periods_mutated
+  TopUps_mutated(event: EventEnum): TopUps_mutated
   ManualWorkEntries_mutated(event: EventEnum): ManualWorkEntries_mutated
   Clients_directus_users_mutated(event: EventEnum): Clients_directus_users_mutated
 }
@@ -1029,7 +1029,7 @@ type TopUps {
   user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   date_updated: Date
   date_updated_func: datetime_functions
-  amount: Int!
+  amount: Float
   note: String
   clientPeriod(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients_Periods
   hourlyRate: Int
@@ -1160,7 +1160,7 @@ type version_TopUps {
   date_created: Date
   user_updated: JSON
   date_updated: Date
-  amount: Int
+  amount: Float
   note: String
   clientPeriod: JSON
   hourlyRate: Int
@@ -1448,7 +1448,7 @@ input create_TopUps_input {
   date_created: Date
   user_updated: create_directus_users_input
   date_updated: Date
-  amount: Int!
+  amount: Float
   note: String
   clientPeriod: create_Clients_Periods_input
   hourlyRate: Int
@@ -2292,7 +2292,7 @@ input update_TopUps_input {
   date_created: Date
   user_updated: update_directus_users_input
   date_updated: Date
-  amount: Int
+  amount: Float
   note: String
   clientPeriod: update_Clients_Periods_input
   hourlyRate: Int

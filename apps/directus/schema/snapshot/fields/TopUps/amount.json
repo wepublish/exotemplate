@@ -1,7 +1,7 @@
 {
   "collection": "TopUps",
   "field": "amount",
-  "type": "integer",
+  "type": "decimal",
   "meta": {
     "collection": "TopUps",
     "conditions": null,
@@ -26,12 +26,12 @@
   "schema": {
     "name": "amount",
     "table": "TopUps",
-    "data_type": "integer",
+    "data_type": "numeric",
     "default_value": null,
     "max_length": null,
-    "numeric_precision": 32,
-    "numeric_scale": 0,
-    "is_nullable": false,
+    "numeric_precision": 10,
+    "numeric_scale": 2,
+    "is_nullable": true,
     "is_unique": false,
     "is_indexed": false,
     "is_primary_key": false,

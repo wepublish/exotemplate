@@ -264,10 +264,10 @@ type Subscription {
   directus_versions_mutated(event: EventEnum): directus_versions_mutated
   directus_comments_mutated(event: EventEnum): directus_comments_mutated
   directus_sync_id_map_mutated(event: EventEnum): directus_sync_id_map_mutated
-  TopUps_mutated(event: EventEnum): TopUps_mutated
   Clients_mutated(event: EventEnum): Clients_mutated
   Periods_mutated(event: EventEnum): Periods_mutated
   Clients_Periods_mutated(event: EventEnum): Clients_Periods_mutated
+  TopUps_mutated(event: EventEnum): TopUps_mutated
   ManualWorkEntries_mutated(event: EventEnum): ManualWorkEntries_mutated
   Clients_directus_users_mutated(event: EventEnum): Clients_directus_users_mutated
 }
@@ -1782,7 +1782,7 @@ type TopUps {
   user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   date_updated: Date
   date_updated_func: datetime_functions
-  amount: Int!
+  amount: Float
   note: String
   clientPeriod(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients_Periods
   hourlyRate: Int
@@ -2346,7 +2346,7 @@ input create_TopUps_input {
   date_created: Date
   user_updated: create_directus_users_input
   date_updated: Date
-  amount: Int!
+  amount: Float
   note: String
   clientPeriod: create_Clients_Periods_input
   hourlyRate: Int
@@ -3499,7 +3499,7 @@ input update_TopUps_input {
   date_created: Date
   user_updated: update_directus_users_input
   date_updated: Date
-  amount: Int
+  amount: Float
   note: String
   clientPeriod: update_Clients_Periods_input
   hourlyRate: Int
