@@ -1,6 +1,7 @@
 <script lang="ts" setup>
   import * as z from 'zod'
   import type { FormSubmitEvent } from '@nuxt/ui'
+  import type { InvoicesStatic } from 'bexio'
 
   const toast = useToast()
   const route = useRoute()
@@ -16,7 +17,7 @@
     amount: z.number('Anzahl Stunden eingeben'),
     hourlyRate: z.number('Stundensatz eingeben'),
     wepPercentage: z.number('Prozent für We.Publish eingeben'),
-    note: z.optional(z.string('Bemerkung eingeben'))
+    note: z.string('Bemerkung eingeben')
   })
 
   type Schema = z.output<typeof schema>
@@ -25,8 +26,10 @@
     amount: amount.value,
     hourlyRate: 150,
     wepPercentage: 20,
-    note: `Abrechnung Leistungen per ${todayText}. Arbeitsprotokoll siehe https://one.wepublish.cloud`
+    note: `Abrechnung erbrachter Leistungen durch das We.Publish-Team per ${todayText}. Profitiere von einem vergünstigten Tarif indem du vorauszahlst. Melde Dich bei deiner Ansprechperson von We.Publish. Das detaillierte Arbeitsprotokoll findest Du hier: https://one.wepublish.cloud`
   })
+
+  const bexioInvoice = ref<InvoicesStatic.Invoice | undefined>(undefined)
 
   const totalAmount = computed<number>(() => ((state.amount || 0) * 100) / 80)
   const wePublishAmount = computed<number>(() => totalAmount.value * 0.2)
@@ -34,13 +37,22 @@
     () => totalAmount.value * (state.hourlyRate || 0)
   )
 
+  const bexioInvoiceUrl = computed<string | undefined>(() => {
+    if (!bexioInvoice) {
+      return
+    }
+    return `https://office.bexio.com/index.php/kb_invoice/show/id/${bexioInvoice.value?.id}`
+  })
+
   async function onSubmit(event: FormSubmitEvent<Schema>) {
     try {
-      const response = await directus.postCustomEndpoint(
-        'invoice-with-topup',
-        event.data
-      )
-      console.log(response)
+      bexioInvoice.value = (
+        await directus.postCustomEndpoint('invoice-with-topup', {
+          text: state.note!,
+          amount: totalAmount.value,
+          unit_price: state.hourlyRate!
+        })
+      ).data as InvoicesStatic.Invoice
       toast.add({
         title: 'Rechnung erfolgreich erstellt!'
       })
@@ -87,7 +99,12 @@
           >
             <UTextarea v-model="state.note" :cols="100" />
           </UFormField>
-          <UButton type="submit" size="xl" class="col-span-6">
+          <UButton
+            v-if="!bexioInvoice"
+            type="submit"
+            size="xl"
+            class="col-span-6"
+          >
             Rechnung erstellen
           </UButton>
         </div>
@@ -109,6 +126,44 @@
           <div class="col-span-6 font-bold pt-8">Total Rechnungsbetrag</div>
           <div class="col-span-6 font-bold text-end pt-8">
             {{ toalPrice }} CHF
+          </div>
+        </div>
+
+        <!-- bexio invoice was created -->
+        <div v-if="bexioInvoice" class="col-span-12 grid grid-cols-12 gap-8">
+          <div class="col-span-12 grid grid-cols-12 justify-center">
+            <UAlert
+              color="success"
+              class="col-span-6"
+              icon="material-symbols:check-rounded"
+            >
+              <template #title> Das hat geklappt! </template>
+              <template #description>
+                Eine Rechnung wurde auf Bexio erstellt und automatisch mit dem
+                One-Dashboard verknüpft.
+              </template>
+            </UAlert>
+          </div>
+
+          <div class="col-span-6">
+            <UButton
+              to="/"
+              icon="material-symbols:arrow-back-ios"
+              variant="link"
+              size="xl"
+            >
+              Zurück zum Dashboard
+            </UButton>
+          </div>
+          <div class="col-span-6">
+            <UButton
+              :href="bexioInvoiceUrl"
+              target="_blank"
+              trailing-icon="material-symbols:open-in-new-rounded"
+              size="xl"
+            >
+              Bexio Rechnung öffnen
+            </UButton>
           </div>
         </div>
       </div>
