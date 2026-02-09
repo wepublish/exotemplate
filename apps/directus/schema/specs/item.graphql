@@ -7,26 +7,26 @@ type Query {
   Clients_by_id(id: ID!, version: String): Clients
   Clients_aggregated(groupBy: [String], filter: Clients_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [Clients_aggregated!]!
   Clients_by_version(version: String!, id: ID!): version_Clients
-  Periods(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Periods!]!
-  Periods_by_id(id: ID!, version: String): Periods
-  Periods_aggregated(groupBy: [String], filter: Periods_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [Periods_aggregated!]!
-  Periods_by_version(version: String!, id: ID!): version_Periods
   Clients_Periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods!]!
   Clients_Periods_by_id(id: ID!, version: String): Clients_Periods
   Clients_Periods_aggregated(groupBy: [String], filter: Clients_Periods_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [Clients_Periods_aggregated!]!
   Clients_Periods_by_version(version: String!, id: ID!): version_Clients_Periods
-  TopUps(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [TopUps!]!
-  TopUps_by_id(id: ID!, version: String): TopUps
-  TopUps_aggregated(groupBy: [String], filter: TopUps_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [TopUps_aggregated!]!
-  TopUps_by_version(version: String!, id: ID!): version_TopUps
-  ManualWorkEntries(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [ManualWorkEntries!]!
-  ManualWorkEntries_by_id(id: ID!, version: String): ManualWorkEntries
-  ManualWorkEntries_aggregated(groupBy: [String], filter: ManualWorkEntries_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [ManualWorkEntries_aggregated!]!
-  ManualWorkEntries_by_version(version: String!, id: ID!): version_ManualWorkEntries
+  Periods(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Periods!]!
+  Periods_by_id(id: ID!, version: String): Periods
+  Periods_aggregated(groupBy: [String], filter: Periods_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [Periods_aggregated!]!
+  Periods_by_version(version: String!, id: ID!): version_Periods
   Clients_directus_users(filter: Clients_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_directus_users!]!
   Clients_directus_users_by_id(id: ID!, version: String): Clients_directus_users
   Clients_directus_users_aggregated(groupBy: [String], filter: Clients_directus_users_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [Clients_directus_users_aggregated!]!
   Clients_directus_users_by_version(version: String!, id: ID!): version_Clients_directus_users
+  ManualWorkEntries(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [ManualWorkEntries!]!
+  ManualWorkEntries_by_id(id: ID!, version: String): ManualWorkEntries
+  ManualWorkEntries_aggregated(groupBy: [String], filter: ManualWorkEntries_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [ManualWorkEntries_aggregated!]!
+  ManualWorkEntries_by_version(version: String!, id: ID!): version_ManualWorkEntries
+  TopUps(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [TopUps!]!
+  TopUps_by_id(id: ID!, version: String): TopUps
+  TopUps_aggregated(groupBy: [String], filter: TopUps_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [TopUps_aggregated!]!
+  TopUps_by_version(version: String!, id: ID!): version_TopUps
 }
 
 type Mutation {
@@ -34,61 +34,61 @@ type Mutation {
   create_directus_sync_id_map_item(data: create_directus_sync_id_map_input!): directus_sync_id_map
   create_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Clients_input!]): [Clients!]!
   create_Clients_item(data: create_Clients_input!): Clients
-  create_Periods_items(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Periods_input!]): [Periods!]!
-  create_Periods_item(data: create_Periods_input!): Periods
   create_Clients_Periods_items(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Clients_Periods_input!]): [Clients_Periods!]!
   create_Clients_Periods_item(data: create_Clients_Periods_input!): Clients_Periods
-  create_TopUps_items(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_TopUps_input!]): [TopUps!]!
-  create_TopUps_item(data: create_TopUps_input!): TopUps
-  create_ManualWorkEntries_items(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_ManualWorkEntries_input!]): [ManualWorkEntries!]!
-  create_ManualWorkEntries_item(data: create_ManualWorkEntries_input!): ManualWorkEntries
+  create_Periods_items(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Periods_input!]): [Periods!]!
+  create_Periods_item(data: create_Periods_input!): Periods
   create_Clients_directus_users_items(filter: Clients_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Clients_directus_users_input!]): [Clients_directus_users!]!
   create_Clients_directus_users_item(data: create_Clients_directus_users_input!): Clients_directus_users
+  create_ManualWorkEntries_items(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_ManualWorkEntries_input!]): [ManualWorkEntries!]!
+  create_ManualWorkEntries_item(data: create_ManualWorkEntries_input!): ManualWorkEntries
+  create_TopUps_items(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_TopUps_input!]): [TopUps!]!
+  create_TopUps_item(data: create_TopUps_input!): TopUps
   update_directus_sync_id_map_items(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_sync_id_map_input!): [directus_sync_id_map!]!
   update_directus_sync_id_map_batch(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_sync_id_map_input!]): [directus_sync_id_map!]!
   update_directus_sync_id_map_item(id: ID!, data: update_directus_sync_id_map_input!): directus_sync_id_map
   update_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Clients_input!): [Clients!]!
   update_Clients_batch(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Clients_input!]): [Clients!]!
   update_Clients_item(id: ID!, data: update_Clients_input!): Clients
-  update_Periods_items(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Periods_input!): [Periods!]!
-  update_Periods_batch(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Periods_input!]): [Periods!]!
-  update_Periods_item(id: ID!, data: update_Periods_input!): Periods
   update_Clients_Periods_items(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Clients_Periods_input!): [Clients_Periods!]!
   update_Clients_Periods_batch(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Clients_Periods_input!]): [Clients_Periods!]!
   update_Clients_Periods_item(id: ID!, data: update_Clients_Periods_input!): Clients_Periods
-  update_TopUps_items(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_TopUps_input!): [TopUps!]!
-  update_TopUps_batch(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_TopUps_input!]): [TopUps!]!
-  update_TopUps_item(id: ID!, data: update_TopUps_input!): TopUps
-  update_ManualWorkEntries_items(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_ManualWorkEntries_input!): [ManualWorkEntries!]!
-  update_ManualWorkEntries_batch(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_ManualWorkEntries_input!]): [ManualWorkEntries!]!
-  update_ManualWorkEntries_item(id: ID!, data: update_ManualWorkEntries_input!): ManualWorkEntries
+  update_Periods_items(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Periods_input!): [Periods!]!
+  update_Periods_batch(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Periods_input!]): [Periods!]!
+  update_Periods_item(id: ID!, data: update_Periods_input!): Periods
   update_Clients_directus_users_items(filter: Clients_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Clients_directus_users_input!): [Clients_directus_users!]!
   update_Clients_directus_users_batch(filter: Clients_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Clients_directus_users_input!]): [Clients_directus_users!]!
   update_Clients_directus_users_item(id: ID!, data: update_Clients_directus_users_input!): Clients_directus_users
+  update_ManualWorkEntries_items(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_ManualWorkEntries_input!): [ManualWorkEntries!]!
+  update_ManualWorkEntries_batch(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_ManualWorkEntries_input!]): [ManualWorkEntries!]!
+  update_ManualWorkEntries_item(id: ID!, data: update_ManualWorkEntries_input!): ManualWorkEntries
+  update_TopUps_items(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_TopUps_input!): [TopUps!]!
+  update_TopUps_batch(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_TopUps_input!]): [TopUps!]!
+  update_TopUps_item(id: ID!, data: update_TopUps_input!): TopUps
   delete_directus_sync_id_map_items(ids: [ID]!): delete_many
   delete_directus_sync_id_map_item(id: ID!): delete_one
   delete_Clients_items(ids: [ID]!): delete_many
   delete_Clients_item(id: ID!): delete_one
-  delete_Periods_items(ids: [ID]!): delete_many
-  delete_Periods_item(id: ID!): delete_one
   delete_Clients_Periods_items(ids: [ID]!): delete_many
   delete_Clients_Periods_item(id: ID!): delete_one
-  delete_TopUps_items(ids: [ID]!): delete_many
-  delete_TopUps_item(id: ID!): delete_one
-  delete_ManualWorkEntries_items(ids: [ID]!): delete_many
-  delete_ManualWorkEntries_item(id: ID!): delete_one
+  delete_Periods_items(ids: [ID]!): delete_many
+  delete_Periods_item(id: ID!): delete_one
   delete_Clients_directus_users_items(ids: [ID]!): delete_many
   delete_Clients_directus_users_item(id: ID!): delete_one
+  delete_ManualWorkEntries_items(ids: [ID]!): delete_many
+  delete_ManualWorkEntries_item(id: ID!): delete_one
+  delete_TopUps_items(ids: [ID]!): delete_many
+  delete_TopUps_item(id: ID!): delete_one
 }
 
 type Subscription {
   directus_folders_mutated(event: EventEnum): directus_folders_mutated
+  directus_users_mutated(event: EventEnum): directus_users_mutated
   directus_activity_mutated(event: EventEnum): directus_activity_mutated
   directus_presets_mutated(event: EventEnum): directus_presets_mutated
   directus_files_mutated(event: EventEnum): directus_files_mutated
   directus_roles_mutated(event: EventEnum): directus_roles_mutated
   directus_permissions_mutated(event: EventEnum): directus_permissions_mutated
-  directus_users_mutated(event: EventEnum): directus_users_mutated
   directus_webhooks_mutated(event: EventEnum): directus_webhooks_mutated
   directus_panels_mutated(event: EventEnum): directus_panels_mutated
   directus_dashboards_mutated(event: EventEnum): directus_dashboards_mutated
@@ -105,11 +105,11 @@ type Subscription {
   directus_comments_mutated(event: EventEnum): directus_comments_mutated
   directus_sync_id_map_mutated(event: EventEnum): directus_sync_id_map_mutated
   Clients_mutated(event: EventEnum): Clients_mutated
-  Periods_mutated(event: EventEnum): Periods_mutated
   Clients_Periods_mutated(event: EventEnum): Clients_Periods_mutated
-  TopUps_mutated(event: EventEnum): TopUps_mutated
-  ManualWorkEntries_mutated(event: EventEnum): ManualWorkEntries_mutated
+  Periods_mutated(event: EventEnum): Periods_mutated
   Clients_directus_users_mutated(event: EventEnum): Clients_directus_users_mutated
+  ManualWorkEntries_mutated(event: EventEnum): ManualWorkEntries_mutated
+  TopUps_mutated(event: EventEnum): TopUps_mutated
 }
 
 """The `Boolean` scalar type represents `true` or `false`."""
@@ -159,20 +159,20 @@ enum EventEnum {
 }
 
 type Clients {
-  id: ID!
-  status: String
-  sort: Int
-  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  clockodo_customer_id: String
   date_created: Date
   date_created_func: datetime_functions
-  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   date_updated: Date
   date_updated_func: datetime_functions
-  name: String!
-  clockodo_customer_id: String
+  id: ID!
 
   """The project shortcode in Jira. Eg. HAS or BA"""
   jira_short_code: String
+  name: String!
+  sort: Int
+  status: String
+  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   allowedUsers(filter: Clients_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_directus_users]
   allowedUsers_func: count_functions
   periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods]
@@ -193,18 +193,18 @@ type Clients_aggregated {
 }
 
 type Clients_aggregated_count {
-  id: Int
-  status: Int
-  sort: Int
-  user_created: Int
-  date_created: Int
-  user_updated: Int
-  date_updated: Int
-  name: Int
   clockodo_customer_id: Int
+  date_created: Int
+  date_updated: Int
+  id: Int
 
   """The project shortcode in Jira. Eg. HAS or BA"""
   jira_short_code: Int
+  name: Int
+  sort: Int
+  status: Int
+  user_created: Int
+  user_updated: Int
   allowedUsers: Int
   periods: Int
 }
@@ -214,9 +214,9 @@ type Clients_aggregated_fields {
 }
 
 type Clients_directus_users {
-  id: ID!
   Clients_id(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients
   directus_users_id(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  id: ID!
 }
 
 type Clients_directus_users_aggregated {
@@ -233,9 +233,9 @@ type Clients_directus_users_aggregated {
 }
 
 type Clients_directus_users_aggregated_count {
-  id: Int
   Clients_id: Int
   directus_users_id: Int
+  id: Int
 }
 
 type Clients_directus_users_aggregated_fields {
@@ -255,13 +255,13 @@ type Clients_mutated {
 }
 
 type Clients_Periods {
-  id: ID!
   Clients_id(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients
   Periods_id(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Periods
-  topUps(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [TopUps]
-  topUps_func: count_functions
+  id: ID!
   manualWorkEntries(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [ManualWorkEntries]
   manualWorkEntries_func: count_functions
+  topUps(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [TopUps]
+  topUps_func: count_functions
 }
 
 type Clients_Periods_aggregated {
@@ -278,11 +278,11 @@ type Clients_Periods_aggregated {
 }
 
 type Clients_Periods_aggregated_count {
-  id: Int
   Clients_id: Int
   Periods_id: Int
-  topUps: Int
+  id: Int
   manualWorkEntries: Int
+  topUps: Int
 }
 
 type Clients_Periods_aggregated_fields {
@@ -909,21 +909,21 @@ type directus_webhooks_mutated {
 }
 
 type ManualWorkEntries {
-  id: ID!
-  status: String
-  sort: Int
-  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
-  date_created: Date
-  date_created_func: datetime_functions
-  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
-  date_updated: Date
-  date_updated_func: datetime_functions
+  clientPeriod(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients_Periods
   date: Date
   date_func: date_functions
-  title: String
+  date_created: Date
+  date_created_func: datetime_functions
+  date_updated: Date
+  date_updated_func: datetime_functions
   description: String
   hours: Float
-  clientPeriod(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients_Periods
+  id: ID!
+  sort: Int
+  status: String
+  title: String
+  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
 }
 
 type ManualWorkEntries_aggregated {
@@ -940,24 +940,24 @@ type ManualWorkEntries_aggregated {
 }
 
 type ManualWorkEntries_aggregated_count {
-  id: Int
-  status: Int
-  sort: Int
-  user_created: Int
-  date_created: Int
-  user_updated: Int
-  date_updated: Int
+  clientPeriod: Int
   date: Int
-  title: Int
+  date_created: Int
+  date_updated: Int
   description: Int
   hours: Int
-  clientPeriod: Int
+  id: Int
+  sort: Int
+  status: Int
+  title: Int
+  user_created: Int
+  user_updated: Int
 }
 
 type ManualWorkEntries_aggregated_fields {
-  sort: Float
-  hours: Float
   clientPeriod: Float
+  hours: Float
+  sort: Float
 }
 
 type ManualWorkEntries_mutated {
@@ -967,20 +967,20 @@ type ManualWorkEntries_mutated {
 }
 
 type Periods {
-  id: ID!
-  status: String
-  sort: Int
-  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   date_created: Date
   date_created_func: datetime_functions
-  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   date_updated: Date
   date_updated_func: datetime_functions
-  name: String
   from: Date!
   from_func: date_functions
+  id: ID!
+  name: String
+  sort: Int
+  status: String
   to: Date!
   to_func: date_functions
+  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
 }
 
 type Periods_aggregated {
@@ -997,16 +997,16 @@ type Periods_aggregated {
 }
 
 type Periods_aggregated_count {
-  id: Int
-  status: Int
-  sort: Int
-  user_created: Int
   date_created: Int
-  user_updated: Int
   date_updated: Int
-  name: Int
   from: Int
+  id: Int
+  name: Int
+  sort: Int
+  status: Int
   to: Int
+  user_created: Int
+  user_updated: Int
 }
 
 type Periods_aggregated_fields {
@@ -1020,19 +1020,19 @@ type Periods_mutated {
 }
 
 type TopUps {
-  id: ID!
-  status: String
-  sort: Int
-  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  amount: Float
+  clientPeriod(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients_Periods
   date_created: Date
   date_created_func: datetime_functions
-  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   date_updated: Date
   date_updated_func: datetime_functions
-  amount: Float
-  note: String
-  clientPeriod(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients_Periods
   hourlyRate: Int
+  id: ID!
+  note: String
+  sort: Int
+  status: String
+  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   wepPercentage: Int
 }
 
@@ -1050,25 +1050,25 @@ type TopUps_aggregated {
 }
 
 type TopUps_aggregated_count {
-  id: Int
-  status: Int
-  sort: Int
-  user_created: Int
-  date_created: Int
-  user_updated: Int
-  date_updated: Int
   amount: Int
-  note: Int
   clientPeriod: Int
+  date_created: Int
+  date_updated: Int
   hourlyRate: Int
+  id: Int
+  note: Int
+  sort: Int
+  status: Int
+  user_created: Int
+  user_updated: Int
   wepPercentage: Int
 }
 
 type TopUps_aggregated_fields {
-  sort: Float
   amount: Float
   clientPeriod: Float
   hourlyRate: Float
+  sort: Float
   wepPercentage: Float
 }
 
@@ -1080,36 +1080,36 @@ type TopUps_mutated {
 
 """"""
 type version_Clients {
-  id: ID
-  status: String
-  sort: Int
-  user_created: JSON
-  date_created: Date
-  user_updated: JSON
-  date_updated: Date
-  name: String
   clockodo_customer_id: String
+  date_created: Date
+  date_updated: Date
+  id: ID
 
   """The project shortcode in Jira. Eg. HAS or BA"""
   jira_short_code: String
+  name: String
+  sort: Int
+  status: String
+  user_created: JSON
+  user_updated: JSON
   allowedUsers: JSON
   periods: JSON
 }
 
 """"""
 type version_Clients_directus_users {
-  id: ID
   Clients_id: JSON
   directus_users_id: JSON
+  id: ID
 }
 
 """"""
 type version_Clients_Periods {
-  id: ID
   Clients_id: JSON
   Periods_id: JSON
-  topUps: JSON
+  id: ID
   manualWorkEntries: JSON
+  topUps: JSON
 }
 
 """"""
@@ -1123,47 +1123,47 @@ type version_directus_sync_id_map {
 
 """"""
 type version_ManualWorkEntries {
-  id: ID
-  status: String
-  sort: Int
-  user_created: JSON
-  date_created: Date
-  user_updated: JSON
-  date_updated: Date
+  clientPeriod: JSON
   date: Date
-  title: String
+  date_created: Date
+  date_updated: Date
   description: String
   hours: Float
-  clientPeriod: JSON
+  id: ID
+  sort: Int
+  status: String
+  title: String
+  user_created: JSON
+  user_updated: JSON
 }
 
 """"""
 type version_Periods {
-  id: ID
-  status: String
-  sort: Int
-  user_created: JSON
   date_created: Date
-  user_updated: JSON
   date_updated: Date
-  name: String
   from: Date
+  id: ID
+  name: String
+  sort: Int
+  status: String
   to: Date
+  user_created: JSON
+  user_updated: JSON
 }
 
 """"""
 type version_TopUps {
-  id: ID
-  status: String
-  sort: Int
-  user_created: JSON
-  date_created: Date
-  user_updated: JSON
-  date_updated: Date
   amount: Float
-  note: String
   clientPeriod: JSON
+  date_created: Date
+  date_updated: Date
   hourlyRate: Int
+  id: ID
+  note: String
+  sort: Int
+  status: String
+  user_created: JSON
+  user_updated: JSON
   wepPercentage: Int
 }
 
@@ -1190,18 +1190,18 @@ input boolean_filter_operators {
 }
 
 input Clients_directus_users_filter {
-  id: number_filter_operators
   Clients_id: Clients_filter
   directus_users_id: directus_users_filter
+  id: number_filter_operators
   _and: [Clients_directus_users_filter]
   _or: [Clients_directus_users_filter]
 }
 
 """"""
 input Clients_directus_users_quantifier_filter {
-  id: number_filter_operators
   Clients_id: Clients_filter
   directus_users_id: directus_users_filter
+  id: number_filter_operators
   _and: [Clients_directus_users_filter]
   _or: [Clients_directus_users_filter]
   _some: Clients_directus_users_filter
@@ -1209,18 +1209,18 @@ input Clients_directus_users_quantifier_filter {
 }
 
 input Clients_filter {
-  id: id_filter_operators
-  status: string_filter_operators
-  sort: number_filter_operators
-  user_created: directus_users_filter
+  clockodo_customer_id: string_filter_operators
   date_created: date_filter_operators
   date_created_func: datetime_function_filter_operators
-  user_updated: directus_users_filter
   date_updated: date_filter_operators
   date_updated_func: datetime_function_filter_operators
-  name: string_filter_operators
-  clockodo_customer_id: string_filter_operators
+  id: id_filter_operators
   jira_short_code: string_filter_operators
+  name: string_filter_operators
+  sort: number_filter_operators
+  status: string_filter_operators
+  user_created: directus_users_filter
+  user_updated: directus_users_filter
   allowedUsers: Clients_directus_users_quantifier_filter
   allowedUsers_func: count_function_filter_operators
   periods: Clients_Periods_quantifier_filter
@@ -1230,26 +1230,26 @@ input Clients_filter {
 }
 
 input Clients_Periods_filter {
-  id: number_filter_operators
   Clients_id: Clients_filter
   Periods_id: Periods_filter
-  topUps: TopUps_quantifier_filter
-  topUps_func: count_function_filter_operators
+  id: number_filter_operators
   manualWorkEntries: ManualWorkEntries_quantifier_filter
   manualWorkEntries_func: count_function_filter_operators
+  topUps: TopUps_quantifier_filter
+  topUps_func: count_function_filter_operators
   _and: [Clients_Periods_filter]
   _or: [Clients_Periods_filter]
 }
 
 """"""
 input Clients_Periods_quantifier_filter {
-  id: number_filter_operators
   Clients_id: Clients_filter
   Periods_id: Periods_filter
-  topUps: TopUps_quantifier_filter
-  topUps_func: count_function_filter_operators
+  id: number_filter_operators
   manualWorkEntries: ManualWorkEntries_quantifier_filter
   manualWorkEntries_func: count_function_filter_operators
+  topUps: TopUps_quantifier_filter
+  topUps_func: count_function_filter_operators
   _and: [Clients_Periods_filter]
   _or: [Clients_Periods_filter]
   _some: Clients_Periods_filter
@@ -1261,34 +1261,34 @@ input count_function_filter_operators {
 }
 
 input create_Clients_directus_users_input {
-  id: ID
   Clients_id: create_Clients_input
   directus_users_id: create_directus_users_input
+  id: ID
 }
 
 input create_Clients_input {
-  id: ID
-  status: String
-  sort: Int
-  user_created: create_directus_users_input
-  date_created: Date
-  user_updated: create_directus_users_input
-  date_updated: Date
-  name: String!
   clockodo_customer_id: String
+  date_created: Date
+  date_updated: Date
+  id: ID
 
   """The project shortcode in Jira. Eg. HAS or BA"""
   jira_short_code: String
+  name: String!
+  sort: Int
+  status: String
+  user_created: create_directus_users_input
+  user_updated: create_directus_users_input
   allowedUsers: [create_Clients_directus_users_input]
   periods: [create_Clients_Periods_input]
 }
 
 input create_Clients_Periods_input {
-  id: ID
   Clients_id: create_Clients_input
   Periods_id: create_Periods_input
-  topUps: [create_TopUps_input]
+  id: ID
   manualWorkEntries: [create_ManualWorkEntries_input]
+  topUps: [create_TopUps_input]
 }
 
 input create_directus_access_input {
@@ -1413,45 +1413,45 @@ input create_directus_users_input {
 }
 
 input create_ManualWorkEntries_input {
-  id: ID
-  status: String
-  sort: Int
-  user_created: create_directus_users_input
-  date_created: Date
-  user_updated: create_directus_users_input
-  date_updated: Date
+  clientPeriod: create_Clients_Periods_input
   date: Date
-  title: String
+  date_created: Date
+  date_updated: Date
   description: String
   hours: Float
-  clientPeriod: create_Clients_Periods_input
+  id: ID
+  sort: Int
+  status: String
+  title: String
+  user_created: create_directus_users_input
+  user_updated: create_directus_users_input
 }
 
 input create_Periods_input {
-  id: ID
-  status: String
-  sort: Int
-  user_created: create_directus_users_input
   date_created: Date
-  user_updated: create_directus_users_input
   date_updated: Date
-  name: String
   from: Date!
+  id: ID
+  name: String
+  sort: Int
+  status: String
   to: Date!
+  user_created: create_directus_users_input
+  user_updated: create_directus_users_input
 }
 
 input create_TopUps_input {
-  id: ID
-  status: String
-  sort: Int
-  user_created: create_directus_users_input
-  date_created: Date
-  user_updated: create_directus_users_input
-  date_updated: Date
   amount: Float
-  note: String
   clientPeriod: create_Clients_Periods_input
+  date_created: Date
+  date_updated: Date
   hourlyRate: Int
+  id: ID
+  note: String
+  sort: Int
+  status: String
+  user_created: create_directus_users_input
+  user_updated: create_directus_users_input
   wepPercentage: Int
 }
 
@@ -1965,42 +1965,42 @@ input id_filter_operators {
 }
 
 input ManualWorkEntries_filter {
-  id: id_filter_operators
-  status: string_filter_operators
-  sort: number_filter_operators
-  user_created: directus_users_filter
-  date_created: date_filter_operators
-  date_created_func: datetime_function_filter_operators
-  user_updated: directus_users_filter
-  date_updated: date_filter_operators
-  date_updated_func: datetime_function_filter_operators
+  clientPeriod: Clients_Periods_filter
   date: date_filter_operators
   date_func: date_function_filter_operators
-  title: string_filter_operators
+  date_created: date_filter_operators
+  date_created_func: datetime_function_filter_operators
+  date_updated: date_filter_operators
+  date_updated_func: datetime_function_filter_operators
   description: string_filter_operators
   hours: number_filter_operators
-  clientPeriod: Clients_Periods_filter
+  id: id_filter_operators
+  sort: number_filter_operators
+  status: string_filter_operators
+  title: string_filter_operators
+  user_created: directus_users_filter
+  user_updated: directus_users_filter
   _and: [ManualWorkEntries_filter]
   _or: [ManualWorkEntries_filter]
 }
 
 """"""
 input ManualWorkEntries_quantifier_filter {
-  id: id_filter_operators
-  status: string_filter_operators
-  sort: number_filter_operators
-  user_created: directus_users_filter
-  date_created: date_filter_operators
-  date_created_func: datetime_function_filter_operators
-  user_updated: directus_users_filter
-  date_updated: date_filter_operators
-  date_updated_func: datetime_function_filter_operators
+  clientPeriod: Clients_Periods_filter
   date: date_filter_operators
   date_func: date_function_filter_operators
-  title: string_filter_operators
+  date_created: date_filter_operators
+  date_created_func: datetime_function_filter_operators
+  date_updated: date_filter_operators
+  date_updated_func: datetime_function_filter_operators
   description: string_filter_operators
   hours: number_filter_operators
-  clientPeriod: Clients_Periods_filter
+  id: id_filter_operators
+  sort: number_filter_operators
+  status: string_filter_operators
+  title: string_filter_operators
+  user_created: directus_users_filter
+  user_updated: directus_users_filter
   _and: [ManualWorkEntries_filter]
   _or: [ManualWorkEntries_filter]
   _some: ManualWorkEntries_filter
@@ -2023,20 +2023,20 @@ input number_filter_operators {
 }
 
 input Periods_filter {
-  id: id_filter_operators
-  status: string_filter_operators
-  sort: number_filter_operators
-  user_created: directus_users_filter
   date_created: date_filter_operators
   date_created_func: datetime_function_filter_operators
-  user_updated: directus_users_filter
   date_updated: date_filter_operators
   date_updated_func: datetime_function_filter_operators
-  name: string_filter_operators
   from: date_filter_operators
   from_func: date_function_filter_operators
+  id: id_filter_operators
+  name: string_filter_operators
+  sort: number_filter_operators
+  status: string_filter_operators
   to: date_filter_operators
   to_func: date_function_filter_operators
+  user_created: directus_users_filter
+  user_updated: directus_users_filter
   _and: [Periods_filter]
   _or: [Periods_filter]
 }
@@ -2064,19 +2064,19 @@ input string_filter_operators {
 }
 
 input TopUps_filter {
-  id: id_filter_operators
-  status: string_filter_operators
-  sort: number_filter_operators
-  user_created: directus_users_filter
+  amount: number_filter_operators
+  clientPeriod: Clients_Periods_filter
   date_created: date_filter_operators
   date_created_func: datetime_function_filter_operators
-  user_updated: directus_users_filter
   date_updated: date_filter_operators
   date_updated_func: datetime_function_filter_operators
-  amount: number_filter_operators
-  note: string_filter_operators
-  clientPeriod: Clients_Periods_filter
   hourlyRate: number_filter_operators
+  id: id_filter_operators
+  note: string_filter_operators
+  sort: number_filter_operators
+  status: string_filter_operators
+  user_created: directus_users_filter
+  user_updated: directus_users_filter
   wepPercentage: number_filter_operators
   _and: [TopUps_filter]
   _or: [TopUps_filter]
@@ -2084,19 +2084,19 @@ input TopUps_filter {
 
 """"""
 input TopUps_quantifier_filter {
-  id: id_filter_operators
-  status: string_filter_operators
-  sort: number_filter_operators
-  user_created: directus_users_filter
+  amount: number_filter_operators
+  clientPeriod: Clients_Periods_filter
   date_created: date_filter_operators
   date_created_func: datetime_function_filter_operators
-  user_updated: directus_users_filter
   date_updated: date_filter_operators
   date_updated_func: datetime_function_filter_operators
-  amount: number_filter_operators
-  note: string_filter_operators
-  clientPeriod: Clients_Periods_filter
   hourlyRate: number_filter_operators
+  id: id_filter_operators
+  note: string_filter_operators
+  sort: number_filter_operators
+  status: string_filter_operators
+  user_created: directus_users_filter
+  user_updated: directus_users_filter
   wepPercentage: number_filter_operators
   _and: [TopUps_filter]
   _or: [TopUps_filter]
@@ -2105,34 +2105,34 @@ input TopUps_quantifier_filter {
 }
 
 input update_Clients_directus_users_input {
-  id: ID
   Clients_id: update_Clients_input
   directus_users_id: update_directus_users_input
+  id: ID
 }
 
 input update_Clients_input {
-  id: ID
-  status: String
-  sort: Int
-  user_created: update_directus_users_input
-  date_created: Date
-  user_updated: update_directus_users_input
-  date_updated: Date
-  name: String
   clockodo_customer_id: String
+  date_created: Date
+  date_updated: Date
+  id: ID
 
   """The project shortcode in Jira. Eg. HAS or BA"""
   jira_short_code: String
+  name: String
+  sort: Int
+  status: String
+  user_created: update_directus_users_input
+  user_updated: update_directus_users_input
   allowedUsers: [update_Clients_directus_users_input]
   periods: [update_Clients_Periods_input]
 }
 
 input update_Clients_Periods_input {
-  id: ID
   Clients_id: update_Clients_input
   Periods_id: update_Periods_input
-  topUps: [update_TopUps_input]
+  id: ID
   manualWorkEntries: [update_ManualWorkEntries_input]
+  topUps: [update_TopUps_input]
 }
 
 input update_directus_access_input {
@@ -2257,44 +2257,44 @@ input update_directus_users_input {
 }
 
 input update_ManualWorkEntries_input {
-  id: ID
-  status: String
-  sort: Int
-  user_created: update_directus_users_input
-  date_created: Date
-  user_updated: update_directus_users_input
-  date_updated: Date
+  clientPeriod: update_Clients_Periods_input
   date: Date
-  title: String
+  date_created: Date
+  date_updated: Date
   description: String
   hours: Float
-  clientPeriod: update_Clients_Periods_input
+  id: ID
+  sort: Int
+  status: String
+  title: String
+  user_created: update_directus_users_input
+  user_updated: update_directus_users_input
 }
 
 input update_Periods_input {
-  id: ID
-  status: String
-  sort: Int
-  user_created: update_directus_users_input
   date_created: Date
-  user_updated: update_directus_users_input
   date_updated: Date
-  name: String
   from: Date
+  id: ID
+  name: String
+  sort: Int
+  status: String
   to: Date
+  user_created: update_directus_users_input
+  user_updated: update_directus_users_input
 }
 
 input update_TopUps_input {
-  id: ID
-  status: String
-  sort: Int
-  user_created: update_directus_users_input
-  date_created: Date
-  user_updated: update_directus_users_input
-  date_updated: Date
   amount: Float
-  note: String
   clientPeriod: update_Clients_Periods_input
+  date_created: Date
+  date_updated: Date
   hourlyRate: Int
+  id: ID
+  note: String
+  sort: Int
+  status: String
+  user_created: update_directus_users_input
+  user_updated: update_directus_users_input
   wepPercentage: Int
 }

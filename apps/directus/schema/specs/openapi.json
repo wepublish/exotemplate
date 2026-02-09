@@ -3,7 +3,7 @@
   "info": {
     "title": "Dynamic API Specification",
     "description": "This is a dynamically generated API specification for all endpoints existing on the current project.",
-    "version": "a6d368fe7247e652b2e3abee627bb45dd92d09c8"
+    "version": "975877bdbae1e7a373facf5c7bed9a0d34d9e69a"
   },
   "servers": [
     {
@@ -1309,6 +1309,579 @@
           {
             "$ref": "#/components/parameters/UUId"
           }
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "summary": "List Users",
+        "description": "List the users.",
+        "operationId": "getUsers",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Users"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/x-metadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      },
+      "post": {
+        "summary": "Create a User",
+        "description": "Create a new user.",
+        "operationId": "createUser",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Meta"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Users"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Users"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      },
+      "patch": {
+        "summary": "Update Multiple Users",
+        "description": "Update multiple users at the same time.",
+        "tags": [
+          "Users"
+        ],
+        "operationId": "updateUsers",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "$ref": "#/components/schemas/Users"
+                  },
+                  "keys": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Users"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/x-metadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Multiple Users",
+        "description": "Delete multiple existing users.",
+        "tags": [
+          "Users"
+        ],
+        "operationId": "deleteUsers",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "summary": "Retrieve a User",
+        "description": "Retrieve a single user by unique identifier.",
+        "operationId": "getUser",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UUId"
+          },
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Users"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      },
+      "patch": {
+        "summary": "Update a User",
+        "description": "Update an existing user",
+        "operationId": "updateUser",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UUId"
+          },
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Users"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      },
+      "delete": {
+        "summary": "Delete a User",
+        "description": "Delete an existing user",
+        "operationId": "deleteUser",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/UUId"
+          }
+        ]
+      }
+    },
+    "/users/invite": {
+      "post": {
+        "summary": "Invite User(s)",
+        "description": "Invites one or more users to this project. It creates a user with an invited status, and then sends an email to the user with instructions on how to activate their account.",
+        "operationId": "invite",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "description": "Email address or array of email addresses of the to-be-invited user(s).",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Users"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/invite/accept": {
+      "post": {
+        "summary": "Accept User Invite",
+        "description": "Accepts and enables an invited user using a JWT invitation token.",
+        "operationId": "acceptInvite",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "example": "eyJh...KmUk",
+                    "description": "Accept invite token."
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Password of the user.",
+                    "format": "password",
+                    "example": "d1r3ctu5"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Users"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/me": {
+      "get": {
+        "summary": "Retrieve Current User",
+        "description": "Retrieve the currently authenticated user.",
+        "operationId": "getMe",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Users"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      },
+      "patch": {
+        "summary": "Update Current User",
+        "description": "Update the currently authenticated user.",
+        "operationId": "updateMe",
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Users"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/me/track/page": {
+      "patch": {
+        "summary": "Update Last Page",
+        "description": "Updates the last used page field of the currently authenticated user. This is used internally to be able to open the Directus admin app from the last page you used.",
+        "operationId": "updateLastUsedPageMe",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "last_page": {
+                    "description": "Path of the page you used last.",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/me/tfa/enable": {
+      "post": {
+        "summary": "Enable 2FA",
+        "description": "Enables two-factor authentication for the currently authenticated user.",
+        "operationId": "meTfaEnable",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/me/tfa/disable": {
+      "post": {
+        "summary": "Disable 2FA",
+        "description": "Disables two-factor authentication for the currently authenticated user.",
+        "operationId": "meTfaDisable",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "tags": [
+          "Users"
         ]
       }
     },
@@ -4449,579 +5022,6 @@
           {
             "$ref": "#/components/parameters/Id"
           }
-        ]
-      }
-    },
-    "/users": {
-      "get": {
-        "summary": "List Users",
-        "description": "List the users.",
-        "operationId": "getUsers",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Limit"
-          },
-          {
-            "$ref": "#/components/parameters/Offset"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Sort"
-          },
-          {
-            "$ref": "#/components/parameters/Filter"
-          },
-          {
-            "$ref": "#/components/parameters/Search"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Users"
-                      }
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/x-metadata"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        },
-        "tags": [
-          "Users"
-        ]
-      },
-      "post": {
-        "summary": "Create a User",
-        "description": "Create a new user.",
-        "operationId": "createUser",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Meta"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Users"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/Users"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        },
-        "tags": [
-          "Users"
-        ]
-      },
-      "patch": {
-        "summary": "Update Multiple Users",
-        "description": "Update multiple users at the same time.",
-        "tags": [
-          "Users"
-        ],
-        "operationId": "updateUsers",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Limit"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Offset"
-          },
-          {
-            "$ref": "#/components/parameters/Sort"
-          },
-          {
-            "$ref": "#/components/parameters/Filter"
-          },
-          {
-            "$ref": "#/components/parameters/Search"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "data": {
-                    "$ref": "#/components/schemas/Users"
-                  },
-                  "keys": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Users"
-                      }
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/x-metadata"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete Multiple Users",
-        "description": "Delete multiple existing users.",
-        "tags": [
-          "Users"
-        ],
-        "operationId": "deleteUsers",
-        "responses": {
-          "200": {
-            "description": "Successful request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        }
-      }
-    },
-    "/users/{id}": {
-      "get": {
-        "summary": "Retrieve a User",
-        "description": "Retrieve a single user by unique identifier.",
-        "operationId": "getUser",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/UUId"
-          },
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/Users"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        },
-        "tags": [
-          "Users"
-        ]
-      },
-      "patch": {
-        "summary": "Update a User",
-        "description": "Update an existing user",
-        "operationId": "updateUser",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/UUId"
-          },
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Users"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "data": {
-                      "type": "object"
-                    }
-                  },
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        },
-        "tags": [
-          "Users"
-        ]
-      },
-      "delete": {
-        "summary": "Delete a User",
-        "description": "Delete an existing user",
-        "operationId": "deleteUser",
-        "responses": {
-          "200": {
-            "description": "Successful request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        },
-        "tags": [
-          "Users"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/UUId"
-          }
-        ]
-      }
-    },
-    "/users/invite": {
-      "post": {
-        "summary": "Invite User(s)",
-        "description": "Invites one or more users to this project. It creates a user with an invited status, and then sends an email to the user with instructions on how to activate their account.",
-        "operationId": "invite",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "email": {
-                    "description": "Email address or array of email addresses of the to-be-invited user(s).",
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/Users"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        },
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/users/invite/accept": {
-      "post": {
-        "summary": "Accept User Invite",
-        "description": "Accepts and enables an invited user using a JWT invitation token.",
-        "operationId": "acceptInvite",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "token": {
-                    "type": "string",
-                    "example": "eyJh...KmUk",
-                    "description": "Accept invite token."
-                  },
-                  "password": {
-                    "type": "string",
-                    "description": "Password of the user.",
-                    "format": "password",
-                    "example": "d1r3ctu5"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/Users"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        },
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/users/me": {
-      "get": {
-        "summary": "Retrieve Current User",
-        "description": "Retrieve the currently authenticated user.",
-        "operationId": "getMe",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/Users"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        },
-        "tags": [
-          "Users"
-        ]
-      },
-      "patch": {
-        "summary": "Update Current User",
-        "description": "Update the currently authenticated user.",
-        "operationId": "updateMe",
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/Users"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        },
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/users/me/track/page": {
-      "patch": {
-        "summary": "Update Last Page",
-        "description": "Updates the last used page field of the currently authenticated user. This is used internally to be able to open the Directus admin app from the last page you used.",
-        "operationId": "updateLastUsedPageMe",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "properties": {
-                  "last_page": {
-                    "description": "Path of the page you used last.",
-                    "type": "string"
-                  }
-                },
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        },
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/users/me/tfa/enable": {
-      "post": {
-        "summary": "Enable 2FA",
-        "description": "Enables two-factor authentication for the currently authenticated user.",
-        "operationId": "meTfaEnable",
-        "responses": {
-          "200": {
-            "description": "Successful request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        },
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/users/me/tfa/disable": {
-      "post": {
-        "summary": "Disable 2FA",
-        "description": "Disables two-factor authentication for the currently authenticated user.",
-        "operationId": "meTfaDisable",
-        "responses": {
-          "200": {
-            "description": "Successful request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        },
-        "tags": [
-          "Users"
         ]
       }
     },
@@ -8291,395 +8291,6 @@
         ]
       }
     },
-    "/items/Periods": {
-      "post": {
-        "summary": "Create an Item",
-        "description": "Create a new Periods item.",
-        "tags": [
-          "Items",
-          "ItemsPeriods"
-        ],
-        "operationId": "createItemsPeriods",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Meta"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "oneOf": [
-                  {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/ItemsPeriods"
-                    }
-                  },
-                  {
-                    "$ref": "#/components/schemas/ItemsPeriods"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/ItemsPeriods"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        }
-      },
-      "get": {
-        "summary": "List Items",
-        "description": "List the Periods items.",
-        "tags": [
-          "Items",
-          "ItemsPeriods"
-        ],
-        "operationId": "readItemsPeriods",
-        "security": [
-          {
-            "Auth": []
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Limit"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Offset"
-          },
-          {
-            "$ref": "#/components/parameters/Sort"
-          },
-          {
-            "$ref": "#/components/parameters/Filter"
-          },
-          {
-            "$ref": "#/components/parameters/Search"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "$ref": "#/components/schemas/ItemsPeriods"
-                      }
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/x-metadata"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        }
-      },
-      "patch": {
-        "summary": "Update Multiple Items",
-        "description": "Update multiple Periods items at the same time.",
-        "tags": [
-          "Items",
-          "ItemsPeriods"
-        ],
-        "operationId": "updateItemsPeriods",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Limit"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Offset"
-          },
-          {
-            "$ref": "#/components/parameters/Sort"
-          },
-          {
-            "$ref": "#/components/parameters/Filter"
-          },
-          {
-            "$ref": "#/components/parameters/Search"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "oneOf": [
-                  {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/ItemsPeriods"
-                    }
-                  },
-                  {
-                    "$ref": "#/components/schemas/ItemsPeriods"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/ItemsPeriods"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete Multiple Items",
-        "description": "Delete multiple existing Periods items.",
-        "tags": [
-          "Items",
-          "ItemsPeriods"
-        ],
-        "operationId": "deleteItemsPeriods",
-        "responses": {
-          "200": {
-            "description": "Successful request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        },
-        "parameters": []
-      }
-    },
-    "/items/Periods/{id}": {
-      "get": {
-        "summary": "Retrieve an Item",
-        "description": "Retrieve a single Periods item by unique identifier.",
-        "tags": [
-          "Items",
-          "ItemsPeriods"
-        ],
-        "operationId": "readSingleItemsPeriods",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Version"
-          },
-          {
-            "name": "id",
-            "description": "Index of the item.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "type": "integer",
-                  "description": "Incremental index of the item.",
-                  "example": 1
-                },
-                {
-                  "type": "string",
-                  "description": "Unique identifier of the item.",
-                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
-                }
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "$ref": "#/components/schemas/ItemsPeriods"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        }
-      },
-      "patch": {
-        "summary": "Update an Item",
-        "description": "Update an existing Periods item.",
-        "tags": [
-          "Items",
-          "ItemsPeriods"
-        ],
-        "operationId": "updateSingleItemsPeriods",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "name": "id",
-            "description": "Index of the item.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "type": "integer",
-                  "description": "Incremental index of the item.",
-                  "example": 1
-                },
-                {
-                  "type": "string",
-                  "description": "Unique identifier of the item.",
-                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
-                }
-              ]
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "$ref": "#/components/schemas/ItemsPeriods"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "$ref": "#/components/schemas/ItemsPeriods"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete an Item",
-        "description": "Delete an existing Periods item.",
-        "tags": [
-          "Items",
-          "ItemsPeriods"
-        ],
-        "operationId": "deleteSingleItemsPeriods",
-        "responses": {
-          "200": {
-            "description": "Successful request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "description": "Index of the item.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "type": "integer",
-                  "description": "Incremental index of the item.",
-                  "example": 1
-                },
-                {
-                  "type": "string",
-                  "description": "Unique identifier of the item.",
-                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
     "/items/Clients_Periods": {
       "post": {
         "summary": "Create an Item",
@@ -9069,15 +8680,15 @@
         ]
       }
     },
-    "/items/TopUps": {
+    "/items/Periods": {
       "post": {
         "summary": "Create an Item",
-        "description": "Create a new TopUps item.",
+        "description": "Create a new Periods item.",
         "tags": [
           "Items",
-          "ItemsTopUps"
+          "ItemsPeriods"
         ],
-        "operationId": "createItemsTopUps",
+        "operationId": "createItemsPeriods",
         "parameters": [
           {
             "$ref": "#/components/parameters/Meta"
@@ -9091,11 +8702,11 @@
                   {
                     "type": "array",
                     "items": {
-                      "$ref": "#/components/schemas/ItemsTopUps"
+                      "$ref": "#/components/schemas/ItemsPeriods"
                     }
                   },
                   {
-                    "$ref": "#/components/schemas/ItemsTopUps"
+                    "$ref": "#/components/schemas/ItemsPeriods"
                   }
                 ]
               }
@@ -9113,7 +8724,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/ItemsTopUps"
+                        "$ref": "#/components/schemas/ItemsPeriods"
                       }
                     }
                   }
@@ -9128,12 +8739,12 @@
       },
       "get": {
         "summary": "List Items",
-        "description": "List the TopUps items.",
+        "description": "List the Periods items.",
         "tags": [
           "Items",
-          "ItemsTopUps"
+          "ItemsPeriods"
         ],
-        "operationId": "readItemsTopUps",
+        "operationId": "readItemsPeriods",
         "security": [
           {
             "Auth": []
@@ -9174,7 +8785,7 @@
                       "type": "array",
                       "items": {
                         "type": "object",
-                        "$ref": "#/components/schemas/ItemsTopUps"
+                        "$ref": "#/components/schemas/ItemsPeriods"
                       }
                     },
                     "meta": {
@@ -9192,12 +8803,12 @@
       },
       "patch": {
         "summary": "Update Multiple Items",
-        "description": "Update multiple TopUps items at the same time.",
+        "description": "Update multiple Periods items at the same time.",
         "tags": [
           "Items",
-          "ItemsTopUps"
+          "ItemsPeriods"
         ],
-        "operationId": "updateItemsTopUps",
+        "operationId": "updateItemsPeriods",
         "parameters": [
           {
             "$ref": "#/components/parameters/Fields"
@@ -9229,11 +8840,11 @@
                   {
                     "type": "array",
                     "items": {
-                      "$ref": "#/components/schemas/ItemsTopUps"
+                      "$ref": "#/components/schemas/ItemsPeriods"
                     }
                   },
                   {
-                    "$ref": "#/components/schemas/ItemsTopUps"
+                    "$ref": "#/components/schemas/ItemsPeriods"
                   }
                 ]
               }
@@ -9250,7 +8861,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/ItemsTopUps"
+                        "$ref": "#/components/schemas/ItemsPeriods"
                       }
                     }
                   }
@@ -9262,12 +8873,12 @@
       },
       "delete": {
         "summary": "Delete Multiple Items",
-        "description": "Delete multiple existing TopUps items.",
+        "description": "Delete multiple existing Periods items.",
         "tags": [
           "Items",
-          "ItemsTopUps"
+          "ItemsPeriods"
         ],
-        "operationId": "deleteItemsTopUps",
+        "operationId": "deleteItemsPeriods",
         "responses": {
           "200": {
             "description": "Successful request"
@@ -9279,15 +8890,15 @@
         "parameters": []
       }
     },
-    "/items/TopUps/{id}": {
+    "/items/Periods/{id}": {
       "get": {
         "summary": "Retrieve an Item",
-        "description": "Retrieve a single TopUps item by unique identifier.",
+        "description": "Retrieve a single Periods item by unique identifier.",
         "tags": [
           "Items",
-          "ItemsTopUps"
+          "ItemsPeriods"
         ],
-        "operationId": "readSingleItemsTopUps",
+        "operationId": "readSingleItemsPeriods",
         "parameters": [
           {
             "$ref": "#/components/parameters/Fields"
@@ -9329,7 +8940,7 @@
                   "properties": {
                     "data": {
                       "type": "object",
-                      "$ref": "#/components/schemas/ItemsTopUps"
+                      "$ref": "#/components/schemas/ItemsPeriods"
                     }
                   }
                 }
@@ -9346,12 +8957,12 @@
       },
       "patch": {
         "summary": "Update an Item",
-        "description": "Update an existing TopUps item.",
+        "description": "Update an existing Periods item.",
         "tags": [
           "Items",
-          "ItemsTopUps"
+          "ItemsPeriods"
         ],
-        "operationId": "updateSingleItemsTopUps",
+        "operationId": "updateSingleItemsPeriods",
         "parameters": [
           {
             "$ref": "#/components/parameters/Fields"
@@ -9385,7 +8996,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "$ref": "#/components/schemas/ItemsTopUps"
+                "$ref": "#/components/schemas/ItemsPeriods"
               }
             }
           }
@@ -9400,7 +9011,7 @@
                   "properties": {
                     "data": {
                       "type": "object",
-                      "$ref": "#/components/schemas/ItemsTopUps"
+                      "$ref": "#/components/schemas/ItemsPeriods"
                     }
                   }
                 }
@@ -9417,12 +9028,401 @@
       },
       "delete": {
         "summary": "Delete an Item",
-        "description": "Delete an existing TopUps item.",
+        "description": "Delete an existing Periods item.",
         "tags": [
           "Items",
-          "ItemsTopUps"
+          "ItemsPeriods"
         ],
-        "operationId": "deleteSingleItemsTopUps",
+        "operationId": "deleteSingleItemsPeriods",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/items/Clients_directus_users": {
+      "post": {
+        "summary": "Create an Item",
+        "description": "Create a new Clients_directus_users item.",
+        "tags": [
+          "Items",
+          "ItemsClientsDirectusUsers"
+        ],
+        "operationId": "createItemsClientsDirectusUsers",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Meta"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "get": {
+        "summary": "List Items",
+        "description": "List the Clients_directus_users items.",
+        "tags": [
+          "Items",
+          "ItemsClientsDirectusUsers"
+        ],
+        "operationId": "readItemsClientsDirectusUsers",
+        "security": [
+          {
+            "Auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/x-metadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update Multiple Items",
+        "description": "Update multiple Clients_directus_users items at the same time.",
+        "tags": [
+          "Items",
+          "ItemsClientsDirectusUsers"
+        ],
+        "operationId": "updateItemsClientsDirectusUsers",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Multiple Items",
+        "description": "Delete multiple existing Clients_directus_users items.",
+        "tags": [
+          "Items",
+          "ItemsClientsDirectusUsers"
+        ],
+        "operationId": "deleteItemsClientsDirectusUsers",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/items/Clients_directus_users/{id}": {
+      "get": {
+        "summary": "Retrieve an Item",
+        "description": "Retrieve a single Clients_directus_users item by unique identifier.",
+        "tags": [
+          "Items",
+          "ItemsClientsDirectusUsers"
+        ],
+        "operationId": "readSingleItemsClientsDirectusUsers",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Version"
+          },
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update an Item",
+        "description": "Update an existing Clients_directus_users item.",
+        "tags": [
+          "Items",
+          "ItemsClientsDirectusUsers"
+        ],
+        "operationId": "updateSingleItemsClientsDirectusUsers",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an Item",
+        "description": "Delete an existing Clients_directus_users item.",
+        "tags": [
+          "Items",
+          "ItemsClientsDirectusUsers"
+        ],
+        "operationId": "deleteSingleItemsClientsDirectusUsers",
         "responses": {
           "200": {
             "description": "Successful request"
@@ -9847,15 +9847,15 @@
         ]
       }
     },
-    "/items/Clients_directus_users": {
+    "/items/TopUps": {
       "post": {
         "summary": "Create an Item",
-        "description": "Create a new Clients_directus_users item.",
+        "description": "Create a new TopUps item.",
         "tags": [
           "Items",
-          "ItemsClientsDirectusUsers"
+          "ItemsTopUps"
         ],
-        "operationId": "createItemsClientsDirectusUsers",
+        "operationId": "createItemsTopUps",
         "parameters": [
           {
             "$ref": "#/components/parameters/Meta"
@@ -9869,11 +9869,11 @@
                   {
                     "type": "array",
                     "items": {
-                      "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                      "$ref": "#/components/schemas/ItemsTopUps"
                     }
                   },
                   {
-                    "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                    "$ref": "#/components/schemas/ItemsTopUps"
                   }
                 ]
               }
@@ -9891,7 +9891,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                        "$ref": "#/components/schemas/ItemsTopUps"
                       }
                     }
                   }
@@ -9906,12 +9906,12 @@
       },
       "get": {
         "summary": "List Items",
-        "description": "List the Clients_directus_users items.",
+        "description": "List the TopUps items.",
         "tags": [
           "Items",
-          "ItemsClientsDirectusUsers"
+          "ItemsTopUps"
         ],
-        "operationId": "readItemsClientsDirectusUsers",
+        "operationId": "readItemsTopUps",
         "security": [
           {
             "Auth": []
@@ -9952,7 +9952,7 @@
                       "type": "array",
                       "items": {
                         "type": "object",
-                        "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                        "$ref": "#/components/schemas/ItemsTopUps"
                       }
                     },
                     "meta": {
@@ -9970,12 +9970,12 @@
       },
       "patch": {
         "summary": "Update Multiple Items",
-        "description": "Update multiple Clients_directus_users items at the same time.",
+        "description": "Update multiple TopUps items at the same time.",
         "tags": [
           "Items",
-          "ItemsClientsDirectusUsers"
+          "ItemsTopUps"
         ],
-        "operationId": "updateItemsClientsDirectusUsers",
+        "operationId": "updateItemsTopUps",
         "parameters": [
           {
             "$ref": "#/components/parameters/Fields"
@@ -10007,11 +10007,11 @@
                   {
                     "type": "array",
                     "items": {
-                      "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                      "$ref": "#/components/schemas/ItemsTopUps"
                     }
                   },
                   {
-                    "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                    "$ref": "#/components/schemas/ItemsTopUps"
                   }
                 ]
               }
@@ -10028,7 +10028,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                        "$ref": "#/components/schemas/ItemsTopUps"
                       }
                     }
                   }
@@ -10040,12 +10040,12 @@
       },
       "delete": {
         "summary": "Delete Multiple Items",
-        "description": "Delete multiple existing Clients_directus_users items.",
+        "description": "Delete multiple existing TopUps items.",
         "tags": [
           "Items",
-          "ItemsClientsDirectusUsers"
+          "ItemsTopUps"
         ],
-        "operationId": "deleteItemsClientsDirectusUsers",
+        "operationId": "deleteItemsTopUps",
         "responses": {
           "200": {
             "description": "Successful request"
@@ -10057,15 +10057,15 @@
         "parameters": []
       }
     },
-    "/items/Clients_directus_users/{id}": {
+    "/items/TopUps/{id}": {
       "get": {
         "summary": "Retrieve an Item",
-        "description": "Retrieve a single Clients_directus_users item by unique identifier.",
+        "description": "Retrieve a single TopUps item by unique identifier.",
         "tags": [
           "Items",
-          "ItemsClientsDirectusUsers"
+          "ItemsTopUps"
         ],
-        "operationId": "readSingleItemsClientsDirectusUsers",
+        "operationId": "readSingleItemsTopUps",
         "parameters": [
           {
             "$ref": "#/components/parameters/Fields"
@@ -10107,7 +10107,7 @@
                   "properties": {
                     "data": {
                       "type": "object",
-                      "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                      "$ref": "#/components/schemas/ItemsTopUps"
                     }
                   }
                 }
@@ -10124,12 +10124,12 @@
       },
       "patch": {
         "summary": "Update an Item",
-        "description": "Update an existing Clients_directus_users item.",
+        "description": "Update an existing TopUps item.",
         "tags": [
           "Items",
-          "ItemsClientsDirectusUsers"
+          "ItemsTopUps"
         ],
-        "operationId": "updateSingleItemsClientsDirectusUsers",
+        "operationId": "updateSingleItemsTopUps",
         "parameters": [
           {
             "$ref": "#/components/parameters/Fields"
@@ -10163,7 +10163,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                "$ref": "#/components/schemas/ItemsTopUps"
               }
             }
           }
@@ -10178,7 +10178,7 @@
                   "properties": {
                     "data": {
                       "type": "object",
-                      "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                      "$ref": "#/components/schemas/ItemsTopUps"
                     }
                   }
                 }
@@ -10195,12 +10195,12 @@
       },
       "delete": {
         "summary": "Delete an Item",
-        "description": "Delete an existing Clients_directus_users item.",
+        "description": "Delete an existing TopUps item.",
         "tags": [
           "Items",
-          "ItemsClientsDirectusUsers"
+          "ItemsTopUps"
         ],
-        "operationId": "deleteSingleItemsClientsDirectusUsers",
+        "operationId": "deleteSingleItemsTopUps",
         "responses": {
           "200": {
             "description": "Successful request"
@@ -10276,6 +10276,11 @@
       "x-collection": "directus_folders"
     },
     {
+      "name": "Users",
+      "description": "Users are what gives you access to the data.",
+      "x-collection": "directus_users"
+    },
+    {
       "name": "Activity",
       "description": "All events that happen within Directus are tracked and stored in the activities collection. This gives you full accountability over everything that happens.",
       "x-collection": "directus_activity"
@@ -10309,11 +10314,6 @@
       "name": "Permissions",
       "description": "Permissions control who has access to what and when.",
       "x-collection": "directus_permissions"
-    },
-    {
-      "name": "Users",
-      "description": "Users are what gives you access to the data.",
-      "x-collection": "directus_users"
     },
     {
       "name": "Webhooks",
@@ -10369,24 +10369,24 @@
       "x-collection": "Clients"
     },
     {
-      "name": "ItemsPeriods",
-      "x-collection": "Periods"
-    },
-    {
       "name": "ItemsClientsPeriods",
       "x-collection": "Clients_Periods"
     },
     {
-      "name": "ItemsTopUps",
-      "x-collection": "TopUps"
+      "name": "ItemsPeriods",
+      "x-collection": "Periods"
+    },
+    {
+      "name": "ItemsClientsDirectusUsers",
+      "x-collection": "Clients_directus_users"
     },
     {
       "name": "ItemsManualWorkEntries",
       "x-collection": "ManualWorkEntries"
     },
     {
-      "name": "ItemsClientsDirectusUsers",
-      "x-collection": "Clients_directus_users"
+      "name": "ItemsTopUps",
+      "x-collection": "TopUps"
     }
   ],
   "components": {
@@ -12384,18 +12384,41 @@
       "ItemsClients": {
         "type": "object",
         "properties": {
+          "clockodo_customer_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "date_created": {
+            "nullable": true,
+            "type": "string",
+            "format": "timestamp"
+          },
+          "date_updated": {
+            "nullable": true,
+            "type": "string",
+            "format": "timestamp"
+          },
           "id": {
             "nullable": false,
             "type": "string",
             "format": "uuid"
           },
-          "status": {
+          "jira_short_code": {
+            "nullable": true,
+            "description": "The project shortcode in Jira. Eg. HAS or BA",
+            "type": "string"
+          },
+          "name": {
             "nullable": false,
             "type": "string"
           },
           "sort": {
             "nullable": true,
             "type": "integer"
+          },
+          "status": {
+            "nullable": false,
+            "type": "string"
           },
           "user_created": {
             "nullable": true,
@@ -12409,11 +12432,6 @@
               }
             ]
           },
-          "date_created": {
-            "nullable": true,
-            "type": "string",
-            "format": "timestamp"
-          },
           "user_updated": {
             "nullable": true,
             "oneOf": [
@@ -12425,24 +12443,6 @@
                 "$ref": "#/components/schemas/Users"
               }
             ]
-          },
-          "date_updated": {
-            "nullable": true,
-            "type": "string",
-            "format": "timestamp"
-          },
-          "name": {
-            "nullable": false,
-            "type": "string"
-          },
-          "clockodo_customer_id": {
-            "nullable": true,
-            "type": "string"
-          },
-          "jira_short_code": {
-            "nullable": true,
-            "description": "The project shortcode in Jira. Eg. HAS or BA",
-            "type": "string"
           },
           "allowedUsers": {
             "nullable": true,
@@ -12479,85 +12479,9 @@
           "name"
         ]
       },
-      "ItemsPeriods": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "nullable": false,
-            "type": "string",
-            "format": "uuid"
-          },
-          "status": {
-            "nullable": false,
-            "type": "string"
-          },
-          "sort": {
-            "nullable": true,
-            "type": "integer"
-          },
-          "user_created": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "$ref": "#/components/schemas/Users"
-              }
-            ]
-          },
-          "date_created": {
-            "nullable": true,
-            "type": "string",
-            "format": "timestamp"
-          },
-          "user_updated": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "$ref": "#/components/schemas/Users"
-              }
-            ]
-          },
-          "date_updated": {
-            "nullable": true,
-            "type": "string",
-            "format": "timestamp"
-          },
-          "name": {
-            "nullable": true,
-            "type": "string"
-          },
-          "from": {
-            "nullable": false,
-            "type": "string",
-            "format": "date"
-          },
-          "to": {
-            "nullable": false,
-            "type": "string",
-            "format": "date"
-          }
-        },
-        "x-collection": "Periods",
-        "required": [
-          "id",
-          "from",
-          "to"
-        ]
-      },
       "ItemsClientsPeriods": {
         "type": "object",
         "properties": {
-          "id": {
-            "nullable": false,
-            "type": "integer"
-          },
           "Clients_id": {
             "nullable": true,
             "oneOf": [
@@ -12582,20 +12506,9 @@
               }
             ]
           },
-          "topUps": {
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "$ref": "#/components/schemas/ItemsTopUps"
-                }
-              ]
-            }
+          "id": {
+            "nullable": false,
+            "type": "integer"
           },
           "manualWorkEntries": {
             "nullable": true,
@@ -12611,184 +12524,100 @@
                 }
               ]
             }
+          },
+          "topUps": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "$ref": "#/components/schemas/ItemsTopUps"
+                }
+              ]
+            }
           }
         },
         "x-collection": "Clients_Periods"
       },
-      "ItemsTopUps": {
+      "ItemsPeriods": {
         "type": "object",
         "properties": {
-          "id": {
-            "nullable": false,
-            "type": "string",
-            "format": "uuid"
-          },
-          "status": {
-            "nullable": false,
-            "type": "string"
-          },
-          "sort": {
-            "nullable": true,
-            "type": "integer"
-          },
-          "user_created": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "$ref": "#/components/schemas/Users"
-              }
-            ]
-          },
           "date_created": {
             "nullable": true,
             "type": "string",
             "format": "timestamp"
-          },
-          "user_updated": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "$ref": "#/components/schemas/Users"
-              }
-            ]
           },
           "date_updated": {
             "nullable": true,
             "type": "string",
             "format": "timestamp"
           },
-          "amount": {
-            "nullable": true,
-            "type": "number"
-          },
-          "note": {
-            "nullable": true,
-            "type": "string"
-          },
-          "clientPeriod": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "$ref": "#/components/schemas/ItemsClientsPeriods"
-              }
-            ]
-          },
-          "hourlyRate": {
+          "from": {
             "nullable": false,
-            "type": "integer"
-          },
-          "wepPercentage": {
-            "nullable": true,
-            "type": "integer"
-          }
-        },
-        "x-collection": "TopUps",
-        "required": [
-          "id"
-        ]
-      },
-      "ItemsManualWorkEntries": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "nullable": false,
-            "type": "string",
-            "format": "uuid"
-          },
-          "status": {
-            "nullable": false,
-            "type": "string"
-          },
-          "sort": {
-            "nullable": true,
-            "type": "integer"
-          },
-          "user_created": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "$ref": "#/components/schemas/Users"
-              }
-            ]
-          },
-          "date_created": {
-            "nullable": true,
-            "type": "string",
-            "format": "timestamp"
-          },
-          "user_updated": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "$ref": "#/components/schemas/Users"
-              }
-            ]
-          },
-          "date_updated": {
-            "nullable": true,
-            "type": "string",
-            "format": "timestamp"
-          },
-          "date": {
-            "nullable": true,
             "type": "string",
             "format": "date"
           },
-          "title": {
+          "id": {
+            "nullable": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
             "nullable": true,
             "type": "string"
           },
-          "description": {
+          "sort": {
             "nullable": true,
+            "type": "integer"
+          },
+          "status": {
+            "nullable": false,
             "type": "string"
           },
-          "hours": {
-            "nullable": true,
-            "type": "number"
+          "to": {
+            "nullable": false,
+            "type": "string",
+            "format": "date"
           },
-          "clientPeriod": {
+          "user_created": {
             "nullable": true,
             "oneOf": [
               {
-                "type": "integer"
+                "type": "string",
+                "format": "uuid"
               },
               {
-                "$ref": "#/components/schemas/ItemsClientsPeriods"
+                "$ref": "#/components/schemas/Users"
+              }
+            ]
+          },
+          "user_updated": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "$ref": "#/components/schemas/Users"
               }
             ]
           }
         },
-        "x-collection": "ManualWorkEntries",
+        "x-collection": "Periods",
         "required": [
-          "id"
+          "from",
+          "id",
+          "to"
         ]
       },
       "ItemsClientsDirectusUsers": {
         "type": "object",
         "properties": {
-          "id": {
-            "nullable": false,
-            "type": "integer"
-          },
           "Clients_id": {
             "nullable": true,
             "oneOf": [
@@ -12812,9 +12641,180 @@
                 "$ref": "#/components/schemas/Users"
               }
             ]
+          },
+          "id": {
+            "nullable": false,
+            "type": "integer"
           }
         },
         "x-collection": "Clients_directus_users"
+      },
+      "ItemsManualWorkEntries": {
+        "type": "object",
+        "properties": {
+          "clientPeriod": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "$ref": "#/components/schemas/ItemsClientsPeriods"
+              }
+            ]
+          },
+          "date": {
+            "nullable": true,
+            "type": "string",
+            "format": "date"
+          },
+          "date_created": {
+            "nullable": true,
+            "type": "string",
+            "format": "timestamp"
+          },
+          "date_updated": {
+            "nullable": true,
+            "type": "string",
+            "format": "timestamp"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "hours": {
+            "nullable": true,
+            "type": "number"
+          },
+          "id": {
+            "nullable": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          "sort": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "status": {
+            "nullable": false,
+            "type": "string"
+          },
+          "title": {
+            "nullable": true,
+            "type": "string"
+          },
+          "user_created": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "$ref": "#/components/schemas/Users"
+              }
+            ]
+          },
+          "user_updated": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "$ref": "#/components/schemas/Users"
+              }
+            ]
+          }
+        },
+        "x-collection": "ManualWorkEntries",
+        "required": [
+          "id"
+        ]
+      },
+      "ItemsTopUps": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "type": "number"
+          },
+          "clientPeriod": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "$ref": "#/components/schemas/ItemsClientsPeriods"
+              }
+            ]
+          },
+          "date_created": {
+            "nullable": true,
+            "type": "string",
+            "format": "timestamp"
+          },
+          "date_updated": {
+            "nullable": true,
+            "type": "string",
+            "format": "timestamp"
+          },
+          "hourlyRate": {
+            "nullable": false,
+            "type": "integer"
+          },
+          "id": {
+            "nullable": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          "note": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sort": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "status": {
+            "nullable": false,
+            "type": "string"
+          },
+          "user_created": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "$ref": "#/components/schemas/Users"
+              }
+            ]
+          },
+          "user_updated": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "$ref": "#/components/schemas/Users"
+              }
+            ]
+          },
+          "wepPercentage": {
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "x-collection": "TopUps",
+        "required": [
+          "id"
+        ]
       }
     },
     "parameters": {
