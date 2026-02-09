@@ -4,6 +4,7 @@
 
   const toast = useToast()
   const route = useRoute()
+  const directus = useDirectus()
 
   const todayText = new Date().toLocaleDateString('de', { dateStyle: 'medium' })
 
@@ -27,18 +28,29 @@
     note: `Abrechnung Leistungen per ${todayText}. Arbeitsprotokoll siehe https://one.wepublish.cloud`
   })
 
-  async function onSubmit(event: FormSubmitEvent<Schema>) {
-    console.log('call endpoint')
-    toast.add({
-      title: 'Rechnung erfolgreich erstellt!'
-    })
-  }
-
   const totalAmount = computed<number>(() => ((state.amount || 0) * 100) / 80)
   const wePublishAmount = computed<number>(() => totalAmount.value * 0.2)
   const toalPrice = computed<number>(
     () => totalAmount.value * (state.hourlyRate || 0)
   )
+
+  async function onSubmit(event: FormSubmitEvent<Schema>) {
+    try {
+      const response = await directus.postCustomEndpoint(
+        'invoice-with-topup',
+        event.data
+      )
+      console.log(response)
+      toast.add({
+        title: 'Rechnung erfolgreich erstellt!'
+      })
+    } catch (error) {
+      toast.add({
+        color: 'error',
+        title: (error as any).toString()
+      })
+    }
+  }
 </script>
 
 <template>

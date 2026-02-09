@@ -50,6 +50,15 @@ export const useDirectus = defineStore('useDirectus', () => {
     return await axios.get(`${API_URL()}/${uri}`)
   }
 
+  async function postCustomEndpoint(
+    uri: string,
+    body: { [key: string]: string | number }
+  ) {
+    await addAuthorizationHeaderToAxios()
+
+    return await axios.post(`${API_URL()}/${uri}`, body)
+  }
+
   async function addAuthorizationHeaderToAxios() {
     const access_token = await directus.getToken()
     if (access_token) {
@@ -59,7 +68,8 @@ export const useDirectus = defineStore('useDirectus', () => {
 
   return {
     directus,
-    getCustomEndpoint
+    getCustomEndpoint,
+    postCustomEndpoint
   }
 })
 
