@@ -29,6 +29,8 @@
 
   type Schema = z.output<typeof schema>
 
+  const loading = ref<boolean>(false)
+
   const state = reactive<Partial<Schema>>({
     title: `Abrechnung per ${todayText}`,
     amount: amount.value,
@@ -38,7 +40,7 @@
   })
 
   const createdBexioInvoice = ref<InvoicesStatic.Invoice | undefined>(undefined)
-  const createdTopUp = ref<TopUp | undefined>(undefined)
+  const createdTopUpId = ref<string | undefined>(undefined)
 
   const totalAmount = computed<number>(() => ((state.amount || 0) * 100) / 80)
   const wePublishAmount = computed<number>(() => totalAmount.value * 0.2)
@@ -53,13 +55,14 @@
     return `https://office.bexio.com/index.php/kb_invoice/show/id/${createdBexioInvoice.value?.id}`
   })
   const topUpUrl = computed<string | undefined>(() => {
-    if (!createdTopUp.value) return
-    return `${directus.API_URL()}/admin/content/TopUps/${createdTopUp.value.id}`
+    if (!createdTopUpId.value) return
+    return `${directus.API_URL()}/admin/content/TopUps/${createdTopUpId.value}`
   })
 
   async function onSubmit(event: FormSubmitEvent<Schema>) {
     try {
-      const { bexioInvoice, topUp } = (
+      loading.value = true
+      const { bexioInvoice, topUpId } = (
         await directus.postCustomEndpoint('invoice-with-topup', {
           clientPeriodId: clientPeriodId.value!,
           title: state.title!,
@@ -68,10 +71,10 @@
           unit_price: state.hourlyRate!,
           wepPercentage: state.wepPercentage!
         })
-      ).data as { bexioInvoice: InvoicesStatic.Invoice; topUp: TopUp }
+      ).data as { bexioInvoice: InvoicesStatic.Invoice; topUpId: string }
 
       createdBexioInvoice.value = bexioInvoice
-      createdTopUp.value = topUp
+      createdTopUpId.value = topUpId
 
       toast.add({
         title: 'Rechnung erfolgreich erstellt!'
@@ -81,6 +84,8 @@
         color: 'error',
         title: (error as any).toString()
       })
+    } finally {
+      loading.value = false
     }
   }
 </script>
@@ -139,6 +144,7 @@
             size="xl"
             class="col-span-6 mt-8"
             icon="material-symbols:sheets-add-on"
+            :loading="loading"
           >
             Rechnung erstellen
           </UButton>
