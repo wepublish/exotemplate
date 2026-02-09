@@ -153,7 +153,7 @@
         <!-- create bexio invoice -->
         <div class="flex-1">
           <UButton
-            :href="`/create-bexio-invoice?amount=${availableHours * -1}`"
+            :href="`/${clientPeriodId}/create-bexio-invoice?amount=${availableHours * -1}`"
           >
             Bexio-Rechnung generieren
           </UButton>

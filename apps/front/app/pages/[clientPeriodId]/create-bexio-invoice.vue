@@ -2,6 +2,7 @@
   import * as z from 'zod'
   import type { FormSubmitEvent } from '@nuxt/ui'
   import type { InvoicesStatic } from 'bexio'
+  import type { TopUp } from '~~/types/DirectusTypes'
 
   const toast = useToast()
   const route = useRoute()
@@ -12,8 +13,14 @@
   const amount = computed<number | undefined>(() =>
     route.query?.amount ? Number(route.query.amount) : undefined
   )
+  const clientPeriodId = computed<number | undefined>(() => {
+    const clientPeriodId = route.params?.clientPeriodId
+    if (!clientPeriodId) return
+    return Number(clientPeriodId)
+  })
 
   const schema = z.object({
+    title: z.string('Rechnungstitel eingeben'),
     amount: z.number('Anzahl Stunden eingeben'),
     hourlyRate: z.number('Stundensatz eingeben'),
     wepPercentage: z.number('Prozent für We.Publish eingeben'),
@@ -23,13 +30,15 @@
   type Schema = z.output<typeof schema>
 
   const state = reactive<Partial<Schema>>({
+    title: `Abrechnung per ${todayText}`,
     amount: amount.value,
     hourlyRate: 150,
     wepPercentage: 20,
     note: `Abrechnung erbrachter Leistungen durch das We.Publish-Team per ${todayText}. Profitiere von einem vergünstigten Tarif indem du vorauszahlst. Melde Dich bei deiner Ansprechperson von We.Publish. Das detaillierte Arbeitsprotokoll findest Du hier: https://one.wepublish.cloud`
   })
 
-  const bexioInvoice = ref<InvoicesStatic.Invoice | undefined>(undefined)
+  const createdBexioInvoice = ref<InvoicesStatic.Invoice | undefined>(undefined)
+  const createdTopUp = ref<TopUp | undefined>(undefined)
 
   const totalAmount = computed<number>(() => ((state.amount || 0) * 100) / 80)
   const wePublishAmount = computed<number>(() => totalAmount.value * 0.2)
@@ -38,21 +47,32 @@
   )
 
   const bexioInvoiceUrl = computed<string | undefined>(() => {
-    if (!bexioInvoice) {
+    if (!createdBexioInvoice.value) {
       return
     }
-    return `https://office.bexio.com/index.php/kb_invoice/show/id/${bexioInvoice.value?.id}`
+    return `https://office.bexio.com/index.php/kb_invoice/show/id/${createdBexioInvoice.value?.id}`
+  })
+  const topUpUrl = computed<string | undefined>(() => {
+    if (!createdTopUp.value) return
+    return `${directus.API_URL()}/admin/content/TopUps/${createdTopUp.value.id}`
   })
 
   async function onSubmit(event: FormSubmitEvent<Schema>) {
     try {
-      bexioInvoice.value = (
+      const { bexioInvoice, topUp } = (
         await directus.postCustomEndpoint('invoice-with-topup', {
+          clientPeriodId: clientPeriodId.value!,
+          title: state.title!,
           text: state.note!,
           amount: totalAmount.value,
-          unit_price: state.hourlyRate!
+          unit_price: state.hourlyRate!,
+          wepPercentage: state.wepPercentage!
         })
-      ).data as InvoicesStatic.Invoice
+      ).data as { bexioInvoice: InvoicesStatic.Invoice; topUp: TopUp }
+
+      createdBexioInvoice.value = bexioInvoice
+      createdTopUp.value = topUp
+
       toast.add({
         title: 'Rechnung erfolgreich erstellt!'
       })
@@ -68,9 +88,23 @@
 <template>
   <UPageCard>
     <template #title> Bexio-Rechnung erstellen </template>
+    <template #description>
+      <p class="max-w-1/2">
+        Hier kannst Du automatisch eine Bexio-Rechnung erstellen. Zu deinen
+        Stunden wird automatisch der We.Publish-Genossenschaftsbeitrag
+        hinzugerechnet.
+      </p>
+      <p class="max-w-1/2 pt-2">
+        Eine Zahlung / Top-Up wird im One-Dashboard automatisch hinzugefügt und
+        mit der Bexio-Rechnung verknüpft.
+      </p>
+    </template>
     <UForm :schema="schema" :state="state" @submit="onSubmit">
-      <div class="grid grid-cols-12 gap-4 items-start">
+      <div class="grid grid-cols-12 gap-4 items-start pt-10">
         <div class="col-span-6 grid grid-cols-12 gap-4">
+          <UFormField label="Rechnungstitel" name="title" class="col-span-12">
+            <UInput v-model="state.title" />
+          </UFormField>
           <UFormField
             label="Anzahl Stunden in Rechnung stellen"
             name="amount"
@@ -93,17 +127,18 @@
             <UInput v-model="state.wepPercentage" />
           </UFormField>
           <UFormField
-            label="Rechnungsbeschreibung"
+            label="Beschreibung Position"
             name="note"
             class="col-span-8"
           >
             <UTextarea v-model="state.note" :cols="100" />
           </UFormField>
           <UButton
-            v-if="!bexioInvoice"
+            v-if="!createdBexioInvoice"
             type="submit"
             size="xl"
-            class="col-span-6"
+            class="col-span-6 mt-8"
+            icon="material-symbols:sheets-add-on"
           >
             Rechnung erstellen
           </UButton>
@@ -130,13 +165,12 @@
         </div>
 
         <!-- bexio invoice was created -->
-        <div v-if="bexioInvoice" class="col-span-12 grid grid-cols-12 gap-8">
-          <div class="col-span-12 grid grid-cols-12 justify-center">
-            <UAlert
-              color="success"
-              class="col-span-6"
-              icon="material-symbols:check-rounded"
-            >
+        <div
+          v-if="createdBexioInvoice"
+          class="col-span-12 grid grid-cols-12 gap-8 items-end"
+        >
+          <div class="col-span-6">
+            <UAlert color="success" icon="material-symbols:check-rounded">
               <template #title> Das hat geklappt! </template>
               <template #description>
                 Eine Rechnung wurde auf Bexio erstellt und automatisch mit dem
@@ -145,25 +179,38 @@
             </UAlert>
           </div>
 
-          <div class="col-span-6">
-            <UButton
-              to="/"
-              icon="material-symbols:arrow-back-ios"
-              variant="link"
-              size="xl"
-            >
-              Zurück zum Dashboard
-            </UButton>
-          </div>
-          <div class="col-span-6">
-            <UButton
-              :href="bexioInvoiceUrl"
-              target="_blank"
-              trailing-icon="material-symbols:open-in-new-rounded"
-              size="xl"
-            >
-              Bexio Rechnung öffnen
-            </UButton>
+          <div class="col-span-6 grid grid-cols-12 gap-4 items-end">
+            <div class="col-span-6">
+              <UButton
+                to="/"
+                icon="material-symbols:arrow-back-ios"
+                variant="link"
+                size="xl"
+              >
+                Zurück zum Dashboard
+              </UButton>
+            </div>
+            <div class="col-span-6">
+              <UButton
+                :href="bexioInvoiceUrl"
+                target="_blank"
+                trailing-icon="material-symbols:open-in-new-rounded"
+                size="xl"
+              >
+                Bexio Rechnung öffnen
+              </UButton>
+              <br />
+              <UButton
+                :href="topUpUrl"
+                variant="link"
+                target="_blank"
+                trailing-icon="material-symbols:open-in-new-rounded"
+                size="xl"
+                class="mt-4"
+              >
+                Directus Top-Up öffnen
+              </UButton>
+            </div>
           </div>
         </div>
       </div>

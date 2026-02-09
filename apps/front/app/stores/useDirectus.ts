@@ -69,7 +69,8 @@ export const useDirectus = defineStore('useDirectus', () => {
   return {
     directus,
     getCustomEndpoint,
-    postCustomEndpoint
+    postCustomEndpoint,
+    API_URL
   }
 })
 
