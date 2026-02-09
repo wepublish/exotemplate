@@ -29,6 +29,7 @@
   "license": "ISC",
   "dependencies": {
     "@directus/errors": "^2.1.0",
+    "bexio": "^3.5.0",
     "directus": "11.13.4",
     "directus-extension-sync": "^3.0.5",
     "directus-sync": "^3.4.1"
