@@ -152,7 +152,11 @@
         </div>
         <!-- create bexio invoice -->
         <div class="flex-1">
-          <CreateBexioInvoice />
+          <UButton
+            :href="`/create-bexio-invoice?amount=${availableHours * -1}`"
+          >
+            Bexio-Rechnung generieren
+          </UButton>
         </div>
       </template>
     </UPageCard>
