@@ -8,8 +8,6 @@ This project is deployed automatically via CI/CD:
 - **Production**  
   Every Git tag matching `v*` (e.g. `v1.2.0`) is automatically deployed to **production**.
 
-
-
 ## Setup
 
 Make sure to install the dependencies:
@@ -42,7 +40,6 @@ pnpm preview
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
 
-
 ## Deployment
 
 This project is deployed automatically via CI/CD:
@@ -52,5 +49,3 @@ This project is deployed automatically via CI/CD:
 
 - **Production**  
   Every Git tag matching `v*` (e.g. `v1.2.0`) is automatically deployed to **production**.
-
-

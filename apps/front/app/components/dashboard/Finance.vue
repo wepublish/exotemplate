@@ -1,95 +1,96 @@
 <script lang="ts" setup>
-import type { Sums } from "~~/types/ClockodoTypes";
-import type {
-  ClientPeriod,
-  ManualWorkEntry,
-  TopUp,
-} from "~~/types/DirectusTypes";
-import CreateBexioInvoice from "./CreateBexioInvoice.vue";
+  import type { Sums } from '~~/types/ClockodoTypes'
+  import type {
+    ClientPeriod,
+    ManualWorkEntry,
+    TopUp
+  } from '~~/types/DirectusTypes'
+  import CreateBexioInvoice from './CreateBexioInvoice.vue'
 
-interface HoursCalculated {
-  totalHours: number;
-  hoursClient: number;
-  hoursWep: number;
-}
+  interface HoursCalculated {
+    totalHours: number
+    hoursClient: number
+    hoursWep: number
+  }
 
-type TopUpsCalculated = TopUp & HoursCalculated;
+  type TopUpsCalculated = TopUp & HoursCalculated
 
-const clientPeriodComp = useUseClientPeriods();
-const manualWorkComp = useManualWorkEntries();
+  const clientPeriodComp = useUseClientPeriods()
+  const manualWorkComp = useManualWorkEntries()
 
-const props = defineProps<{
-  clientPeriodId: number | undefined;
-  workingSums: Sums | undefined;
-}>();
+  const props = defineProps<{
+    clientPeriodId: number | undefined
+    workingSums: Sums | undefined
+  }>()
 
-const selectedClientPeriod = computed<ClientPeriod | undefined>(() =>
-  clientPeriodComp.getClientPeriodById(props.clientPeriodId),
-);
+  const selectedClientPeriod = computed<ClientPeriod | undefined>(() =>
+    clientPeriodComp.getClientPeriodById(props.clientPeriodId)
+  )
 
-const topUps = computed<TopUp[]>(
-  () => (selectedClientPeriod.value?.topUps || []) as TopUp[],
-);
+  const topUps = computed<TopUp[]>(
+    () => (selectedClientPeriod.value?.topUps || []) as TopUp[]
+  )
 
-const topUpsCalculated = computed<TopUpsCalculated[]>(() =>
-  topUps.value.map((topUp) => {
-    const totalHours = Math.round((topUp.amount / topUp.hourlyRate) * 2) / 2;
-    const hoursClient =
-      Math.round(totalHours * ((100 - (topUp.wepPercentage || 0)) / 100) * 2) /
-      2;
-    const hoursWep = totalHours - hoursClient;
-    return {
-      ...topUp,
-      totalHours,
-      hoursClient,
-      hoursWep,
-    };
-  }),
-);
-
-const topUpsForTable = computed(() =>
-  topUpsCalculated.value.map((topUp) => {
-    return {
-      Datum: new Date(topUp.date_created as string).toLocaleDateString("de", {
-        dateStyle: "medium",
-      }),
-      Notiz: topUp.note || " - ",
-      Betrag: `CHF ${topUp.amount}`,
-      Satz: `${topUp.hourlyRate} chf / h`,
-      Total: `${topUp.totalHours} h`,
-      WePublish: `${topUp.hoursWep} h`,
-      Medium: `${topUp.hoursClient} h`,
-    };
-  }),
-);
-
-const totalTopUpHours = computed<HoursCalculated>(() => {
-  return topUpsCalculated.value.reduce(
-    (acc, curr) => {
+  const topUpsCalculated = computed<TopUpsCalculated[]>(() =>
+    topUps.value.map((topUp) => {
+      const totalHours = Math.round((topUp.amount / topUp.hourlyRate) * 2) / 2
+      const hoursClient =
+        Math.round(
+          totalHours * ((100 - (topUp.wepPercentage || 0)) / 100) * 2
+        ) / 2
+      const hoursWep = totalHours - hoursClient
       return {
-        totalHours: acc.totalHours + curr.totalHours,
-        hoursClient: acc.hoursClient + curr.hoursClient,
-        hoursWep: acc.hoursWep + curr.hoursWep,
-      };
-    },
-    { totalHours: 0, hoursClient: 0, hoursWep: 0 },
-  );
-});
+        ...topUp,
+        totalHours,
+        hoursClient,
+        hoursWep
+      }
+    })
+  )
 
-const totalManualWorkHours = computed<number>(() =>
-  manualWorkComp.getSumByClientPeriod(
-    (selectedClientPeriod.value?.manualWorkEntries || []) as ManualWorkEntry[],
-  ),
-);
-const totalUsedHours = computed<number>(
-  () => (props.workingSums?.billableHours || 0) + totalManualWorkHours.value,
-);
-const availableHours = computed<number>(
-  () => totalTopUpHours.value.hoursClient - totalUsedHours.value,
-);
-const hoursUsedPercentage = computed<number>(
-  () => (totalUsedHours.value * 100) / totalTopUpHours.value.hoursClient,
-);
+  const topUpsForTable = computed(() =>
+    topUpsCalculated.value.map((topUp) => {
+      return {
+        Datum: new Date(topUp.date_created as string).toLocaleDateString('de', {
+          dateStyle: 'medium'
+        }),
+        Notiz: topUp.note || ' - ',
+        Betrag: `CHF ${topUp.amount}`,
+        Satz: `${topUp.hourlyRate} chf / h`,
+        Total: `${topUp.totalHours} h`,
+        WePublish: `${topUp.hoursWep} h`,
+        Medium: `${topUp.hoursClient} h`
+      }
+    })
+  )
+
+  const totalTopUpHours = computed<HoursCalculated>(() => {
+    return topUpsCalculated.value.reduce(
+      (acc, curr) => {
+        return {
+          totalHours: acc.totalHours + curr.totalHours,
+          hoursClient: acc.hoursClient + curr.hoursClient,
+          hoursWep: acc.hoursWep + curr.hoursWep
+        }
+      },
+      { totalHours: 0, hoursClient: 0, hoursWep: 0 }
+    )
+  })
+
+  const totalManualWorkHours = computed<number>(() =>
+    manualWorkComp.getSumByClientPeriod(
+      (selectedClientPeriod.value?.manualWorkEntries || []) as ManualWorkEntry[]
+    )
+  )
+  const totalUsedHours = computed<number>(
+    () => (props.workingSums?.billableHours || 0) + totalManualWorkHours.value
+  )
+  const availableHours = computed<number>(
+    () => totalTopUpHours.value.hoursClient - totalUsedHours.value
+  )
+  const hoursUsedPercentage = computed<number>(
+    () => (totalUsedHours.value * 100) / totalTopUpHours.value.hoursClient
+  )
 </script>
 
 <template>

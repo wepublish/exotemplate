@@ -1,6 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: ['@nuxt/eslint', '@nuxt/ui', '@pinia/nuxt'],
+  modules: ['@nuxt/ui', '@pinia/nuxt'],
 
   devtools: {
     enabled: true
@@ -9,7 +9,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       directusClientApiUrl: process.env.DIRECTUS_CLIENT_API_URL,
-      directusServerApiUrl: process.env.DIRECTUS_SERVER_API_URL,
+      directusServerApiUrl: process.env.DIRECTUS_SERVER_API_URL
     }
   },
 
@@ -19,14 +19,5 @@ export default defineNuxtConfig({
     '/': { prerender: false }
   },
 
-  compatibilityDate: '2025-01-15',
-
-  eslint: {
-    config: {
-      stylistic: {
-        commaDangle: 'never',
-        braceStyle: '1tbs'
-      }
-    }
-  }
+  compatibilityDate: '2025-01-15'
 })

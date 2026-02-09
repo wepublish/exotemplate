@@ -6,23 +6,28 @@
 
   const loading = ref<boolean>(true)
 
-  const fields: AuthFormField[] = [{
-    name: 'email',
-    type: 'email',
-    label: 'Email',
-    placeholder: 'Email eingeben',
-    required: true
-  }, {
-    name: 'password',
-    label: 'Passwort',
-    type: 'password',
-    placeholder: 'Passwort eingeben',
-    required: true
-  }]
+  const fields: AuthFormField[] = [
+    {
+      name: 'email',
+      type: 'email',
+      label: 'Email',
+      placeholder: 'Email eingeben',
+      required: true
+    },
+    {
+      name: 'password',
+      label: 'Passwort',
+      type: 'password',
+      placeholder: 'Passwort eingeben',
+      required: true
+    }
+  ]
 
   const schema = z.object({
     email: z.email('Invalid email'),
-    password: z.string('Password is required').min(8, 'Must be at least 8 characters')
+    password: z
+      .string('Password is required')
+      .min(8, 'Must be at least 8 characters')
   })
 
   type Schema = z.output<typeof schema>

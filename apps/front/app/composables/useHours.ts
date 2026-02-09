@@ -1,6 +1,5 @@
 export function useHours() {
-
-  function secondsToHours (seconds: number): string {
+  function secondsToHours(seconds: number): string {
     return (seconds / 3600).toFixed(2)
   }
 

@@ -26,7 +26,7 @@ export interface EntryGroup {
   duration: number
   restrictions: string[]
   sub_groups: EntryGroup[]
-  
+
   // decorating entries
   jiraIssue?: JiraIssue
   pastEntryGroup?: EntryGroup
@@ -47,7 +47,7 @@ export interface JiraIssue {
   expand: string
   id: string
   self: string
-  key: string,
+  key: string
   fields: {
     customfield_10028: string
   }
