@@ -1,4 +1,5 @@
 # Inside We.Publish Backend
+
 Backend serving We.Publish Inside Front-End. The Project is based on Directus headless cms.
 
 ## Get started
@@ -32,5 +33,3 @@ This project is deployed automatically via CI/CD:
 
 - **Production**  
   Every Git tag matching `v*` (e.g. `v1.2.0`) is automatically deployed to **production**.
-
-
