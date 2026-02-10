@@ -34,11 +34,13 @@
 
   const topUpsCalculated = computed<TopUpsCalculated[]>(() =>
     topUps.value.map((topUp) => {
-      const totalHours = Math.round((topUp.amount / topUp.hourlyRate) * 2) / 2
+      const totalHours =
+        Math.round(((topUp.amount || 0) / topUp.hourlyRate) * 2) / 2
+
       const hoursClient =
         Math.round(
-          totalHours * ((100 - (topUp.wepPercentage || 0)) / 100) * 2
-        ) / 2
+          (totalHours * (100 - (topUp.wepPercentage || 0))) / 100 / 0.25
+        ) * 0.25
       const hoursWep = totalHours - hoursClient
       return {
         ...topUp,
