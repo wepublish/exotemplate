@@ -33,36 +33,7 @@ export const useUserStore = defineStore('useUserStore', () => {
       }
 
       // load user
-      user.value = await directus.request<CustomDirectusUser>(
-        readMe({
-          fields: [
-            '*',
-            {
-              accessToClients: [
-                {
-                  Clients_id: [
-                    '*',
-                    {
-                      periods: [
-                        '*',
-                        {
-                          Periods_id: ['*']
-                        },
-                        {
-                          topUps: ['*']
-                        },
-                        {
-                          manualWorkEntries: ['*']
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        })
-      )
+      await loadUserData()
 
       toast.add({
         color: 'success',
@@ -81,6 +52,39 @@ export const useUserStore = defineStore('useUserStore', () => {
         description: e as any as string
       })
     }
+  }
+
+  async function loadUserData() {
+    user.value = await directus.request<CustomDirectusUser>(
+      readMe({
+        fields: [
+          '*',
+          {
+            accessToClients: [
+              {
+                Clients_id: [
+                  '*',
+                  {
+                    periods: [
+                      '*',
+                      {
+                        Periods_id: ['*']
+                      },
+                      {
+                        topUps: ['*']
+                      },
+                      {
+                        manualWorkEntries: ['*']
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+    )
   }
 
   async function logout() {
@@ -110,6 +114,7 @@ export const useUserStore = defineStore('useUserStore', () => {
     login,
     logout,
     user,
-    clients
+    clients,
+    loadUserData
   }
 })

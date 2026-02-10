@@ -5,7 +5,6 @@
     ManualWorkEntry,
     TopUp
   } from '~~/types/DirectusTypes'
-  import CreateBexioInvoice from './CreateBexioInvoice.vue'
 
   interface HoursCalculated {
     totalHours: number
@@ -17,6 +16,7 @@
 
   const clientPeriodComp = useUseClientPeriods()
   const manualWorkComp = useManualWorkEntries()
+  const topUpsComp = useTopUps()
 
   const props = defineProps<{
     clientPeriodId: number | undefined
@@ -59,7 +59,8 @@
         Satz: `${topUp.hourlyRate} chf / h`,
         Total: `${topUp.totalHours} h`,
         WePublish: `${topUp.hoursWep} h`,
-        Medium: `${topUp.hoursClient} h`
+        Medium: `${topUp.hoursClient} h`,
+        Bexio: topUp.bexioInvoiceId
       }
     })
   )
@@ -94,10 +95,62 @@
 </script>
 
 <template>
-  <div class="flex gap-4">
+  <div class="grid grid-cols-12 gap-4">
+    <!-- progress -->
+    <UPageCard class="col-span-12">
+      <template #default v-if="selectedClientPeriod">
+        <div class="flex justify-between w-full">
+          <div class="font-bold">Verfügbare Arbeitsstunden</div>
+          <div
+            class="font-bold text-4xl"
+            :class="availableHours <= 0 ? 'text-error' : 'text-primary'"
+          >
+            {{ availableHours }} h
+          </div>
+        </div>
+
+        <div class="grid grid-cols-12 gap-16">
+          <div class="col-span-6 flex text-sm mt-4">
+            <div class="flex-1">
+              <p>Zahlungen / Top-Ups</p>
+              <p>Arbeitsprotokoll</p>
+              <p class="border-b">Manuelle Korrekturen</p>
+              <p class="font-bold pt-1">Verfügbar</p>
+            </div>
+            <div class="text-right">
+              <p>{{ totalTopUpHours.hoursClient }} h</p>
+              <p>- {{ props.workingSums?.billableHours || 0 }} h</p>
+              <p class="border-b">- {{ totalManualWorkHours }} h</p>
+              <p class="font-bold pt-1">{{ availableHours }} h</p>
+            </div>
+          </div>
+          <UProgress
+            :model-value="hoursUsedPercentage"
+            status
+            size="2xl"
+            class="col-span-6"
+            :color="hoursUsedPercentage >= 100 ? 'error' : 'primary'"
+          >
+            <template #status>
+              {{ totalUsedHours }} / {{ totalTopUpHours.hoursClient }} h
+            </template>
+          </UProgress>
+
+          <!-- create bexio invoice -->
+          <div class="col-span-12 text-end">
+            <UButton
+              :href="`/${clientPeriodId}/create-bexio-invoice?amount=${availableHours * -1}`"
+            >
+              Bexio-Rechnung generieren
+            </UButton>
+          </div>
+        </div>
+      </template>
+    </UPageCard>
+
     <!-- top ups -->
-    <UPageCard>
-      <template #body>
+    <UPageCard class="col-span-12">
+      <template #default>
         <div class="flex justify-between w-full">
           <div class="font-bold">Zahlungen / Top-Ups</div>
           <div
@@ -107,57 +160,18 @@
             {{ totalTopUpHours.hoursClient }} h
           </div>
         </div>
-        <UTable :data="topUpsForTable" />
-      </template>
-    </UPageCard>
-
-    <!-- progress -->
-    <UPageCard class="flex-1">
-      <template #default v-if="selectedClientPeriod">
-        <div class="flex justify-between w-full">
-          <div class="font-bold">Verfügbare Arbeitsstunden</div>
-          <div
-            class="font-bold text-4xl"
-            :class="availableHours < 0 ? 'text-error' : 'text-primary'"
-          >
-            {{ availableHours }} h
-          </div>
-        </div>
-
-        <UProgress
-          :model-value="hoursUsedPercentage"
-          status
-          size="2xl"
-          class="w-full"
-          :color="hoursUsedPercentage >= 100 ? 'error' : 'primary'"
-        >
-          <template #status>
-            {{ totalUsedHours }} / {{ totalTopUpHours.hoursClient }} h
+        <UTable :data="topUpsForTable">
+          <template #Bexio-cell="{ row }">
+            <UButton
+              v-if="row.original.Bexio"
+              :href="topUpsComp.getBexioInvoiceUrl(row.original.Bexio)"
+              target="_blank"
+              trailing-icon="material-symbols:open-in-new-rounded"
+            >
+              Nr. {{ row.original.Bexio }}
+            </UButton>
           </template>
-        </UProgress>
-
-        <div class="flex text-sm mt-4">
-          <div class="flex-1">
-            <p>Zahlungen / Top-Ups</p>
-            <p>Arbeitsprotokoll</p>
-            <p class="border-b">Manuelle Korrekturen</p>
-            <p class="font-bold pt-1">Verfügbar</p>
-          </div>
-          <div class="text-right">
-            <p>{{ totalTopUpHours.hoursClient }} h</p>
-            <p>- {{ props.workingSums?.billableHours || 0 }} h</p>
-            <p class="border-b">- {{ totalManualWorkHours }} h</p>
-            <p class="font-bold pt-1">{{ availableHours }} h</p>
-          </div>
-        </div>
-        <!-- create bexio invoice -->
-        <div class="flex-1">
-          <UButton
-            :href="`/${clientPeriodId}/create-bexio-invoice?amount=${availableHours * -1}`"
-          >
-            Bexio-Rechnung generieren
-          </UButton>
-        </div>
+        </UTable>
       </template>
     </UPageCard>
   </div>

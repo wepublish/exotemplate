@@ -12,75 +12,77 @@ export interface Schema {
 }
 
 export interface Client {
-  id: string
-  status: 'published' | 'draft' | 'archived'
-  sort: number | null
-  user_created: string | DirectusUser<Schema> | null
-  date_created: string | null
-  user_updated: string | DirectusUser<Schema> | null
-  date_updated: string | null
-  name: string
   clockodo_customer_id: string | null
+  date_created: string | null
+  date_updated: string | null
+  id: string
   jira_short_code: string | null
+  name: string
+  sort: number | null
+  status: 'published' | 'draft' | 'archived'
+  user_created: string | DirectusUser<Schema> | null
+  user_updated: string | DirectusUser<Schema> | null
+  bexio_contact_id: number | null
   allowedUsers: string[] | ClientDirectusUser[]
   periods: string[] | ClientPeriod[]
 }
 
 export interface ClientPeriod {
-  id: number
   Clients_id: string | Client | null
   Periods_id: string | Period | null
-  topUps: number[] | TopUp[]
+  id: number
   manualWorkEntries: number[] | ManualWorkEntry[]
+  topUps: number[] | TopUp[]
 }
 
 export interface ClientDirectusUser {
-  id: number
   Clients_id: string | Client | null
   directus_users_id: string | DirectusUser<Schema> | null
+  id: number
 }
 
 export interface ManualWorkEntry {
-  id: string
-  status: 'published' | 'draft' | 'archived'
-  sort: number | null
-  user_created: string | DirectusUser<Schema> | null
-  date_created: string | null
-  user_updated: string | DirectusUser<Schema> | null
-  date_updated: string | null
+  clientPeriod: number | ClientPeriod | null
   date: string | null
-  title: string | null
+  date_created: string | null
+  date_updated: string | null
   description: string | null
   hours: number | null
-  clientPeriod: number | ClientPeriod | null
+  id: string
+  sort: number | null
+  status: 'published' | 'draft' | 'archived'
+  title: string | null
+  user_created: string | DirectusUser<Schema> | null
+  user_updated: string | DirectusUser<Schema> | null
 }
 
 export interface Period {
-  id: string
-  status: 'published' | 'draft' | 'archived'
-  sort: number | null
-  user_created: string | DirectusUser<Schema> | null
   date_created: string | null
-  user_updated: string | DirectusUser<Schema> | null
   date_updated: string | null
-  name: string | null
   from: string
+  id: string
+  name: string | null
+  sort: number | null
+  status: 'published' | 'draft' | 'archived'
   to: string
+  user_created: string | DirectusUser<Schema> | null
+  user_updated: string | DirectusUser<Schema> | null
 }
 
 export interface TopUp {
-  id: string
-  status: 'published' | 'draft' | 'archived'
-  sort: number | null
-  user_created: string | DirectusUser<Schema> | null
-  date_created: string | null
-  user_updated: string | DirectusUser<Schema> | null
-  date_updated: string | null
-  amount: number
-  note: string | null
+  amount: number | null
   clientPeriod: number | ClientPeriod | null
+  date_created: string | null
+  date_updated: string | null
   hourlyRate: number
+  id: string
+  note: string | null
+  sort: number | null
+  status: 'published' | 'draft' | 'archived'
+  user_created: string | DirectusUser<Schema> | null
+  user_updated: string | DirectusUser<Schema> | null
   wepPercentage: number | null
+  bexioInvoiceId: number | null
 }
 
 export interface CustomDirectusUser {

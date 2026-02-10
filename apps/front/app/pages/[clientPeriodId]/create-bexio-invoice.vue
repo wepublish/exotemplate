@@ -2,11 +2,12 @@
   import * as z from 'zod'
   import type { FormSubmitEvent } from '@nuxt/ui'
   import type { InvoicesStatic } from 'bexio'
-  import type { TopUp } from '~~/types/DirectusTypes'
 
   const toast = useToast()
   const route = useRoute()
   const directus = useDirectus()
+  const userStore = useUserStore()
+  const topUpsComp = useTopUps()
 
   const todayText = new Date().toLocaleDateString('de', { dateStyle: 'medium' })
 
@@ -52,7 +53,7 @@
     if (!createdBexioInvoice.value) {
       return
     }
-    return `https://office.bexio.com/index.php/kb_invoice/show/id/${createdBexioInvoice.value?.id}`
+    return topUpsComp.getBexioInvoiceUrl(createdBexioInvoice.value?.id)
   })
   const topUpUrl = computed<string | undefined>(() => {
     if (!createdTopUpId.value) return
@@ -75,6 +76,8 @@
 
       createdBexioInvoice.value = bexioInvoice
       createdTopUpId.value = topUpId
+
+      await userStore.loadUserData()
 
       toast.add({
         title: 'Rechnung erfolgreich erstellt!'
