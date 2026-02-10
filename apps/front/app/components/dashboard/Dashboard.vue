@@ -71,6 +71,7 @@
             value-key="id"
             label-key="name"
             placeholder="Projekt wählen"
+            class="min-w-60"
             @change="() => (selectedClientPeriodId = undefined)"
           />
 
@@ -82,7 +83,7 @@
             value-key="id"
             label-key="periodName"
             placeholder="Zeitraum wählen"
-            class="ml-4"
+            class="min-w-60 ml-4"
           />
         </template>
       </UPageCard>
