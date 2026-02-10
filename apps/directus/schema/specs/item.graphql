@@ -7,6 +7,10 @@ type Query {
   Clients_by_id(id: ID!, version: String): Clients
   Clients_aggregated(groupBy: [String], filter: Clients_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [Clients_aggregated!]!
   Clients_by_version(version: String!, id: ID!): version_Clients
+  TopUps(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [TopUps!]!
+  TopUps_by_id(id: ID!, version: String): TopUps
+  TopUps_aggregated(groupBy: [String], filter: TopUps_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [TopUps_aggregated!]!
+  TopUps_by_version(version: String!, id: ID!): version_TopUps
   Clients_Periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods!]!
   Clients_Periods_by_id(id: ID!, version: String): Clients_Periods
   Clients_Periods_aggregated(groupBy: [String], filter: Clients_Periods_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [Clients_Periods_aggregated!]!
@@ -23,10 +27,6 @@ type Query {
   ManualWorkEntries_by_id(id: ID!, version: String): ManualWorkEntries
   ManualWorkEntries_aggregated(groupBy: [String], filter: ManualWorkEntries_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [ManualWorkEntries_aggregated!]!
   ManualWorkEntries_by_version(version: String!, id: ID!): version_ManualWorkEntries
-  TopUps(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [TopUps!]!
-  TopUps_by_id(id: ID!, version: String): TopUps
-  TopUps_aggregated(groupBy: [String], filter: TopUps_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [TopUps_aggregated!]!
-  TopUps_by_version(version: String!, id: ID!): version_TopUps
 }
 
 type Mutation {
@@ -34,6 +34,8 @@ type Mutation {
   create_directus_sync_id_map_item(data: create_directus_sync_id_map_input!): directus_sync_id_map
   create_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Clients_input!]): [Clients!]!
   create_Clients_item(data: create_Clients_input!): Clients
+  create_TopUps_items(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_TopUps_input!]): [TopUps!]!
+  create_TopUps_item(data: create_TopUps_input!): TopUps
   create_Clients_Periods_items(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Clients_Periods_input!]): [Clients_Periods!]!
   create_Clients_Periods_item(data: create_Clients_Periods_input!): Clients_Periods
   create_Periods_items(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Periods_input!]): [Periods!]!
@@ -42,14 +44,15 @@ type Mutation {
   create_Clients_directus_users_item(data: create_Clients_directus_users_input!): Clients_directus_users
   create_ManualWorkEntries_items(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_ManualWorkEntries_input!]): [ManualWorkEntries!]!
   create_ManualWorkEntries_item(data: create_ManualWorkEntries_input!): ManualWorkEntries
-  create_TopUps_items(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_TopUps_input!]): [TopUps!]!
-  create_TopUps_item(data: create_TopUps_input!): TopUps
   update_directus_sync_id_map_items(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_sync_id_map_input!): [directus_sync_id_map!]!
   update_directus_sync_id_map_batch(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_sync_id_map_input!]): [directus_sync_id_map!]!
   update_directus_sync_id_map_item(id: ID!, data: update_directus_sync_id_map_input!): directus_sync_id_map
   update_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Clients_input!): [Clients!]!
   update_Clients_batch(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Clients_input!]): [Clients!]!
   update_Clients_item(id: ID!, data: update_Clients_input!): Clients
+  update_TopUps_items(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_TopUps_input!): [TopUps!]!
+  update_TopUps_batch(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_TopUps_input!]): [TopUps!]!
+  update_TopUps_item(id: ID!, data: update_TopUps_input!): TopUps
   update_Clients_Periods_items(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Clients_Periods_input!): [Clients_Periods!]!
   update_Clients_Periods_batch(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Clients_Periods_input!]): [Clients_Periods!]!
   update_Clients_Periods_item(id: ID!, data: update_Clients_Periods_input!): Clients_Periods
@@ -62,13 +65,12 @@ type Mutation {
   update_ManualWorkEntries_items(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_ManualWorkEntries_input!): [ManualWorkEntries!]!
   update_ManualWorkEntries_batch(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_ManualWorkEntries_input!]): [ManualWorkEntries!]!
   update_ManualWorkEntries_item(id: ID!, data: update_ManualWorkEntries_input!): ManualWorkEntries
-  update_TopUps_items(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_TopUps_input!): [TopUps!]!
-  update_TopUps_batch(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_TopUps_input!]): [TopUps!]!
-  update_TopUps_item(id: ID!, data: update_TopUps_input!): TopUps
   delete_directus_sync_id_map_items(ids: [ID]!): delete_many
   delete_directus_sync_id_map_item(id: ID!): delete_one
   delete_Clients_items(ids: [ID]!): delete_many
   delete_Clients_item(id: ID!): delete_one
+  delete_TopUps_items(ids: [ID]!): delete_many
+  delete_TopUps_item(id: ID!): delete_one
   delete_Clients_Periods_items(ids: [ID]!): delete_many
   delete_Clients_Periods_item(id: ID!): delete_one
   delete_Periods_items(ids: [ID]!): delete_many
@@ -77,8 +79,6 @@ type Mutation {
   delete_Clients_directus_users_item(id: ID!): delete_one
   delete_ManualWorkEntries_items(ids: [ID]!): delete_many
   delete_ManualWorkEntries_item(id: ID!): delete_one
-  delete_TopUps_items(ids: [ID]!): delete_many
-  delete_TopUps_item(id: ID!): delete_one
 }
 
 type Subscription {
@@ -105,11 +105,11 @@ type Subscription {
   directus_comments_mutated(event: EventEnum): directus_comments_mutated
   directus_sync_id_map_mutated(event: EventEnum): directus_sync_id_map_mutated
   Clients_mutated(event: EventEnum): Clients_mutated
+  TopUps_mutated(event: EventEnum): TopUps_mutated
   Clients_Periods_mutated(event: EventEnum): Clients_Periods_mutated
   Periods_mutated(event: EventEnum): Periods_mutated
   Clients_directus_users_mutated(event: EventEnum): Clients_directus_users_mutated
   ManualWorkEntries_mutated(event: EventEnum): ManualWorkEntries_mutated
-  TopUps_mutated(event: EventEnum): TopUps_mutated
 }
 
 """The `Boolean` scalar type represents `true` or `false`."""
@@ -173,6 +173,11 @@ type Clients {
   status: String
   user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+
+  """
+  Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
+  """
+  bexio_contact_id: Int
   allowedUsers(filter: Clients_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_directus_users]
   allowedUsers_func: count_functions
   periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods]
@@ -205,12 +210,22 @@ type Clients_aggregated_count {
   status: Int
   user_created: Int
   user_updated: Int
+
+  """
+  Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
+  """
+  bexio_contact_id: Int
   allowedUsers: Int
   periods: Int
 }
 
 type Clients_aggregated_fields {
   sort: Float
+
+  """
+  Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
+  """
+  bexio_contact_id: Float
 }
 
 type Clients_directus_users {
@@ -1034,6 +1049,9 @@ type TopUps {
   user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   wepPercentage: Int
+
+  """Connected invoice from Bexio"""
+  bexioInvoiceId: Int
 }
 
 type TopUps_aggregated {
@@ -1062,6 +1080,9 @@ type TopUps_aggregated_count {
   user_created: Int
   user_updated: Int
   wepPercentage: Int
+
+  """Connected invoice from Bexio"""
+  bexioInvoiceId: Int
 }
 
 type TopUps_aggregated_fields {
@@ -1070,6 +1091,9 @@ type TopUps_aggregated_fields {
   hourlyRate: Float
   sort: Float
   wepPercentage: Float
+
+  """Connected invoice from Bexio"""
+  bexioInvoiceId: Float
 }
 
 type TopUps_mutated {
@@ -1092,6 +1116,11 @@ type version_Clients {
   status: String
   user_created: JSON
   user_updated: JSON
+
+  """
+  Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
+  """
+  bexio_contact_id: Int
   allowedUsers: JSON
   periods: JSON
 }
@@ -1165,6 +1194,9 @@ type version_TopUps {
   user_created: JSON
   user_updated: JSON
   wepPercentage: Int
+
+  """Connected invoice from Bexio"""
+  bexioInvoiceId: Int
 }
 
 input big_int_filter_operators {
@@ -1221,6 +1253,7 @@ input Clients_filter {
   status: string_filter_operators
   user_created: directus_users_filter
   user_updated: directus_users_filter
+  bexio_contact_id: number_filter_operators
   allowedUsers: Clients_directus_users_quantifier_filter
   allowedUsers_func: count_function_filter_operators
   periods: Clients_Periods_quantifier_filter
@@ -1279,6 +1312,11 @@ input create_Clients_input {
   status: String
   user_created: create_directus_users_input
   user_updated: create_directus_users_input
+
+  """
+  Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
+  """
+  bexio_contact_id: Int
   allowedUsers: [create_Clients_directus_users_input]
   periods: [create_Clients_Periods_input]
 }
@@ -1453,6 +1491,9 @@ input create_TopUps_input {
   user_created: create_directus_users_input
   user_updated: create_directus_users_input
   wepPercentage: Int
+
+  """Connected invoice from Bexio"""
+  bexioInvoiceId: Int
 }
 
 input date_filter_operators {
@@ -2078,6 +2119,7 @@ input TopUps_filter {
   user_created: directus_users_filter
   user_updated: directus_users_filter
   wepPercentage: number_filter_operators
+  bexioInvoiceId: number_filter_operators
   _and: [TopUps_filter]
   _or: [TopUps_filter]
 }
@@ -2098,6 +2140,7 @@ input TopUps_quantifier_filter {
   user_created: directus_users_filter
   user_updated: directus_users_filter
   wepPercentage: number_filter_operators
+  bexioInvoiceId: number_filter_operators
   _and: [TopUps_filter]
   _or: [TopUps_filter]
   _some: TopUps_filter
@@ -2123,6 +2166,11 @@ input update_Clients_input {
   status: String
   user_created: update_directus_users_input
   user_updated: update_directus_users_input
+
+  """
+  Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
+  """
+  bexio_contact_id: Int
   allowedUsers: [update_Clients_directus_users_input]
   periods: [update_Clients_Periods_input]
 }
@@ -2297,4 +2345,7 @@ input update_TopUps_input {
   user_created: update_directus_users_input
   user_updated: update_directus_users_input
   wepPercentage: Int
+
+  """Connected invoice from Bexio"""
+  bexioInvoiceId: Int
 }

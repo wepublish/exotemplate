@@ -1,22 +1,22 @@
 {
   "collection": "TopUps",
-  "field": "clientPeriod",
+  "field": "bexioInvoiceId",
   "type": "integer",
   "meta": {
     "collection": "TopUps",
     "conditions": null,
     "display": null,
     "display_options": null,
-    "field": "clientPeriod",
+    "field": "bexioInvoiceId",
     "group": null,
-    "hidden": true,
-    "interface": "select-dropdown-m2o",
-    "note": null,
+    "hidden": false,
+    "interface": "input",
+    "note": "Connected invoice from Bexio",
     "options": null,
     "readonly": false,
     "required": false,
     "searchable": true,
-    "sort": 13,
+    "sort": 12,
     "special": null,
     "translations": null,
     "validation": null,
@@ -24,7 +24,7 @@
     "width": "half"
   },
   "schema": {
-    "name": "clientPeriod",
+    "name": "bexioInvoiceId",
     "table": "TopUps",
     "data_type": "integer",
     "default_value": null,
@@ -38,7 +38,7 @@
     "is_generated": false,
     "generation_expression": null,
     "has_auto_increment": false,
-    "foreign_key_table": "Clients_Periods",
-    "foreign_key_column": "id"
+    "foreign_key_table": null,
+    "foreign_key_column": null
   }
 }

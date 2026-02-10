@@ -6,5 +6,5 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: directus
     ports:
-      - "5432:5432"
+      - '5432:5432'
     restart: on-failure
