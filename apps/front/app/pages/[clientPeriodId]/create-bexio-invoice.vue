@@ -43,8 +43,12 @@
   const createdBexioInvoice = ref<InvoicesStatic.Invoice | undefined>(undefined)
   const createdTopUpId = ref<string | undefined>(undefined)
 
-  const totalAmount = computed<number>(() => ((state.amount || 0) * 100) / 80)
-  const wePublishAmount = computed<number>(() => totalAmount.value * 0.2)
+  const totalAmount = computed<number>(
+    () => Math.round(((state.amount || 0) * 100) / 80 / 0.25) * 0.25
+  )
+  const wePublishAmount = computed<number>(
+    () => totalAmount.value - (state.amount || 0)
+  )
   const toalPrice = computed<number>(
     () => totalAmount.value * (state.hourlyRate || 0)
   )
