@@ -22,9 +22,9 @@
 
   const schema = z.object({
     title: z.string('Rechnungstitel eingeben'),
-    amount: z.number('Anzahl Stunden eingeben'),
-    hourlyRate: z.number('Stundensatz eingeben'),
-    wepPercentage: z.number('Prozent für We.Publish eingeben'),
+    amount: z.coerce.number('Anzahl Stunden eingeben'),
+    hourlyRate: z.coerce.number('Stundensatz eingeben'),
+    wepPercentage: z.coerce.number('Prozent für We.Publish eingeben'),
     note: z.string('Bemerkung eingeben')
   })
 
