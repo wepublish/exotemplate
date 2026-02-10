@@ -44,7 +44,10 @@
   const createdTopUpId = ref<string | undefined>(undefined)
 
   const totalAmount = computed<number>(
-    () => Math.round(((state.amount || 0) * 100) / 80 / 0.25) * 0.25
+    () =>
+      Math.round(
+        ((state.amount || 0) * 100) / (100 - (state.wepPercentage || 0)) / 0.25
+      ) * 0.25
   )
   const wePublishAmount = computed<number>(
     () => totalAmount.value - (state.amount || 0)
