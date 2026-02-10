@@ -85,7 +85,7 @@ export interface TopUp {
   bexioInvoiceId: number | null
 }
 
-export interface CustomDirectusUser {
+export interface CustomDirectusUser extends DirectusUser<Schema> {
   accessToClients: string[] | ClientDirectusUser[]
 }
 

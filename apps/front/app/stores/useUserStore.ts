@@ -3,7 +3,7 @@ import {
   type CustomDirectusUser,
   type Client
 } from '@/../types/DirectusTypes'
-import { readMe } from '@directus/sdk'
+import { readMe, type DirectusRole } from '@directus/sdk'
 
 export const useUserStore = defineStore('useUserStore', () => {
   const { directus } = useDirectus()
@@ -60,6 +60,9 @@ export const useUserStore = defineStore('useUserStore', () => {
         fields: [
           '*',
           {
+            role: ['name']
+          },
+          {
             accessToClients: [
               {
                 Clients_id: [
@@ -109,12 +112,17 @@ export const useUserStore = defineStore('useUserStore', () => {
     return clientUsers.map((clientUser) => clientUser.Clients_id as Client)
   })
 
+  function amIAdministrator(): boolean {
+    return (user.value?.role as DirectusRole)?.name === 'Administrator'
+  }
+
   return {
     loggedIn,
     login,
     logout,
     user,
     clients,
-    loadUserData
+    loadUserData,
+    amIAdministrator
   }
 })

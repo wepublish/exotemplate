@@ -17,6 +17,7 @@
   const clientPeriodComp = useUseClientPeriods()
   const manualWorkComp = useManualWorkEntries()
   const topUpsComp = useTopUps()
+  const userStore = useUserStore()
 
   const props = defineProps<{
     clientPeriodId: number | undefined
@@ -137,9 +138,10 @@
           </UProgress>
 
           <!-- create bexio invoice -->
-          <div class="col-span-12 text-end">
+          <div v-if="userStore.amIAdministrator()" class="col-span-12 text-end">
             <UButton
-              :href="`/${clientPeriodId}/create-bexio-invoice?amount=${availableHours * -1}`"
+              :to="`/${clientPeriodId}/create-bexio-invoice?amount=${availableHours * -1}`"
+              variant="subtle"
             >
               Bexio-Rechnung generieren
             </UButton>
@@ -167,6 +169,7 @@
               :href="topUpsComp.getBexioInvoiceUrl(row.original.Bexio)"
               target="_blank"
               trailing-icon="material-symbols:open-in-new-rounded"
+              variant="link"
             >
               Nr. {{ row.original.Bexio }}
             </UButton>
