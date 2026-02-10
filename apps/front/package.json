@@ -7,8 +7,12 @@
     "dev": "nuxt dev",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "lint": "eslint .",
-    "typecheck": "nuxt typecheck"
+    "typecheck": "nuxt typecheck",
+    "prepare": "husky",
+    "lint": "prettier . --write --ignore-unknown"
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
   },
   "dependencies": {
     "@directus/sdk": "^20.2.0",
@@ -17,14 +21,16 @@
     "@nuxt/ui": "^4.2.1",
     "@pinia/nuxt": "0.11.3",
     "axios": "^1.13.2",
+    "bexio": "^3.5.0",
     "date-fns": "^4.1.0",
     "nuxt": "^4.2.1",
     "pinia": "^3.0.4",
-    "zod": "^4.1.13"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@nuxt/eslint": "^1.10.0",
-    "eslint": "^9.39.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "3.8.1",
     "typescript": "^5.9.3",
     "vue-tsc": "^3.1.5"
   },

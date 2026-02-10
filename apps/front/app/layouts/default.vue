@@ -11,11 +11,7 @@
   <UApp>
     <UHeader>
       <template #left>
-        <img
-          src="@/assets/images/wep-logo.png"
-          alt="Logo"
-          class="h-8 w-auto"
-        >
+        <img src="@/assets/images/wep-logo.png" alt="Logo" class="h-8 w-auto" />
         <p class="text-2xl text-primary font-bold">ONE</p>
       </template>
 

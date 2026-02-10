@@ -1,15 +1,25 @@
-import {type ClientDirectusUser, type CustomDirectusUser, type Client} from '@/../types/DirectusTypes'
-import { readMe } from '@directus/sdk'
+import {
+  type ClientDirectusUser,
+  type CustomDirectusUser,
+  type Client
+} from '@/../types/DirectusTypes'
+import { readMe, type DirectusRole } from '@directus/sdk'
 
 export const useUserStore = defineStore('useUserStore', () => {
-  const {directus} = useDirectus()
+  const { directus } = useDirectus()
   const toast = useToast()
   const route = useRoute()
   const router = useRouter()
 
   const user = ref<CustomDirectusUser | undefined>(undefined)
-  
-  async function login({ email, password }: { email?: string, password?: string }) {
+
+  async function login({
+    email,
+    password
+  }: {
+    email?: string
+    password?: string
+  }) {
     try {
       // manual login with credentials
       if (email && password) {
@@ -23,36 +33,7 @@ export const useUserStore = defineStore('useUserStore', () => {
       }
 
       // load user
-      user.value = await directus.request<CustomDirectusUser>(readMe({
-        fields: [
-          '*',
-          {
-            accessToClients: [
-              {
-                Clients_id: [
-                  '*',
-                  {
-                    periods:[
-                      '*', 
-                      {
-                        Periods_id: ['*']
-                      },
-                      {
-                        topUps: [
-                          '*'
-                        ]
-                      },
-                      {
-                        manualWorkEntries: ['*']
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-        ]
-      }))
+      await loadUserData()
 
       toast.add({
         color: 'success',
@@ -73,6 +54,42 @@ export const useUserStore = defineStore('useUserStore', () => {
     }
   }
 
+  async function loadUserData() {
+    user.value = await directus.request<CustomDirectusUser>(
+      readMe({
+        fields: [
+          '*',
+          {
+            role: ['name']
+          },
+          {
+            accessToClients: [
+              {
+                Clients_id: [
+                  '*',
+                  {
+                    periods: [
+                      '*',
+                      {
+                        Periods_id: ['*']
+                      },
+                      {
+                        topUps: ['*']
+                      },
+                      {
+                        manualWorkEntries: ['*']
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+    )
+  }
+
   async function logout() {
     try {
       await directus.logout()
@@ -90,15 +107,22 @@ export const useUserStore = defineStore('useUserStore', () => {
   })
 
   const clients = computed<Client[]>(() => {
-    const clientUsers = (user.value?.accessToClients || []) as ClientDirectusUser[]
-    return clientUsers.map(clientUser => clientUser.Clients_id as Client)
+    const clientUsers = (user.value?.accessToClients ||
+      []) as ClientDirectusUser[]
+    return clientUsers.map((clientUser) => clientUser.Clients_id as Client)
   })
+
+  function amIAdministrator(): boolean {
+    return (user.value?.role as DirectusRole)?.name === 'Administrator'
+  }
 
   return {
     loggedIn,
     login,
     logout,
     user,
-    clients
+    clients,
+    loadUserData,
+    amIAdministrator
   }
 })
