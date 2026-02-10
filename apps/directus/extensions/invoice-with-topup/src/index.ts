@@ -1,10 +1,12 @@
 import {
+  ContainsNullValuesError,
   createError,
   ForbiddenError,
   InvalidPayloadError
 } from '@directus/errors'
 import { defineEndpoint } from '@directus/extensions-sdk'
 import Bexio, { InvoicesStatic, PositionStatic } from 'bexio'
+import { Client, ClientPeriod, TopUp } from './DirectusTypes'
 
 // https://office.bexio.com/user_manager/editRights/id/1
 const BEXIO_USER_ID = 1
@@ -19,7 +21,7 @@ const BEXIO_ERROR = createError(
   'Could not create invoice on Bexio. Unexpected error. See the logs.'
 )
 
-export default defineEndpoint((router, { env }) => {
+export default defineEndpoint((router, { env, services, getSchema }) => {
   router.post('/', async (_req: Request & any, res, next) => {
     try {
       const accountability = _req.accountability
@@ -37,9 +39,10 @@ export default defineEndpoint((router, { env }) => {
       }
 
       // get body params
-      const { text, amount, unit_price } = _req.body
+      const { clientPeriodId, title, text, amount, unit_price, wepPercentage } =
+        _req.body
 
-      if (!text || !amount || !unit_price) {
+      if (!clientPeriodId || !title || !text || !amount || !unit_price) {
         return next(
           new InvalidPayloadError({
             reason: 'Missing body params text, amount or unit_price!'
@@ -47,18 +50,60 @@ export default defineEndpoint((router, { env }) => {
         )
       }
 
+      // load client period table data
+      const ItemsService = services.ItemsService
+      const schema = await getSchema()
+
+      const clientPeriodService = new ItemsService<ClientPeriod>(
+        'Clients_Periods',
+        { schema, accountability }
+      )
+      const topUpService = new ItemsService<TopUp>('TopUps', {
+        schema,
+        accountability
+      })
+
+      const clientPeriod = await clientPeriodService.readOne(clientPeriodId, {
+        fields: ['*', 'Clients_id.*']
+      })
+
+      const bexioContactId = (clientPeriod.Clients_id as Client)
+        .bexio_contact_id
+
+      if (!clientPeriod || !bexioContactId) {
+        return next(
+          new ContainsNullValuesError({
+            collection: 'Clients_Periods',
+            field: 'id'
+          })
+        )
+      }
+
       const bexioInvoice = await createBexioInvoice({
         bexioToken,
+        contactId: Number(bexioContactId),
+        title: title.toString(),
         text: text.toString(),
         amount: amount.toString(),
         unit_price: unit_price.toString()
       })
 
-      if (!bexioInvoice?.id) {
+      if (!bexioInvoice?.id || !bexioInvoice.total) {
         return next(new BEXIO_ERROR())
       }
 
-      res.send(bexioInvoice)
+      // create new topup
+      const topUpId = await topUpService.createOne({
+        status: 'published',
+        clientPeriod: clientPeriodId,
+        bexioInvoiceId: bexioInvoice.id,
+        amount: Number(bexioInvoice.total),
+        hourlyRate: Number(unit_price),
+        wepPercentage: Number(wepPercentage),
+        note: title
+      })
+
+      res.send({ bexioInvoice, topUpId })
     } catch (error) {
       return next(error)
     }
@@ -67,11 +112,15 @@ export default defineEndpoint((router, { env }) => {
 
 async function createBexioInvoice({
   bexioToken,
+  contactId,
+  title,
   text,
   amount,
   unit_price
 }: {
   bexioToken: string
+  contactId: number
+  title: string
   text: string
   amount: string
   unit_price: string
@@ -88,9 +137,9 @@ async function createBexioInvoice({
   }
 
   return await bexio.invoices.create({
-    contact_id: 2,
+    contact_id: contactId,
     user_id: BEXIO_USER_ID,
     positions: [position],
-    title: 'TEST'
+    title
   })
 }

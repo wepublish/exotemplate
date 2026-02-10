@@ -265,11 +265,11 @@ type Subscription {
   directus_comments_mutated(event: EventEnum): directus_comments_mutated
   directus_sync_id_map_mutated(event: EventEnum): directus_sync_id_map_mutated
   Clients_mutated(event: EventEnum): Clients_mutated
+  TopUps_mutated(event: EventEnum): TopUps_mutated
   Clients_Periods_mutated(event: EventEnum): Clients_Periods_mutated
   Periods_mutated(event: EventEnum): Periods_mutated
   Clients_directus_users_mutated(event: EventEnum): Clients_directus_users_mutated
   ManualWorkEntries_mutated(event: EventEnum): ManualWorkEntries_mutated
-  TopUps_mutated(event: EventEnum): TopUps_mutated
 }
 
 """The `Boolean` scalar type represents `true` or `false`."""
@@ -355,6 +355,11 @@ type Clients {
   status: String
   user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+
+  """
+  Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
+  """
+  bexio_contact_id: Int
   allowedUsers(filter: Clients_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_directus_users]
   allowedUsers_func: count_functions
   periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods]
@@ -1787,6 +1792,9 @@ type TopUps {
   user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   wepPercentage: Int
+
+  """Connected invoice from Bexio"""
+  bexioInvoiceId: Int
 }
 
 type TopUps_mutated {
@@ -1970,6 +1978,7 @@ input Clients_filter {
   status: string_filter_operators
   user_created: directus_users_filter
   user_updated: directus_users_filter
+  bexio_contact_id: number_filter_operators
   allowedUsers: Clients_directus_users_quantifier_filter
   allowedUsers_func: count_function_filter_operators
   periods: Clients_Periods_quantifier_filter
@@ -2028,6 +2037,11 @@ input create_Clients_input {
   status: String
   user_created: create_directus_users_input
   user_updated: create_directus_users_input
+
+  """
+  Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
+  """
+  bexio_contact_id: Int
   allowedUsers: [create_Clients_directus_users_input]
   periods: [create_Clients_Periods_input]
 }
@@ -2351,6 +2365,9 @@ input create_TopUps_input {
   user_created: create_directus_users_input
   user_updated: create_directus_users_input
   wepPercentage: Int
+
+  """Connected invoice from Bexio"""
+  bexioInvoiceId: Int
 }
 
 input date_filter_operators {
@@ -3062,6 +3079,7 @@ input TopUps_filter {
   user_created: directus_users_filter
   user_updated: directus_users_filter
   wepPercentage: number_filter_operators
+  bexioInvoiceId: number_filter_operators
   _and: [TopUps_filter]
   _or: [TopUps_filter]
 }
@@ -3082,6 +3100,7 @@ input TopUps_quantifier_filter {
   user_created: directus_users_filter
   user_updated: directus_users_filter
   wepPercentage: number_filter_operators
+  bexioInvoiceId: number_filter_operators
   _and: [TopUps_filter]
   _or: [TopUps_filter]
   _some: TopUps_filter
@@ -3107,6 +3126,11 @@ input update_Clients_input {
   status: String
   user_created: update_directus_users_input
   user_updated: update_directus_users_input
+
+  """
+  Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
+  """
+  bexio_contact_id: Int
   allowedUsers: [update_Clients_directus_users_input]
   periods: [update_Clients_Periods_input]
 }
@@ -3504,6 +3528,9 @@ input update_TopUps_input {
   user_created: update_directus_users_input
   user_updated: update_directus_users_input
   wepPercentage: Int
+
+  """Connected invoice from Bexio"""
+  bexioInvoiceId: Int
 }
 
 input write_directus_collections_input {
