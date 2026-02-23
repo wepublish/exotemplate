@@ -7,19 +7,40 @@ import {
 } from '@directus/errors'
 import axios from 'axios'
 import { format } from 'date-fns'
-import { Client, ClientPeriod, Period } from './DirectusTypes'
+import {
+  Client,
+  ClientPeriod,
+  ManualWorkEntry,
+  Period,
+  TopUp
+} from './DirectusTypes'
 
 export interface EntryGroups {
   groups: EntryGroup[]
 }
 
-export interface EntryGroupsWithSums extends EntryGroups {
+export interface EntryGroupComputed extends EntryGroups {
   sums: Sums
 }
 
 export interface Sums {
   billableHours: number
   nonBillableHours: number
+
+  computedTopUps: TopUpComputed[]
+
+  totalTopUps: number
+  totalManualWorkHours: number
+  totalUsedHours: number
+  totalAvailableHours: number
+
+  totalUsedPercentage: number
+}
+
+export interface TopUpComputed extends TopUp {
+  paidHours: number
+  clientHours: number
+  wepHours: number
 }
 
 export interface EntryGroup {
@@ -150,9 +171,22 @@ export default defineEndpoint((router, context) => {
         { schema, accountability }
       )
 
-      const clientPeriod = await clientPeriodService.readOne(clientPeriodId)
+      const {
+        topUps,
+        manualWorkEntries,
+        Clients_id: client,
+        Periods_id: period
+      } = await clientPeriodService.readOne(clientPeriodId, {
+        fields: [
+          '*',
+          'topUps.*',
+          'manualWorkEntries.*',
+          'Clients_id.*',
+          'Periods_id.*'
+        ]
+      })
 
-      if (!clientPeriod) {
+      if (!client || !period) {
         return next(
           new ContainsNullValuesError({
             collection: 'Clients_Periods',
@@ -161,44 +195,11 @@ export default defineEndpoint((router, context) => {
         )
       }
 
-      // load client and period table data
-      const clientId = clientPeriod.Clients_id
-      const periodId = clientPeriod.Periods_id
-
-      if (!clientId) {
-        return next(
-          new ContainsNullValuesError({
-            collection: 'Clients_Periods',
-            field: 'Clients_id'
-          })
-        )
-      }
-
-      if (!periodId) {
-        return next(
-          new ContainsNullValuesError({
-            collection: 'Clients_Periods',
-            field: 'Periods_id'
-          })
-        )
-      }
-
-      const clientService = new ItemsService<Client>('Clients', {
-        schema,
-        accountability
-      })
-      const periodService = new ItemsService<Period>('Periods', {
-        schema,
-        accountability
-      })
-
-      const client = await clientService.readOne(clientId as string)
-      const period = await periodService.readOne(periodId as string)
-
-      const jiraPrefix = client.jira_short_code
-      const clockCustomerid = client.clockodo_customer_id
-      const from = period.from
-      const to = period.to
+      const {
+        jira_short_code: jiraPrefix,
+        clockodo_customer_id: clockCustomerid
+      } = client as Client
+      const { from, to } = period as Period
 
       if (!clockCustomerid) {
         return next(
@@ -239,35 +240,88 @@ export default defineEndpoint((router, context) => {
         validatedEnv
       )
 
-      return res.send(calculateSums(entryGroupsWithinPeriod))
+      const entryGroupComputed = computeEntryGroups(
+        entryGroupsWithinPeriod,
+        topUps as TopUp[],
+        manualWorkEntries as ManualWorkEntry[]
+      )
+
+      return res.send(entryGroupComputed)
     } catch (e) {
       return next(e)
     }
   })
 })
 
-function calculateSums(
-  entryGroupsWithinPeriod: EntryGroups
-): EntryGroupsWithSums {
-  const sums: Sums = {
-    billableHours: 0,
-    nonBillableHours: 0
-  }
-
-  for (let entryGroup of entryGroupsWithinPeriod.groups) {
-    sums.billableHours +=
-      entryGroup?.billability?.billableTotal || entryGroup.duration
-    sums.nonBillableHours += entryGroup?.billability?.billablePart || 0
-  }
-
-  const roundToQuarter = (hours: number) => Math.round(hours / 0.25) * 0.25
+function computeEntryGroups(
+  entryGroupsWithinPeriod: EntryGroups,
+  topUps: TopUp[],
+  manualWorkEntries: ManualWorkEntry[]
+): EntryGroupComputed {
+  const { billableHours, nonBillableHours } = getBillableAndNonBillableHours(
+    entryGroupsWithinPeriod.groups
+  )
+  const computedTopUps = computeTopUps(topUps)
+  const totalTopUps = computedTopUps.reduce(
+    (sum, topUp) => sum + topUp.clientHours,
+    0
+  )
+  const totalManualWorkHours = manualWorkEntries.reduce(
+    (sum, manualWork) => sum + (manualWork.hours || 0),
+    0
+  )
+  const totalUsedHours = billableHours + totalManualWorkHours
+  const totalAvailableHours = totalTopUps - totalUsedHours
+  const totalUsedPercentage = (totalUsedHours * 100) / totalTopUps
 
   return {
     groups: entryGroupsWithinPeriod.groups,
     sums: {
-      billableHours: roundToQuarter(sums.billableHours / 3600),
-      nonBillableHours: roundToQuarter(sums.nonBillableHours / 3600)
+      billableHours,
+      nonBillableHours,
+      computedTopUps,
+      totalTopUps,
+      totalManualWorkHours,
+      totalUsedHours,
+      totalAvailableHours,
+      totalUsedPercentage
     }
+  }
+}
+
+function computeTopUps(topUps: TopUp[]): TopUpComputed[] {
+  return topUps.map((topUp) => {
+    const paidHours =
+      Math.round(((topUp.amount || 0) / topUp.hourlyRate) * 2) / 2
+
+    const clientHours =
+      Math.round(
+        (paidHours * (100 - (topUp.wepPercentage || 0))) / 100 / 0.25
+      ) * 0.25
+    const wepHours = paidHours - clientHours
+    return {
+      ...topUp,
+      paidHours,
+      clientHours,
+      wepHours
+    }
+  })
+}
+
+function getBillableAndNonBillableHours(
+  groups: EntryGroup[]
+): Pick<Sums, 'billableHours' | 'nonBillableHours'> {
+  let billableHours = 0
+  let nonBillableHours = 0
+
+  for (let entryGroup of groups) {
+    billableHours +=
+      entryGroup?.billability?.billableTotal || entryGroup.duration
+    nonBillableHours += entryGroup?.billability?.billablePart || 0
+  }
+  return {
+    billableHours: roundToQuarter(billableHours / 3600),
+    nonBillableHours: roundToQuarter(nonBillableHours / 3600)
   }
 }
 
@@ -593,4 +647,8 @@ function getJiraIssue(
   jiraPrefix: string
 ): string | undefined {
   return text?.match(new RegExp(`${jiraPrefix}-\\d+`))?.[0]
+}
+
+function roundToQuarter(hours: number) {
+  return Math.round(hours / 0.25) * 0.25
 }
