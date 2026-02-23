@@ -9,6 +9,9 @@
     sums: Sums | undefined
   }>()
 
+  const showTopUpsModal = ref(false)
+  const showTopUpsTableSlideover = ref(false)
+
   const topUpsForTable = computed(() =>
     props.sums?.computedTopUps.map((topUp) => {
       return {
@@ -25,74 +28,98 @@
       }
     })
   )
+
+  const progressColor = computed<string>(() => {
+    const sums = props.sums?.totalUsedPercentage || 0
+    if (sums >= 90) {
+      return 'error'
+    }
+    if (sums >= 75) {
+      return 'warning'
+    }
+    return 'primary'
+  })
 </script>
 
 <template>
   <div class="grid grid-cols-12 gap-4">
-    <!-- progress -->
-    <UPageCard class="col-span-12">
+    <UPageCard class="col-span-6">
       <template #default v-if="sums">
-        <div class="flex justify-between w-full">
-          <div class="font-bold">Verfügbare Arbeitsstunden</div>
-          <div
-            class="font-bold text-4xl"
-            :class="
-              sums.totalAvailableHours <= 0 ? 'text-error' : 'text-primary'
-            "
-          >
-            {{ sums.totalAvailableHours }} h
-          </div>
-        </div>
-
-        <div class="grid grid-cols-12 gap-16">
-          <div class="col-span-6 flex text-sm mt-4">
-            <div class="flex-1">
-              <p>Zahlungen / Top-Ups</p>
-              <p>Arbeitsprotokoll</p>
-              <p class="border-b">Manuelle Korrekturen</p>
-              <p class="font-bold pt-1">Verfügbar</p>
-            </div>
-            <div class="text-right">
-              <p>{{ sums.totalTopUps }} h</p>
-              <p>- {{ sums.billableHours }} h</p>
-              <p class="border-b">- {{ sums.totalManualWorkHours }} h</p>
-              <p class="font-bold pt-1">{{ sums.totalAvailableHours }} h</p>
+        <div class="flex flex-col justify-between h-full w-full">
+          <div class="flex justify-between w-full">
+            <div class="font-bold">Zahlungen / Top-Ups</div>
+            <div class="font-bold text-4xl text-primary">
+              {{ sums.totalTopUps }} h
             </div>
           </div>
-          <UProgress
-            :model-value="sums.totalUsedPercentage"
-            status
-            size="2xl"
-            class="col-span-6"
-            :color="sums.totalUsedPercentage >= 100 ? 'error' : 'primary'"
-          >
-            <template #status>
-              {{ sums.totalUsedHours }} / {{ sums.totalTopUps }} h
-            </template>
-          </UProgress>
-
-          <!-- create bexio invoice -->
-          <div v-if="userStore.amIAdministrator()" class="col-span-12 text-end">
+          <div class="flex justify-end w-full">
             <UButton
-              :to="`/${clientPeriodId}/create-bexio-invoice?amount=${sums.totalAvailableHours * -1}`"
               variant="subtle"
+              icon="ic:twotone-search"
+              @click="showTopUpsTableSlideover = true"
+              >Details anzeigen</UButton
             >
-              Bexio-Rechnung generieren
-            </UButton>
           </div>
         </div>
       </template>
     </UPageCard>
 
-    <!-- top ups -->
-    <UPageCard class="col-span-12">
-      <template #default>
+    <UPageCard class="col-span-6">
+      <template #default v-if="sums">
         <div class="flex justify-between w-full">
-          <div class="font-bold">Zahlungen / Top-Ups</div>
-          <div v-if="sums" class="font-bold text-4xl text-primary">
-            {{ sums.totalTopUps }} h
+          <div class="font-bold">Verfügbare Arbeitsstunden</div>
+          <div class="font-bold text-4xl" :class="`text-${progressColor}`">
+            {{ sums.totalAvailableHours }} h
           </div>
         </div>
+
+        <div>
+          <UProgress
+            :model-value="sums.totalUsedPercentage"
+            status
+            size="2xl"
+            class="col-span-6"
+            :color="progressColor as any"
+          >
+            <template #status>
+              <p :class="`text-${progressColor}`">
+                {{ sums.totalUsedPercentage }} %
+              </p>
+            </template>
+          </UProgress>
+        </div>
+
+        <!-- create bexio invoice -->
+        <div
+          v-if="userStore.amIAdministrator()"
+          class="flex justify-between w-full pt-6"
+        >
+          <UButton
+            :to="`/${clientPeriodId}/create-bexio-invoice?amount=${sums.totalAvailableHours * -1}`"
+            variant="outline"
+            icon="material-symbols:add-notes"
+          >
+            Bexio-Rechnung generieren
+          </UButton>
+
+          <UButton
+            variant="subtle"
+            icon="ic:twotone-search"
+            @click="showTopUpsModal = true"
+            >Details anzeigen</UButton
+          >
+        </div>
+      </template>
+    </UPageCard>
+
+    <!-- top-ups table slideover -->
+    <USlideover
+      v-model:open="showTopUpsTableSlideover"
+      side="right"
+      title="Zahlungen / Top-Ups"
+      :ui="{ content: 'max-w-2/3' }"
+    >
+      <template #body>
         <UTable :data="topUpsForTable">
           <template #Bexio-cell="{ row }">
             <UButton
@@ -107,6 +134,31 @@
           </template>
         </UTable>
       </template>
-    </UPageCard>
+    </USlideover>
+
+    <!-- available hours details slideover -->
+    <USlideover
+      v-model:open="showTopUpsModal"
+      side="right"
+      title="Details: Verfügbare Arbeitsstunden"
+      :ui="{ content: 'max-w-md' }"
+    >
+      <template #body>
+        <div v-if="sums" class="flex text-sm">
+          <div class="flex-1">
+            <p>Zahlungen / Top-Ups</p>
+            <p>Arbeitsprotokoll</p>
+            <p class="border-b">Manuelle Korrekturen</p>
+            <p class="font-bold pt-1">Verfügbar</p>
+          </div>
+          <div class="text-right">
+            <p>{{ sums.totalTopUps }} h</p>
+            <p>- {{ sums.billableHours }} h</p>
+            <p class="border-b">- {{ sums.totalManualWorkHours }} h</p>
+            <p class="font-bold pt-1">{{ sums.totalAvailableHours }} h</p>
+          </div>
+        </div>
+      </template>
+    </USlideover>
   </div>
 </template>
