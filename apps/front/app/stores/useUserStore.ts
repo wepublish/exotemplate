@@ -74,9 +74,6 @@ export const useUserStore = defineStore('useUserStore', () => {
                         Periods_id: ['*']
                       },
                       {
-                        topUps: ['*']
-                      },
-                      {
                         manualWorkEntries: ['*']
                       }
                     ]

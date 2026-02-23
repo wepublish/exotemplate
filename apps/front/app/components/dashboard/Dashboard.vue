@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import type { EntryGroupsWithSums } from '~~/types/ClockodoTypes'
+  import type { EntryGroupComputed } from '~~/types/ClockodoTypes'
   import WorkLog from './WorkLog.vue'
   import type { Client, ClientPeriod, Period } from '~~/types/DirectusTypes'
   import ManualWorkEntries from './ManualWorkEntries.vue'
@@ -43,7 +43,7 @@
   const dataLoaderKey = computed<string>(
     () => `clientPeriodId-${selectedClientPeriodId.value}`
   )
-  const { data: entryGroups, pending } = await useAsyncData(
+  const { data: computedEntryGroups, pending } = await useAsyncData(
     dataLoaderKey,
     async () => {
       if (!selectedClientPeriodId.value) {
@@ -53,7 +53,7 @@
         await getCustomEndpoint('aggregatedHours', {
           clientPeriodId: selectedClientPeriodId.value
         })
-      ).data as Promise<EntryGroupsWithSums>
+      ).data as Promise<EntryGroupComputed>
     }
   )
 </script>
@@ -95,13 +95,13 @@
     <div class="col-span-12" v-if="selectedClientPeriodId && !pending">
       <DashboardFinance
         :client-period-id="selectedClientPeriodId"
-        :working-sums="entryGroups?.sums"
+        :sums="computedEntryGroups?.sums"
       />
     </div>
 
     <!-- clockodo insights -->
     <div class="col-span-12" v-if="selectedClientPeriodId && !pending">
-      <WorkLog :entry-groups="entryGroups" />
+      <WorkLog :entry-groups="computedEntryGroups" />
     </div>
 
     <!-- manual correction entries -->

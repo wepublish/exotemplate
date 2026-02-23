@@ -1,58 +1,16 @@
 <script lang="ts" setup>
   import type { Sums } from '~~/types/ClockodoTypes'
-  import type {
-    ClientPeriod,
-    ManualWorkEntry,
-    TopUp
-  } from '~~/types/DirectusTypes'
 
-  interface HoursCalculated {
-    totalHours: number
-    hoursClient: number
-    hoursWep: number
-  }
-
-  type TopUpsCalculated = TopUp & HoursCalculated
-
-  const clientPeriodComp = useUseClientPeriods()
-  const manualWorkComp = useManualWorkEntries()
   const topUpsComp = useTopUps()
   const userStore = useUserStore()
 
   const props = defineProps<{
     clientPeriodId: number | undefined
-    workingSums: Sums | undefined
+    sums: Sums | undefined
   }>()
 
-  const selectedClientPeriod = computed<ClientPeriod | undefined>(() =>
-    clientPeriodComp.getClientPeriodById(props.clientPeriodId)
-  )
-
-  const topUps = computed<TopUp[]>(
-    () => (selectedClientPeriod.value?.topUps || []) as TopUp[]
-  )
-
-  const topUpsCalculated = computed<TopUpsCalculated[]>(() =>
-    topUps.value.map((topUp) => {
-      const totalHours =
-        Math.round(((topUp.amount || 0) / topUp.hourlyRate) * 2) / 2
-
-      const hoursClient =
-        Math.round(
-          (totalHours * (100 - (topUp.wepPercentage || 0))) / 100 / 0.25
-        ) * 0.25
-      const hoursWep = totalHours - hoursClient
-      return {
-        ...topUp,
-        totalHours,
-        hoursClient,
-        hoursWep
-      }
-    })
-  )
-
   const topUpsForTable = computed(() =>
-    topUpsCalculated.value.map((topUp) => {
+    props.sums?.computedTopUps.map((topUp) => {
       return {
         Datum: new Date(topUp.date_created as string).toLocaleDateString('de', {
           dateStyle: 'medium'
@@ -60,40 +18,12 @@
         Notiz: topUp.note || ' - ',
         Betrag: `CHF ${topUp.amount}`,
         Satz: `${topUp.hourlyRate} chf / h`,
-        Total: `${topUp.totalHours} h`,
-        WePublish: `${topUp.hoursWep} h`,
-        Medium: `${topUp.hoursClient} h`,
+        Total: `${topUp.paidHours} h`,
+        WePublish: `${topUp.wepHours} h`,
+        Medium: `${topUp.clientHours} h`,
         Bexio: topUp.bexioInvoiceId
       }
     })
-  )
-
-  const totalTopUpHours = computed<HoursCalculated>(() => {
-    return topUpsCalculated.value.reduce(
-      (acc, curr) => {
-        return {
-          totalHours: acc.totalHours + curr.totalHours,
-          hoursClient: acc.hoursClient + curr.hoursClient,
-          hoursWep: acc.hoursWep + curr.hoursWep
-        }
-      },
-      { totalHours: 0, hoursClient: 0, hoursWep: 0 }
-    )
-  })
-
-  const totalManualWorkHours = computed<number>(() =>
-    manualWorkComp.getSumByClientPeriod(
-      (selectedClientPeriod.value?.manualWorkEntries || []) as ManualWorkEntry[]
-    )
-  )
-  const totalUsedHours = computed<number>(
-    () => (props.workingSums?.billableHours || 0) + totalManualWorkHours.value
-  )
-  const availableHours = computed<number>(
-    () => totalTopUpHours.value.hoursClient - totalUsedHours.value
-  )
-  const hoursUsedPercentage = computed<number>(
-    () => (totalUsedHours.value * 100) / totalTopUpHours.value.hoursClient
   )
 </script>
 
@@ -101,14 +31,16 @@
   <div class="grid grid-cols-12 gap-4">
     <!-- progress -->
     <UPageCard class="col-span-12">
-      <template #default v-if="selectedClientPeriod">
+      <template #default v-if="sums">
         <div class="flex justify-between w-full">
           <div class="font-bold">Verfügbare Arbeitsstunden</div>
           <div
             class="font-bold text-4xl"
-            :class="availableHours <= 0 ? 'text-error' : 'text-primary'"
+            :class="
+              sums.totalAvailableHours <= 0 ? 'text-error' : 'text-primary'
+            "
           >
-            {{ availableHours }} h
+            {{ sums.totalAvailableHours }} h
           </div>
         </div>
 
@@ -121,28 +53,28 @@
               <p class="font-bold pt-1">Verfügbar</p>
             </div>
             <div class="text-right">
-              <p>{{ totalTopUpHours.hoursClient }} h</p>
-              <p>- {{ props.workingSums?.billableHours || 0 }} h</p>
-              <p class="border-b">- {{ totalManualWorkHours }} h</p>
-              <p class="font-bold pt-1">{{ availableHours }} h</p>
+              <p>{{ sums.totalTopUps }} h</p>
+              <p>- {{ sums.billableHours }} h</p>
+              <p class="border-b">- {{ sums.totalManualWorkHours }} h</p>
+              <p class="font-bold pt-1">{{ sums.totalAvailableHours }} h</p>
             </div>
           </div>
           <UProgress
-            :model-value="hoursUsedPercentage"
+            :model-value="sums.totalUsedPercentage"
             status
             size="2xl"
             class="col-span-6"
-            :color="hoursUsedPercentage >= 100 ? 'error' : 'primary'"
+            :color="sums.totalUsedPercentage >= 100 ? 'error' : 'primary'"
           >
             <template #status>
-              {{ totalUsedHours }} / {{ totalTopUpHours.hoursClient }} h
+              {{ sums.totalUsedHours }} / {{ sums.totalTopUps }} h
             </template>
           </UProgress>
 
           <!-- create bexio invoice -->
           <div v-if="userStore.amIAdministrator()" class="col-span-12 text-end">
             <UButton
-              :to="`/${clientPeriodId}/create-bexio-invoice?amount=${availableHours * -1}`"
+              :to="`/${clientPeriodId}/create-bexio-invoice?amount=${sums.totalAvailableHours * -1}`"
               variant="subtle"
             >
               Bexio-Rechnung generieren
@@ -157,11 +89,8 @@
       <template #default>
         <div class="flex justify-between w-full">
           <div class="font-bold">Zahlungen / Top-Ups</div>
-          <div
-            v-if="selectedClientPeriod"
-            class="font-bold text-4xl text-primary"
-          >
-            {{ totalTopUpHours.hoursClient }} h
+          <div v-if="sums" class="font-bold text-4xl text-primary">
+            {{ sums.totalTopUps }} h
           </div>
         </div>
         <UTable :data="topUpsForTable">

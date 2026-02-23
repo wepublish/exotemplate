@@ -1,14 +1,31 @@
+import type { TopUp } from './DirectusTypes'
+
 export interface EntryGroups {
   groups: EntryGroup[]
 }
 
-export interface EntryGroupsWithSums extends EntryGroups {
+export interface EntryGroupComputed extends EntryGroups {
   sums: Sums
 }
 
 export interface Sums {
   billableHours: number
   nonBillableHours: number
+
+  computedTopUps: TopUpComputed[]
+
+  totalTopUps: number
+  totalManualWorkHours: number
+  totalUsedHours: number
+  totalAvailableHours: number
+
+  totalUsedPercentage: number
+}
+
+export interface TopUpComputed extends TopUp {
+  paidHours: number
+  clientHours: number
+  wepHours: number
 }
 
 export interface EntryGroup {
@@ -43,6 +60,7 @@ export interface Billability {
   billableTotal: number
 }
 
+// response from jira api
 export interface JiraIssue {
   expand: string
   id: string
