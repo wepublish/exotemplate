@@ -11,8 +11,6 @@
   const topUpsComp = useTopUps()
   const financeCalc = useFinanceCalculations()
 
-  const todayText = new Date().toLocaleDateString('de', { dateStyle: 'medium' })
-
   const hours = computed<number | undefined>(() =>
     route.query?.hours ? Number(route.query.hours) : undefined
   )
@@ -56,11 +54,11 @@
   type Schema = z.output<typeof schema>
 
   const state = reactive<Partial<Schema>>({
-    title: `Abrechnung per ${todayText}`,
+    title: '',
     hours: hours.value,
     hourlyRate: 150,
     wepPercentage: 20,
-    note: `Abrechnung erbrachter Leistungen durch das We.Publish-Team per ${todayText}. Profitiere von einem vergünstigten Tarif indem du vorauszahlst. Melde Dich bei deiner Ansprechperson von We.Publish. Das detaillierte Arbeitsprotokoll findest Du hier: https://one.wepublish.cloud`
+    note: ''
   })
 
   const loading = ref<boolean>(false)
@@ -126,13 +124,36 @@
   watch(
     [state, amount],
     () => {
-      // only update if tab is on prepaid
+      // only update if in prePaid mode
       if (prePaid.value) {
+        // get hours from amount
         state.hours = financeCalc.getHoursByAmount(
           amount.value,
           state.hourlyRate,
           state.wepPercentage
         ).clientHours
+      }
+    },
+    {
+      immediate: true
+    }
+  )
+
+  const todayText = new Date().toLocaleDateString('de', { dateStyle: 'medium' })
+
+  // update texts depending on tab
+  watch(
+    tab,
+    () => {
+      if (prePaid.value) {
+        state.hourlyRate = 120
+        state.title = `We.Develop Prepaid [NUMMER] Quartal [JAHR]`
+        state.note = `We.Develop in Prepaid gemäss vertraglicher Vereinbarung. [NUMMER] Quartal [JAHR]. Abrechnungsdetails siehe Dashboard We.Publish ONE`
+      }
+      if (postPaid.value) {
+        state.hourlyRate = 150
+        state.title = `Abrechnung per ${todayText}`
+        state.note = `Abrechnung erbrachter Leistungen durch das We.Publish-Team per ${todayText}. Profitiere von einem vergünstigten Tarif indem du vorauszahlst. Melde Dich bei deiner Ansprechperson von We.Publish. Das detaillierte Arbeitsprotokoll findest Du hier: https://one.wepublish.cloud`
       }
     },
     {
@@ -249,7 +270,7 @@
           </div>
 
           <UAlert
-            v-if="amount !== toalPrice"
+            v-if="prePaid && Number(amount) !== toalPrice"
             color="error"
             variant="soft"
             icon="mdi:flash-triangle-outline"
