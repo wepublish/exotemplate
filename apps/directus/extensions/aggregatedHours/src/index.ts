@@ -274,7 +274,8 @@ function computeEntryGroups(
   )
   const totalUsedHours = billableHours + totalManualWorkHours
   const totalAvailableHours = totalTopUps - totalUsedHours
-  const totalUsedPercentage = Math.round((totalUsedHours * 100) / totalTopUps)
+  const totalUsedPercentage =
+    Math.round((totalUsedHours * 100) / totalTopUps) || 0
 
   return {
     groups: entryGroupsWithinPeriod.groups,
