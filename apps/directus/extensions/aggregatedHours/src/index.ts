@@ -266,8 +266,10 @@ function computeEntryGroups(
     (sum, topUp) => sum + topUp.clientHours,
     0
   )
-  const totalManualWorkHours = manualWorkEntries.reduce(
-    (sum, manualWork) => sum + (manualWork.hours || 0),
+
+  const totalManualWorkHours: number = manualWorkEntries.reduce(
+    (sum: number, manualWork) =>
+      sum + (parseFloat(String(manualWork.hours)) || 0),
     0
   )
   const totalUsedHours = billableHours + totalManualWorkHours
