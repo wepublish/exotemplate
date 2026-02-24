@@ -12,6 +12,9 @@
 
   const todayText = new Date().toLocaleDateString('de', { dateStyle: 'medium' })
 
+  const hours = computed<number | undefined>(() =>
+    route.query?.hours ? Number(route.query.hours) : undefined
+  )
   const amount = computed<number | undefined>(() =>
     route.query?.amount ? Number(route.query.amount) : undefined
   )
@@ -21,9 +24,28 @@
     return Number(clientPeriodId)
   })
 
+  const tabs: TabsItem[] = [
+    {
+      label: 'Post-Paid (Stundenbasiert)',
+      icon: 'mdi:watch',
+      slot: 'postPaid',
+      value: 'postPaid'
+    },
+    {
+      label: 'Pre-Paid (Betragsbasiert)',
+      icon: 'mdi:bird',
+      slot: 'prePaid',
+      value: 'prePaid'
+    }
+  ]
+  const tab = ref<'postPaid' | 'prePaid'>(hours.value ? 'postPaid' : 'prePaid')
+
+  const postPaid = computed<boolean>(() => tab.value === 'postPaid')
+  const prePaid = computed<boolean>(() => tab.value === 'prePaid')
+
   const schema = z.object({
     title: z.string('Rechnungstitel eingeben'),
-    amount: z.coerce.number('Anzahl Stunden eingeben'),
+    hours: z.coerce.number('Anzahl Stunden eingeben'),
     hourlyRate: z.coerce.number('Stundensatz eingeben'),
     wepPercentage: z.coerce.number('Prozent für We.Publish eingeben'),
     note: z.string('Bemerkung eingeben')
@@ -31,15 +53,15 @@
 
   type Schema = z.output<typeof schema>
 
-  const loading = ref<boolean>(false)
-
   const state = reactive<Partial<Schema>>({
     title: `Abrechnung per ${todayText}`,
-    amount: amount.value,
+    hours: hours.value,
     hourlyRate: 150,
     wepPercentage: 20,
     note: `Abrechnung erbrachter Leistungen durch das We.Publish-Team per ${todayText}. Profitiere von einem vergünstigten Tarif indem du vorauszahlst. Melde Dich bei deiner Ansprechperson von We.Publish. Das detaillierte Arbeitsprotokoll findest Du hier: https://one.wepublish.cloud`
   })
+
+  const loading = ref<boolean>(false)
 
   const createdBexioInvoice = ref<InvoicesStatic.Invoice | undefined>(undefined)
   const createdTopUpId = ref<string | undefined>(undefined)
@@ -47,11 +69,11 @@
   const totalAmount = computed<number>(
     () =>
       Math.round(
-        ((state.amount || 0) * 100) / (100 - (state.wepPercentage || 0)) / 0.25
+        ((state.hours || 0) * 100) / (100 - (state.wepPercentage || 0)) / 0.25
       ) * 0.25
   )
   const wePublishAmount = computed<number>(
-    () => totalAmount.value - (state.amount || 0)
+    () => totalAmount.value - (state.hours || 0)
   )
   const toalPrice = computed<number>(
     () => totalAmount.value * (state.hourlyRate || 0)
@@ -99,22 +121,6 @@
       loading.value = false
     }
   }
-
-  const tabs: TabsItem[] = [
-    {
-      label: 'Post-Paid (Stundenbasiert)',
-      icon: 'mdi:watch',
-      slot: 'postPaid',
-      value: 'postPaid'
-    },
-    {
-      label: 'Pre-Paid (Betragsbasiert)',
-      icon: 'mdi:bird',
-      slot: 'prePaid',
-      value: 'prePaid'
-    }
-  ]
-  const tab = ref<'postPaid' | 'prePaid'>('postPaid')
 </script>
 
 <template>
@@ -137,7 +143,7 @@
         Eine Zahlung / Top-Up wird im One-Dashboard automatisch hinzugefügt und
         mit der Bexio-Rechnung verknüpft.
       </p>
-      <p v-if="tab === 'postPaid'" class="font-bold">
+      <p v-if="postPaid" class="font-bold">
         Zu deinen Stunden wird automatisch der We.Publish-Genossenschaftsbeitrag
         hinzugerechnet.
       </p>
@@ -150,15 +156,22 @@
             <UInput v-model="state.title" class="w-3/4" />
           </UFormField>
           <UFormField
-            v-if="tab === 'postPaid'"
-            label="Anzahl Stunden in Rechnung stellen"
+            v-if="prePaid"
+            label="Pauschaler Rechnungsbetrag (CHF)"
             name="amount"
             class="col-span-12"
           >
             <UInput v-model="state.amount" class="w-3/4" />
           </UFormField>
           <UFormField
-            v-if="tab === 'postPaid'"
+            v-if="postPaid"
+            label="Anzahl Stunden in Rechnung stellen"
+            name="hours"
+            class="col-span-12"
+          >
+            <UInput v-model="state.hours" class="w-3/4" />
+          </UFormField>
+          <UFormField
             label="Stundensatz (chf)"
             name="hourlyRate"
             class="col-span-12"
@@ -166,7 +179,6 @@
             <UInput v-model="state.hourlyRate" class="w-3/4" />
           </UFormField>
           <UFormField
-            v-if="tab === 'postPaid'"
             label="Prozente We.Publish"
             name="wepPercentage"
             class="col-span-12"
@@ -196,9 +208,9 @@
         <div class="col-span-6">
           <div class="col-span-12 font-bold pb-4">Vorschau Rechnung</div>
 
-          <div v-if="tab === 'postPaid'" class="grid grid-cols-12">
+          <div class="grid grid-cols-12">
             <div class="col-span-6">Stunden abzurechnen:</div>
-            <div class="col-span-6 text-end">{{ state.amount }} h</div>
+            <div class="col-span-6 text-end">{{ state.hours }} h</div>
             <div class="col-span-6 border-b">
               Genossenschaftsanteil We.Publish
             </div>

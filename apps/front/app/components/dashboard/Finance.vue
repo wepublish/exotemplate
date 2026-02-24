@@ -89,19 +89,7 @@
           </UProgress>
         </div>
 
-        <!-- create bexio invoice -->
-        <div
-          v-if="userStore.amIAdministrator()"
-          class="flex justify-between w-full pt-6"
-        >
-          <UButton
-            :to="`/${clientPeriodId}/create-bexio-invoice?amount=${sums.totalAvailableHours * -1}`"
-            variant="outline"
-            icon="material-symbols:add-notes"
-          >
-            Bexio-Rechnung generieren
-          </UButton>
-
+        <div class="flex justify-end w-full pt-6">
           <UButton
             variant="subtle"
             icon="ic:twotone-search"
@@ -133,6 +121,19 @@
             </UButton>
           </template>
         </UTable>
+
+        <div
+          v-if="userStore.amIAdministrator()"
+          class="flex justify-center w-full pt-6"
+        >
+          <UButton
+            :to="`/${clientPeriodId}/create-bexio-invoice?amount=0`"
+            variant="outline"
+            icon="material-symbols:add-notes"
+          >
+            Bexio-Rechnung generieren
+          </UButton>
+        </div>
       </template>
     </USlideover>
 
@@ -164,6 +165,18 @@
             </p>
             <p class="font-bold pt-1">{{ sums.totalAvailableHours }} h</p>
           </div>
+        </div>
+        <div
+          v-if="userStore.amIAdministrator()"
+          class="flex justify-center w-full pt-6"
+        >
+          <UButton
+            :to="`/${clientPeriodId}/create-bexio-invoice?hours=${(sums?.totalAvailableHours || 0) * -1}`"
+            variant="outline"
+            icon="material-symbols:add-notes"
+          >
+            Bexio-Rechnung generieren
+          </UButton>
         </div>
       </template>
     </USlideover>
