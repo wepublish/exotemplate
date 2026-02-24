@@ -5,6 +5,7 @@
 
   const toast = useToast()
   const route = useRoute()
+  const router = useRouter()
   const directus = useDirectus()
   const userStore = useUserStore()
   const topUpsComp = useTopUps()
@@ -101,6 +102,15 @@
 </script>
 
 <template>
+  <UButton
+    icon="material-symbols:arrow-back-ios"
+    variant="ghost"
+    size="sm"
+    class="mb-4"
+    @click="router.back()"
+  >
+    Zurück
+  </UButton>
   <UPageCard>
     <template #title> Bexio-Rechnung erstellen </template>
     <template #description>
