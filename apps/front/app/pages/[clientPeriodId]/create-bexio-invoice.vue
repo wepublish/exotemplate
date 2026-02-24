@@ -1,6 +1,6 @@
 <script lang="ts" setup>
   import * as z from 'zod'
-  import type { FormSubmitEvent } from '@nuxt/ui'
+  import type { FormSubmitEvent, TabsItem } from '@nuxt/ui'
   import type { InvoicesStatic } from 'bexio'
 
   const toast = useToast()
@@ -99,6 +99,22 @@
       loading.value = false
     }
   }
+
+  const tabs: TabsItem[] = [
+    {
+      label: 'Post-Paid (Stundenbasiert)',
+      icon: 'mdi:watch',
+      slot: 'postPaid',
+      value: 'postPaid'
+    },
+    {
+      label: 'Pre-Paid (Betragsbasiert)',
+      icon: 'mdi:bird',
+      slot: 'prePaid',
+      value: 'prePaid'
+    }
+  ]
+  const tab = ref<'postPaid' | 'prePaid'>('postPaid')
 </script>
 
 <template>
@@ -113,50 +129,56 @@
   </UButton>
   <UPageCard>
     <template #title> Bexio-Rechnung erstellen </template>
+    <UTabs :items="tabs" v-model="tab" />
+
     <template #description>
-      <p class="max-w-1/2">
-        Hier kannst Du automatisch eine Bexio-Rechnung erstellen. Zu deinen
-        Stunden wird automatisch der We.Publish-Genossenschaftsbeitrag
-        hinzugerechnet.
-      </p>
-      <p class="max-w-1/2 pt-2">
+      <p>Hier kannst Du automatisch eine Bexio-Rechnung erstellen.</p>
+      <p>
         Eine Zahlung / Top-Up wird im One-Dashboard automatisch hinzugefügt und
         mit der Bexio-Rechnung verknüpft.
       </p>
+      <p v-if="tab === 'postPaid'" class="font-bold">
+        Zu deinen Stunden wird automatisch der We.Publish-Genossenschaftsbeitrag
+        hinzugerechnet.
+      </p>
     </template>
+
     <UForm :schema="schema" :state="state" @submit="onSubmit">
       <div class="grid grid-cols-12 gap-4 items-start pt-10">
         <div class="col-span-6 grid grid-cols-12 gap-4">
           <UFormField label="Rechnungstitel" name="title" class="col-span-12">
-            <UInput v-model="state.title" />
+            <UInput v-model="state.title" class="w-3/4" />
           </UFormField>
           <UFormField
+            v-if="tab === 'postPaid'"
             label="Anzahl Stunden in Rechnung stellen"
             name="amount"
             class="col-span-12"
           >
-            <UInput v-model="state.amount" />
+            <UInput v-model="state.amount" class="w-3/4" />
           </UFormField>
           <UFormField
+            v-if="tab === 'postPaid'"
             label="Stundensatz (chf)"
             name="hourlyRate"
             class="col-span-12"
           >
-            <UInput v-model="state.hourlyRate" />
+            <UInput v-model="state.hourlyRate" class="w-3/4" />
           </UFormField>
           <UFormField
+            v-if="tab === 'postPaid'"
             label="Prozente We.Publish"
             name="wepPercentage"
             class="col-span-12"
           >
-            <UInput v-model="state.wepPercentage" />
+            <UInput v-model="state.wepPercentage" class="w-3/4" />
           </UFormField>
           <UFormField
             label="Beschreibung Position"
             name="note"
-            class="col-span-8"
+            class="col-span-12"
           >
-            <UTextarea v-model="state.note" :cols="100" />
+            <UTextarea v-model="state.note" :rows="5" class="w-full" />
           </UFormField>
           <UButton
             v-if="!createdBexioInvoice"
@@ -171,22 +193,27 @@
         </div>
 
         <!-- preview -->
-        <div class="col-span-6 grid grid-cols-12">
+        <div class="col-span-6">
           <div class="col-span-12 font-bold pb-4">Vorschau Rechnung</div>
-          <div class="col-span-6">Stunden abzurechnen:</div>
-          <div class="col-span-6 text-end">{{ state.amount }} h</div>
-          <div class="col-span-6 border-b">
-            Genossenschaftsanteil We.Publish
-          </div>
-          <div class="col-span-6 border-b text-end">
-            {{ wePublishAmount }} h
-          </div>
-          <div class="col-span-6 font-bold">Total Stunden</div>
-          <div class="col-span-6 font-bold text-end">{{ totalAmount }} h</div>
 
-          <div class="col-span-6 font-bold pt-8">Total Rechnungsbetrag</div>
-          <div class="col-span-6 font-bold text-end pt-8">
-            {{ toalPrice }} CHF
+          <div v-if="tab === 'postPaid'" class="grid grid-cols-12">
+            <div class="col-span-6">Stunden abzurechnen:</div>
+            <div class="col-span-6 text-end">{{ state.amount }} h</div>
+            <div class="col-span-6 border-b">
+              Genossenschaftsanteil We.Publish
+            </div>
+            <div class="col-span-6 border-b text-end">
+              {{ wePublishAmount }} h
+            </div>
+            <div class="col-span-6 font-bold">Total Stunden</div>
+            <div class="col-span-6 font-bold text-end">{{ totalAmount }} h</div>
+          </div>
+
+          <div class="grid grid-cols-12">
+            <div class="col-span-6 font-bold pt-8">Total Rechnungsbetrag</div>
+            <div class="col-span-6 font-bold text-end pt-8">
+              {{ toalPrice }} CHF
+            </div>
           </div>
         </div>
 
@@ -243,5 +270,3 @@
     </UForm>
   </UPageCard>
 </template>
-
-<style></style>
