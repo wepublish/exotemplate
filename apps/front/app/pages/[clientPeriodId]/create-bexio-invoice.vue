@@ -9,15 +9,17 @@
   const directus = useDirectus()
   const userStore = useUserStore()
   const topUpsComp = useTopUps()
+  const financeCalc = useFinanceCalculations()
 
   const todayText = new Date().toLocaleDateString('de', { dateStyle: 'medium' })
 
   const hours = computed<number | undefined>(() =>
     route.query?.hours ? Number(route.query.hours) : undefined
   )
-  const amount = computed<number | undefined>(() =>
+  const amount = ref<number | undefined>(
     route.query?.amount ? Number(route.query.amount) : undefined
   )
+
   const clientPeriodId = computed<number | undefined>(() => {
     const clientPeriodId = route.params?.clientPeriodId
     if (!clientPeriodId) return
@@ -66,17 +68,15 @@
   const createdBexioInvoice = ref<InvoicesStatic.Invoice | undefined>(undefined)
   const createdTopUpId = ref<string | undefined>(undefined)
 
-  const totalAmount = computed<number>(
-    () =>
-      Math.round(
-        ((state.hours || 0) * 100) / (100 - (state.wepPercentage || 0)) / 0.25
-      ) * 0.25
+  const totalHoursWithWepPercentage = computed<number>(() =>
+    financeCalc.getHoursWithWepPercentageOnTop(state.hours, state.wepPercentage)
   )
-  const wePublishAmount = computed<number>(
-    () => totalAmount.value - (state.hours || 0)
+
+  const wePublishHours = computed<number>(
+    () => totalHoursWithWepPercentage.value - (state.hours || 0)
   )
   const toalPrice = computed<number>(
-    () => totalAmount.value * (state.hourlyRate || 0)
+    () => totalHoursWithWepPercentage.value * (state.hourlyRate || 0)
   )
 
   const bexioInvoiceUrl = computed<string | undefined>(() => {
@@ -98,7 +98,7 @@
           clientPeriodId: clientPeriodId.value!,
           title: state.title!,
           text: state.note!,
-          amount: totalAmount.value,
+          amount: totalHoursWithWepPercentage.value,
           unit_price: state.hourlyRate!,
           wepPercentage: state.wepPercentage!
         })
@@ -121,6 +121,24 @@
       loading.value = false
     }
   }
+
+  // update hours if amount or state changes
+  watch(
+    [state, amount],
+    () => {
+      // only update if tab is on prepaid
+      if (prePaid.value) {
+        state.hours = financeCalc.getHoursByAmount(
+          amount.value,
+          state.hourlyRate,
+          state.wepPercentage
+        ).clientHours
+      }
+    },
+    {
+      immediate: true
+    }
+  )
 </script>
 
 <template>
@@ -161,7 +179,7 @@
             name="amount"
             class="col-span-12"
           >
-            <UInput v-model="state.amount" class="w-3/4" />
+            <UInput v-model="amount" class="w-3/4" />
           </UFormField>
           <UFormField
             v-if="postPaid"
@@ -215,10 +233,12 @@
               Genossenschaftsanteil We.Publish
             </div>
             <div class="col-span-6 border-b text-end">
-              {{ wePublishAmount }} h
+              {{ wePublishHours }} h
             </div>
             <div class="col-span-6 font-bold">Total Stunden</div>
-            <div class="col-span-6 font-bold text-end">{{ totalAmount }} h</div>
+            <div class="col-span-6 font-bold text-end">
+              {{ totalHoursWithWepPercentage }} h
+            </div>
           </div>
 
           <div class="grid grid-cols-12">
@@ -227,6 +247,20 @@
               {{ toalPrice }} CHF
             </div>
           </div>
+
+          <UAlert
+            v-if="amount !== toalPrice"
+            color="error"
+            variant="soft"
+            icon="mdi:flash-triangle-outline"
+            class="mt-4"
+          >
+            <template #title>Angepasster Rechnungsbetrag</template>
+            <template #description
+              >Der Rechnungsbetrag wurde aufgrund von Rundungsregeln automatisch
+              angepasst.</template
+            >
+          </UAlert>
         </div>
 
         <!-- bexio invoice was created -->
