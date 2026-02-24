@@ -79,7 +79,7 @@
             status
             size="2xl"
             class="col-span-6"
-            :color="progressColor as any"
+            :color="progressColor"
           >
             <template #status>
               <p :class="`text-${progressColor}`">
@@ -154,7 +154,14 @@
           <div class="text-right">
             <p>{{ sums.totalTopUps }} h</p>
             <p>- {{ sums.billableHours }} h</p>
-            <p class="border-b">- {{ sums.totalManualWorkHours }} h</p>
+            <p class="border-b">
+              {{
+                sums.totalManualWorkHours < 0
+                  ? `+ ${sums.totalManualWorkHours * -1}`
+                  : `- ${sums.totalManualWorkHours}`
+              }}
+              h
+            </p>
             <p class="font-bold pt-1">{{ sums.totalAvailableHours }} h</p>
           </div>
         </div>
