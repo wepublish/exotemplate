@@ -30,7 +30,7 @@
   )
 
   const progressColor = computed<string>(() => {
-    const sums = props.sums?.totalUsedPercentage || 0
+    const sums = props.sums?.totalUsedPercentage || 100
     if (sums >= 90) {
       return 'error'
     }
@@ -75,7 +75,7 @@
 
         <div>
           <UProgress
-            :model-value="sums.totalUsedPercentage"
+            :model-value="sums.totalUsedPercentage || 100"
             status
             size="2xl"
             class="col-span-6"
@@ -83,7 +83,7 @@
           >
             <template #status>
               <p :class="`text-${progressColor}`">
-                {{ sums.totalUsedPercentage }} %
+                {{ sums.totalUsedPercentage || 100 }} %
               </p>
             </template>
           </UProgress>
