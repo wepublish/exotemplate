@@ -287,7 +287,8 @@ function computeEntryGroups(
       totalManualWorkHours,
       totalUsedHours,
       totalAvailableHours,
-      totalUsedPercentage
+      totalUsedPercentage:
+        totalUsedPercentage === null ? 100 : totalUsedPercentage
     }
   }
 }
