@@ -75,19 +75,25 @@
   const dataLoaderKey = computed<string>(
     () => `clientPeriodId-${selectedClientPeriodId.value}`
   )
-  const { data: computedEntryGroups, pending } = await useAsyncData(
-    dataLoaderKey,
-    async () => {
-      if (!selectedClientPeriodId.value) {
-        return
-      }
-      return (
-        await getCustomEndpoint('aggregatedHours', {
-          clientPeriodId: selectedClientPeriodId.value
-        })
-      ).data as Promise<EntryGroupComputed>
+  const {
+    data: computedEntryGroups,
+    pending,
+    error
+  } = await useAsyncData(dataLoaderKey, async () => {
+    if (!selectedClientPeriodId.value) {
+      return
     }
-  )
+
+    try {
+      const response = await getCustomEndpoint('aggregatedHours', {
+        clientPeriodId: selectedClientPeriodId.value
+      })
+      return response.data as EntryGroupComputed
+    } catch (err: any) {
+      const firstError = err.response?.data?.errors?.[0]
+      throw new Error(firstError.message)
+    }
+  })
 </script>
 
 <template>
@@ -123,8 +129,21 @@
 
     <USkeleton v-if="pending" class="h-16 col-span-12" />
 
+    <UAlert
+      v-if="error"
+      title="Beim Abrufen der Daten ist ein Fehler aufgetreten."
+      :description="error.message"
+      color="error"
+      variant="soft"
+      class="col-span-12"
+      icon="i-heroicons-exclamation-triangle"
+    />
+
     <!-- budget of client -->
-    <div class="col-span-12" v-if="selectedClientPeriodId && !pending">
+    <div
+      class="col-span-12"
+      v-if="selectedClientPeriodId && !pending && !error"
+    >
       <DashboardFinance
         :client-period-id="selectedClientPeriodId"
         :sums="computedEntryGroups?.sums"
@@ -132,12 +151,18 @@
     </div>
 
     <!-- clockodo insights -->
-    <div class="col-span-12" v-if="selectedClientPeriodId && !pending">
+    <div
+      class="col-span-12"
+      v-if="selectedClientPeriodId && !pending && !error"
+    >
       <WorkLog :entry-groups="computedEntryGroups" />
     </div>
 
     <!-- manual correction entries -->
-    <div class="col-span-12" v-if="selectedClientPeriodId && !pending">
+    <div
+      class="col-span-12"
+      v-if="selectedClientPeriodId && !pending && !error"
+    >
       <ManualWorkEntries :client-period-id="selectedClientPeriodId" />
     </div>
   </div>
