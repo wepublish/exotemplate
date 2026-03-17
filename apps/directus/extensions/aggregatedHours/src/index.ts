@@ -124,6 +124,11 @@ interface ValidatedEnv {
 const JIRA_ISSUE_GROUP_ID = '1100301'
 const MISSING_ENV_ERROR = createError('500', 'Missing env variables.')
 
+function MOVED_JIRA_ISSUE_ERROR(message: string) {
+  const ErrorClass = createError('MOVED_JIRA_ISSUE', message, 500)
+  return new ErrorClass()
+}
+
 export default defineEndpoint((router, context) => {
   router.get('/', async (_req: Request & any, res, next) => {
     try {
@@ -533,8 +538,8 @@ async function decorateWithJiraIssues(
       (subGroup) => subGroup.name === estimate.key
     )
     if (!existing) {
-      throw new Error(
-        `Unexpected Error: Could not find jira key where it should exist. ${estimate.key}`
+      throw MOVED_JIRA_ISSUE_ERROR(
+        `Could not find jira key ${estimate.key}. The jira issue was probably moved into another project. Rename it on Clockodo.`
       )
     }
 
