@@ -17,6 +17,8 @@
   const amount = ref<number | undefined>(
     route.query?.amount ? Number(route.query.amount) : undefined
   )
+  const quarter = ref<number | undefined>(undefined)
+  const year = ref<number>(new Date().getFullYear())
 
   const clientPeriodId = computed<number | undefined>(() => {
     const clientPeriodId = route.params?.clientPeriodId
@@ -155,12 +157,12 @@
 
   // update texts depending on tab
   watch(
-    tab,
+    [tab, quarter, year],
     () => {
       if (prePaid.value) {
         state.hourlyRate = 120
-        state.title = `We.Develop Prepaid [NUMMER] Quartal [JAHR]`
-        state.note = `We.Develop in Prepaid gemäss vertraglicher Vereinbarung. [NUMMER] Quartal [JAHR]. Abrechnungsdetails siehe Dashboard We.Publish ONE`
+        state.title = `We.Develop Prepaid ${quarter.value || '[QUARTAL]'}. Quartal ${year.value}`
+        state.note = `We.Develop in Prepaid gemäss vertraglicher Vereinbarung. ${quarter.value || '[QUARTAL]'}. Quartal ${year.value}. Abrechnungsdetails siehe Dashboard We.Publish ONE`
       }
       if (postPaid.value) {
         state.hourlyRate = 150
@@ -199,6 +201,19 @@
         hinzugerechnet.
       </p>
     </template>
+
+    <div v-if="prePaid" class="grid grid-cols-12 gap-4 items-start">
+      <div class="col-span-2">
+        <UFormField label="Quartal" name="quarter">
+          <UInput v-model="quarter" class="w-full" />
+        </UFormField>
+      </div>
+      <div class="col-span-2">
+        <UFormField label="Jahr" name="quarter">
+          <UInput v-model="year" class="w-full" />
+        </UFormField>
+      </div>
+    </div>
 
     <UForm :schema="schema" :state="state" @submit="onSubmit">
       <div class="grid grid-cols-12 gap-4 items-start pt-10">
