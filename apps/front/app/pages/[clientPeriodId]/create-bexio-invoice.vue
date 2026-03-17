@@ -2,6 +2,7 @@
   import * as z from 'zod'
   import type { FormSubmitEvent, TabsItem } from '@nuxt/ui'
   import type { InvoicesStatic } from 'bexio'
+  import { CalendarDate } from '@internationalized/date'
 
   const toast = useToast()
   const route = useRoute()
@@ -19,6 +20,14 @@
   )
   const quarter = ref<number | undefined>(undefined)
   const year = ref<number>(new Date().getFullYear())
+  const billingDate = ref<CalendarDate>(
+    new CalendarDate(
+      new Date().getFullYear(),
+      new Date().getMonth() + 1,
+      new Date().getDate()
+    )
+  )
+  const inputDate = useTemplateRef('inputDate')
 
   const clientPeriodId = computed<number | undefined>(() => {
     const clientPeriodId = route.params?.clientPeriodId
@@ -49,8 +58,9 @@
     title: z.string('Rechnungstitel eingeben'),
     hours: z.coerce.number('Anzahl Stunden eingeben'),
     hourlyRate: z.coerce.number('Stundensatz eingeben'),
-    wepPercentage: z.coerce.number('Prozent für We.Publish eingeben'),
-    note: z.string('Bemerkung eingeben')
+    wepPercentage: z.coerce.number('Prozent für We.Share eingeben'),
+    note: z.string('Bemerkung eingeben'),
+    billingDate: z.any()
   })
 
   type Schema = z.output<typeof schema>
@@ -112,7 +122,8 @@
           text: state.note!,
           amount: totalHoursWithWepPercentage.value,
           unit_price: state.hourlyRate!,
-          wepPercentage: state.wepPercentage!
+          wepPercentage: state.wepPercentage!,
+          billingDate: billingDate.value.toString()
         })
       ).data as { bexioInvoice: InvoicesStatic.Invoice; topUpId: string }
 
@@ -159,6 +170,7 @@
   watch(
     [tab, quarter, year],
     () => {
+      billingDate.value = getBillingDateByQuarter()
       if (prePaid.value) {
         state.hourlyRate = 120
         state.title = `We.Develop Prepaid ${quarter.value || '[QUARTAL]'}. Quartal ${year.value}`
@@ -174,6 +186,36 @@
       immediate: true
     }
   )
+
+  function getBillingDateByQuarter(): CalendarDate {
+    let tmpBd = new Date()
+
+    if (quarter.value && year.value && prePaid.value) {
+      switch (Number(quarter.value)) {
+        case 1:
+          // return 15th of January >> payment by 15th of Feb.
+          tmpBd = new Date(year.value, 0, 15)
+          break
+        case 2:
+          tmpBd = new Date(year.value, 3, 15)
+          break
+        case 3:
+          tmpBd = new Date(year.value, 6, 15)
+          break
+        case 4:
+          tmpBd = new Date(year.value, 9, 15)
+          break
+        default:
+          tmpBd = new Date()
+      }
+    }
+
+    return new CalendarDate(
+      tmpBd.getFullYear(),
+      tmpBd.getMonth() + 1,
+      tmpBd.getDate()
+    )
+  }
 </script>
 
 <template>
@@ -204,52 +246,76 @@
 
     <div v-if="prePaid" class="grid grid-cols-12 gap-4 items-start">
       <div class="col-span-2">
-        <UFormField label="Quartal" name="quarter">
-          <UInput v-model="quarter" class="w-full" />
+        <UFormField label="Jahr" name="quarter">
+          <UInput v-model="year" class="w-full" />
         </UFormField>
       </div>
       <div class="col-span-2">
-        <UFormField label="Jahr" name="quarter">
-          <UInput v-model="year" class="w-full" />
+        <UFormField label="Quartal" name="quarter">
+          <UInput v-model="quarter" class="w-full" />
         </UFormField>
       </div>
     </div>
 
     <UForm :schema="schema" :state="state" @submit="onSubmit">
-      <div class="grid grid-cols-12 gap-4 items-start pt-10">
+      <div class="grid grid-cols-12 gap-12 items-start pt-10">
         <div class="col-span-6 grid grid-cols-12 gap-4">
+          <UFormField
+            label="Rechnungsdatum"
+            name="billingDate"
+            class="col-span-12"
+          >
+            {{
+              new Date(billingDate.toString()).toLocaleDateString('de', {
+                dateStyle: 'medium'
+              })
+            }}
+
+            <UPopover :reference="inputDate?.inputsRef[3]?.$el">
+              <UButton
+                size="xs"
+                icon="i-lucide-calendar"
+                class="ml-2"
+                variant="outline"
+                >Datum wählen</UButton
+              >
+              <template #content>
+                <UCalendar v-model="billingDate" />
+              </template>
+            </UPopover>
+          </UFormField>
           <UFormField label="Rechnungstitel" name="title" class="col-span-12">
-            <UInput v-model="state.title" class="w-3/4" />
+            <UInput v-model="state.title" class="w-full" />
           </UFormField>
           <UFormField
             v-if="prePaid"
             label="Pauschaler Rechnungsbetrag (CHF)"
             name="amount"
-            class="col-span-12"
+            class="col-span-6"
           >
-            <UInput v-model="amount" class="w-3/4" />
+            <UInput v-model="amount" class="w-full" />
           </UFormField>
           <UFormField
             v-if="postPaid"
-            label="Anzahl Stunden in Rechnung stellen"
+            label="Anzahl Stunden"
             name="hours"
-            class="col-span-12"
+            class="col-span-6"
           >
-            <UInput v-model="state.hours" class="w-3/4" />
+            <UInput v-model="state.hours" class="w-full" />
           </UFormField>
           <UFormField
             label="Stundensatz (chf)"
             name="hourlyRate"
-            class="col-span-12"
+            class="col-span-6"
           >
-            <UInput v-model="state.hourlyRate" class="w-3/4" />
+            <UInput v-model="state.hourlyRate" class="w-full" />
           </UFormField>
           <UFormField
-            label="Prozente We.Publish"
+            label="We.Share Prozente"
             name="wepPercentage"
-            class="col-span-12"
+            class="col-span-6"
           >
-            <UInput v-model="state.wepPercentage" class="w-3/4" />
+            <UInput v-model="state.wepPercentage" class="w-full" />
           </UFormField>
           <UFormField
             label="Beschreibung Position"
