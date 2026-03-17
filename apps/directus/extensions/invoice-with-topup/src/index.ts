@@ -101,7 +101,7 @@ export default defineEndpoint((router, { env, services, getSchema }) => {
         billingDate: new Date(billingDate)
       })
 
-      if (!bexioInvoice?.id || !bexioInvoice.total) {
+      if (!bexioInvoice?.id || !bexioInvoice.total_gross) {
         return next(new BEXIO_ERROR())
       }
 
@@ -110,7 +110,7 @@ export default defineEndpoint((router, { env, services, getSchema }) => {
         status: 'published',
         clientPeriod: clientPeriodId,
         bexioInvoiceId: bexioInvoice.id,
-        amount: Number(bexioInvoice.total),
+        amount: Number(bexioInvoice.total_gross),
         hourlyRate: Number(unit_price),
         wepPercentage: Number(wepPercentage),
         note: title
