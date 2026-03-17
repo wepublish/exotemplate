@@ -37,10 +37,24 @@ export default defineEndpoint((router, { env, services, getSchema }) => {
       }
 
       // get body params
-      const { clientPeriodId, title, text, amount, unit_price, wepPercentage } =
-        _req.body
+      const {
+        clientPeriodId,
+        title,
+        text,
+        amount,
+        unit_price,
+        wepPercentage,
+        billingDate
+      } = _req.body
 
-      if (!clientPeriodId || !title || !text || !amount || !unit_price) {
+      if (
+        !clientPeriodId ||
+        !title ||
+        !text ||
+        !amount ||
+        !unit_price ||
+        !billingDate
+      ) {
         return next(
           new InvalidPayloadError({
             reason: 'Missing body params text, amount or unit_price!'
@@ -83,7 +97,8 @@ export default defineEndpoint((router, { env, services, getSchema }) => {
         title: title.toString(),
         text: text.toString(),
         amount: amount.toString(),
-        unit_price: unit_price.toString()
+        unit_price: unit_price.toString(),
+        billingDate: new Date(billingDate)
       })
 
       if (!bexioInvoice?.id || !bexioInvoice.total) {
@@ -114,7 +129,8 @@ async function createBexioInvoice({
   title,
   text,
   amount,
-  unit_price
+  unit_price,
+  billingDate
 }: {
   bexioToken: string
   contactId: number
@@ -122,6 +138,7 @@ async function createBexioInvoice({
   text: string
   amount: string
   unit_price: string
+  billingDate: Date
 }): Promise<InvoicesStatic.Invoice> {
   const bexio = new Bexio(bexioToken)
 
@@ -139,6 +156,7 @@ async function createBexioInvoice({
     user_id: BEXIO_USER_ID,
     positions: [position],
     title,
+    is_valid_from: billingDate.toISOString(),
     mwst_type: 0,
     mwst_is_net: true
   })
