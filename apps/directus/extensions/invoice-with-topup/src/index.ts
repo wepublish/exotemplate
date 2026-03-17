@@ -10,9 +10,7 @@ import { Client, ClientPeriod, TopUp } from './DirectusTypes'
 
 // https://office.bexio.com/user_manager/editRights/id/1
 const BEXIO_USER_ID = 1
-// TODO: will change every year
-// https://office.bexio.com/index.php/accountingSettings/vatSettingsYear/id/4
-const BEXIO_MWST_ID = 3
+const BEXIO_MWST_ID = 47
 const BEXIO_UNIT_ID = 2
 
 const MISSING_ENV_ERROR = createError('500', 'Missing env variables.')
@@ -140,6 +138,8 @@ async function createBexioInvoice({
     contact_id: contactId,
     user_id: BEXIO_USER_ID,
     positions: [position],
-    title
+    title,
+    mwst_type: 0,
+    mwst_is_net: true
   })
 }
