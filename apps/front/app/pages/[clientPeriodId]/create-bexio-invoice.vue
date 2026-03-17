@@ -73,10 +73,18 @@
   const wePublishHours = computed<number>(
     () => totalHoursWithWepPercentage.value - (state.hours || 0)
   )
-  const toalPrice = computed<number>(
+
+  const toalPriceWithoutVat = computed<number>(
     () => totalHoursWithWepPercentage.value * (state.hourlyRate || 0)
   )
 
+  const totalVat = computed<number>(
+    () => Math.round(toalPriceWithoutVat.value * 0.081 * 100) / 100
+  )
+
+  const totalPriceWithVat = computed<number>(
+    () => toalPriceWithoutVat.value + totalVat.value
+  )
   const bexioInvoiceUrl = computed<string | undefined>(() => {
     if (!createdBexioInvoice.value) {
       return
@@ -87,6 +95,10 @@
     if (!createdTopUpId.value) return
     return `${directus.API_URL()}/admin/content/TopUps/${createdTopUpId.value}`
   })
+
+  const showAmountDeviation = computed<boolean>(
+    () => prePaid.value && Number(amount.value) !== toalPriceWithoutVat.value
+  )
 
   async function onSubmit(event: FormSubmitEvent<Schema>) {
     try {
@@ -262,26 +274,45 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-12">
-            <div class="col-span-6 font-bold pt-8">Total Rechnungsbetrag</div>
-            <div class="col-span-6 font-bold text-end pt-8">
-              {{ toalPrice }} CHF
+          <div class="grid grid-cols-12 pt-8">
+            <div
+              class="col-span-6"
+              :class="{ 'text-error': showAmountDeviation }"
+            >
+              Total ohne MwSt.
+            </div>
+            <div
+              class="col-span-6 text-end"
+              :class="{ 'text-error': showAmountDeviation }"
+            >
+              {{ toalPriceWithoutVat }} CHF
+            </div>
+
+            <div v-if="showAmountDeviation" class="col-span-12 pb-2">
+              <UAlert
+                color="error"
+                variant="soft"
+                icon="mdi:flash-triangle-outline"
+              >
+                <template #title>Angepasster Rechnungsbetrag</template>
+                <template #description
+                  >Der Rechnungsbetrag wurde aufgrund von Rundungsregeln
+                  automatisch angepasst.</template
+                >
+              </UAlert>
+            </div>
+            <div class="col-span-6">MwSt.</div>
+            <div class="col-span-6 text-end">{{ totalVat }} CHF</div>
+          </div>
+
+          <div class="grid grid-cols-12 py-2 border-b border-t">
+            <div class="col-span-6 font-bold">Total mit MwSt.</div>
+            <div class="col-span-6 font-bold text-end">
+              {{ totalPriceWithVat }} CHF
             </div>
           </div>
 
-          <UAlert
-            v-if="prePaid && Number(amount) !== toalPrice"
-            color="error"
-            variant="soft"
-            icon="mdi:flash-triangle-outline"
-            class="mt-4"
-          >
-            <template #title>Angepasster Rechnungsbetrag</template>
-            <template #description
-              >Der Rechnungsbetrag wurde aufgrund von Rundungsregeln automatisch
-              angepasst.</template
-            >
-          </UAlert>
+          <div class="grid grid-cols-12"></div>
         </div>
 
         <!-- bexio invoice was created -->
