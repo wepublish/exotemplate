@@ -6,7 +6,7 @@ import {
 } from '@directus/errors'
 import { defineEndpoint } from '@directus/extensions-sdk'
 import Bexio, { InvoicesStatic, PositionStatic } from 'bexio'
-import { Client, ClientPeriod, TopUp } from './DirectusTypes'
+import { Client, ClientPeriod, TopUp } from '../DirectusTypes'
 
 // https://office.bexio.com/user_manager/editRights/id/1
 const BEXIO_USER_ID = 1
