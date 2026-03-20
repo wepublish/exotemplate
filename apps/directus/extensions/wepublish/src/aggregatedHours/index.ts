@@ -13,7 +13,7 @@ import {
   ManualWorkEntry,
   Period,
   TopUp
-} from './DirectusTypes'
+} from '../DirectusTypes'
 
 export interface EntryGroups {
   groups: EntryGroup[]
