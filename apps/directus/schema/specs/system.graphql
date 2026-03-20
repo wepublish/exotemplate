@@ -264,12 +264,13 @@ type Subscription {
   directus_versions_mutated(event: EventEnum): directus_versions_mutated
   directus_comments_mutated(event: EventEnum): directus_comments_mutated
   directus_sync_id_map_mutated(event: EventEnum): directus_sync_id_map_mutated
-  Clients_mutated(event: EventEnum): Clients_mutated
   TopUps_mutated(event: EventEnum): TopUps_mutated
+  Clients_mutated(event: EventEnum): Clients_mutated
   Clients_Periods_mutated(event: EventEnum): Clients_Periods_mutated
   Periods_mutated(event: EventEnum): Periods_mutated
   Clients_directus_users_mutated(event: EventEnum): Clients_directus_users_mutated
   ManualWorkEntries_mutated(event: EventEnum): ManualWorkEntries_mutated
+  PeerArticles_mutated(event: EventEnum): PeerArticles_mutated
 }
 
 """The `Boolean` scalar type represents `true` or `false`."""
@@ -360,10 +361,13 @@ type Clients {
   Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
   """
   bexio_contact_id: Int
+  apiUrl: String
   allowedUsers(filter: Clients_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_directus_users]
   allowedUsers_func: count_functions
   periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods]
   periods_func: count_functions
+  articles(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [PeerArticles]
+  articles_func: count_functions
 }
 
 type Clients_directus_users {
@@ -1721,6 +1725,33 @@ type ManualWorkEntries_mutated {
   data: ManualWorkEntries
 }
 
+type PeerArticles {
+  id: ID!
+  status: String
+  sort: Int
+  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  date_created: Date
+  date_created_func: datetime_functions
+  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  date_updated: Date
+  date_updated_func: datetime_functions
+  source_id: String!
+  source_publishedAt: Date!
+  source_publishedAt_func: datetime_functions
+  source_url: String
+  source_title: String
+  source_slug: String!
+  source_imageUrl: String
+  client(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients
+  source_lead: String
+}
+
+type PeerArticles_mutated {
+  key: ID!
+  event: EventEnum
+  data: PeerArticles
+}
+
 type Periods {
   date_created: Date
   date_created_func: datetime_functions
@@ -1979,10 +2010,13 @@ input Clients_filter {
   user_created: directus_users_filter
   user_updated: directus_users_filter
   bexio_contact_id: number_filter_operators
+  apiUrl: string_filter_operators
   allowedUsers: Clients_directus_users_quantifier_filter
   allowedUsers_func: count_function_filter_operators
   periods: Clients_Periods_quantifier_filter
   periods_func: count_function_filter_operators
+  articles: PeerArticles_quantifier_filter
+  articles_func: count_function_filter_operators
   _and: [Clients_filter]
   _or: [Clients_filter]
 }
@@ -2042,8 +2076,10 @@ input create_Clients_input {
   Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
   """
   bexio_contact_id: Int
+  apiUrl: String
   allowedUsers: [create_Clients_directus_users_input]
   periods: [create_Clients_Periods_input]
+  articles: [create_PeerArticles_input]
 }
 
 input create_Clients_Periods_input {
@@ -2337,6 +2373,24 @@ input create_ManualWorkEntries_input {
   title: String
   user_created: create_directus_users_input
   user_updated: create_directus_users_input
+}
+
+input create_PeerArticles_input {
+  id: ID
+  status: String
+  sort: Int
+  user_created: create_directus_users_input
+  date_created: Date
+  user_updated: create_directus_users_input
+  date_updated: Date
+  source_id: String!
+  source_publishedAt: Date!
+  source_url: String
+  source_title: String
+  source_slug: String!
+  source_imageUrl: String
+  client: create_Clients_input
+  source_lead: String
 }
 
 input create_Periods_input {
@@ -3023,6 +3077,55 @@ input number_filter_operators {
   _nbetween: [GraphQLStringOrFloat]
 }
 
+input PeerArticles_filter {
+  id: id_filter_operators
+  status: string_filter_operators
+  sort: number_filter_operators
+  user_created: directus_users_filter
+  date_created: date_filter_operators
+  date_created_func: datetime_function_filter_operators
+  user_updated: directus_users_filter
+  date_updated: date_filter_operators
+  date_updated_func: datetime_function_filter_operators
+  source_id: string_filter_operators
+  source_publishedAt: date_filter_operators
+  source_publishedAt_func: datetime_function_filter_operators
+  source_url: string_filter_operators
+  source_title: string_filter_operators
+  source_slug: string_filter_operators
+  source_imageUrl: string_filter_operators
+  client: Clients_filter
+  source_lead: string_filter_operators
+  _and: [PeerArticles_filter]
+  _or: [PeerArticles_filter]
+}
+
+""""""
+input PeerArticles_quantifier_filter {
+  id: id_filter_operators
+  status: string_filter_operators
+  sort: number_filter_operators
+  user_created: directus_users_filter
+  date_created: date_filter_operators
+  date_created_func: datetime_function_filter_operators
+  user_updated: directus_users_filter
+  date_updated: date_filter_operators
+  date_updated_func: datetime_function_filter_operators
+  source_id: string_filter_operators
+  source_publishedAt: date_filter_operators
+  source_publishedAt_func: datetime_function_filter_operators
+  source_url: string_filter_operators
+  source_title: string_filter_operators
+  source_slug: string_filter_operators
+  source_imageUrl: string_filter_operators
+  client: Clients_filter
+  source_lead: string_filter_operators
+  _and: [PeerArticles_filter]
+  _or: [PeerArticles_filter]
+  _some: PeerArticles_filter
+  _none: PeerArticles_filter
+}
+
 input Periods_filter {
   date_created: date_filter_operators
   date_created_func: datetime_function_filter_operators
@@ -3131,8 +3234,10 @@ input update_Clients_input {
   Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
   """
   bexio_contact_id: Int
+  apiUrl: String
   allowedUsers: [update_Clients_directus_users_input]
   periods: [update_Clients_Periods_input]
+  articles: [update_PeerArticles_input]
 }
 
 input update_Clients_Periods_input {
@@ -3500,6 +3605,24 @@ input update_ManualWorkEntries_input {
   title: String
   user_created: update_directus_users_input
   user_updated: update_directus_users_input
+}
+
+input update_PeerArticles_input {
+  id: ID
+  status: String
+  sort: Int
+  user_created: update_directus_users_input
+  date_created: Date
+  user_updated: update_directus_users_input
+  date_updated: Date
+  source_id: String
+  source_publishedAt: Date
+  source_url: String
+  source_title: String
+  source_slug: String
+  source_imageUrl: String
+  client: update_Clients_input
+  source_lead: String
 }
 
 input update_Periods_input {

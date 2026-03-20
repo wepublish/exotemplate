@@ -1,9 +1,9 @@
 {
-  "collection": "TopUps",
+  "collection": "PeerArticles",
   "field": "sort",
   "type": "integer",
   "meta": {
-    "collection": "TopUps",
+    "collection": "PeerArticles",
     "conditions": null,
     "display": null,
     "display_options": null,
@@ -16,7 +16,7 @@
     "readonly": false,
     "required": false,
     "searchable": true,
-    "sort": 4,
+    "sort": 3,
     "special": null,
     "translations": null,
     "validation": null,
@@ -25,7 +25,7 @@
   },
   "schema": {
     "name": "sort",
-    "table": "TopUps",
+    "table": "PeerArticles",
     "data_type": "integer",
     "default_value": null,
     "max_length": null,

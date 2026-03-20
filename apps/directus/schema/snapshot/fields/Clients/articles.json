@@ -1,0 +1,33 @@
+{
+  "collection": "Clients",
+  "field": "articles",
+  "type": "alias",
+  "meta": {
+    "collection": "Clients",
+    "conditions": null,
+    "display": null,
+    "display_options": null,
+    "field": "articles",
+    "group": null,
+    "hidden": false,
+    "interface": "list-o2m",
+    "note": null,
+    "options": {
+      "enableCreate": false,
+      "enableLink": true,
+      "enableSelect": false,
+      "template": "{{source_title}}"
+    },
+    "readonly": false,
+    "required": false,
+    "searchable": true,
+    "sort": 15,
+    "special": [
+      "o2m"
+    ],
+    "translations": null,
+    "validation": null,
+    "validation_message": null,
+    "width": "full"
+  }
+}

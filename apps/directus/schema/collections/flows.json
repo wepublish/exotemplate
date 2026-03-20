@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "name": "Scrape Articles from We.Publish Network",
+    "icon": "newsmode",
+    "color": null,
+    "description": null,
+    "status": "active",
+    "trigger": "manual",
+    "accountability": "all",
+    "options": {
+      "collections": [
+        "PeerArticles"
+      ],
+      "requireSelection": false,
+      "location": "collection"
+    },
+    "operation": "31a49153-4318-496b-91ff-910549b5d9b7",
+    "_syncId": "10a77950-d05d-42bc-bb87-d2f3337acae5"
+  }
+]

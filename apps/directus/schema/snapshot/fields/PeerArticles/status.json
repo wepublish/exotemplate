@@ -1,9 +1,9 @@
 {
-  "collection": "TopUps",
+  "collection": "PeerArticles",
   "field": "status",
   "type": "string",
   "meta": {
-    "collection": "TopUps",
+    "collection": "PeerArticles",
     "conditions": null,
     "display": "labels",
     "display_options": {
@@ -64,11 +64,11 @@
     "translations": null,
     "validation": null,
     "validation_message": null,
-    "width": "half"
+    "width": "full"
   },
   "schema": {
     "name": "status",
-    "table": "TopUps",
+    "table": "PeerArticles",
     "data_type": "character varying",
     "default_value": "draft",
     "max_length": 255,
