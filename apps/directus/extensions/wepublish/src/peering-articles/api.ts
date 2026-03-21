@@ -78,6 +78,8 @@ export default defineOperationApi<Options>({
           )
         } else {
           publicationDateFrom = new Date(latestArticle.source_publishedAt)
+          // workaround because directus cuts the milliseconds >> potential loss of articles
+          publicationDateFrom.setSeconds(publicationDateFrom.getSeconds() + 1)
         }
 
         const articles = await getLatestArticlesByClient(
@@ -98,22 +100,24 @@ async function saveLatestArticles(
   client: Client,
   articles: WePublishArticle[]
 ): Promise<void> {
-  const peerArticles: Partial<PeerArticle>[] = articles.map((article) => {
-    return {
-      client: client.id,
-      source_id: article.id,
-      source_slug: article.slug,
-      source_url: article.url,
-      source_publishedAt: new Date(article.publishedAt).toISOString(),
-      source_title: article.published?.title,
-      source_lead: article.published?.lead,
-      source_imageUrl:
-        article.published?.image?.url ||
-        article?.blocks?.find((block) => !!block?.image?.url)?.image?.url ||
-        null,
-      status: 'published'
-    }
-  })
+  const peerArticles: Partial<PeerArticle>[] = articles
+    .filter((article) => !article.peerId)
+    .map((article) => {
+      return {
+        client: client.id,
+        source_id: article.id,
+        source_slug: article.slug,
+        source_url: article.url,
+        source_publishedAt: new Date(article.publishedAt).toISOString(),
+        source_title: article.published?.title,
+        source_lead: article.published?.lead,
+        source_imageUrl:
+          article.published?.image?.url ||
+          article?.blocks?.find((block) => !!block?.image?.url)?.image?.url ||
+          null,
+        status: 'published'
+      }
+    })
 
   const storedArticles = await peerArticleService.createMany(peerArticles)
   console.log(
