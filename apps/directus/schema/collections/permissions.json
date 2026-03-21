@@ -2,6 +2,59 @@
   {
     "collection": "Clients_directus_users",
     "action": "read",
+    "permissions": null,
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "Clients_id",
+      "directus_users_id"
+    ],
+    "policy": "_sync_default_public_policy",
+    "_syncId": "737716b9-f7d0-46cd-9a45-34dd966f1556"
+  },
+  {
+    "collection": "Clients",
+    "action": "read",
+    "permissions": null,
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "apiUrl",
+      "name",
+      "allowedUsers"
+    ],
+    "policy": "_sync_default_public_policy",
+    "_syncId": "7721f03d-1733-4151-b8a3-ea9c4ede8e66"
+  },
+  {
+    "collection": "directus_users",
+    "action": "read",
+    "permissions": null,
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "first_name",
+      "last_name",
+      "email"
+    ],
+    "policy": "_sync_default_public_policy",
+    "_syncId": "167a577a-8d5f-4c9f-bbbe-14cf21074fad"
+  },
+  {
+    "collection": "PeerArticles",
+    "action": "read",
+    "permissions": null,
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "*"
+    ],
+    "policy": "_sync_default_public_policy",
+    "_syncId": "91166f50-7bb9-4f26-8a7c-3e5604e366d8"
+  },
+  {
+    "collection": "Clients_directus_users",
+    "action": "read",
     "permissions": {
       "_and": [
         {

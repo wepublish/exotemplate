@@ -16,5 +16,19 @@
     },
     "operation": "31a49153-4318-496b-91ff-910549b5d9b7",
     "_syncId": "10a77950-d05d-42bc-bb87-d2f3337acae5"
+  },
+  {
+    "name": "Cronjob Scrape Articles from We.Publish-Network",
+    "icon": "hourglass_full",
+    "color": null,
+    "description": null,
+    "status": "active",
+    "trigger": "schedule",
+    "accountability": "all",
+    "options": {
+      "cron": "0 30 * * * *"
+    },
+    "operation": "7095a097-e862-45a5-8b05-da605a0ee4b1",
+    "_syncId": "3bf5c16c-32c8-42a7-a85b-e78385653bd8"
   }
 ]
