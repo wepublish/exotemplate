@@ -1,4 +1,3 @@
-import { ForbiddenError } from '@directus/errors'
 import { defineOperationApi } from '@directus/extensions-sdk'
 import { Client, PeerArticle } from '../DirectusTypes'
 import { ItemsService } from '@directus/api/dist/services/items'
@@ -31,22 +30,14 @@ interface WePublishArticle {
 
 export default defineOperationApi<Options>({
   id: 'peering-articles',
-  handler: async ({ text }, { services, getSchema, accountability }) => {
+  handler: async ({ text }, { services, getSchema }) => {
     try {
-      // 1. check access rights
-      if (!accountability?.user) {
-        return new ForbiddenError()
-      }
-
       // 2. prepare some items services
+      const schema = await getSchema()
       const { ItemsService } = services
-      const clientsService = new ItemsService<Client>('Clients', {
-        schema: await getSchema(),
-        accountability
-      })
+      const clientsService = new ItemsService<Client>('Clients', { schema })
       const peerArticleService = new ItemsService<PeerArticle>('PeerArticles', {
-        schema: await getSchema(),
-        accountability
+        schema
       }) as ItemsService<PeerArticle>
 
       // 3. get list of media apis
