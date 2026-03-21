@@ -18,13 +18,15 @@ interface WePublishArticle {
     image: {
       url: string
     } | null
-  } | null
+    blocks:
+      | {
+          image: {
+            url: string | null
+          }
+        }[]
+      | null
+  }
   peerId: string | null
-  blocks: {
-    image: {
-      url: string | null
-    }
-  }[]
 }
 
 export default defineOperationApi<Options>({
@@ -113,7 +115,8 @@ async function saveLatestArticles(
         source_lead: article.published?.lead,
         source_imageUrl:
           article.published?.image?.url ||
-          article?.blocks?.find((block) => !!block?.image?.url)?.image?.url ||
+          article.published?.blocks?.find((block) => !!block?.image?.url)?.image
+            ?.url ||
           null,
         status: 'published'
       }
