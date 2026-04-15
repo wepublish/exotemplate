@@ -12,6 +12,7 @@ import { Client, ClientPeriod, TopUp } from '../DirectusTypes'
 const BEXIO_USER_ID = 1
 const BEXIO_MWST_ID = 47
 const BEXIO_UNIT_ID = 2
+const BEXIO_ACCOUNT_ID = 150 // Ertrag Dienstleistungen (account_no 3400)
 
 const MISSING_ENV_ERROR = createError('500', 'Missing env variables.')
 const BEXIO_ERROR = createError(
@@ -147,6 +148,7 @@ async function createBexioInvoice({
     type: 'KbPositionCustom',
     amount,
     unit_id: BEXIO_UNIT_ID,
+    account_id: BEXIO_ACCOUNT_ID,
     tax_id: BEXIO_MWST_ID,
     unit_price
   }
