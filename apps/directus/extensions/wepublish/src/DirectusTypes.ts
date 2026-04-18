@@ -25,6 +25,9 @@ export interface Client {
   user_updated: string | DirectusUser<Schema> | null
   bexio_contact_id: number | null
   apiUrl: string | null
+  slack_channel_id: string | null
+  onboarding_current_step: number | null
+  onboarding_manual_checklist: string[] | null
   allowedUsers: string[] | ClientDirectusUser[]
   periods: string[] | ClientPeriod[]
   articles: string[] | PeerArticle[]

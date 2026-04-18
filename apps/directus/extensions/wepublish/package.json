@@ -30,6 +30,11 @@
         "source": "src/invoice-with-topup/index.ts"
       },
       {
+        "type": "endpoint",
+        "name": "client-onboarding",
+        "source": "src/client-onboarding/index.ts"
+      },
+      {
         "type": "operation",
         "name": "peering-articles",
         "source": {

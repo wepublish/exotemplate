@@ -7,10 +7,6 @@ type Query {
   TopUps_by_id(id: ID!, version: String): TopUps
   TopUps_aggregated(groupBy: [String], filter: TopUps_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [TopUps_aggregated!]!
   TopUps_by_version(version: String!, id: ID!): version_TopUps
-  Clients(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients!]!
-  Clients_by_id(id: ID!, version: String): Clients
-  Clients_aggregated(groupBy: [String], filter: Clients_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [Clients_aggregated!]!
-  Clients_by_version(version: String!, id: ID!): version_Clients
   Clients_Periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods!]!
   Clients_Periods_by_id(id: ID!, version: String): Clients_Periods
   Clients_Periods_aggregated(groupBy: [String], filter: Clients_Periods_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [Clients_Periods_aggregated!]!
@@ -27,6 +23,10 @@ type Query {
   ManualWorkEntries_by_id(id: ID!, version: String): ManualWorkEntries
   ManualWorkEntries_aggregated(groupBy: [String], filter: ManualWorkEntries_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [ManualWorkEntries_aggregated!]!
   ManualWorkEntries_by_version(version: String!, id: ID!): version_ManualWorkEntries
+  Clients(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients!]!
+  Clients_by_id(id: ID!, version: String): Clients
+  Clients_aggregated(groupBy: [String], filter: Clients_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [Clients_aggregated!]!
+  Clients_by_version(version: String!, id: ID!): version_Clients
   PeerArticles(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [PeerArticles!]!
   PeerArticles_by_id(id: ID!, version: String): PeerArticles
   PeerArticles_aggregated(groupBy: [String], filter: PeerArticles_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [PeerArticles_aggregated!]!
@@ -38,8 +38,6 @@ type Mutation {
   create_directus_sync_id_map_item(data: create_directus_sync_id_map_input!): directus_sync_id_map
   create_TopUps_items(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_TopUps_input!]): [TopUps!]!
   create_TopUps_item(data: create_TopUps_input!): TopUps
-  create_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Clients_input!]): [Clients!]!
-  create_Clients_item(data: create_Clients_input!): Clients
   create_Clients_Periods_items(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Clients_Periods_input!]): [Clients_Periods!]!
   create_Clients_Periods_item(data: create_Clients_Periods_input!): Clients_Periods
   create_Periods_items(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Periods_input!]): [Periods!]!
@@ -48,6 +46,8 @@ type Mutation {
   create_Clients_directus_users_item(data: create_Clients_directus_users_input!): Clients_directus_users
   create_ManualWorkEntries_items(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_ManualWorkEntries_input!]): [ManualWorkEntries!]!
   create_ManualWorkEntries_item(data: create_ManualWorkEntries_input!): ManualWorkEntries
+  create_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Clients_input!]): [Clients!]!
+  create_Clients_item(data: create_Clients_input!): Clients
   create_PeerArticles_items(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_PeerArticles_input!]): [PeerArticles!]!
   create_PeerArticles_item(data: create_PeerArticles_input!): PeerArticles
   update_directus_sync_id_map_items(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_sync_id_map_input!): [directus_sync_id_map!]!
@@ -56,9 +56,6 @@ type Mutation {
   update_TopUps_items(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_TopUps_input!): [TopUps!]!
   update_TopUps_batch(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_TopUps_input!]): [TopUps!]!
   update_TopUps_item(id: ID!, data: update_TopUps_input!): TopUps
-  update_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Clients_input!): [Clients!]!
-  update_Clients_batch(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Clients_input!]): [Clients!]!
-  update_Clients_item(id: ID!, data: update_Clients_input!): Clients
   update_Clients_Periods_items(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Clients_Periods_input!): [Clients_Periods!]!
   update_Clients_Periods_batch(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Clients_Periods_input!]): [Clients_Periods!]!
   update_Clients_Periods_item(id: ID!, data: update_Clients_Periods_input!): Clients_Periods
@@ -71,6 +68,9 @@ type Mutation {
   update_ManualWorkEntries_items(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_ManualWorkEntries_input!): [ManualWorkEntries!]!
   update_ManualWorkEntries_batch(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_ManualWorkEntries_input!]): [ManualWorkEntries!]!
   update_ManualWorkEntries_item(id: ID!, data: update_ManualWorkEntries_input!): ManualWorkEntries
+  update_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Clients_input!): [Clients!]!
+  update_Clients_batch(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Clients_input!]): [Clients!]!
+  update_Clients_item(id: ID!, data: update_Clients_input!): Clients
   update_PeerArticles_items(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_PeerArticles_input!): [PeerArticles!]!
   update_PeerArticles_batch(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_PeerArticles_input!]): [PeerArticles!]!
   update_PeerArticles_item(id: ID!, data: update_PeerArticles_input!): PeerArticles
@@ -78,8 +78,6 @@ type Mutation {
   delete_directus_sync_id_map_item(id: ID!): delete_one
   delete_TopUps_items(ids: [ID]!): delete_many
   delete_TopUps_item(id: ID!): delete_one
-  delete_Clients_items(ids: [ID]!): delete_many
-  delete_Clients_item(id: ID!): delete_one
   delete_Clients_Periods_items(ids: [ID]!): delete_many
   delete_Clients_Periods_item(id: ID!): delete_one
   delete_Periods_items(ids: [ID]!): delete_many
@@ -88,6 +86,8 @@ type Mutation {
   delete_Clients_directus_users_item(id: ID!): delete_one
   delete_ManualWorkEntries_items(ids: [ID]!): delete_many
   delete_ManualWorkEntries_item(id: ID!): delete_one
+  delete_Clients_items(ids: [ID]!): delete_many
+  delete_Clients_item(id: ID!): delete_one
   delete_PeerArticles_items(ids: [ID]!): delete_many
   delete_PeerArticles_item(id: ID!): delete_one
 }
@@ -116,11 +116,11 @@ type Subscription {
   directus_comments_mutated(event: EventEnum): directus_comments_mutated
   directus_sync_id_map_mutated(event: EventEnum): directus_sync_id_map_mutated
   TopUps_mutated(event: EventEnum): TopUps_mutated
-  Clients_mutated(event: EventEnum): Clients_mutated
   Clients_Periods_mutated(event: EventEnum): Clients_Periods_mutated
   Periods_mutated(event: EventEnum): Periods_mutated
   Clients_directus_users_mutated(event: EventEnum): Clients_directus_users_mutated
   ManualWorkEntries_mutated(event: EventEnum): ManualWorkEntries_mutated
+  Clients_mutated(event: EventEnum): Clients_mutated
   PeerArticles_mutated(event: EventEnum): PeerArticles_mutated
 }
 
@@ -191,6 +191,20 @@ type Clients {
   """
   bexio_contact_id: Int
   apiUrl: String
+
+  """Slack channel ID created during client onboarding"""
+  slack_channel_id: String
+
+  """
+  Index of the last active onboarding step (0-based). Used to track progress for manual/email steps that have no service ID.
+  """
+  onboarding_current_step: Int
+
+  """
+  IDs of completed manual-onboarding checklist items. Persisted so the checklist state survives a page reload.
+  """
+  onboarding_manual_checklist: JSON
+  onboarding_manual_checklist_func: count_functions
   allowedUsers(filter: Clients_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_directus_users]
   allowedUsers_func: count_functions
   periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods]
@@ -231,6 +245,19 @@ type Clients_aggregated_count {
   """
   bexio_contact_id: Int
   apiUrl: Int
+
+  """Slack channel ID created during client onboarding"""
+  slack_channel_id: Int
+
+  """
+  Index of the last active onboarding step (0-based). Used to track progress for manual/email steps that have no service ID.
+  """
+  onboarding_current_step: Int
+
+  """
+  IDs of completed manual-onboarding checklist items. Persisted so the checklist state survives a page reload.
+  """
+  onboarding_manual_checklist: Int
   allowedUsers: Int
   periods: Int
   articles: Int
@@ -243,6 +270,11 @@ type Clients_aggregated_fields {
   Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
   """
   bexio_contact_id: Float
+
+  """
+  Index of the last active onboarding step (0-based). Used to track progress for manual/email steps that have no service ID.
+  """
+  onboarding_current_step: Float
 }
 
 type Clients_directus_users {
@@ -1201,6 +1233,19 @@ type version_Clients {
   """
   bexio_contact_id: Int
   apiUrl: String
+
+  """Slack channel ID created during client onboarding"""
+  slack_channel_id: String
+
+  """
+  Index of the last active onboarding step (0-based). Used to track progress for manual/email steps that have no service ID.
+  """
+  onboarding_current_step: Int
+
+  """
+  IDs of completed manual-onboarding checklist items. Persisted so the checklist state survives a page reload.
+  """
+  onboarding_manual_checklist: JSON
   allowedUsers: JSON
   periods: JSON
   articles: JSON
@@ -1355,6 +1400,10 @@ input Clients_filter {
   user_updated: directus_users_filter
   bexio_contact_id: number_filter_operators
   apiUrl: string_filter_operators
+  slack_channel_id: string_filter_operators
+  onboarding_current_step: number_filter_operators
+  onboarding_manual_checklist: string_filter_operators
+  onboarding_manual_checklist_func: count_function_filter_operators
   allowedUsers: Clients_directus_users_quantifier_filter
   allowedUsers_func: count_function_filter_operators
   periods: Clients_Periods_quantifier_filter
@@ -1421,6 +1470,19 @@ input create_Clients_input {
   """
   bexio_contact_id: Int
   apiUrl: String
+
+  """Slack channel ID created during client onboarding"""
+  slack_channel_id: String
+
+  """
+  Index of the last active onboarding step (0-based). Used to track progress for manual/email steps that have no service ID.
+  """
+  onboarding_current_step: Int
+
+  """
+  IDs of completed manual-onboarding checklist items. Persisted so the checklist state survives a page reload.
+  """
+  onboarding_manual_checklist: JSON
   allowedUsers: [create_Clients_directus_users_input]
   periods: [create_Clients_Periods_input]
   articles: [create_PeerArticles_input]
@@ -2344,6 +2406,19 @@ input update_Clients_input {
   """
   bexio_contact_id: Int
   apiUrl: String
+
+  """Slack channel ID created during client onboarding"""
+  slack_channel_id: String
+
+  """
+  Index of the last active onboarding step (0-based). Used to track progress for manual/email steps that have no service ID.
+  """
+  onboarding_current_step: Int
+
+  """
+  IDs of completed manual-onboarding checklist items. Persisted so the checklist state survives a page reload.
+  """
+  onboarding_manual_checklist: JSON
   allowedUsers: [update_Clients_directus_users_input]
   periods: [update_Clients_Periods_input]
   articles: [update_PeerArticles_input]

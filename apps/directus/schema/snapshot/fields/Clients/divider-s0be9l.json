@@ -1,29 +1,27 @@
 {
   "collection": "Clients",
-  "field": "articles",
+  "field": "divider-s0be9l",
   "type": "alias",
   "meta": {
     "collection": "Clients",
     "conditions": null,
     "display": null,
     "display_options": null,
-    "field": "articles",
+    "field": "divider-s0be9l",
     "group": null,
     "hidden": false,
-    "interface": "list-o2m",
+    "interface": "presentation-divider",
     "note": null,
     "options": {
-      "enableCreate": false,
-      "enableLink": true,
-      "enableSelect": false,
-      "template": "{{source_title}}"
+      "title": "Onboarding"
     },
     "readonly": false,
     "required": false,
     "searchable": true,
-    "sort": 16,
+    "sort": 17,
     "special": [
-      "o2m"
+      "alias",
+      "no-data"
     ],
     "translations": null,
     "validation": null,

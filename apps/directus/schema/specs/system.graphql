@@ -265,11 +265,11 @@ type Subscription {
   directus_comments_mutated(event: EventEnum): directus_comments_mutated
   directus_sync_id_map_mutated(event: EventEnum): directus_sync_id_map_mutated
   TopUps_mutated(event: EventEnum): TopUps_mutated
-  Clients_mutated(event: EventEnum): Clients_mutated
   Clients_Periods_mutated(event: EventEnum): Clients_Periods_mutated
   Periods_mutated(event: EventEnum): Periods_mutated
   Clients_directus_users_mutated(event: EventEnum): Clients_directus_users_mutated
   ManualWorkEntries_mutated(event: EventEnum): ManualWorkEntries_mutated
+  Clients_mutated(event: EventEnum): Clients_mutated
   PeerArticles_mutated(event: EventEnum): PeerArticles_mutated
 }
 
@@ -362,6 +362,20 @@ type Clients {
   """
   bexio_contact_id: Int
   apiUrl: String
+
+  """Slack channel ID created during client onboarding"""
+  slack_channel_id: String
+
+  """
+  Index of the last active onboarding step (0-based). Used to track progress for manual/email steps that have no service ID.
+  """
+  onboarding_current_step: Int
+
+  """
+  IDs of completed manual-onboarding checklist items. Persisted so the checklist state survives a page reload.
+  """
+  onboarding_manual_checklist: JSON
+  onboarding_manual_checklist_func: count_functions
   allowedUsers(filter: Clients_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_directus_users]
   allowedUsers_func: count_functions
   periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods]
@@ -2011,6 +2025,10 @@ input Clients_filter {
   user_updated: directus_users_filter
   bexio_contact_id: number_filter_operators
   apiUrl: string_filter_operators
+  slack_channel_id: string_filter_operators
+  onboarding_current_step: number_filter_operators
+  onboarding_manual_checklist: string_filter_operators
+  onboarding_manual_checklist_func: count_function_filter_operators
   allowedUsers: Clients_directus_users_quantifier_filter
   allowedUsers_func: count_function_filter_operators
   periods: Clients_Periods_quantifier_filter
@@ -2077,6 +2095,19 @@ input create_Clients_input {
   """
   bexio_contact_id: Int
   apiUrl: String
+
+  """Slack channel ID created during client onboarding"""
+  slack_channel_id: String
+
+  """
+  Index of the last active onboarding step (0-based). Used to track progress for manual/email steps that have no service ID.
+  """
+  onboarding_current_step: Int
+
+  """
+  IDs of completed manual-onboarding checklist items. Persisted so the checklist state survives a page reload.
+  """
+  onboarding_manual_checklist: JSON
   allowedUsers: [create_Clients_directus_users_input]
   periods: [create_Clients_Periods_input]
   articles: [create_PeerArticles_input]
@@ -3235,6 +3266,19 @@ input update_Clients_input {
   """
   bexio_contact_id: Int
   apiUrl: String
+
+  """Slack channel ID created during client onboarding"""
+  slack_channel_id: String
+
+  """
+  Index of the last active onboarding step (0-based). Used to track progress for manual/email steps that have no service ID.
+  """
+  onboarding_current_step: Int
+
+  """
+  IDs of completed manual-onboarding checklist items. Persisted so the checklist state survives a page reload.
+  """
+  onboarding_manual_checklist: JSON
   allowedUsers: [update_Clients_directus_users_input]
   periods: [update_Clients_Periods_input]
   articles: [update_PeerArticles_input]
