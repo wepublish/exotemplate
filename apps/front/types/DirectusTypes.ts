@@ -5,6 +5,7 @@ export interface Schema {
   Clients_Periods: ClientPeriod[]
   Clients_directus_users: ClientDirectusUser[]
   ManualWorkEntries: ManualWorkEntry[]
+  PeerArticles: PeerArticle[]
   Periods: Period[]
   TopUps: TopUp[]
   directus_users: CustomDirectusUser
@@ -23,8 +24,13 @@ export interface Client {
   user_created: string | DirectusUser<Schema> | null
   user_updated: string | DirectusUser<Schema> | null
   bexio_contact_id: number | null
+  apiUrl: string | null
+  slack_channel_id: string | null
+  onboarding_current_step: number | null
+  onboarding_manual_checklist: string[] | null
   allowedUsers: string[] | ClientDirectusUser[]
   periods: string[] | ClientPeriod[]
+  articles: string[] | PeerArticle[]
 }
 
 export interface ClientPeriod {
@@ -56,6 +62,24 @@ export interface ManualWorkEntry {
   user_updated: string | DirectusUser<Schema> | null
 }
 
+export interface PeerArticle {
+  id: string
+  status: 'published' | 'draft' | 'archived'
+  sort: number | null
+  user_created: string | DirectusUser<Schema> | null
+  date_created: string | null
+  user_updated: string | DirectusUser<Schema> | null
+  date_updated: string | null
+  source_id: string
+  source_publishedAt: string
+  source_url: string | null
+  source_title: string | null
+  source_slug: string
+  source_imageUrl: string | null
+  client: string | Client | null
+  source_lead: string | null
+}
+
 export interface Period {
   date_created: string | null
   date_updated: string | null
@@ -85,7 +109,7 @@ export interface TopUp {
   bexioInvoiceId: number | null
 }
 
-export interface CustomDirectusUser extends DirectusUser<Schema> {
+export interface CustomDirectusUser {
   accessToClients: string[] | ClientDirectusUser[]
 }
 

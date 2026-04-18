@@ -52,11 +52,17 @@ export const useDirectus = defineStore('useDirectus', () => {
 
   async function postCustomEndpoint(
     uri: string,
-    body: { [key: string]: string | number }
+    body: Record<string, unknown>
   ) {
     await addAuthorizationHeaderToAxios()
 
     return await axios.post(`${API_URL()}/${uri}`, body)
+  }
+
+  async function deleteCustomEndpoint(uri: string) {
+    await addAuthorizationHeaderToAxios()
+
+    return await axios.delete(`${API_URL()}/${uri}`)
   }
 
   async function addAuthorizationHeaderToAxios() {
@@ -70,6 +76,7 @@ export const useDirectus = defineStore('useDirectus', () => {
     directus,
     getCustomEndpoint,
     postCustomEndpoint,
+    deleteCustomEndpoint,
     API_URL
   }
 })
