@@ -4,7 +4,9 @@ export interface Schema {
   Clients: Client[]
   Clients_Periods: ClientPeriod[]
   Clients_directus_users: ClientDirectusUser[]
+  JiraWarnings: JiraWarning[]
   ManualWorkEntries: ManualWorkEntry[]
+  NotificationThresholds: NotificationThreshold[]
   PeerArticles: PeerArticle[]
   Periods: Period[]
   TopUps: TopUp[]
@@ -28,9 +30,46 @@ export interface Client {
   slack_channel_id: string | null
   onboarding_current_step: number | null
   onboarding_manual_checklist: string[] | null
+  notifications_paused: boolean
+  weekly_report_paused: boolean
   allowedUsers: string[] | ClientDirectusUser[]
   periods: string[] | ClientPeriod[]
   articles: string[] | PeerArticle[]
+}
+
+export interface NotificationThreshold {
+  id: string
+  status: 'published' | 'draft' | 'archived'
+  sort: number | null
+  date_created: string | null
+  date_updated: string | null
+  user_created: string | DirectusUser<Schema> | null
+  user_updated: string | DirectusUser<Schema> | null
+  min_hours_inclusive: number
+  initial_threshold_hours: number
+  recurring_threshold_hours: number
+}
+
+export interface JiraWarning {
+  id: string
+  status: 'published' | 'draft' | 'archived'
+  sort: number | null
+  date_created: string | null
+  date_updated: string | null
+  user_created: string | DirectusUser<Schema> | null
+  user_updated: string | DirectusUser<Schema> | null
+  client: string | Client | null
+  jira_issue_key: string
+  last_notified_hours: number | null
+  next_threshold_hours: number | null
+  halt_requested: boolean
+  halt_requested_by: string | DirectusUser<Schema> | null
+  halt_requested_at: string | null
+  halt_resolved_by: string | DirectusUser<Schema> | null
+  halt_resolved_at: string | null
+  silenced_permanently: boolean
+  silenced_by: string | DirectusUser<Schema> | null
+  silenced_at: string | null
 }
 
 export interface ClientPeriod {
@@ -110,6 +149,7 @@ export interface TopUp {
 }
 
 export interface CustomDirectusUser {
+  id: string
   accessToClients: string[] | ClientDirectusUser[]
 }
 

@@ -3,10 +3,14 @@
 
   const topUpsComp = useTopUps()
   const userStore = useUserStore()
+  const { compute, statusColor, statusHeadline, statusBody, statusIcon } =
+    useWeeklyReportProgress()
 
   const props = defineProps<{
     clientPeriodId: number | undefined
     sums: Sums | undefined
+    periodFrom: string | undefined
+    periodTo: string | undefined
   }>()
 
   const showTopUpsModal = ref(false)
@@ -29,21 +33,54 @@
     })
   )
 
-  const progressColor = computed<string>(() => {
+  const progress = computed(() =>
+    compute({
+      totalUsedHours: props.sums?.totalUsedHours,
+      totalTopUps: props.sums?.totalTopUps,
+      periodFrom: props.periodFrom,
+      periodTo: props.periodTo
+    })
+  )
+
+  const budgetColor = computed<
+    'primary' | 'success' | 'warning' | 'error' | 'info'
+  >(() => {
     const sums = props.sums?.totalUsedPercentage || 0
-    if (sums >= 90) {
-      return 'error'
-    }
-    if (sums >= 75) {
-      return 'warning'
-    }
+    if (sums >= 100) return 'error'
+    if (sums >= 90) return 'error'
+    if (sums >= 75) return 'warning'
     return 'primary'
+  })
+
+  const summaryColor = computed(() =>
+    progress.value ? statusColor(progress.value.status) : budgetColor.value
+  )
+
+  const summaryIcon = computed(() =>
+    progress.value
+      ? statusIcon(progress.value.status)
+      : 'material-symbols:trending-flat-rounded'
+  )
+
+  const summaryHeadline = computed(() =>
+    progress.value ? statusHeadline(progress.value.status) : ''
+  )
+
+  const summaryBody = computed(() =>
+    progress.value ? statusBody(progress.value) : ''
+  )
+
+  const formattedPeriod = computed(() => {
+    if (!props.periodFrom || !props.periodTo) return ''
+    const fmt = (iso: string) =>
+      new Date(iso).toLocaleDateString('de-CH', { dateStyle: 'medium' })
+    return `${fmt(props.periodFrom)} – ${fmt(props.periodTo)}`
   })
 </script>
 
 <template>
   <div class="grid grid-cols-12 gap-4">
-    <UPageCard class="col-span-6">
+    <UPageCard class="col-span-12 md:col-span-4">
       <template #default v-if="sums">
         <div class="flex flex-col justify-between h-full w-full">
           <div class="flex justify-between w-full">
@@ -64,32 +101,72 @@
       </template>
     </UPageCard>
 
-    <UPageCard class="col-span-6">
+    <UPageCard class="col-span-12 md:col-span-8">
       <template #default v-if="sums">
         <div class="flex justify-between w-full">
-          <div class="font-bold">Verfügbare Arbeitsstunden</div>
-          <div class="font-bold text-4xl" :class="`text-${progressColor}`">
-            {{ sums.totalAvailableHours }} h
+          <div>
+            <div class="font-bold">Verfügbare Arbeitsstunden</div>
+            <div v-if="formattedPeriod" class="text-xs text-muted mt-0.5">
+              {{ formattedPeriod }}
+            </div>
+          </div>
+          <div class="font-bold text-4xl" :class="`text-${budgetColor}`">
+            {{ sums.totalAvailableHours }} h | {{ progress?.daysRemaining }} d
           </div>
         </div>
 
-        <div>
-          <UProgress
-            :model-value="sums.totalUsedPercentage"
-            status
-            size="2xl"
-            class="col-span-6"
-            :color="progressColor"
-          >
-            <template #status>
-              <p :class="`text-${progressColor}`">
+        <!-- Status callout: combines budget vs time wording -->
+        <UAlert
+          v-if="progress"
+          class="mt-4"
+          :color="summaryColor"
+          variant="soft"
+          :icon="summaryIcon"
+          :title="summaryHeadline"
+          :description="summaryBody"
+        />
+
+        <!-- Budget vs. time visual comparison -->
+        <div class="mt-4 space-y-3">
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="font-medium">Budget verbraucht</span>
+              <span :class="`text-${budgetColor} font-medium`">
                 {{ sums.totalUsedPercentage }} %
-              </p>
-            </template>
-          </UProgress>
+                <span class="text-muted font-normal">
+                  ({{ sums.totalUsedHours }} h / {{ sums.totalTopUps }} h)
+                </span>
+              </span>
+            </div>
+            <UProgress
+              :model-value="Math.min(100, sums.totalUsedPercentage)"
+              size="lg"
+              :color="budgetColor"
+            />
+          </div>
+
+          <div v-if="progress">
+            <div class="flex justify-between text-xs mb-1">
+              <span class="font-medium">Zeit vergangen</span>
+              <span class="font-medium text-muted">
+                {{ Math.round(progress.timeElapsedPercent) }} % (<span
+                  v-if="progress"
+                  class="ml-1"
+                >
+                  {{ progress.daysElapsed }} /
+                  {{ progress.periodDurationDays }} Tagen</span
+                >)
+              </span>
+            </div>
+            <UProgress
+              :model-value="Math.round(progress.timeElapsedPercent)"
+              size="lg"
+              color="neutral"
+            />
+          </div>
         </div>
 
-        <div class="flex justify-end w-full pt-6">
+        <div class="flex justify-end w-full pt-4">
           <UButton
             variant="subtle"
             icon="ic:twotone-search"
@@ -166,6 +243,31 @@
             <p class="font-bold pt-1">{{ sums.totalAvailableHours }} h</p>
           </div>
         </div>
+
+        <div v-if="progress" class="pt-6">
+          <p class="font-bold pb-2">Budget vs. Zeit</p>
+          <div class="flex text-sm">
+            <div class="flex-1">
+              <p>Budget verbraucht</p>
+              <p>Zeit vergangen</p>
+              <p class="border-b">Differenz</p>
+              <p>Verbleibende Tage</p>
+            </div>
+            <div class="text-right">
+              <p>{{ Math.round(progress.budgetUsedPercent) }} %</p>
+              <p>{{ Math.round(progress.timeElapsedPercent) }} %</p>
+              <p class="border-b">
+                {{ progress.deltaPercent > 0 ? '+' : ''
+                }}{{ Math.round(progress.deltaPercent) }} %
+              </p>
+              <p>
+                {{ progress.daysRemaining }} /
+                {{ progress.periodDurationDays }}
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div
           v-if="userStore.amIAdministrator()"
           class="flex justify-center w-full pt-6"

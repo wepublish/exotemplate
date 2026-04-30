@@ -1,22 +1,17 @@
 <script lang="ts" setup>
   import type { TableColumn } from '@nuxt/ui'
   import type { ClientPeriod, ManualWorkEntry } from '~~/types/DirectusTypes'
+  import type { Sums } from '~~/types/ClockodoTypes'
 
   const props = defineProps<{
     clientPeriodId: number | undefined
+    sums: Sums | undefined
   }>()
 
   const clientPeriodComp = useUseClientPeriods()
-  const manualWorkingEntriesComp = useManualWorkEntries()
 
   const selectedClientPeriod = computed<ClientPeriod | undefined>(() =>
     clientPeriodComp.getClientPeriodById(props.clientPeriodId)
-  )
-
-  const sum = computed<number>(() =>
-    manualWorkingEntriesComp.getSumByClientPeriod(
-      (selectedClientPeriod.value?.manualWorkEntries || []) as ManualWorkEntry[]
-    )
   )
 
   const columns: TableColumn<ManualWorkEntry>[] = [
@@ -45,7 +40,9 @@
       <template #default>
         <div class="flex justify-between w-full font-bold">
           <div>Manuelle Korrekturen</div>
-          <div class="font-bold text-4xl text-primary">{{ sum }} h</div>
+          <div class="font-bold text-4xl text-primary">
+            {{ sums?.totalManualWorkHours ?? 0 }} h
+          </div>
         </div>
 
         <UTable

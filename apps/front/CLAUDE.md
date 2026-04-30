@@ -43,7 +43,7 @@ server/                  # Nuxt server routes (currently empty)
 
 - **Composition API only** — no Options API. All components use `<script setup lang="ts">`.
 - **Pinia stores** for global state: `useDirectus` (API client), `useUserStore` (auth + current user).
-- **Composables** encapsulate domain logic: `useFinanceCalculations`, `useHours`, `useClientPeriods`, `useManualWorkEntries`, `useTopUps`.
+- **Composables** encapsulate domain logic: `useFinanceCalculations`, `useHours`, `useClientPeriods`, `useTopUps`.
 - **File-based routing** via Nuxt pages directory.
 - **Dual API URL pattern**: `DIRECTUS_SERVER_API_URL` is used during SSR, `DIRECTUS_CLIENT_API_URL` in the browser. Both are exposed via Nuxt's `runtimeConfig`.
 - Route `/` is not prerendered (dynamic dashboard content).

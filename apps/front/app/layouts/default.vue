@@ -27,6 +27,15 @@
               Dashboard
             </UButton>
             <UButton
+              to="/settings"
+              variant="ghost"
+              color="neutral"
+              size="sm"
+              icon="material-symbols:settings-rounded"
+            >
+              Einstellungen
+            </UButton>
+            <UButton
               v-if="userStore.amIAdministrator()"
               to="/onboarding"
               variant="ghost"
