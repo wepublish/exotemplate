@@ -1,0 +1,48 @@
+{
+  "collection": "NotificationThresholds",
+  "field": "recurring_threshold_hours",
+  "type": "decimal",
+  "meta": {
+    "collection": "NotificationThresholds",
+    "conditions": null,
+    "display": "formatted-value",
+    "display_options": {
+      "format": "+ {{value}} h"
+    },
+    "field": "recurring_threshold_hours",
+    "group": null,
+    "hidden": false,
+    "interface": "input",
+    "note": "Intervall zwischen wiederkehrenden Meldungen in Stunden (z.B. 4 = weitere Meldung alle 4 h über der initialen Schwelle). Muss grösser als 0 sein.",
+    "options": {
+      "iconRight": "schedule"
+    },
+    "readonly": false,
+    "required": true,
+    "searchable": true,
+    "sort": 10,
+    "special": null,
+    "translations": null,
+    "validation": null,
+    "validation_message": null,
+    "width": "half"
+  },
+  "schema": {
+    "name": "recurring_threshold_hours",
+    "table": "NotificationThresholds",
+    "data_type": "numeric",
+    "default_value": 1,
+    "max_length": null,
+    "numeric_precision": 10,
+    "numeric_scale": 2,
+    "is_nullable": false,
+    "is_unique": false,
+    "is_indexed": false,
+    "is_primary_key": false,
+    "is_generated": false,
+    "generation_expression": null,
+    "has_auto_increment": false,
+    "foreign_key_table": null,
+    "foreign_key_column": null
+  }
+}

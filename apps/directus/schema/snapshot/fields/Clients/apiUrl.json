@@ -18,12 +18,12 @@
     "readonly": false,
     "required": false,
     "searchable": true,
-    "sort": 15,
+    "sort": 18,
     "special": null,
     "translations": null,
     "validation": null,
     "validation_message": null,
-    "width": "full"
+    "width": "half"
   },
   "schema": {
     "name": "apiUrl",

@@ -41,6 +41,42 @@
     "_syncId": "167a577a-8d5f-4c9f-bbbe-14cf21074fad"
   },
   {
+    "collection": "JiraWarnings",
+    "action": "read",
+    "permissions": {},
+    "validation": {},
+    "presets": null,
+    "fields": [
+      "*"
+    ],
+    "policy": "_sync_default_public_policy",
+    "_syncId": "e07c34ec-7d41-4f7f-b90d-57729ea48204"
+  },
+  {
+    "collection": "JiraWarnings",
+    "action": "update",
+    "permissions": {},
+    "validation": {},
+    "presets": null,
+    "fields": [
+      "*"
+    ],
+    "policy": "_sync_default_public_policy",
+    "_syncId": "e428c958-13c8-444b-93ef-ee776a746d28"
+  },
+  {
+    "collection": "NotificationThresholds",
+    "action": "read",
+    "permissions": {},
+    "validation": {},
+    "presets": null,
+    "fields": [
+      "*"
+    ],
+    "policy": "_sync_default_public_policy",
+    "_syncId": "0877c988-4bfb-43ef-be10-d89e6aee117e"
+  },
+  {
     "collection": "PeerArticles",
     "action": "read",
     "permissions": null,
@@ -134,10 +170,35 @@
       "periods",
       "allowedUsers",
       "clockodo_customer_id",
-      "jira_short_code"
+      "jira_short_code",
+      "notifications_paused",
+      "weekly_report_paused"
     ],
     "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
     "_syncId": "1962465b-c65f-4e12-8df8-6cbb28e0885a"
+  },
+  {
+    "collection": "Clients",
+    "action": "update",
+    "permissions": {
+      "_and": [
+        {
+          "allowedUsers": {
+            "directus_users_id": {
+              "_eq": "$CURRENT_USER"
+            }
+          }
+        }
+      ]
+    },
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "notifications_paused",
+      "weekly_report_paused"
+    ],
+    "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
+    "_syncId": "1e4d2304-5f03-48bd-b946-3d390547bb85"
   },
   {
     "collection": "directus_users",
@@ -164,6 +225,51 @@
     ],
     "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
     "_syncId": "f1a05aa0-b343-4c97-af99-9b533a7044c2"
+  },
+  {
+    "collection": "JiraWarnings",
+    "action": "read",
+    "permissions": {},
+    "validation": {},
+    "presets": null,
+    "fields": [
+      "*"
+    ],
+    "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
+    "_syncId": "05bb3b50-0afa-4a86-9bf7-eb79fbdf63c7"
+  },
+  {
+    "collection": "JiraWarnings",
+    "action": "update",
+    "permissions": {
+      "_and": [
+        {
+          "client": {
+            "allowedUsers": {
+              "directus_users_id": {
+                "id": {
+                  "_eq": "$CURRENT_USER"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "validation": {},
+    "presets": null,
+    "fields": [
+      "silenced_permanently",
+      "silenced_by",
+      "silenced_at",
+      "halt_requested",
+      "halt_requested_by",
+      "halt_requested_at",
+      "halt_resolved_by",
+      "halt_resolved_at"
+    ],
+    "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
+    "_syncId": "577aea6c-c85e-4378-a91c-5295d5c970d3"
   },
   {
     "collection": "ManualWorkEntries",
@@ -201,6 +307,18 @@
     ],
     "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
     "_syncId": "e6af6ff4-1ea1-46b3-a998-71534e7a5939"
+  },
+  {
+    "collection": "NotificationThresholds",
+    "action": "read",
+    "permissions": {},
+    "validation": {},
+    "presets": null,
+    "fields": [
+      "*"
+    ],
+    "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
+    "_syncId": "3a880f0a-ff54-4fbc-bc2b-5eb4c54f0200"
   },
   {
     "collection": "Periods",

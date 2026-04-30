@@ -18,7 +18,7 @@
     "readonly": true,
     "required": false,
     "searchable": true,
-    "sort": 7,
+    "sort": 6,
     "special": [
       "date-updated"
     ],

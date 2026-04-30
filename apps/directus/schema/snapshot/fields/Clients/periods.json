@@ -29,7 +29,7 @@
     "readonly": false,
     "required": false,
     "searchable": true,
-    "sort": 10,
+    "sort": 12,
     "special": [
       "m2m"
     ],

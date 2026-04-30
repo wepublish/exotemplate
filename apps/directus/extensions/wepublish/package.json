@@ -41,6 +41,27 @@
           "app": "src/peering-articles/app.ts",
           "api": "src/peering-articles/api.ts"
         }
+      },
+      {
+        "type": "operation",
+        "name": "jira-threshold-notifier",
+        "source": {
+          "app": "src/jira-threshold-notifier/app.ts",
+          "api": "src/jira-threshold-notifier/api.ts"
+        }
+      },
+      {
+        "type": "operation",
+        "name": "weekly-report",
+        "source": {
+          "app": "src/weekly-report/app.ts",
+          "api": "src/weekly-report/api.ts"
+        }
+      },
+      {
+        "type": "hook",
+        "name": "jira-halt-notifier",
+        "source": "src/jira-halt-notifier/index.ts"
       }
     ],
     "host": "^10.10.0"
@@ -50,12 +71,15 @@
     "dev": "directus-extension build -w --no-minify",
     "link": "directus-extension link",
     "validate": "directus-extension validate",
-    "add": "directus-extension add"
+    "add": "directus-extension add",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@directus/extensions-sdk": "17.0.11",
     "@types/node": "^25.5.0",
     "typescript": "^5.9.3",
+    "vitest": "^4.1.4",
     "vue": "^3.5.30"
   }
 }

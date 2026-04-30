@@ -23,14 +23,22 @@ type Query {
   ManualWorkEntries_by_id(id: ID!, version: String): ManualWorkEntries
   ManualWorkEntries_aggregated(groupBy: [String], filter: ManualWorkEntries_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [ManualWorkEntries_aggregated!]!
   ManualWorkEntries_by_version(version: String!, id: ID!): version_ManualWorkEntries
-  Clients(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients!]!
-  Clients_by_id(id: ID!, version: String): Clients
-  Clients_aggregated(groupBy: [String], filter: Clients_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [Clients_aggregated!]!
-  Clients_by_version(version: String!, id: ID!): version_Clients
   PeerArticles(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [PeerArticles!]!
   PeerArticles_by_id(id: ID!, version: String): PeerArticles
   PeerArticles_aggregated(groupBy: [String], filter: PeerArticles_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [PeerArticles_aggregated!]!
   PeerArticles_by_version(version: String!, id: ID!): version_PeerArticles
+  NotificationThresholds(filter: NotificationThresholds_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [NotificationThresholds!]!
+  NotificationThresholds_by_id(id: ID!, version: String): NotificationThresholds
+  NotificationThresholds_aggregated(groupBy: [String], filter: NotificationThresholds_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [NotificationThresholds_aggregated!]!
+  NotificationThresholds_by_version(version: String!, id: ID!): version_NotificationThresholds
+  JiraWarnings(filter: JiraWarnings_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [JiraWarnings!]!
+  JiraWarnings_by_id(id: ID!, version: String): JiraWarnings
+  JiraWarnings_aggregated(groupBy: [String], filter: JiraWarnings_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [JiraWarnings_aggregated!]!
+  JiraWarnings_by_version(version: String!, id: ID!): version_JiraWarnings
+  Clients(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients!]!
+  Clients_by_id(id: ID!, version: String): Clients
+  Clients_aggregated(groupBy: [String], filter: Clients_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [Clients_aggregated!]!
+  Clients_by_version(version: String!, id: ID!): version_Clients
 }
 
 type Mutation {
@@ -46,10 +54,14 @@ type Mutation {
   create_Clients_directus_users_item(data: create_Clients_directus_users_input!): Clients_directus_users
   create_ManualWorkEntries_items(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_ManualWorkEntries_input!]): [ManualWorkEntries!]!
   create_ManualWorkEntries_item(data: create_ManualWorkEntries_input!): ManualWorkEntries
-  create_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Clients_input!]): [Clients!]!
-  create_Clients_item(data: create_Clients_input!): Clients
   create_PeerArticles_items(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_PeerArticles_input!]): [PeerArticles!]!
   create_PeerArticles_item(data: create_PeerArticles_input!): PeerArticles
+  create_NotificationThresholds_items(filter: NotificationThresholds_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_NotificationThresholds_input!]): [NotificationThresholds!]!
+  create_NotificationThresholds_item(data: create_NotificationThresholds_input!): NotificationThresholds
+  create_JiraWarnings_items(filter: JiraWarnings_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_JiraWarnings_input!]): [JiraWarnings!]!
+  create_JiraWarnings_item(data: create_JiraWarnings_input!): JiraWarnings
+  create_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Clients_input!]): [Clients!]!
+  create_Clients_item(data: create_Clients_input!): Clients
   update_directus_sync_id_map_items(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_sync_id_map_input!): [directus_sync_id_map!]!
   update_directus_sync_id_map_batch(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_sync_id_map_input!]): [directus_sync_id_map!]!
   update_directus_sync_id_map_item(id: ID!, data: update_directus_sync_id_map_input!): directus_sync_id_map
@@ -68,12 +80,18 @@ type Mutation {
   update_ManualWorkEntries_items(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_ManualWorkEntries_input!): [ManualWorkEntries!]!
   update_ManualWorkEntries_batch(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_ManualWorkEntries_input!]): [ManualWorkEntries!]!
   update_ManualWorkEntries_item(id: ID!, data: update_ManualWorkEntries_input!): ManualWorkEntries
-  update_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Clients_input!): [Clients!]!
-  update_Clients_batch(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Clients_input!]): [Clients!]!
-  update_Clients_item(id: ID!, data: update_Clients_input!): Clients
   update_PeerArticles_items(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_PeerArticles_input!): [PeerArticles!]!
   update_PeerArticles_batch(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_PeerArticles_input!]): [PeerArticles!]!
   update_PeerArticles_item(id: ID!, data: update_PeerArticles_input!): PeerArticles
+  update_NotificationThresholds_items(filter: NotificationThresholds_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_NotificationThresholds_input!): [NotificationThresholds!]!
+  update_NotificationThresholds_batch(filter: NotificationThresholds_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_NotificationThresholds_input!]): [NotificationThresholds!]!
+  update_NotificationThresholds_item(id: ID!, data: update_NotificationThresholds_input!): NotificationThresholds
+  update_JiraWarnings_items(filter: JiraWarnings_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_JiraWarnings_input!): [JiraWarnings!]!
+  update_JiraWarnings_batch(filter: JiraWarnings_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_JiraWarnings_input!]): [JiraWarnings!]!
+  update_JiraWarnings_item(id: ID!, data: update_JiraWarnings_input!): JiraWarnings
+  update_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Clients_input!): [Clients!]!
+  update_Clients_batch(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Clients_input!]): [Clients!]!
+  update_Clients_item(id: ID!, data: update_Clients_input!): Clients
   delete_directus_sync_id_map_items(ids: [ID]!): delete_many
   delete_directus_sync_id_map_item(id: ID!): delete_one
   delete_TopUps_items(ids: [ID]!): delete_many
@@ -86,10 +104,14 @@ type Mutation {
   delete_Clients_directus_users_item(id: ID!): delete_one
   delete_ManualWorkEntries_items(ids: [ID]!): delete_many
   delete_ManualWorkEntries_item(id: ID!): delete_one
-  delete_Clients_items(ids: [ID]!): delete_many
-  delete_Clients_item(id: ID!): delete_one
   delete_PeerArticles_items(ids: [ID]!): delete_many
   delete_PeerArticles_item(id: ID!): delete_one
+  delete_NotificationThresholds_items(ids: [ID]!): delete_many
+  delete_NotificationThresholds_item(id: ID!): delete_one
+  delete_JiraWarnings_items(ids: [ID]!): delete_many
+  delete_JiraWarnings_item(id: ID!): delete_one
+  delete_Clients_items(ids: [ID]!): delete_many
+  delete_Clients_item(id: ID!): delete_one
 }
 
 type Subscription {
@@ -120,8 +142,10 @@ type Subscription {
   Periods_mutated(event: EventEnum): Periods_mutated
   Clients_directus_users_mutated(event: EventEnum): Clients_directus_users_mutated
   ManualWorkEntries_mutated(event: EventEnum): ManualWorkEntries_mutated
-  Clients_mutated(event: EventEnum): Clients_mutated
   PeerArticles_mutated(event: EventEnum): PeerArticles_mutated
+  NotificationThresholds_mutated(event: EventEnum): NotificationThresholds_mutated
+  JiraWarnings_mutated(event: EventEnum): JiraWarnings_mutated
+  Clients_mutated(event: EventEnum): Clients_mutated
 }
 
 """The `Boolean` scalar type represents `true` or `false`."""
@@ -205,12 +229,23 @@ type Clients {
   """
   onboarding_manual_checklist: JSON
   onboarding_manual_checklist_func: count_functions
+
+  """
+  Wenn aktiv, werden sämtliche Slack-Warnungen für diesen Kunden unterdrückt, bis der Schalter wieder deaktiviert wird.
+  """
+  notifications_paused: Boolean!
+
+  """
+  Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.
+  """
+  weekly_report_paused: Boolean!
   allowedUsers(filter: Clients_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_directus_users]
   allowedUsers_func: count_functions
   periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods]
   periods_func: count_functions
   articles(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [PeerArticles]
   articles_func: count_functions
+  jiraWarnings(filter: JiraWarnings_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [JiraWarnings]
 }
 
 type Clients_aggregated {
@@ -258,6 +293,16 @@ type Clients_aggregated_count {
   IDs of completed manual-onboarding checklist items. Persisted so the checklist state survives a page reload.
   """
   onboarding_manual_checklist: Int
+
+  """
+  Wenn aktiv, werden sämtliche Slack-Warnungen für diesen Kunden unterdrückt, bis der Schalter wieder deaktiviert wird.
+  """
+  notifications_paused: Int
+
+  """
+  Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.
+  """
+  weekly_report_paused: Int
   allowedUsers: Int
   periods: Int
   articles: Int
@@ -972,6 +1017,131 @@ type directus_webhooks_mutated {
   data: directus_webhooks
 }
 
+type JiraWarnings {
+  client(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients
+  date_created: Date
+  date_created_func: datetime_functions
+  date_updated: Date
+  date_updated_func: datetime_functions
+  id: ID!
+
+  """Jira-Issue-Key, z.B. ABC-123."""
+  jira_issue_key: String!
+  silenced_at: Date
+  silenced_at_func: datetime_functions
+  silenced_by(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+
+  """
+  Wenn aktiv, wird dieses Ticket dauerhaft nicht mehr per Slack gemeldet.
+  """
+  silenced_permanently: Boolean!
+  sort: Int
+  status: String
+  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+
+  """Stundenwert der zuletzt benachrichtigten Schwelle."""
+  last_notified_hours: Float
+
+  """
+  Wenn aktiv, hat der Kunde einen Arbeitsstopp für dieses Ticket angefordert. Das Team wird via Slack informiert und soll die Arbeit daran einstellen, bis der Stopp aufgehoben wird.
+  """
+  halt_requested: Boolean!
+
+  """Zeitpunkt, zu dem der aktuelle Arbeitsstopp angefordert wurde."""
+  halt_requested_at: Date
+  halt_requested_at_func: datetime_functions
+  halt_requested_by(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+
+  """Zeitpunkt, zu dem der letzte Arbeitsstopp aufgehoben wurde."""
+  halt_resolved_at: Date
+  halt_resolved_at_func: datetime_functions
+  halt_resolved_by(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+
+  """
+  Stundenwert, ab dem die nächste Slack-Meldung ausgelöst wird, sofern das Ticket nicht stummgeschaltet ist.
+  """
+  next_threshold_hours: Float
+}
+
+type JiraWarnings_aggregated {
+  group: JSON
+  countAll: Int
+  count: JiraWarnings_aggregated_count
+  countDistinct: JiraWarnings_aggregated_count
+  avg: JiraWarnings_aggregated_fields
+  sum: JiraWarnings_aggregated_fields
+  avgDistinct: JiraWarnings_aggregated_fields
+  sumDistinct: JiraWarnings_aggregated_fields
+  min: JiraWarnings_aggregated_fields
+  max: JiraWarnings_aggregated_fields
+}
+
+type JiraWarnings_aggregated_count {
+  """Zugeordneter Kunde."""
+  client: Int
+  date_created: Int
+  date_updated: Int
+  id: Int
+
+  """Jira-Issue-Key, z.B. ABC-123."""
+  jira_issue_key: Int
+  silenced_at: Int
+  silenced_by: Int
+
+  """
+  Wenn aktiv, wird dieses Ticket dauerhaft nicht mehr per Slack gemeldet.
+  """
+  silenced_permanently: Int
+  sort: Int
+  status: Int
+  user_created: Int
+  user_updated: Int
+
+  """Stundenwert der zuletzt benachrichtigten Schwelle."""
+  last_notified_hours: Int
+
+  """
+  Wenn aktiv, hat der Kunde einen Arbeitsstopp für dieses Ticket angefordert. Das Team wird via Slack informiert und soll die Arbeit daran einstellen, bis der Stopp aufgehoben wird.
+  """
+  halt_requested: Int
+
+  """Zeitpunkt, zu dem der aktuelle Arbeitsstopp angefordert wurde."""
+  halt_requested_at: Int
+
+  """Der Benutzer, der den aktuellen Arbeitsstopp angefordert hat."""
+  halt_requested_by: Int
+
+  """Zeitpunkt, zu dem der letzte Arbeitsstopp aufgehoben wurde."""
+  halt_resolved_at: Int
+
+  """Der Benutzer, der den letzten Arbeitsstopp aufgehoben hat."""
+  halt_resolved_by: Int
+
+  """
+  Stundenwert, ab dem die nächste Slack-Meldung ausgelöst wird, sofern das Ticket nicht stummgeschaltet ist.
+  """
+  next_threshold_hours: Int
+}
+
+type JiraWarnings_aggregated_fields {
+  sort: Float
+
+  """Stundenwert der zuletzt benachrichtigten Schwelle."""
+  last_notified_hours: Float
+
+  """
+  Stundenwert, ab dem die nächste Slack-Meldung ausgelöst wird, sofern das Ticket nicht stummgeschaltet ist.
+  """
+  next_threshold_hours: Float
+}
+
+type JiraWarnings_mutated {
+  key: ID!
+  event: EventEnum
+  data: JiraWarnings
+}
+
 type ManualWorkEntries {
   clientPeriod(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients_Periods
   date: Date
@@ -1028,6 +1198,96 @@ type ManualWorkEntries_mutated {
   key: ID!
   event: EventEnum
   data: ManualWorkEntries
+}
+
+type NotificationThresholds {
+  date_created: Date
+  date_created_func: datetime_functions
+  date_updated: Date
+  date_updated_func: datetime_functions
+  id: ID!
+  sort: Int
+  status: String
+  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+
+  """
+  Erste Slack-Warnung, sobald der Stundenverbrauch diesen Wert erreicht (z.B. 9 = Meldung bei 9 verbrauchten Stunden).
+  """
+  initial_threshold_hours: Float!
+
+  """
+  Intervall zwischen wiederkehrenden Meldungen in Stunden (z.B. 4 = weitere Meldung alle 4 h über der initialen Schwelle). Muss grösser als 0 sein.
+  """
+  recurring_threshold_hours: Float
+
+  """
+  Schätzwert-Untergrenze (inklusiv). Ein Ticket nutzt diesen Eintrag, wenn seine Schätzung mindestens diesem Wert entspricht und kein Eintrag mit grösserem Wert zutrifft.
+  """
+  min_hours_inclusive: Float!
+}
+
+type NotificationThresholds_aggregated {
+  group: JSON
+  countAll: Int
+  count: NotificationThresholds_aggregated_count
+  countDistinct: NotificationThresholds_aggregated_count
+  avg: NotificationThresholds_aggregated_fields
+  sum: NotificationThresholds_aggregated_fields
+  avgDistinct: NotificationThresholds_aggregated_fields
+  sumDistinct: NotificationThresholds_aggregated_fields
+  min: NotificationThresholds_aggregated_fields
+  max: NotificationThresholds_aggregated_fields
+}
+
+type NotificationThresholds_aggregated_count {
+  date_created: Int
+  date_updated: Int
+  id: Int
+  sort: Int
+  status: Int
+  user_created: Int
+  user_updated: Int
+
+  """
+  Erste Slack-Warnung, sobald der Stundenverbrauch diesen Wert erreicht (z.B. 9 = Meldung bei 9 verbrauchten Stunden).
+  """
+  initial_threshold_hours: Int
+
+  """
+  Intervall zwischen wiederkehrenden Meldungen in Stunden (z.B. 4 = weitere Meldung alle 4 h über der initialen Schwelle). Muss grösser als 0 sein.
+  """
+  recurring_threshold_hours: Int
+
+  """
+  Schätzwert-Untergrenze (inklusiv). Ein Ticket nutzt diesen Eintrag, wenn seine Schätzung mindestens diesem Wert entspricht und kein Eintrag mit grösserem Wert zutrifft.
+  """
+  min_hours_inclusive: Int
+}
+
+type NotificationThresholds_aggregated_fields {
+  sort: Float
+
+  """
+  Erste Slack-Warnung, sobald der Stundenverbrauch diesen Wert erreicht (z.B. 9 = Meldung bei 9 verbrauchten Stunden).
+  """
+  initial_threshold_hours: Float
+
+  """
+  Intervall zwischen wiederkehrenden Meldungen in Stunden (z.B. 4 = weitere Meldung alle 4 h über der initialen Schwelle). Muss grösser als 0 sein.
+  """
+  recurring_threshold_hours: Float
+
+  """
+  Schätzwert-Untergrenze (inklusiv). Ein Ticket nutzt diesen Eintrag, wenn seine Schätzung mindestens diesem Wert entspricht und kein Eintrag mit grösserem Wert zutrifft.
+  """
+  min_hours_inclusive: Float
+}
+
+type NotificationThresholds_mutated {
+  key: ID!
+  event: EventEnum
+  data: NotificationThresholds
 }
 
 type PeerArticles {
@@ -1246,9 +1506,20 @@ type version_Clients {
   IDs of completed manual-onboarding checklist items. Persisted so the checklist state survives a page reload.
   """
   onboarding_manual_checklist: JSON
+
+  """
+  Wenn aktiv, werden sämtliche Slack-Warnungen für diesen Kunden unterdrückt, bis der Schalter wieder deaktiviert wird.
+  """
+  notifications_paused: Boolean
+
+  """
+  Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.
+  """
+  weekly_report_paused: Boolean
   allowedUsers: JSON
   periods: JSON
   articles: JSON
+  jiraWarnings: JSON
 }
 
 """"""
@@ -1277,6 +1548,49 @@ type version_directus_sync_id_map {
 }
 
 """"""
+type version_JiraWarnings {
+  client: JSON
+  date_created: Date
+  date_updated: Date
+  id: ID
+
+  """Jira-Issue-Key, z.B. ABC-123."""
+  jira_issue_key: String
+  silenced_at: Date
+  silenced_by: JSON
+
+  """
+  Wenn aktiv, wird dieses Ticket dauerhaft nicht mehr per Slack gemeldet.
+  """
+  silenced_permanently: Boolean
+  sort: Int
+  status: String
+  user_created: JSON
+  user_updated: JSON
+
+  """Stundenwert der zuletzt benachrichtigten Schwelle."""
+  last_notified_hours: Float
+
+  """
+  Wenn aktiv, hat der Kunde einen Arbeitsstopp für dieses Ticket angefordert. Das Team wird via Slack informiert und soll die Arbeit daran einstellen, bis der Stopp aufgehoben wird.
+  """
+  halt_requested: Boolean
+
+  """Zeitpunkt, zu dem der aktuelle Arbeitsstopp angefordert wurde."""
+  halt_requested_at: Date
+  halt_requested_by: JSON
+
+  """Zeitpunkt, zu dem der letzte Arbeitsstopp aufgehoben wurde."""
+  halt_resolved_at: Date
+  halt_resolved_by: JSON
+
+  """
+  Stundenwert, ab dem die nächste Slack-Meldung ausgelöst wird, sofern das Ticket nicht stummgeschaltet ist.
+  """
+  next_threshold_hours: Float
+}
+
+""""""
 type version_ManualWorkEntries {
   clientPeriod: JSON
   date: Date
@@ -1290,6 +1604,32 @@ type version_ManualWorkEntries {
   title: String
   user_created: JSON
   user_updated: JSON
+}
+
+""""""
+type version_NotificationThresholds {
+  date_created: Date
+  date_updated: Date
+  id: ID
+  sort: Int
+  status: String
+  user_created: JSON
+  user_updated: JSON
+
+  """
+  Erste Slack-Warnung, sobald der Stundenverbrauch diesen Wert erreicht (z.B. 9 = Meldung bei 9 verbrauchten Stunden).
+  """
+  initial_threshold_hours: Float
+
+  """
+  Intervall zwischen wiederkehrenden Meldungen in Stunden (z.B. 4 = weitere Meldung alle 4 h über der initialen Schwelle). Muss grösser als 0 sein.
+  """
+  recurring_threshold_hours: Float
+
+  """
+  Schätzwert-Untergrenze (inklusiv). Ein Ticket nutzt diesen Eintrag, wenn seine Schätzung mindestens diesem Wert entspricht und kein Eintrag mit grösserem Wert zutrifft.
+  """
+  min_hours_inclusive: Float
 }
 
 """"""
@@ -1404,6 +1744,8 @@ input Clients_filter {
   onboarding_current_step: number_filter_operators
   onboarding_manual_checklist: string_filter_operators
   onboarding_manual_checklist_func: count_function_filter_operators
+  notifications_paused: boolean_filter_operators
+  weekly_report_paused: boolean_filter_operators
   allowedUsers: Clients_directus_users_quantifier_filter
   allowedUsers_func: count_function_filter_operators
   periods: Clients_Periods_quantifier_filter
@@ -1412,6 +1754,7 @@ input Clients_filter {
   articles_func: count_function_filter_operators
   _and: [Clients_filter]
   _or: [Clients_filter]
+  jiraWarnings: JiraWarnings_quantifier_filter
 }
 
 input Clients_Periods_filter {
@@ -1483,9 +1826,20 @@ input create_Clients_input {
   IDs of completed manual-onboarding checklist items. Persisted so the checklist state survives a page reload.
   """
   onboarding_manual_checklist: JSON
+
+  """
+  Wenn aktiv, werden sämtliche Slack-Warnungen für diesen Kunden unterdrückt, bis der Schalter wieder deaktiviert wird.
+  """
+  notifications_paused: Boolean!
+
+  """
+  Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.
+  """
+  weekly_report_paused: Boolean!
   allowedUsers: [create_Clients_directus_users_input]
   periods: [create_Clients_Periods_input]
   articles: [create_PeerArticles_input]
+  jiraWarnings: [create_JiraWarnings_input]
 }
 
 input create_Clients_Periods_input {
@@ -1617,6 +1971,48 @@ input create_directus_users_input {
   policies: [create_directus_access_input]
 }
 
+input create_JiraWarnings_input {
+  client: create_Clients_input
+  date_created: Date
+  date_updated: Date
+  id: ID
+
+  """Jira-Issue-Key, z.B. ABC-123."""
+  jira_issue_key: String!
+  silenced_at: Date
+  silenced_by: create_directus_users_input
+
+  """
+  Wenn aktiv, wird dieses Ticket dauerhaft nicht mehr per Slack gemeldet.
+  """
+  silenced_permanently: Boolean!
+  sort: Int
+  status: String
+  user_created: create_directus_users_input
+  user_updated: create_directus_users_input
+
+  """Stundenwert der zuletzt benachrichtigten Schwelle."""
+  last_notified_hours: Float
+
+  """
+  Wenn aktiv, hat der Kunde einen Arbeitsstopp für dieses Ticket angefordert. Das Team wird via Slack informiert und soll die Arbeit daran einstellen, bis der Stopp aufgehoben wird.
+  """
+  halt_requested: Boolean!
+
+  """Zeitpunkt, zu dem der aktuelle Arbeitsstopp angefordert wurde."""
+  halt_requested_at: Date
+  halt_requested_by: create_directus_users_input
+
+  """Zeitpunkt, zu dem der letzte Arbeitsstopp aufgehoben wurde."""
+  halt_resolved_at: Date
+  halt_resolved_by: create_directus_users_input
+
+  """
+  Stundenwert, ab dem die nächste Slack-Meldung ausgelöst wird, sofern das Ticket nicht stummgeschaltet ist.
+  """
+  next_threshold_hours: Float
+}
+
 input create_ManualWorkEntries_input {
   clientPeriod: create_Clients_Periods_input
   date: Date
@@ -1630,6 +2026,31 @@ input create_ManualWorkEntries_input {
   title: String
   user_created: create_directus_users_input
   user_updated: create_directus_users_input
+}
+
+input create_NotificationThresholds_input {
+  date_created: Date
+  date_updated: Date
+  id: ID
+  sort: Int
+  status: String
+  user_created: create_directus_users_input
+  user_updated: create_directus_users_input
+
+  """
+  Erste Slack-Warnung, sobald der Stundenverbrauch diesen Wert erreicht (z.B. 9 = Meldung bei 9 verbrauchten Stunden).
+  """
+  initial_threshold_hours: Float!
+
+  """
+  Intervall zwischen wiederkehrenden Meldungen in Stunden (z.B. 4 = weitere Meldung alle 4 h über der initialen Schwelle). Muss grösser als 0 sein.
+  """
+  recurring_threshold_hours: Float
+
+  """
+  Schätzwert-Untergrenze (inklusiv). Ein Ticket nutzt diesen Eintrag, wenn seine Schätzung mindestens diesem Wert entspricht und kein Eintrag mit grösserem Wert zutrifft.
+  """
+  min_hours_inclusive: Float!
 }
 
 input create_PeerArticles_input {
@@ -2190,6 +2611,67 @@ input id_filter_operators {
   _nempty: Boolean
 }
 
+input JiraWarnings_filter {
+  client: Clients_filter
+  date_created: date_filter_operators
+  date_created_func: datetime_function_filter_operators
+  date_updated: date_filter_operators
+  date_updated_func: datetime_function_filter_operators
+  id: id_filter_operators
+  jira_issue_key: string_filter_operators
+  silenced_at: date_filter_operators
+  silenced_at_func: datetime_function_filter_operators
+  silenced_by: directus_users_filter
+  silenced_permanently: boolean_filter_operators
+  sort: number_filter_operators
+  status: string_filter_operators
+  user_created: directus_users_filter
+  user_updated: directus_users_filter
+  last_notified_hours: number_filter_operators
+  halt_requested: boolean_filter_operators
+  halt_requested_at: date_filter_operators
+  halt_requested_at_func: datetime_function_filter_operators
+  halt_requested_by: directus_users_filter
+  halt_resolved_at: date_filter_operators
+  halt_resolved_at_func: datetime_function_filter_operators
+  halt_resolved_by: directus_users_filter
+  next_threshold_hours: number_filter_operators
+  _and: [JiraWarnings_filter]
+  _or: [JiraWarnings_filter]
+}
+
+""""""
+input JiraWarnings_quantifier_filter {
+  client: Clients_filter
+  date_created: date_filter_operators
+  date_created_func: datetime_function_filter_operators
+  date_updated: date_filter_operators
+  date_updated_func: datetime_function_filter_operators
+  id: id_filter_operators
+  jira_issue_key: string_filter_operators
+  silenced_at: date_filter_operators
+  silenced_at_func: datetime_function_filter_operators
+  silenced_by: directus_users_filter
+  silenced_permanently: boolean_filter_operators
+  sort: number_filter_operators
+  status: string_filter_operators
+  user_created: directus_users_filter
+  user_updated: directus_users_filter
+  last_notified_hours: number_filter_operators
+  halt_requested: boolean_filter_operators
+  halt_requested_at: date_filter_operators
+  halt_requested_at_func: datetime_function_filter_operators
+  halt_requested_by: directus_users_filter
+  halt_resolved_at: date_filter_operators
+  halt_resolved_at_func: datetime_function_filter_operators
+  halt_resolved_by: directus_users_filter
+  next_threshold_hours: number_filter_operators
+  _and: [JiraWarnings_filter]
+  _or: [JiraWarnings_filter]
+  _some: JiraWarnings_filter
+  _none: JiraWarnings_filter
+}
+
 input ManualWorkEntries_filter {
   clientPeriod: Clients_Periods_filter
   date: date_filter_operators
@@ -2231,6 +2713,23 @@ input ManualWorkEntries_quantifier_filter {
   _or: [ManualWorkEntries_filter]
   _some: ManualWorkEntries_filter
   _none: ManualWorkEntries_filter
+}
+
+input NotificationThresholds_filter {
+  date_created: date_filter_operators
+  date_created_func: datetime_function_filter_operators
+  date_updated: date_filter_operators
+  date_updated_func: datetime_function_filter_operators
+  id: id_filter_operators
+  sort: number_filter_operators
+  status: string_filter_operators
+  user_created: directus_users_filter
+  user_updated: directus_users_filter
+  initial_threshold_hours: number_filter_operators
+  recurring_threshold_hours: number_filter_operators
+  min_hours_inclusive: number_filter_operators
+  _and: [NotificationThresholds_filter]
+  _or: [NotificationThresholds_filter]
 }
 
 input number_filter_operators {
@@ -2419,9 +2918,20 @@ input update_Clients_input {
   IDs of completed manual-onboarding checklist items. Persisted so the checklist state survives a page reload.
   """
   onboarding_manual_checklist: JSON
+
+  """
+  Wenn aktiv, werden sämtliche Slack-Warnungen für diesen Kunden unterdrückt, bis der Schalter wieder deaktiviert wird.
+  """
+  notifications_paused: Boolean
+
+  """
+  Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.
+  """
+  weekly_report_paused: Boolean
   allowedUsers: [update_Clients_directus_users_input]
   periods: [update_Clients_Periods_input]
   articles: [update_PeerArticles_input]
+  jiraWarnings: [update_JiraWarnings_input]
 }
 
 input update_Clients_Periods_input {
@@ -2553,6 +3063,48 @@ input update_directus_users_input {
   policies: [update_directus_access_input]
 }
 
+input update_JiraWarnings_input {
+  client: update_Clients_input
+  date_created: Date
+  date_updated: Date
+  id: ID
+
+  """Jira-Issue-Key, z.B. ABC-123."""
+  jira_issue_key: String
+  silenced_at: Date
+  silenced_by: update_directus_users_input
+
+  """
+  Wenn aktiv, wird dieses Ticket dauerhaft nicht mehr per Slack gemeldet.
+  """
+  silenced_permanently: Boolean
+  sort: Int
+  status: String
+  user_created: update_directus_users_input
+  user_updated: update_directus_users_input
+
+  """Stundenwert der zuletzt benachrichtigten Schwelle."""
+  last_notified_hours: Float
+
+  """
+  Wenn aktiv, hat der Kunde einen Arbeitsstopp für dieses Ticket angefordert. Das Team wird via Slack informiert und soll die Arbeit daran einstellen, bis der Stopp aufgehoben wird.
+  """
+  halt_requested: Boolean
+
+  """Zeitpunkt, zu dem der aktuelle Arbeitsstopp angefordert wurde."""
+  halt_requested_at: Date
+  halt_requested_by: update_directus_users_input
+
+  """Zeitpunkt, zu dem der letzte Arbeitsstopp aufgehoben wurde."""
+  halt_resolved_at: Date
+  halt_resolved_by: update_directus_users_input
+
+  """
+  Stundenwert, ab dem die nächste Slack-Meldung ausgelöst wird, sofern das Ticket nicht stummgeschaltet ist.
+  """
+  next_threshold_hours: Float
+}
+
 input update_ManualWorkEntries_input {
   clientPeriod: update_Clients_Periods_input
   date: Date
@@ -2566,6 +3118,31 @@ input update_ManualWorkEntries_input {
   title: String
   user_created: update_directus_users_input
   user_updated: update_directus_users_input
+}
+
+input update_NotificationThresholds_input {
+  date_created: Date
+  date_updated: Date
+  id: ID
+  sort: Int
+  status: String
+  user_created: update_directus_users_input
+  user_updated: update_directus_users_input
+
+  """
+  Erste Slack-Warnung, sobald der Stundenverbrauch diesen Wert erreicht (z.B. 9 = Meldung bei 9 verbrauchten Stunden).
+  """
+  initial_threshold_hours: Float
+
+  """
+  Intervall zwischen wiederkehrenden Meldungen in Stunden (z.B. 4 = weitere Meldung alle 4 h über der initialen Schwelle). Muss grösser als 0 sein.
+  """
+  recurring_threshold_hours: Float
+
+  """
+  Schätzwert-Untergrenze (inklusiv). Ein Ticket nutzt diesen Eintrag, wenn seine Schätzung mindestens diesem Wert entspricht und kein Eintrag mit grösserem Wert zutrifft.
+  """
+  min_hours_inclusive: Float
 }
 
 input update_PeerArticles_input {

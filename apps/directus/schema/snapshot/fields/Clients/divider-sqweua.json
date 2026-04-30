@@ -1,0 +1,32 @@
+{
+  "collection": "Clients",
+  "field": "divider-sqweua",
+  "type": "alias",
+  "meta": {
+    "collection": "Clients",
+    "conditions": null,
+    "display": null,
+    "display_options": null,
+    "field": "divider-sqweua",
+    "group": null,
+    "hidden": false,
+    "interface": "presentation-divider",
+    "note": null,
+    "options": {
+      "icon": "settings",
+      "title": "Settings"
+    },
+    "readonly": false,
+    "required": false,
+    "searchable": true,
+    "sort": 9,
+    "special": [
+      "alias",
+      "no-data"
+    ],
+    "translations": null,
+    "validation": null,
+    "validation_message": null,
+    "width": "full"
+  }
+}

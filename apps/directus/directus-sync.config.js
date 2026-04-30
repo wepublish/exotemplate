@@ -1,3 +1,4 @@
 module.exports = {
-  dumpPath: './schema'
+  dumpPath: './schema',
+  seedPath: './schema/seed'
 }

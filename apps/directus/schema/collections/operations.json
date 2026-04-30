@@ -1,5 +1,29 @@
 [
   {
+    "name": "Notifier ausführen",
+    "key": "jira_threshold_notifier",
+    "type": "jira-threshold-notifier",
+    "position_x": 20,
+    "position_y": 1,
+    "options": {},
+    "resolve": null,
+    "reject": null,
+    "flow": "3a5d2d12-6a1e-4e0a-9c1d-1d9e6f9f0001",
+    "_syncId": "3dda842d-9797-407f-aefc-4f6f493e965a"
+  },
+  {
+    "name": "Jira Threshold Notifier",
+    "key": "jira_threshold_notifier_ixk2e",
+    "type": "jira-threshold-notifier",
+    "position_x": 19,
+    "position_y": 1,
+    "options": {},
+    "resolve": null,
+    "reject": null,
+    "flow": "f9486a79-4968-424e-8aed-ad22484e9aef",
+    "_syncId": "cf9cdac7-4dc2-4f25-88fb-b5446d2380e3"
+  },
+  {
     "name": "Peering Articles",
     "key": "peering_articles_odt6q",
     "type": "peering-articles",
@@ -22,5 +46,29 @@
     "reject": null,
     "flow": "10a77950-d05d-42bc-bb87-d2f3337acae5",
     "_syncId": "31a49153-4318-496b-91ff-910549b5d9b7"
+  },
+  {
+    "name": "Weekly Project Report",
+    "key": "weekly_report_fixj0",
+    "type": "weekly-report",
+    "position_x": 19,
+    "position_y": 1,
+    "options": {},
+    "resolve": null,
+    "reject": null,
+    "flow": "098407d5-a49a-432d-938d-451867eee06f",
+    "_syncId": "10803925-ac5f-4296-9764-4f7966e5b803"
+  },
+  {
+    "name": "Weekly Project Report",
+    "key": "weekly_report_j3geb",
+    "type": "weekly-report",
+    "position_x": 19,
+    "position_y": 1,
+    "options": {},
+    "resolve": null,
+    "reject": null,
+    "flow": "47276210-d22c-4d0f-af03-6a451600c1c9",
+    "_syncId": "cc593600-6f95-4f78-96ff-b42d875bba42"
   }
 ]

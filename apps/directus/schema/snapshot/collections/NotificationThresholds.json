@@ -1,0 +1,28 @@
+{
+  "collection": "NotificationThresholds",
+  "meta": {
+    "accountability": "all",
+    "archive_app_filter": true,
+    "archive_field": "status",
+    "archive_value": "archived",
+    "collapse": "open",
+    "collection": "NotificationThresholds",
+    "color": null,
+    "display_template": "ab {{min_hours_inclusive}} h",
+    "group": null,
+    "hidden": false,
+    "icon": "notifications",
+    "item_duplication_fields": null,
+    "note": "Konfiguration der Schwellenwerte für Slack-Warnungen. Pro Stundenbereich werden mehrere Prozentwerte als Schwelle hinterlegt.",
+    "preview_url": null,
+    "singleton": false,
+    "sort": 8,
+    "sort_field": "min_hours_inclusive",
+    "translations": null,
+    "unarchive_value": "draft",
+    "versioning": false
+  },
+  "schema": {
+    "name": "NotificationThresholds"
+  }
+}

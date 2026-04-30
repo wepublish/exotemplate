@@ -1,0 +1,46 @@
+{
+  "collection": "JiraWarnings",
+  "field": "halt_requested",
+  "type": "boolean",
+  "meta": {
+    "collection": "JiraWarnings",
+    "conditions": null,
+    "display": "boolean",
+    "display_options": null,
+    "field": "halt_requested",
+    "group": null,
+    "hidden": false,
+    "interface": "boolean",
+    "note": "Wenn aktiv, hat der Kunde einen Arbeitsstopp für dieses Ticket angefordert. Das Team wird via Slack informiert und soll die Arbeit daran einstellen, bis der Stopp aufgehoben wird.",
+    "options": null,
+    "readonly": false,
+    "required": false,
+    "searchable": true,
+    "sort": 11,
+    "special": [
+      "cast-boolean"
+    ],
+    "translations": null,
+    "validation": null,
+    "validation_message": null,
+    "width": "half"
+  },
+  "schema": {
+    "name": "halt_requested",
+    "table": "JiraWarnings",
+    "data_type": "boolean",
+    "default_value": false,
+    "max_length": null,
+    "numeric_precision": null,
+    "numeric_scale": null,
+    "is_nullable": false,
+    "is_unique": false,
+    "is_indexed": false,
+    "is_primary_key": false,
+    "is_generated": false,
+    "generation_expression": null,
+    "has_auto_increment": false,
+    "foreign_key_table": null,
+    "foreign_key_column": null
+  }
+}

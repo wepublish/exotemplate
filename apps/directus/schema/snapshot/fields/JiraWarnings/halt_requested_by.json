@@ -1,0 +1,46 @@
+{
+  "collection": "JiraWarnings",
+  "field": "halt_requested_by",
+  "type": "uuid",
+  "meta": {
+    "collection": "JiraWarnings",
+    "conditions": null,
+    "display": "user",
+    "display_options": null,
+    "field": "halt_requested_by",
+    "group": null,
+    "hidden": false,
+    "interface": "select-dropdown-m2o",
+    "note": "Der Benutzer, der den aktuellen Arbeitsstopp angefordert hat.",
+    "options": {
+      "template": "{{avatar}} {{first_name}} {{last_name}}"
+    },
+    "readonly": true,
+    "required": false,
+    "searchable": true,
+    "sort": 12,
+    "special": null,
+    "translations": null,
+    "validation": null,
+    "validation_message": null,
+    "width": "half"
+  },
+  "schema": {
+    "name": "halt_requested_by",
+    "table": "JiraWarnings",
+    "data_type": "uuid",
+    "default_value": null,
+    "max_length": null,
+    "numeric_precision": null,
+    "numeric_scale": null,
+    "is_nullable": true,
+    "is_unique": false,
+    "is_indexed": false,
+    "is_primary_key": false,
+    "is_generated": false,
+    "generation_expression": null,
+    "has_auto_increment": false,
+    "foreign_key_table": "directus_users",
+    "foreign_key_column": "id"
+  }
+}

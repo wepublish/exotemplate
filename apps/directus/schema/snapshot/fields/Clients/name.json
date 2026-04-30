@@ -16,12 +16,12 @@
     "readonly": false,
     "required": true,
     "searchable": true,
-    "sort": 8,
+    "sort": 7,
     "special": null,
     "translations": null,
     "validation": null,
     "validation_message": null,
-    "width": "full"
+    "width": "half"
   },
   "schema": {
     "name": "name",

@@ -59,12 +59,12 @@
     "readonly": false,
     "required": false,
     "searchable": true,
-    "sort": 2,
+    "sort": 8,
     "special": null,
     "translations": null,
     "validation": null,
     "validation_message": null,
-    "width": "full"
+    "width": "half"
   },
   "schema": {
     "name": "status",
