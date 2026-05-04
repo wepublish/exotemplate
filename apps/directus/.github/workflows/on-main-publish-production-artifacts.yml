@@ -21,5 +21,4 @@ jobs:
       tags: |
         ghcr.io/wepublish/inside-backend:production-${{ needs.date_sha_tag.outputs.tag }}
         ghcr.io/wepublish/inside-backend:production
-        default-route-openshift-image-registry.apps.os.wepublish.cloud/wepublish-inside/inside-backend:production
     secrets: inherit
