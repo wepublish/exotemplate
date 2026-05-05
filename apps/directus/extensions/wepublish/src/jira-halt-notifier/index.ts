@@ -1,5 +1,10 @@
 import { defineHook } from '@directus/extensions-sdk'
-import type { Client, JiraWarning } from '../DirectusTypes'
+import type {
+  Client,
+  ClientPeriod,
+  JiraWarning,
+  Period
+} from '../DirectusTypes'
 import { getJiraIssueAssignee } from '../shared/billing/jira'
 import {
   composeGermanHaltRequestedDmMessage,
@@ -22,6 +27,7 @@ interface HookUser {
 
 interface ItemsServiceLike<T> {
   readOne(id: string | number, opts?: unknown): Promise<T>
+  readByQuery?(query: unknown): Promise<T[]>
 }
 
 /**
@@ -121,6 +127,10 @@ export default defineHook(({ filter, action }, { services, env }) => {
       schema: context.schema,
       knex: context.database
     }) as ItemsServiceLike<Client>
+    const clientPeriodService = new ItemsService('Clients_Periods', {
+      schema: context.schema,
+      knex: context.database
+    }) as ItemsServiceLike<ClientPeriod>
     const userService = new ItemsService('directus_users', {
       schema: context.schema,
       knex: context.database
@@ -137,6 +147,7 @@ export default defineHook(({ filter, action }, { services, env }) => {
           transition,
           warningService,
           clientService,
+          clientPeriodService,
           userService,
           slackToken,
           dashboardBaseUrl,
@@ -158,6 +169,7 @@ interface NotifyArgs {
   transition: HaltTransition
   warningService: ItemsServiceLike<JiraWarning>
   clientService: ItemsServiceLike<Client>
+  clientPeriodService: ItemsServiceLike<ClientPeriod>
   userService: ItemsServiceLike<HookUser>
   slackToken: string
   dashboardBaseUrl: string
@@ -178,6 +190,21 @@ async function notifyHaltTransition(args: NotifyArgs): Promise<void> {
   if (!client.slack_channel_id) return
   if (isClientPaused(client.notifications_paused)) return
 
+  // The deep link goes to the client's currently active billing period.
+  // No fallback: without an active period there's no Arbeitsprotokoll page
+  // to land on, and we'd rather skip the notification than send a broken URL.
+  const clientPeriodId = await findCurrentClientPeriodId(
+    args.clientPeriodService,
+    clientId,
+    new Date()
+  )
+  if (clientPeriodId == null) {
+    console.warn(
+      `jira-halt-notifier: no active period for client ${client.name} — skipping Slack notification for ${warning.jira_issue_key}`
+    )
+    return
+  }
+
   const actorId =
     args.transition === 'requested'
       ? warning.halt_requested_by
@@ -191,7 +218,7 @@ async function notifyHaltTransition(args: NotifyArgs): Promise<void> {
 
   const payload = {
     clientName: client.name,
-    clientId: client.id,
+    clientPeriodId,
     jiraIssueKey: warning.jira_issue_key,
     actorName:
       [actor.first_name ?? '', actor.last_name ?? ''].join(' ').trim() || '',
@@ -303,4 +330,37 @@ async function loadActor(
   } catch {
     return { id: actorRef }
   }
+}
+
+/**
+ * Returns the `Clients_Periods.id` considered "current" for `clientId` at
+ * `now`. When more than one period overlaps, the one with the latest
+ * `Periods.from` wins — mirrors `findCurrentClientPeriod` in the threshold
+ * notifier. Returns null when the client has no overlapping period.
+ */
+async function findCurrentClientPeriodId(
+  service: ItemsServiceLike<ClientPeriod>,
+  clientId: string,
+  now: Date
+): Promise<number | null> {
+  if (!service.readByQuery) return null
+  const today = now.toISOString()
+  const rows = await service.readByQuery({
+    filter: {
+      Clients_id: { _eq: clientId },
+      Periods_id: { from: { _lte: today }, to: { _gte: today } }
+    },
+    fields: ['id', 'Periods_id.from'],
+    limit: -1
+  })
+
+  if (!rows.length) return null
+
+  const best = rows.reduce((winner, candidate) => {
+    const winnerFrom = (winner.Periods_id as Period).from
+    const candidateFrom = (candidate.Periods_id as Period).from
+    return candidateFrom > winnerFrom ? candidate : winner
+  })
+
+  return best.id ?? null
 }

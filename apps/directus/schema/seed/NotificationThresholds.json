@@ -13,71 +13,29 @@
       "_sync_id": "threshold-0-25h",
       "status": "published",
       "min_hours_inclusive": 0.25,
-      "initial_threshold_hours": 1,
+      "initial_threshold_offset_hours": 1,
       "recurring_threshold_hours": 1
     },
     {
-      "_sync_id": "threshold-1h",
+      "_sync_id": "threshold-4h",
       "status": "published",
-      "min_hours_inclusive": 1,
-      "initial_threshold_hours": 2,
-      "recurring_threshold_hours": 1
-    },
-    {
-      "_sync_id": "threshold-2h",
-      "status": "published",
-      "min_hours_inclusive": 2,
-      "initial_threshold_hours": 2,
-      "recurring_threshold_hours": 1
-    },
-    {
-      "_sync_id": "threshold-3h",
-      "status": "published",
-      "min_hours_inclusive": 3,
-      "initial_threshold_hours": 3,
-      "recurring_threshold_hours": 1.5
-    },
-    {
-      "_sync_id": "threshold-5h",
-      "status": "published",
-      "min_hours_inclusive": 5,
-      "initial_threshold_hours": 4,
+      "min_hours_inclusive": 4,
+      "initial_threshold_offset_hours": 0,
       "recurring_threshold_hours": 2
     },
     {
       "_sync_id": "threshold-8h",
       "status": "published",
       "min_hours_inclusive": 8,
-      "initial_threshold_hours": 7,
+      "initial_threshold_offset_hours": -1,
       "recurring_threshold_hours": 2
     },
     {
-      "_sync_id": "threshold-13h",
+      "_sync_id": "threshold-24h",
       "status": "published",
-      "min_hours_inclusive": 13,
-      "initial_threshold_hours": 11,
-      "recurring_threshold_hours": 3
-    },
-    {
-      "_sync_id": "threshold-21h",
-      "status": "published",
-      "min_hours_inclusive": 21,
-      "initial_threshold_hours": 18,
+      "min_hours_inclusive": 24,
+      "initial_threshold_offset_hours": -4,
       "recurring_threshold_hours": 4
-    },
-    {
-      "_sync_id": "threshold-34h",
-      "status": "published",
-      "min_hours_inclusive": 34,
-      "initial_threshold_hours": 29,
-      "recurring_threshold_hours": 6
-    },
-    {
-      "_sync_id": "threshold-56h",
-      "status": "published",
-      "min_hours_inclusive": 56,
-      "initial_threshold_hours": 49,
-      "recurring_threshold_hours": 8
     }
   ]
 }

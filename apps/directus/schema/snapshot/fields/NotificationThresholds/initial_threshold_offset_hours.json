@@ -1,6 +1,6 @@
 {
   "collection": "NotificationThresholds",
-  "field": "initial_threshold_hours",
+  "field": "initial_threshold_offset_hours",
   "type": "decimal",
   "meta": {
     "collection": "NotificationThresholds",
@@ -9,13 +9,13 @@
     "display_options": {
       "format": "{{value}} h"
     },
-    "field": "initial_threshold_hours",
+    "field": "initial_threshold_offset_hours",
     "group": null,
     "hidden": false,
     "interface": "input",
-    "note": "Erste Slack-Warnung, sobald der Stundenverbrauch diesen Wert erreicht (z.B. 9 = Meldung bei 9 verbrauchten Stunden).",
+    "note": "Toleranz gegenüber der Jira-Schätzung in Stunden (vorzeichenbehaftet). Beispiel: +2 = erste Meldung 2 h nach Erreichen der Schätzung. -1 = erste Meldung 1 h vor Erreichen der Schätzung.",
     "options": {
-      "iconRight": "schedule"
+      "iconRight": "tune"
     },
     "readonly": false,
     "required": true,
@@ -28,7 +28,7 @@
     "width": "half"
   },
   "schema": {
-    "name": "initial_threshold_hours",
+    "name": "initial_threshold_offset_hours",
     "table": "NotificationThresholds",
     "data_type": "numeric",
     "default_value": 0,

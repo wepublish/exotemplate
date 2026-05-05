@@ -26,6 +26,11 @@
       },
       {
         "type": "endpoint",
+        "name": "networkContribution",
+        "source": "src/networkContribution/index.ts"
+      },
+      {
+        "type": "endpoint",
         "name": "invoice-with-topup",
         "source": "src/invoice-with-topup/index.ts"
       },

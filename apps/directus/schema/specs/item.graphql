@@ -27,10 +27,6 @@ type Query {
   PeerArticles_by_id(id: ID!, version: String): PeerArticles
   PeerArticles_aggregated(groupBy: [String], filter: PeerArticles_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [PeerArticles_aggregated!]!
   PeerArticles_by_version(version: String!, id: ID!): version_PeerArticles
-  NotificationThresholds(filter: NotificationThresholds_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [NotificationThresholds!]!
-  NotificationThresholds_by_id(id: ID!, version: String): NotificationThresholds
-  NotificationThresholds_aggregated(groupBy: [String], filter: NotificationThresholds_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [NotificationThresholds_aggregated!]!
-  NotificationThresholds_by_version(version: String!, id: ID!): version_NotificationThresholds
   JiraWarnings(filter: JiraWarnings_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [JiraWarnings!]!
   JiraWarnings_by_id(id: ID!, version: String): JiraWarnings
   JiraWarnings_aggregated(groupBy: [String], filter: JiraWarnings_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [JiraWarnings_aggregated!]!
@@ -39,6 +35,10 @@ type Query {
   Clients_by_id(id: ID!, version: String): Clients
   Clients_aggregated(groupBy: [String], filter: Clients_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [Clients_aggregated!]!
   Clients_by_version(version: String!, id: ID!): version_Clients
+  NotificationThresholds(filter: NotificationThresholds_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [NotificationThresholds!]!
+  NotificationThresholds_by_id(id: ID!, version: String): NotificationThresholds
+  NotificationThresholds_aggregated(groupBy: [String], filter: NotificationThresholds_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [NotificationThresholds_aggregated!]!
+  NotificationThresholds_by_version(version: String!, id: ID!): version_NotificationThresholds
 }
 
 type Mutation {
@@ -56,12 +56,12 @@ type Mutation {
   create_ManualWorkEntries_item(data: create_ManualWorkEntries_input!): ManualWorkEntries
   create_PeerArticles_items(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_PeerArticles_input!]): [PeerArticles!]!
   create_PeerArticles_item(data: create_PeerArticles_input!): PeerArticles
-  create_NotificationThresholds_items(filter: NotificationThresholds_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_NotificationThresholds_input!]): [NotificationThresholds!]!
-  create_NotificationThresholds_item(data: create_NotificationThresholds_input!): NotificationThresholds
   create_JiraWarnings_items(filter: JiraWarnings_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_JiraWarnings_input!]): [JiraWarnings!]!
   create_JiraWarnings_item(data: create_JiraWarnings_input!): JiraWarnings
   create_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Clients_input!]): [Clients!]!
   create_Clients_item(data: create_Clients_input!): Clients
+  create_NotificationThresholds_items(filter: NotificationThresholds_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_NotificationThresholds_input!]): [NotificationThresholds!]!
+  create_NotificationThresholds_item(data: create_NotificationThresholds_input!): NotificationThresholds
   update_directus_sync_id_map_items(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_sync_id_map_input!): [directus_sync_id_map!]!
   update_directus_sync_id_map_batch(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_sync_id_map_input!]): [directus_sync_id_map!]!
   update_directus_sync_id_map_item(id: ID!, data: update_directus_sync_id_map_input!): directus_sync_id_map
@@ -83,15 +83,15 @@ type Mutation {
   update_PeerArticles_items(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_PeerArticles_input!): [PeerArticles!]!
   update_PeerArticles_batch(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_PeerArticles_input!]): [PeerArticles!]!
   update_PeerArticles_item(id: ID!, data: update_PeerArticles_input!): PeerArticles
-  update_NotificationThresholds_items(filter: NotificationThresholds_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_NotificationThresholds_input!): [NotificationThresholds!]!
-  update_NotificationThresholds_batch(filter: NotificationThresholds_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_NotificationThresholds_input!]): [NotificationThresholds!]!
-  update_NotificationThresholds_item(id: ID!, data: update_NotificationThresholds_input!): NotificationThresholds
   update_JiraWarnings_items(filter: JiraWarnings_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_JiraWarnings_input!): [JiraWarnings!]!
   update_JiraWarnings_batch(filter: JiraWarnings_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_JiraWarnings_input!]): [JiraWarnings!]!
   update_JiraWarnings_item(id: ID!, data: update_JiraWarnings_input!): JiraWarnings
   update_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Clients_input!): [Clients!]!
   update_Clients_batch(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Clients_input!]): [Clients!]!
   update_Clients_item(id: ID!, data: update_Clients_input!): Clients
+  update_NotificationThresholds_items(filter: NotificationThresholds_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_NotificationThresholds_input!): [NotificationThresholds!]!
+  update_NotificationThresholds_batch(filter: NotificationThresholds_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_NotificationThresholds_input!]): [NotificationThresholds!]!
+  update_NotificationThresholds_item(id: ID!, data: update_NotificationThresholds_input!): NotificationThresholds
   delete_directus_sync_id_map_items(ids: [ID]!): delete_many
   delete_directus_sync_id_map_item(id: ID!): delete_one
   delete_TopUps_items(ids: [ID]!): delete_many
@@ -106,12 +106,12 @@ type Mutation {
   delete_ManualWorkEntries_item(id: ID!): delete_one
   delete_PeerArticles_items(ids: [ID]!): delete_many
   delete_PeerArticles_item(id: ID!): delete_one
-  delete_NotificationThresholds_items(ids: [ID]!): delete_many
-  delete_NotificationThresholds_item(id: ID!): delete_one
   delete_JiraWarnings_items(ids: [ID]!): delete_many
   delete_JiraWarnings_item(id: ID!): delete_one
   delete_Clients_items(ids: [ID]!): delete_many
   delete_Clients_item(id: ID!): delete_one
+  delete_NotificationThresholds_items(ids: [ID]!): delete_many
+  delete_NotificationThresholds_item(id: ID!): delete_one
 }
 
 type Subscription {
@@ -143,9 +143,9 @@ type Subscription {
   Clients_directus_users_mutated(event: EventEnum): Clients_directus_users_mutated
   ManualWorkEntries_mutated(event: EventEnum): ManualWorkEntries_mutated
   PeerArticles_mutated(event: EventEnum): PeerArticles_mutated
-  NotificationThresholds_mutated(event: EventEnum): NotificationThresholds_mutated
   JiraWarnings_mutated(event: EventEnum): JiraWarnings_mutated
   Clients_mutated(event: EventEnum): Clients_mutated
+  NotificationThresholds_mutated(event: EventEnum): NotificationThresholds_mutated
 }
 
 """The `Boolean` scalar type represents `true` or `false`."""
@@ -1212,11 +1212,6 @@ type NotificationThresholds {
   user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
 
   """
-  Erste Slack-Warnung, sobald der Stundenverbrauch diesen Wert erreicht (z.B. 9 = Meldung bei 9 verbrauchten Stunden).
-  """
-  initial_threshold_hours: Float!
-
-  """
   Intervall zwischen wiederkehrenden Meldungen in Stunden (z.B. 4 = weitere Meldung alle 4 h über der initialen Schwelle). Muss grösser als 0 sein.
   """
   recurring_threshold_hours: Float
@@ -1225,6 +1220,11 @@ type NotificationThresholds {
   Schätzwert-Untergrenze (inklusiv). Ein Ticket nutzt diesen Eintrag, wenn seine Schätzung mindestens diesem Wert entspricht und kein Eintrag mit grösserem Wert zutrifft.
   """
   min_hours_inclusive: Float!
+
+  """
+  Toleranz gegenüber der Jira-Schätzung in Stunden (vorzeichenbehaftet). Beispiel: +2 = erste Meldung 2 h nach Erreichen der Schätzung. -1 = erste Meldung 1 h vor Erreichen der Schätzung.
+  """
+  initial_threshold_offset_hours: Float!
 }
 
 type NotificationThresholds_aggregated {
@@ -1250,11 +1250,6 @@ type NotificationThresholds_aggregated_count {
   user_updated: Int
 
   """
-  Erste Slack-Warnung, sobald der Stundenverbrauch diesen Wert erreicht (z.B. 9 = Meldung bei 9 verbrauchten Stunden).
-  """
-  initial_threshold_hours: Int
-
-  """
   Intervall zwischen wiederkehrenden Meldungen in Stunden (z.B. 4 = weitere Meldung alle 4 h über der initialen Schwelle). Muss grösser als 0 sein.
   """
   recurring_threshold_hours: Int
@@ -1263,15 +1258,15 @@ type NotificationThresholds_aggregated_count {
   Schätzwert-Untergrenze (inklusiv). Ein Ticket nutzt diesen Eintrag, wenn seine Schätzung mindestens diesem Wert entspricht und kein Eintrag mit grösserem Wert zutrifft.
   """
   min_hours_inclusive: Int
+
+  """
+  Toleranz gegenüber der Jira-Schätzung in Stunden (vorzeichenbehaftet). Beispiel: +2 = erste Meldung 2 h nach Erreichen der Schätzung. -1 = erste Meldung 1 h vor Erreichen der Schätzung.
+  """
+  initial_threshold_offset_hours: Int
 }
 
 type NotificationThresholds_aggregated_fields {
   sort: Float
-
-  """
-  Erste Slack-Warnung, sobald der Stundenverbrauch diesen Wert erreicht (z.B. 9 = Meldung bei 9 verbrauchten Stunden).
-  """
-  initial_threshold_hours: Float
 
   """
   Intervall zwischen wiederkehrenden Meldungen in Stunden (z.B. 4 = weitere Meldung alle 4 h über der initialen Schwelle). Muss grösser als 0 sein.
@@ -1282,6 +1277,11 @@ type NotificationThresholds_aggregated_fields {
   Schätzwert-Untergrenze (inklusiv). Ein Ticket nutzt diesen Eintrag, wenn seine Schätzung mindestens diesem Wert entspricht und kein Eintrag mit grösserem Wert zutrifft.
   """
   min_hours_inclusive: Float
+
+  """
+  Toleranz gegenüber der Jira-Schätzung in Stunden (vorzeichenbehaftet). Beispiel: +2 = erste Meldung 2 h nach Erreichen der Schätzung. -1 = erste Meldung 1 h vor Erreichen der Schätzung.
+  """
+  initial_threshold_offset_hours: Float
 }
 
 type NotificationThresholds_mutated {
@@ -1617,11 +1617,6 @@ type version_NotificationThresholds {
   user_updated: JSON
 
   """
-  Erste Slack-Warnung, sobald der Stundenverbrauch diesen Wert erreicht (z.B. 9 = Meldung bei 9 verbrauchten Stunden).
-  """
-  initial_threshold_hours: Float
-
-  """
   Intervall zwischen wiederkehrenden Meldungen in Stunden (z.B. 4 = weitere Meldung alle 4 h über der initialen Schwelle). Muss grösser als 0 sein.
   """
   recurring_threshold_hours: Float
@@ -1630,6 +1625,11 @@ type version_NotificationThresholds {
   Schätzwert-Untergrenze (inklusiv). Ein Ticket nutzt diesen Eintrag, wenn seine Schätzung mindestens diesem Wert entspricht und kein Eintrag mit grösserem Wert zutrifft.
   """
   min_hours_inclusive: Float
+
+  """
+  Toleranz gegenüber der Jira-Schätzung in Stunden (vorzeichenbehaftet). Beispiel: +2 = erste Meldung 2 h nach Erreichen der Schätzung. -1 = erste Meldung 1 h vor Erreichen der Schätzung.
+  """
+  initial_threshold_offset_hours: Float
 }
 
 """"""
@@ -2038,11 +2038,6 @@ input create_NotificationThresholds_input {
   user_updated: create_directus_users_input
 
   """
-  Erste Slack-Warnung, sobald der Stundenverbrauch diesen Wert erreicht (z.B. 9 = Meldung bei 9 verbrauchten Stunden).
-  """
-  initial_threshold_hours: Float!
-
-  """
   Intervall zwischen wiederkehrenden Meldungen in Stunden (z.B. 4 = weitere Meldung alle 4 h über der initialen Schwelle). Muss grösser als 0 sein.
   """
   recurring_threshold_hours: Float
@@ -2051,6 +2046,11 @@ input create_NotificationThresholds_input {
   Schätzwert-Untergrenze (inklusiv). Ein Ticket nutzt diesen Eintrag, wenn seine Schätzung mindestens diesem Wert entspricht und kein Eintrag mit grösserem Wert zutrifft.
   """
   min_hours_inclusive: Float!
+
+  """
+  Toleranz gegenüber der Jira-Schätzung in Stunden (vorzeichenbehaftet). Beispiel: +2 = erste Meldung 2 h nach Erreichen der Schätzung. -1 = erste Meldung 1 h vor Erreichen der Schätzung.
+  """
+  initial_threshold_offset_hours: Float!
 }
 
 input create_PeerArticles_input {
@@ -2725,9 +2725,9 @@ input NotificationThresholds_filter {
   status: string_filter_operators
   user_created: directus_users_filter
   user_updated: directus_users_filter
-  initial_threshold_hours: number_filter_operators
   recurring_threshold_hours: number_filter_operators
   min_hours_inclusive: number_filter_operators
+  initial_threshold_offset_hours: number_filter_operators
   _and: [NotificationThresholds_filter]
   _or: [NotificationThresholds_filter]
 }
@@ -3130,11 +3130,6 @@ input update_NotificationThresholds_input {
   user_updated: update_directus_users_input
 
   """
-  Erste Slack-Warnung, sobald der Stundenverbrauch diesen Wert erreicht (z.B. 9 = Meldung bei 9 verbrauchten Stunden).
-  """
-  initial_threshold_hours: Float
-
-  """
   Intervall zwischen wiederkehrenden Meldungen in Stunden (z.B. 4 = weitere Meldung alle 4 h über der initialen Schwelle). Muss grösser als 0 sein.
   """
   recurring_threshold_hours: Float
@@ -3143,6 +3138,11 @@ input update_NotificationThresholds_input {
   Schätzwert-Untergrenze (inklusiv). Ein Ticket nutzt diesen Eintrag, wenn seine Schätzung mindestens diesem Wert entspricht und kein Eintrag mit grösserem Wert zutrifft.
   """
   min_hours_inclusive: Float
+
+  """
+  Toleranz gegenüber der Jira-Schätzung in Stunden (vorzeichenbehaftet). Beispiel: +2 = erste Meldung 2 h nach Erreichen der Schätzung. -1 = erste Meldung 1 h vor Erreichen der Schätzung.
+  """
+  initial_threshold_offset_hours: Float
 }
 
 input update_PeerArticles_input {

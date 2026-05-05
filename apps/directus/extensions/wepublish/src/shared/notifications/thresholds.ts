@@ -16,17 +16,31 @@ export interface ComputedWarning {
   estimatedHours: number
   totalHoursUsed: number
   usedPercent: number
+  /**
+   * Erste Schwelle für dieses Ticket: `Schätzung + Offset`. Hilft im Slack-
+   * Text und im Frontend dabei, dem Empfänger zu zeigen, ab welcher Stunde
+   * grundsätzlich gemeldet wird.
+   */
+  initialThresholdHours: number
+  /**
+   * Höchste bereits überschrittene Schwelle (in Stunden). Liegt auf der
+   * arithmetischen Progression `initial, initial + recurring, …`.
+   */
   crossedThresholdHours: number
   /**
-   * Stundenwert, ab dem die nächste Slack-Meldung ausgelöst würde, wenn das
-   * Ticket nicht stummgeschaltet ist. Für ein arithmetisches Schema mit
-   * Abstand `recurring` ist das einfach `crossedThresholdHours + recurring`.
+   * Stundenwert der nächsten Slack-Meldung — `crossedThresholdHours +
+   * recurringHours`.
    */
   nextThresholdHours: number
 }
 
 export interface ThresholdSchedule {
-  initialHours: number
+  /**
+   * Vorzeichenbehaftete Toleranz gegenüber der Jira-Schätzung. Negative Werte
+   * lösen die erste Meldung vor Erreichen der Schätzung aus, positive Werte
+   * danach. Beispiel: Schätzung 9 h, Offset +2 h → erste Meldung bei 11 h.
+   */
+  initialOffsetHours: number
   recurringHours: number
 }
 
@@ -73,31 +87,49 @@ export function selectThresholdForHours(
   }
   if (!match) return null
 
-  const initialHours = toNumber(match.initial_threshold_hours)
+  const initialOffsetHours = toNumber(match.initial_threshold_offset_hours)
   const recurringHours = toNumber(match.recurring_threshold_hours)
-  if (!Number.isFinite(initialHours)) return null
+  if (!Number.isFinite(initialOffsetHours)) return null
   if (!Number.isFinite(recurringHours) || recurringHours <= 0) return null
 
-  return { initialHours, recurringHours }
+  return { initialOffsetHours, recurringHours }
+}
+
+/**
+ * Erste Schwelle (in Stunden) für ein konkretes Ticket. Sie ergibt sich aus
+ * der Jira-Schätzung plus der vorzeichenbehafteten Toleranz aus dem Bucket.
+ *
+ * Beispiel: Schätzung 5 h, Offset +2 h → erste Schwelle 7 h.
+ *           Schätzung 9 h, Offset +2 h → erste Schwelle 11 h.
+ *           Schätzung 13 h, Offset −2 h → erste Schwelle 11 h.
+ */
+export function initialThresholdForEstimate(
+  estimatedHours: number,
+  schedule: ThresholdSchedule
+): number {
+  const estimated = toNumber(estimatedHours)
+  const offset = toNumber(schedule.initialOffsetHours)
+  return estimated + offset
 }
 
 /**
  * Returns the highest threshold (in hours) the current usage has crossed, or
  * null when the usage is still below the initial threshold. Thresholds form
- * an arithmetic progression: initial, initial + recurring,
- * initial + 2·recurring and so on — no upper bound.
+ * an arithmetic progression starting at `Schätzung + offset` and stepping by
+ * `recurringHours` — no upper bound.
  *
- * Example: initial 9h, recurring 4h → 9, 13, 17, 21, ...
+ * Example: estimate 9 h, offset 0, recurring 4 h → 9, 13, 17, 21, …
  *   currentHours 8   → null (below initial)
  *   currentHours 9   → 9
  *   currentHours 20  → 17 (9 + 2·4)
  */
 export function highestCrossedThreshold(
   currentHours: number,
+  estimatedHours: number,
   schedule: ThresholdSchedule
 ): number | null {
   const current = toNumber(currentHours)
-  const initialHours = toNumber(schedule.initialHours)
+  const initialHours = initialThresholdForEstimate(estimatedHours, schedule)
   const recurringHours = toNumber(schedule.recurringHours)
   if (
     !Number.isFinite(current) ||
@@ -152,15 +184,21 @@ export function computePendingWarnings(args: {
     )
     if (!schedule) continue
 
-    const crossed = highestCrossedThreshold(totalHoursUsed, schedule)
+    const crossed = highestCrossedThreshold(
+      totalHoursUsed,
+      estimatedHours,
+      schedule
+    )
     if (!shouldNotify(crossed, args.warningsByKey.get(issue.jiraIssueKey))) {
       continue
     }
 
     const crossedHours = toNumber(crossed)
+    const initialHours = initialThresholdForEstimate(estimatedHours, schedule)
     const nextThresholdHours = crossedHours + schedule.recurringHours
     if (
       !Number.isFinite(crossedHours) ||
+      !Number.isFinite(initialHours) ||
       !Number.isFinite(nextThresholdHours)
     ) {
       continue
@@ -171,6 +209,7 @@ export function computePendingWarnings(args: {
       estimatedHours,
       totalHoursUsed,
       usedPercent: percentUsed(totalHoursUsed, estimatedHours),
+      initialThresholdHours: initialHours,
       crossedThresholdHours: crossedHours,
       nextThresholdHours
     })

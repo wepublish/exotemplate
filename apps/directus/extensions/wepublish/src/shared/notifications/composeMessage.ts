@@ -12,14 +12,20 @@ export interface ComposedSlackMessage {
 
 export interface ComposeMessageInput {
   clientName: string
-  clientId: string
+  /**
+   * Numeric `Clients_Periods.id` of the period the warning belongs to. Used
+   * to deep-link the Slack notification straight to that period's
+   * Arbeitsprotokoll page (`/[clientPeriodId]/work-log?issue=...`).
+   */
+  clientPeriodId: number
   warnings: ComputedWarning[]
   dashboardBaseUrl: string
 }
 
 export interface ComposeHaltMessageInput {
   clientName: string
-  clientId: string
+  /** Same as `ComposeMessageInput.clientPeriodId`. */
+  clientPeriodId: number
   jiraIssueKey: string
   actorName: string
   actorEmail: string | null
@@ -49,6 +55,12 @@ function formatHours(hours: number): string {
   return `${HOURS_FORMATTER.format(hours)} h`
 }
 
+function formatOffset(hours: number): string {
+  if (Math.abs(hours) < 0.005) return '±0 h'
+  const sign = hours > 0 ? '+' : '−'
+  return `${sign}${HOURS_FORMATTER.format(Math.abs(hours))} h`
+}
+
 function formatTimestamp(iso: string): string {
   const date = new Date(iso)
   if (Number.isNaN(date.getTime())) return iso
@@ -64,22 +76,19 @@ function formatActor(name: string, email: string | null): string {
 }
 
 /**
- * Build a deep link into the dashboard that selects the right client and
- * drills the Arbeitsprotokoll into the affected Jira ticket. Mirrors the
- * query-param contract used by `app/components/dashboard/Dashboard.vue`
- * (`clientId` + `issue`).
+ * Build a deep link into the Arbeitsprotokoll page for one specific
+ * (clientPeriod, Jira issue) pair. Matches the route shape consumed by
+ * `app/pages/[clientPeriodId]/work-log.vue` — `?issue=<key>` triggers the
+ * focus + scroll-into-view behaviour on arrival.
  */
-export function buildDashboardUrl(
+export function buildWorkLogUrl(
   dashboardBaseUrl: string,
-  clientId: string,
+  clientPeriodId: number,
   jiraIssueKey: string
 ): string {
   const base = dashboardBaseUrl.replace(/\/+$/, '')
-  const params = new URLSearchParams({
-    clientId,
-    issue: jiraIssueKey
-  })
-  return `${base}/?${params.toString()}`
+  const params = new URLSearchParams({ issue: jiraIssueKey })
+  return `${base}/${clientPeriodId}/work-log?${params.toString()}`
 }
 
 /**
@@ -91,7 +100,7 @@ export function buildDashboardUrl(
 export function composeGermanWarningMessage(
   input: ComposeMessageInput
 ): ComposedSlackMessage {
-  const { clientName, clientId, warnings, dashboardBaseUrl } = input
+  const { clientName, clientPeriodId, warnings, dashboardBaseUrl } = input
 
   const header = `Freundlicher Hinweis für ${clientName}: ${warnings.length} Jira-Ticket${
     warnings.length === 1 ? '' : 's'
@@ -107,9 +116,9 @@ export function composeGermanWarningMessage(
   ]
 
   for (const warning of warnings) {
-    const url = buildDashboardUrl(
+    const url = buildWorkLogUrl(
       dashboardBaseUrl,
-      clientId,
+      clientPeriodId,
       warning.jiraIssueKey
     )
     const line =
@@ -117,11 +126,9 @@ export function composeGermanWarningMessage(
         warning.estimatedHours
       )}, ` +
       `verbraucht: ${formatHours(warning.totalHoursUsed)} ` +
-      `(${warning.usedPercent}%, Schwelle ${formatHours(
-        warning.crossedThresholdHours
-      )}).\n` +
-      `_Nächste Meldung, sobald ${formatHours(warning.nextThresholdHours)} ` +
-      `auf diesem Ticket erreicht sind._`
+      `(${warning.usedPercent}%).\n` +
+      `_Erste Meldung ab ${formatHours(warning.initialThresholdHours)} ` +
+      `Nächste Meldung ab ${formatHours(warning.nextThresholdHours)}._`
 
     blocks.push({
       type: 'section',
@@ -155,9 +162,9 @@ export function composeGermanWarningMessage(
         (w) =>
           `• ${w.jiraIssueKey}: ${formatHours(w.totalHoursUsed)} / ${formatHours(
             w.estimatedHours
-          )} (${w.usedPercent}%) — nächste Meldung ab ${formatHours(
-            w.nextThresholdHours
-          )}`
+          )} (${w.usedPercent}%) — erste Schwelle ${formatHours(
+            w.initialThresholdHours
+          )}, nächste Meldung ab ${formatHours(w.nextThresholdHours)}`
       )
       .join('\n')
 
@@ -174,7 +181,7 @@ export function composeGermanHaltRequestedMessage(
 ): ComposedSlackMessage {
   const {
     clientName,
-    clientId,
+    clientPeriodId,
     jiraIssueKey,
     actorName,
     actorEmail,
@@ -182,7 +189,7 @@ export function composeGermanHaltRequestedMessage(
     dashboardBaseUrl
   } = input
 
-  const url = buildDashboardUrl(dashboardBaseUrl, clientId, jiraIssueKey)
+  const url = buildWorkLogUrl(dashboardBaseUrl, clientPeriodId, jiraIssueKey)
   const actor = formatActor(actorName, actorEmail)
   const occurredAt = formatTimestamp(occurredAtIso)
 
@@ -243,7 +250,7 @@ export function composeGermanHaltResolvedMessage(
 ): ComposedSlackMessage {
   const {
     clientName,
-    clientId,
+    clientPeriodId,
     jiraIssueKey,
     actorName,
     actorEmail,
@@ -251,7 +258,7 @@ export function composeGermanHaltResolvedMessage(
     dashboardBaseUrl
   } = input
 
-  const url = buildDashboardUrl(dashboardBaseUrl, clientId, jiraIssueKey)
+  const url = buildWorkLogUrl(dashboardBaseUrl, clientPeriodId, jiraIssueKey)
   const actor = formatActor(actorName, actorEmail)
   const occurredAt = formatTimestamp(occurredAtIso)
 
@@ -301,7 +308,7 @@ export function composeGermanHaltRequestedDmMessage(
 ): ComposedSlackMessage {
   const {
     clientName,
-    clientId,
+    clientPeriodId,
     jiraIssueKey,
     actorName,
     actorEmail,
@@ -310,7 +317,7 @@ export function composeGermanHaltRequestedDmMessage(
     assigneeName
   } = input
 
-  const url = buildDashboardUrl(dashboardBaseUrl, clientId, jiraIssueKey)
+  const url = buildWorkLogUrl(dashboardBaseUrl, clientPeriodId, jiraIssueKey)
   const actor = formatActor(actorName, actorEmail)
   const occurredAt = formatTimestamp(occurredAtIso)
   const greeting = assigneeName?.trim()

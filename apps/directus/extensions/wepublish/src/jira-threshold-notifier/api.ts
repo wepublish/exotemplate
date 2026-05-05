@@ -175,7 +175,7 @@ async function processClient(args: ProcessClientArgs): Promise<void> {
 
   const message = composeGermanWarningMessage({
     clientName: client.name,
-    clientId: client.id,
+    clientPeriodId: activePeriod.id,
     warnings: pending,
     dashboardBaseUrl: args.dashboardBaseUrl
   })

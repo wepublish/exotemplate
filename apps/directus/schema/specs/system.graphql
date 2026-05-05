@@ -270,9 +270,9 @@ type Subscription {
   Clients_directus_users_mutated(event: EventEnum): Clients_directus_users_mutated
   ManualWorkEntries_mutated(event: EventEnum): ManualWorkEntries_mutated
   PeerArticles_mutated(event: EventEnum): PeerArticles_mutated
-  NotificationThresholds_mutated(event: EventEnum): NotificationThresholds_mutated
   JiraWarnings_mutated(event: EventEnum): JiraWarnings_mutated
   Clients_mutated(event: EventEnum): Clients_mutated
+  NotificationThresholds_mutated(event: EventEnum): NotificationThresholds_mutated
 }
 
 """The `Boolean` scalar type represents `true` or `false`."""
@@ -1817,11 +1817,6 @@ type NotificationThresholds {
   user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
 
   """
-  Erste Slack-Warnung, sobald der Stundenverbrauch diesen Wert erreicht (z.B. 9 = Meldung bei 9 verbrauchten Stunden).
-  """
-  initial_threshold_hours: Float!
-
-  """
   Intervall zwischen wiederkehrenden Meldungen in Stunden (z.B. 4 = weitere Meldung alle 4 h über der initialen Schwelle). Muss grösser als 0 sein.
   """
   recurring_threshold_hours: Float
@@ -1830,6 +1825,11 @@ type NotificationThresholds {
   Schätzwert-Untergrenze (inklusiv). Ein Ticket nutzt diesen Eintrag, wenn seine Schätzung mindestens diesem Wert entspricht und kein Eintrag mit grösserem Wert zutrifft.
   """
   min_hours_inclusive: Float!
+
+  """
+  Toleranz gegenüber der Jira-Schätzung in Stunden (vorzeichenbehaftet). Beispiel: +2 = erste Meldung 2 h nach Erreichen der Schätzung. -1 = erste Meldung 1 h vor Erreichen der Schätzung.
+  """
+  initial_threshold_offset_hours: Float!
 }
 
 type NotificationThresholds_mutated {

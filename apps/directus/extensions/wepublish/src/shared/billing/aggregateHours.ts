@@ -68,6 +68,20 @@ export interface JiraIssue {
   key: string
   fields: {
     customfield_10028: string
+    /**
+     * Live status of the Jira issue. We expose `statusCategory.key` because
+     * Jira normalizes every workflow state into one of `new`, `indeterminate`,
+     * or `done` — that's the most reliable signal that a ticket is finished
+     * (covers "Done", "Cancelled", "Resolved", "Closed", etc.) regardless of
+     * the team's custom workflow naming.
+     */
+    status?: {
+      name: string
+      statusCategory: {
+        key: 'new' | 'indeterminate' | 'done'
+        name: string
+      }
+    }
   }
 }
 

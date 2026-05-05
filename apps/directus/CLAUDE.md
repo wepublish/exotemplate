@@ -64,6 +64,8 @@ All collections follow Directus conventions: `status` (published/draft/archived)
 
 Extensions are bundled under `extensions/wepublish/` and built with `npm run build:extensions`.
 
+**Always extend the existing `wepublish` bundle — do not create a new top-level extension.** All custom endpoints, hooks, operations, and shared helpers go inside `extensions/wepublish/src/`. Add a new sub-folder there (e.g. `extensions/wepublish/src/<feature>/`) and wire it into the bundle's entry point. This keeps a single build, a single deploy artifact, and one place to share helpers like the cache layer. Only spin up a separate extension package if the user explicitly asks for it.
+
 **`aggregatedHours` endpoint** ([extensions/wepublish/src/aggregatedHours/index.ts](extensions/wepublish/src/aggregatedHours/index.ts)):
 
 - `GET /aggregatedHours?clientPeriodId=<id>`
@@ -71,7 +73,26 @@ Extensions are bundled under `extensions/wepublish/` and built with `npm run bui
 - Fetches billable hours from Clockodo API.
 - Decorates with Jira issue estimates.
 - Calculates billability (direct vs. partial client responsibility).
-- Returns aggregated sums and percentages.
+- Returns `{ data: EntryGroupComputed, cache: { hit, cachedAt, expiresAt, ttlMs } }` — the wrapper exposes cache metadata so the dashboard can show users where the data came from.
+- `DELETE /aggregatedHours/cache?clientPeriodId=<id>` — invalidates the single cached entry for that period. Authorization rides on the same `ItemsService.readOne` accountability check, so only users who can read the period can clear its cache.
+
+**Caching layer** ([extensions/wepublish/src/shared/cache/](extensions/wepublish/src/shared/cache/)):
+
+The Jira and Clockodo round-trips inside `aggregatedHours` are slow and rate-limited (429s under load). The endpoint result is cached in process memory per `(clientId, clientPeriodId)` pair.
+
+- [`ttlCache.ts`](extensions/wepublish/src/shared/cache/ttlCache.ts) — generic TTL cache with single-flight deduplication. A thundering herd of dashboard loads collapses into one upstream call. Failures aren't cached — the inflight slot frees on rejection so the next caller retries.
+- [`billingCache.ts`](extensions/wepublish/src/shared/cache/billingCache.ts) — billing-specific singleton. **TTL is configured in code via `BILLING_CACHE_TTL_MS`** (currently 1 hour) — no env var, no per-deployment override. Tune by editing the constant. `loadBillingResultWithMeta()` is the helper that probes for a cache hit, runs `getOrCompute`, and re-reads the entry to attach metadata to the response.
+- Single-process, in-memory only. If we ever scale horizontally, swap `TtlCache`'s storage for Redis and keep the same surface.
+- Tests: [`ttlCache.test.ts`](extensions/wepublish/src/shared/cache/ttlCache.test.ts), [`billingCache.test.ts`](extensions/wepublish/src/shared/cache/billingCache.test.ts) — cover TTL boundaries, single-flight, retry-after-failure, per-key isolation, and cache-meta hit/miss reporting.
+
+**`networkContribution` endpoint** ([extensions/wepublish/src/networkContribution/index.ts](extensions/wepublish/src/networkContribution/index.ts)):
+
+- `GET /networkContribution?clientPeriodId=<id>`
+- Same authorization gate as `aggregatedHours` (ItemsService.readOne on the period).
+- Returns network-wide work delivered during the period's date range — used by the dashboard's "Netzwerk-Beitrag" card to show clients the value they receive beyond direct billing. Two parallel Clockodo queries: we.share entries grouped by `services_id` (bucketed into Akquisition / Engineering / Hosting / Weiteres via the maps in [`shared/networkContribution/constants.ts`](extensions/wepublish/src/shared/networkContribution/constants.ts)), plus all customers grouped by `customers_id` summed for non-excluded clients.
+- Cached per `clientPeriodId` only (not per client) since the figures are network-wide. Cache singleton lives in [`shared/cache/networkContributionCache.ts`](extensions/wepublish/src/shared/cache/networkContributionCache.ts), 1-hour TTL.
+- Pinned IDs (we.share customer, excluded customers, service buckets) are hardcoded in `constants.ts` to mirror the `JIRA_ISSUE_GROUP_ID` precedent — Clockodo is shared across environments. Lift them to env vars only if we ever fan out per-environment workspaces.
+- `DELETE /networkContribution/cache?clientPeriodId=<id>` — same invalidate-then-refetch pattern as `aggregatedHours`.
 
 **`invoice-with-topup` endpoint** ([extensions/wepublish/src/invoice-with-topup/index.ts](extensions/wepublish/src/invoice-with-topup/index.ts)):
 
@@ -109,13 +130,17 @@ npm run lint               # Format code with Prettier
 
 ## Schema Management
 
-Schema is version-controlled via **directus-sync**. After any schema change in the Directus admin:
+Schema is version-controlled via **directus-sync**. `schema/snapshot/` is the databases serialized form.
 
-1. Run `npm run schema:dump` to export the updated schema.
-2. Commit the changed files in `schema/snapshot/`.
-3. On deployment, `entrypoint.sh` automatically runs `schema:load` and `database:migrate`.
+**Workflow for any schema change** (whether edited in the Directus admin UI or anywhere else):
 
-Never edit files in `schema/snapshot/` manually — always export from a running Directus instance.
+1. `npm run schema:load` — apply the change to the running DB. This must happen before dumping; the dump reflects whatever is currently in the DB.
+2. `npm run schema:dump` — re-export from the live DB so `schema/snapshot/` exactly matches what's actually deployed (including DB-assigned IDs, ordering, and other auto-populated fields).
+3. Review the resulting diff in `schema/snapshot/` and commit it together with the code change that depends on it.
+
+On deployment, `entrypoint.sh` automatically runs `schema:load` and `database:migrate`, so what's in `schema/snapshot/` is what production will get.
+
+Never edit files in `schema/snapshot/` manually — always go through `schema:load` then `schema:dump` so the snapshot is grounded in real DB state.
 
 ## Environment Variables
 
@@ -158,7 +183,18 @@ The frontend ([one-front](../one-front/)) connects to this backend at port 8055:
 
 ## Testing
 
-No formal test framework is configured.
+**Vitest is configured for the custom extensions bundle** (`extensions/wepublish/`). Run from that directory:
+
+```bash
+npm run test          # one-shot
+npm run test:watch    # watch mode
+```
+
+Existing suites cover the cache layer ([ttlCache.test.ts](extensions/wepublish/src/shared/cache/ttlCache.test.ts), [billingCache.test.ts](extensions/wepublish/src/shared/cache/billingCache.test.ts)), billing aggregation ([aggregateHours.test.ts](extensions/wepublish/src/shared/billing/aggregateHours.test.ts)), notification thresholds and message composition, and weekly-report progress logic.
+
+**Write tests by default** for new logic in the extensions bundle — domain rules, computations, parsers, anything pure or with mockable boundaries. Co-locate `*.test.ts` next to the file under test, matching the existing pattern. Skip tests only with a concrete reason: thin glue to Directus services that's not meaningfully testable in isolation, one-off scripts, or trivial passthroughs.
+
+The Directus app layer itself (schema, migrations, hooks wired into the framework) has no unit-test setup — those are validated by running the system. Don't invent a test framework for them without asking.
 
 ## Deployment
 
@@ -170,7 +206,8 @@ No formal test framework is configured.
 
 ## Important Notes
 
-- All schema changes **must** go through `schema:dump` — never hand-edit the snapshot files.
-- The `extensions/wepublish/` bundle is a single Directus extension bundle; all custom endpoints and operations live there.
+- All schema changes **must** go through `schema:load` → `schema:dump` (in that order). The dump must come from a real DB to capture auto-populated values correctly.
+- The `extensions/wepublish/` bundle is the single Directus extension bundle; **always extend it rather than creating a new extension package**. All custom endpoints, hooks, operations, and shared helpers live there.
 - GeoJSON types are defined in `DirectusTypes.ts` to support PostGIS fields.
 - `EXTENSIONS_AUTO_RELOAD=true` is set in dev for hot-reloading extensions.
+- **Keep this CLAUDE.md current**: when a change adds/removes an endpoint, collection, command, env var, integration, or convention — or invalidates something written here — update this file in the same change. Skip the update for routine bug fixes, refactors that don't change shape, dep bumps, and anything obvious from reading the code.

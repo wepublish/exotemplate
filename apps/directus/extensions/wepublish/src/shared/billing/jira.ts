@@ -59,7 +59,7 @@ export async function getEstimatesFromJira(
     const response = await axios.get(
       `https://${JIRA_DOMAIN}/rest/api/3/search/jql`,
       {
-        params: { jql, fields: 'key, customfield_10028' },
+        params: { jql, fields: 'key, customfield_10028, status' },
         auth: { username: env.jiraEmail, password: env.jiraApiKey },
         headers: {
           Accept: 'application/json',

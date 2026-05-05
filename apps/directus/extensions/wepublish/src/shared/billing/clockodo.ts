@@ -24,7 +24,7 @@ export interface ClockodoParams {
   grouping?: ClockodoGrouping
   filter: {
     billable?: 0 | 1 | 2
-    customers_id: string | number
+    customers_id?: string | number
     services_id?: string | number
   }
 }

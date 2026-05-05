@@ -46,7 +46,7 @@ export interface NotificationThreshold {
   user_created: string | DirectusUser<Schema> | null
   user_updated: string | DirectusUser<Schema> | null
   min_hours_inclusive: number
-  initial_threshold_hours: number
+  initial_threshold_offset_hours: number
   recurring_threshold_hours: number
 }
 
