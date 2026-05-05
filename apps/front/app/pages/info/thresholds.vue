@@ -13,19 +13,28 @@
     return `${HOURS_FORMATTER.format(hours)} h`
   }
 
+  function formatOffset(hours: number): string {
+    const value = Number(hours)
+    if (!Number.isFinite(value) || Math.abs(value) < 0.005) return '±0 h'
+    const sign = value > 0 ? '+' : '−'
+    return `${sign}${HOURS_FORMATTER.format(Math.abs(value))} h`
+  }
+
   /**
-   * Builds the first ~5 notification points for a threshold so users can
-   * quickly see the cadence without us having to render an infinite list.
+   * Builds an example walkthrough for a threshold: takes the bucket's lower
+   * bound as a sample estimate and shows the first ~4 warning points.
    */
   function exampleNotifications(threshold: NotificationThreshold): string {
-    const initial = Number(threshold.initial_threshold_hours)
+    const min = Number(threshold.min_hours_inclusive)
+    const offset = Number(threshold.initial_threshold_offset_hours)
     const recurring = Number(threshold.recurring_threshold_hours)
-    if (!Number.isFinite(initial)) return ''
+    if (!Number.isFinite(min) || !Number.isFinite(offset)) return ''
+    const initial = min + offset
     const points = [initial]
     if (Number.isFinite(recurring) && recurring > 0) {
       for (let i = 1; i < 4; i += 1) points.push(initial + i * recurring)
     }
-    return points.map(formatHours).join(', ') + ', …'
+    return `Schätzung ${formatHours(min)} → ${points.map(formatHours).join(', ')}, …`
   }
 
   const { data: thresholds, pending } = await useAsyncData(
@@ -49,40 +58,37 @@
   <div class="grid grid-cols-12 gap-4">
     <div class="col-span-12">
       <UPageCard>
-        <template #title> Schwellenwerte für Slack-Warnungen </template>
-        <template #description>
-          So entscheidet die Anwendung, wann ein Jira-Ticket gemeldet wird.
+        <template #header>
+          <p class="text-2xl font-semibold">
+            Wann wird ein Jira-Ticket gemeldet?
+          </p>
         </template>
-        <template #body>
-          <div class="prose max-w-none">
+        <template #default>
+          <section class="space-y-4 leading-relaxed">
             <p>
-              Für jedes Jira-Ticket vergleichen wir die kumulierte Clockodo-Zeit
-              (alle bisher gebuchten Stunden inklusive den letzten 12 Monaten
-              vor der laufenden Abrechnungsperiode) mit der Aufwandsschätzung in
-              Jira. Sobald die verbrauchte Zeit eine definierte Schwelle
-              erreicht, geht eine Slack-Meldung an den Kunden-Channel.
+              Wir vergleichen die geleistete Arbeitszeit eines Jira-Tickets
+              (alle bisher gebuchten Stunden inklusive der letzten 12 Monate vor
+              der laufenden Abrechnungsperiode) mit der Aufwandsschätzung im
+              Jira-Ticket. Sobald die verbrauchte Zeit eine Schwelle erreicht,
+              meldet sich der Bot im Slack-Channel.
             </p>
+
+            <h3 class="text-lg pt-2">Erste Meldung = Schätzung + Toleranz</h3>
             <p>
-              Welche Schwelle gilt, hängt von der ursprünglichen Schätzung des
-              Tickets ab. Wir wählen den passenden Eintrag aus der
-              untenstehen­den Tabelle: kleinere Tickets erhalten engere
-              Schwellen, grössere Tickets dürfen mehr Mehraufwand verursachen,
-              bevor wir warnen.
-            </p>
-            <p>
-              <strong>Ablesebeispiel:</strong> Ein Ticket mit Schätzung
-              <em>3 h</em> fällt in den Bereich „ab 3 h Schätzung“. Sobald die
-              gebuchte Zeit die <em>erste Meldung</em> erreicht, wird eine
-              Warnung verschickt; danach folgt jeweils eine weitere Warnung im
+              Die erste Meldung erfolgt, sobald die Schätzung eines Jira-Tickets
+              zuzüglich oder abzüglich der Toleranz erreicht wird. Die
+              <em>Toleranz</em> kommt aus der Tabelle unten und kann positiv
+              (Meldung nach Erreichen der Schätzung) oder negativ (Meldung schon
+              vor Erreichen) sein. Danach folgt jeweils eine weitere Meldung im
               <em>wiederkehrenden Abstand</em>, ohne Obergrenze.
             </p>
-          </div>
+          </section>
 
-          <USkeleton v-if="pending" class="h-32 mt-4" />
+          <USkeleton v-if="pending" class="h-32 mt-6" />
 
           <UTable
             v-else
-            class="mt-4"
+            class="mt-6"
             :data="orderedThresholds"
             :columns="[
               {
@@ -90,23 +96,22 @@
                 header: 'Bereich (Schätzung)'
               },
               {
-                accessorKey: 'initial_threshold_hours',
-                header: 'Erste Meldung'
+                accessorKey: 'initial_threshold_offset_hours',
+                header: 'Toleranz'
               },
               {
                 accessorKey: 'recurring_threshold_hours',
                 header: 'Wiederkehrend'
               },
-              { id: 'examples', header: 'Folgemeldungen' }
+              { id: 'examples', header: 'Beispiel' }
             ]"
           >
             <template #min_hours_inclusive-cell="{ row }">
-              ab {{ formatHours(row.original.min_hours_inclusive) }} Schätzung
+              ab {{ formatHours(row.original.min_hours_inclusive) }}
             </template>
-            <template #initial_threshold_hours-cell="{ row }">
-              bei
-              {{ formatHours(row.original.initial_threshold_hours) }}
-              verbraucht
+            <template #initial_threshold_offset_hours-cell="{ row }">
+              Schätzung
+              {{ formatOffset(row.original.initial_threshold_offset_hours) }}
             </template>
             <template #recurring_threshold_hours-cell="{ row }">
               alle
@@ -117,17 +122,33 @@
             </template>
           </UTable>
 
-          <div class="prose max-w-none mt-6">
-            <h3>Was passiert nach einer Meldung?</h3>
-            <ul>
-              <li>
-                <strong>Bestätigen:</strong> nimmt die Slack-Meldung als gesehen
-                zur Kenntnis. Die nächste Meldung folgt erst, wenn der Verbrauch
-                die nächste Schwelle erreicht.
-              </li>
+          <h3 class="text-lg font-semibold pt-2">Lesebeispiele</h3>
+          <ul class="list-disc ps-6 space-y-2">
+            <li>
+              Toleranz <strong>+2 h</strong>, Wiederkehrend
+              <strong>4 h</strong>: Ticket mit Schätzung <strong>5 h</strong> →
+              erste Meldung bei <strong>7 h</strong>, dann 11 h, 15 h …
+            </li>
+            <li>
+              Gleicher Bereich, Ticket mit Schätzung <strong>9 h</strong> →
+              erste Meldung bei <strong>11 h</strong>, dann 15 h, 19 h … (kein
+              „zu früh" mehr).
+            </li>
+            <li>
+              Toleranz <strong>−1 h</strong>: Wir warnen bewusst kurz
+              <em>bevor</em> die Schätzung aufgebraucht ist – nützlich bei
+              grösseren Tickets.
+            </li>
+          </ul>
+
+          <section class="space-y-3 leading-relaxed mt-8">
+            <h3 class="text-lg font-semibold">
+              Was passiert nach einer Meldung?
+            </h3>
+            <ul class="list-disc ps-6 space-y-2">
               <li>
                 <strong>Arbeit stoppen:</strong> markiert das Ticket als
-                blockiert; das Team erhält in Slack die Anweisung, sofort die
+                blockiert. Das Team erhält in Slack die Anweisung, sofort die
                 Arbeit einzustellen, und die zugewiesene Person bekommt
                 zusätzlich eine persönliche Direktnachricht.
               </li>
@@ -136,13 +157,8 @@
                 für dieses Ticket dauerhaft, bis die Stummschaltung explizit
                 aufgehoben wird.
               </li>
-              <li>
-                <strong>Kunde pausieren:</strong> über den Schalter im
-                Warnungs-Dashboard können sämtliche Slack-Meldungen für einen
-                Kunden temporär unterbunden werden.
-              </li>
             </ul>
-          </div>
+          </section>
         </template>
       </UPageCard>
     </div>

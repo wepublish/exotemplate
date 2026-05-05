@@ -11,8 +11,18 @@
   <UApp>
     <UHeader>
       <template #left>
-        <img src="@/assets/images/wep-logo.png" alt="Logo" class="h-8 w-auto" />
-        <p class="text-2xl text-primary font-bold">ONE</p>
+        <NuxtLink
+          to="/"
+          class="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          aria-label="Zum Dashboard"
+        >
+          <img
+            src="@/assets/images/wep-logo.png"
+            alt="Logo"
+            class="h-8 w-auto"
+          />
+          <p class="text-2xl text-primary font-bold">ONE</p>
+        </NuxtLink>
 
         <template v-if="userStore.loggedIn">
           <div class="w-px h-6 bg-neutral-200 dark:bg-neutral-700 mx-2" />

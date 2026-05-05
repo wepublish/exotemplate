@@ -122,7 +122,7 @@ export function useWeeklyReportProgress() {
 
     switch (progress.status) {
       case 'over_budget':
-        return `${usedFmt} des Budgets verbraucht – über 100 %. Bitte mit dem Projektverantwortlichen Rücksprache nehmen.`
+        return `${usedFmt} des Budgets verbraucht. Bitte mit dem Projektverantwortlichen Rücksprache nehmen.`
       case 'close_to_limit':
         return `${usedFmt} des Budgets verbraucht, ${timeFmt} der Zeit vergangen. Letzte Stunden bewusst planen.`
       case 'behind_schedule':

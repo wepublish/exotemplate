@@ -56,10 +56,34 @@
     return name || user.email || null
   }
 
-  function warningStatusBadge(warning: JiraWarning): {
-    color: 'error' | 'neutral' | 'primary' | 'warning'
+  /**
+   * A warning is rendered as "resolved" once Jira flips the issue into the
+   * `done` status category (Done, Cancelled, Resolved, Closed …). The flag
+   * is purely derived from the live Jira data we already pull into each
+   * row — when the issue is reopened, the row goes back to its previous
+   * (orange) warning state on the next refresh, no DB write required.
+   */
+  function isIssueResolved(row: { jiraIssue?: { fields?: unknown } }): boolean {
+    const fields = row.jiraIssue?.fields as
+      | { status?: { statusCategory?: { key?: string } } }
+      | undefined
+    return fields?.status?.statusCategory?.key === 'done'
+  }
+
+  function warningStatusBadge(
+    warning: JiraWarning,
+    resolved: boolean
+  ): {
+    color: 'error' | 'neutral' | 'primary' | 'warning' | 'success'
     label: string
+    icon?: string
   } {
+    if (resolved)
+      return {
+        color: 'success',
+        label: 'Erledigt',
+        icon: 'material-symbols:check-circle-rounded'
+      }
     if (isHalted(warning)) return { color: 'error', label: 'Arbeitsstopp' }
     if (warning.silenced_permanently)
       return { color: 'neutral', label: 'Stummgeschaltet' }
@@ -103,22 +127,41 @@
 
   const haltedCount = computed<number>(() => props.haltedIssueKeys?.size ?? 0)
 
-  /**
-   * Counts JiraWarnings nested inside a row's sub-groups. We use this on the
-   * top-level rows (e.g. "Working on Jira Issue") to surface the number of
-   * warnings without forcing the user to drill in. Recursive so deeper Jira
-   * groupings (services_id → texts_id → day) still aggregate to their parent.
-   */
-  function warningCountForRow(row: {
+  type RowNode = {
     name?: string | null
-    sub_groups?: { name?: string | null; sub_groups?: any[] }[]
-  }): number {
+    jiraIssue?: { fields?: { status?: { statusCategory?: { key?: string } } } }
+    sub_groups?: RowNode[]
+  }
+
+  function isResolvedNode(node: RowNode): boolean {
+    return node.jiraIssue?.fields?.status?.statusCategory?.key === 'done'
+  }
+
+  /**
+   * Walks the row's tree and counts every Jira issue that has a matching
+   * JiraWarning. The `predicate` decides whether each node should be
+   * counted, which lets us split the total into "still open" (orange) and
+   * "Erledigt" (green) without traversing twice.
+   */
+  function countWarningsInRow(
+    row: RowNode,
+    predicate: (node: RowNode) => boolean
+  ): number {
     const map = props.warningsByIssueKey
     if (!map || map.size === 0) return 0
     let count = 0
-    if (row.name && map.has(row.name)) count += 1
-    for (const sub of row.sub_groups ?? []) count += warningCountForRow(sub)
+    if (row.name && map.has(row.name) && predicate(row)) count += 1
+    for (const sub of row.sub_groups ?? [])
+      count += countWarningsInRow(sub, predicate)
     return count
+  }
+
+  function unresolvedWarningCountForRow(row: RowNode): number {
+    return countWarningsInRow(row, (node) => !isResolvedNode(node))
+  }
+
+  function resolvedWarningCountForRow(row: RowNode): number {
+    return countWarningsInRow(row, isResolvedNode)
   }
 
   const entryGroupNavigation = ref<EntryGroup[]>([])
@@ -307,21 +350,39 @@
                 >
                   Arbeitsstopp aktiv
                 </p>
-                <p
-                  v-else-if="warningCountForRow(row.row.original) > 0"
-                  class="text-xs text-warning font-medium mt-1 flex items-center gap-1"
+                <div
+                  v-else-if="
+                    unresolvedWarningCountForRow(row.row.original) > 0 ||
+                    resolvedWarningCountForRow(row.row.original) > 0
+                  "
+                  class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1"
                 >
-                  <UIcon
-                    name="i-heroicons-exclamation-triangle"
-                    class="shrink-0"
-                  />
-                  {{ warningCountForRow(row.row.original) }}
-                  {{
-                    warningCountForRow(row.row.original) === 1
-                      ? 'Warnung'
-                      : 'Warnungen'
-                  }}
-                </p>
+                  <p
+                    v-if="unresolvedWarningCountForRow(row.row.original) > 0"
+                    class="text-xs text-warning font-medium flex items-center gap-1"
+                  >
+                    <UIcon
+                      name="i-heroicons-exclamation-triangle"
+                      class="shrink-0"
+                    />
+                    {{ unresolvedWarningCountForRow(row.row.original) }}
+                    {{
+                      unresolvedWarningCountForRow(row.row.original) === 1
+                        ? 'Warnung'
+                        : 'Warnungen'
+                    }}
+                  </p>
+                  <p
+                    v-if="resolvedWarningCountForRow(row.row.original) > 0"
+                    class="text-xs text-success font-medium flex items-center gap-1"
+                  >
+                    <UIcon
+                      name="material-symbols:check-circle-rounded"
+                      class="shrink-0"
+                    />
+                    {{ resolvedWarningCountForRow(row.row.original) }} erledigt
+                  </p>
+                </div>
               </div>
             </div>
           </template>
@@ -416,23 +477,37 @@
                 class="pt-3 mt-3 border-t text-xs space-y-1.5"
               >
                 <!-- Status badge + threshold info on one line. The badge uses
-                     `solid` for the two states the team must act on
-                     (Arbeitsstopp / Warnung) and `soft` for the passive
-                     "Stummgeschaltet" state, so the eye lands on actionable
-                     warnings the same way it does on halts. -->
+                     `solid` for the states the team must read at a glance
+                     (Erledigt / Arbeitsstopp / Warnung) and `soft` for the
+                     passive "Stummgeschaltet" state, so the eye lands on
+                     informative badges the same way it does on halts. -->
                 <div class="flex items-center justify-between gap-2 flex-wrap">
                   <UBadge
                     size="xs"
                     :color="
-                      warningStatusBadge(warningForRow(row.original)!).color
+                      warningStatusBadge(
+                        warningForRow(row.original)!,
+                        isIssueResolved(row.original)
+                      ).color
                     "
                     :variant="
                       warningForRow(row.original)!.silenced_permanently
                         ? 'soft'
                         : 'solid'
                     "
+                    :icon="
+                      warningStatusBadge(
+                        warningForRow(row.original)!,
+                        isIssueResolved(row.original)
+                      ).icon
+                    "
                   >
-                    {{ warningStatusBadge(warningForRow(row.original)!).label }}
+                    {{
+                      warningStatusBadge(
+                        warningForRow(row.original)!,
+                        isIssueResolved(row.original)
+                      ).label
+                    }}
                   </UBadge>
                   <NuxtLink
                     to="/info/thresholds"

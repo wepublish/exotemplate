@@ -150,6 +150,16 @@
                 geht eine Slack-Meldung an den Kanal des Kunden. Wird hier
                 ausgeschaltet, bleibt der Kanal für diese Warnungen still.
               </p>
+              <UButton
+                to="/info/thresholds"
+                variant="outline"
+                color="neutral"
+                size="sm"
+                icon="material-symbols:info-rounded"
+                class="mt-2"
+              >
+                Wie funktionieren Schwellenwerte?
+              </UButton>
             </div>
             <div class="flex items-center gap-2 shrink-0">
               <USwitch
