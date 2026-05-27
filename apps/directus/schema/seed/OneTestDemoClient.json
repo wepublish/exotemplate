@@ -1,0 +1,118 @@
+[
+  {
+    "collection": "Clients",
+    "meta": {
+      "insert_order": 2,
+      "create": true,
+      "update": true,
+      "delete": false,
+      "preserve_ids": false
+    },
+    "data": [
+      {
+        "_sync_id": "one-test-client",
+        "status": "published",
+        "name": "One Test",
+        "jira_short_code": "ONETEST",
+        "clockodo_customer_id": "4938992",
+        "slack_channel_id": "C0AUCDV2J6B",
+        "bexio_contact_id": 37,
+        "onboarding_current_step": 8
+      }
+    ]
+  },
+  {
+    "collection": "Periods",
+    "meta": {
+      "insert_order": 3,
+      "create": true,
+      "update": true,
+      "delete": false,
+      "preserve_ids": false
+    },
+    "data": [
+      {
+        "_sync_id": "one-test-period-1h-2026",
+        "status": "published",
+        "name": "1. Halbjahr 2026",
+        "from": "2026-01-01",
+        "to": "2026-06-30"
+      }
+    ]
+  },
+  {
+    "collection": "Clients_Periods",
+    "meta": {
+      "insert_order": 4,
+      "create": true,
+      "update": true,
+      "delete": false,
+      "preserve_ids": false
+    },
+    "data": [
+      {
+        "_sync_id": "one-test-client-period-1h-2026",
+        "Clients_id": "one-test-client",
+        "Periods_id": "one-test-period-1h-2026"
+      }
+    ]
+  },
+  {
+    "collection": "Clients_directus_users",
+    "meta": {
+      "insert_order": 5,
+      "create": true,
+      "update": true,
+      "delete": false,
+      "preserve_ids": false
+    },
+    "data": [
+      {
+        "_sync_id": "one-test-admin-access",
+        "Clients_id": "one-test-client",
+        "directus_users_id": "admin-user"
+      }
+    ]
+  },
+  {
+    "collection": "TopUps",
+    "meta": {
+      "insert_order": 6,
+      "create": true,
+      "update": true,
+      "delete": false,
+      "preserve_ids": false
+    },
+    "data": [
+      {
+        "_sync_id": "one-test-topup-10000",
+        "status": "published",
+        "clientPeriod": "one-test-client-period-1h-2026",
+        "amount": 10000,
+        "hourlyRate": 120,
+        "wepPercentage": 20
+      }
+    ]
+  },
+  {
+    "collection": "ManualWorkEntries",
+    "meta": {
+      "insert_order": 7,
+      "create": true,
+      "update": true,
+      "delete": false,
+      "preserve_ids": false
+    },
+    "data": [
+      {
+        "_sync_id": "one-test-manual-work-575",
+        "status": "published",
+        "clientPeriod": "one-test-client-period-1h-2026",
+        "date": "2026-05-27",
+        "hours": 5.75,
+        "title": "Manuelle Arbeitszeit",
+        "description": "Seed-Eintrag"
+      }
+    ]
+  }
+]
