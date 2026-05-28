@@ -329,19 +329,6 @@
       icon="i-heroicons-exclamation-triangle"
     />
 
-    <!-- Network contribution: always full width, expandable. No detail page. -->
-    <div
-      v-if="selectedClientPeriodId && !pending && !error"
-      class="col-span-12"
-    >
-      <DashboardNetworkContribution
-        :client-period-id="selectedClientPeriodId"
-        :period-from="selectedPeriod?.from"
-        :period-to="selectedPeriod?.to"
-        :sums="sums"
-      />
-    </div>
-
     <!-- Half-width summary cards. Each links to a dedicated detail page. -->
     <template v-if="selectedClientPeriodId && !pending && !error">
       <div class="col-span-12 md:col-span-6">
@@ -399,5 +386,18 @@
         />
       </div>
     </template>
+
+    <!-- Network contribution: always full width, expandable. No detail page. -->
+    <div
+      v-if="selectedClientPeriodId && !pending && !error"
+      class="col-span-12"
+    >
+      <DashboardNetworkContribution
+        :client-period-id="selectedClientPeriodId"
+        :period-from="selectedPeriod?.from"
+        :period-to="selectedPeriod?.to"
+        :sums="sums"
+      />
+    </div>
   </div>
 </template>

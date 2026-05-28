@@ -11,6 +11,15 @@ export function composeJiraProjectUrl(
   )}`
 }
 
+export function composeJiraIssueUrl(
+  issueKey: string | null | undefined
+): string {
+  if (!issueKey) return 'https://wepublish.atlassian.net'
+  return `https://wepublish.atlassian.net/browse/${encodeURIComponent(
+    issueKey
+  )}`
+}
+
 export function composeBexioContactUrl(
   contactId: number | string | null | undefined
 ): string {

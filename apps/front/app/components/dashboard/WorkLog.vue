@@ -342,7 +342,7 @@
                   }}
                 </p>
                 <p v-else class="whitespace-normal">
-                  {{ row.row.original.name }}
+                  <LinkifiedText :text="row.row.original.name" />
                 </p>
                 <p
                   v-if="isHaltedName(row.row.original.name)"

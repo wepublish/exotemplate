@@ -271,16 +271,10 @@
           >
             <div class="flex justify-between text-sm mb-1">
               <span>
-                <span class="font-medium">Dein Beitrag an We.Publish</span>
-                <span class="text-muted">
-                  · {{ clientHours }} h ({{ clientSharePercent }} %)
-                </span>
-              </span>
-              <span class="text-muted">
-                Übriges Netzwerk · {{ grandTotalHours }} h ({{
-                  100 - clientSharePercent
-                }}
-                %)
+                <span class="font-medium"
+                  >Dein Beitrag ist unverzichtbar - Danke, dass wir auf dich
+                  zählen dürfen!</span
+                >
               </span>
             </div>
             <UProgress
@@ -289,9 +283,9 @@
               color="primary"
             />
             <p class="text-xs text-muted mt-2 leading-snug">
-              So viel von der gesamten We.Publish-Arbeit hast du in dieser
-              Periode beigetragen — und so viel kommt dir zusätzlich aus dem
-              Netzwerk zugute.
+              Nur zusammen mit Euch und
+              {{ contribution.otherClients.clientCount }} weiteren unabhängigen
+              Medien kommen wir auf 100%!
             </p>
           </div>
         </div>
