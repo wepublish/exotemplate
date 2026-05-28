@@ -62,6 +62,24 @@
     })
   )
 
+  const isMonthlyBilling = computed(
+    () => (resolved.value?.client?.billing_mode ?? 'prepaid') === 'monthly'
+  )
+
+  const pageTitleSuffix = computed(() =>
+    isMonthlyBilling.value
+      ? 'Aktuell zu verrechnen'
+      : 'Verfügbare Arbeitsstunden'
+  )
+
+  // For monthly clients the "Aktuell zu verrechnen" headline carries the
+  // positive amount that still needs to land on the next invoice. Mirrors
+  // the dashboard tile + the weekly Slack report's `remainingToBillHours`.
+  const headlineValue = computed<number>(() => {
+    const available = sums.value?.totalAvailableHours ?? 0
+    return isMonthlyBilling.value ? Math.max(0, -available) : available
+  })
+
   const budgetColor = computed<
     'primary' | 'success' | 'warning' | 'error' | 'info'
   >(() => {
@@ -107,8 +125,7 @@
         <div class="flex justify-between items-start w-full">
           <div>
             <div class="font-bold text-xl">
-              {{ resolved?.client?.name || 'Projekt' }} · Verfügbare
-              Arbeitsstunden
+              {{ resolved?.client?.name || 'Projekt' }} · {{ pageTitleSuffix }}
             </div>
             <div v-if="formattedPeriod" class="text-xs text-muted mt-0.5">
               {{ formattedPeriod }}
@@ -116,9 +133,9 @@
           </div>
           <div
             class="font-bold text-4xl whitespace-nowrap"
-            :class="`text-${budgetColor}`"
+            :class="isMonthlyBilling ? 'text-primary' : `text-${budgetColor}`"
           >
-            {{ sums?.totalAvailableHours ?? 0 }} h
+            {{ headlineValue }} h
           </div>
         </div>
 
@@ -136,7 +153,7 @@
 
         <template v-else-if="sums">
           <UAlert
-            v-if="progress"
+            v-if="progress && !isMonthlyBilling"
             class="mt-6"
             :color="summaryColor"
             variant="soft"
@@ -145,8 +162,8 @@
             :description="summaryBody"
           />
 
-          <div class="mt-6 space-y-3">
-            <div>
+          <div v-if="!isMonthlyBilling" class="mt-6 space-y-3">
+            <div v-if="progress?.status !== 'no_budget'">
               <div class="flex justify-between text-xs mb-1">
                 <span class="font-medium">Budget verbraucht</span>
                 <span :class="`text-${budgetColor} font-medium`">
@@ -161,6 +178,18 @@
                 size="lg"
                 :color="budgetColor"
               />
+            </div>
+
+            <div v-else>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="font-medium">Verbrauchte Stunden</span>
+                <span class="text-warning font-medium">
+                  {{ sums.totalUsedHours }} h
+                  <span class="text-muted font-normal">
+                    (werden separat verrechnet)
+                  </span>
+                </span>
+              </div>
             </div>
 
             <div v-if="progress">
@@ -184,13 +213,21 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
             <div>
-              <div class="font-bold pb-2">Berechnung Verfügbares Budget</div>
+              <div class="font-bold pb-2">
+                {{
+                  isMonthlyBilling
+                    ? 'Berechnung Aktuell zu verrechnen'
+                    : 'Berechnung Verfügbares Budget'
+                }}
+              </div>
               <div class="flex text-sm">
                 <div class="flex-1">
                   <p>Zahlungen / Top-Ups</p>
                   <p>Arbeitsprotokoll</p>
                   <p class="border-b">Manuelle Korrekturen</p>
-                  <p class="font-bold pt-1">Verfügbar</p>
+                  <p class="font-bold pt-1">
+                    {{ isMonthlyBilling ? 'Saldo' : 'Verfügbar' }}
+                  </p>
                 </div>
                 <div class="text-right">
                   <p>{{ sums.totalTopUps }} h</p>
@@ -208,7 +245,7 @@
               </div>
             </div>
 
-            <div v-if="progress">
+            <div v-if="progress && !isMonthlyBilling">
               <div class="font-bold pb-2">Budget vs. Zeit</div>
               <div class="flex text-sm">
                 <div class="flex-1">

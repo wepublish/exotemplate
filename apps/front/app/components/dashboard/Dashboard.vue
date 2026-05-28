@@ -254,7 +254,28 @@
     })
   )
 
+  const isMonthlyBilling = computed(
+    () => (selectedClient.value?.billing_mode ?? 'prepaid') === 'monthly'
+  )
+
+  // Monthly clients are invoiced after the fact: there's no budget to warn
+  // about, so the dashboard tile drops the alert and relabels the figure to
+  // "Aktuell zu verrechnen" with the positive amount that still needs to
+  // land on the next invoice (= -totalAvailableHours, floored at 0).
+  const availableHoursTitle = computed(() =>
+    isMonthlyBilling.value
+      ? 'Aktuell zu verrechnen'
+      : 'Verfügbare Arbeitsstunden'
+  )
+
+  const availableHoursValue = computed<number | undefined>(() => {
+    const available = sums.value?.totalAvailableHours
+    if (available == null) return undefined
+    return isMonthlyBilling.value ? Math.max(0, -available) : available
+  })
+
   const availableHoursSummary = computed(() => {
+    if (isMonthlyBilling.value) return null
     const p = availableHoursProgress.value
     if (!p) return null
     const color = statusColor(p.status)
@@ -342,11 +363,11 @@
 
       <div class="col-span-12 md:col-span-6">
         <SummaryCard
-          title="Verfügbare Arbeitsstunden"
+          :title="availableHoursTitle"
           icon="material-symbols:hourglass-top-rounded"
-          :hours="sums?.totalAvailableHours"
+          :hours="availableHoursValue"
           :to="detailLink('available-hours')"
-          :color="budgetColor"
+          :color="isMonthlyBilling ? 'primary' : budgetColor"
         >
           <UAlert
             v-if="availableHoursSummary"

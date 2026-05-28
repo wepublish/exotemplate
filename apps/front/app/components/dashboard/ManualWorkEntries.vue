@@ -2,6 +2,7 @@
   import type { TableColumn } from '@nuxt/ui'
   import type { ClientPeriod, ManualWorkEntry } from '~~/types/DirectusTypes'
   import type { Sums } from '~~/types/ClockodoTypes'
+  import LinkifiedText from '~/components/LinkifiedText.vue'
 
   const props = defineProps<{
     clientPeriodId: number | undefined
@@ -59,6 +60,9 @@
                 dateStyle: 'medium'
               })
             }}
+          </template>
+          <template #description-cell="{ row }">
+            <LinkifiedText :text="row.original.description" />
           </template>
           <template #hours-cell="{ row }">
             {{ Number(row.original.hours) }}

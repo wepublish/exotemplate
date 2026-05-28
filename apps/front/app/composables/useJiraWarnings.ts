@@ -1,5 +1,5 @@
 import { readItems, updateItem } from '@directus/sdk'
-import type { Client, JiraWarning } from '~~/types/DirectusTypes'
+import type { BillingMode, Client, JiraWarning } from '~~/types/DirectusTypes'
 
 export function useJiraWarnings() {
   const { directus } = useDirectus()
@@ -119,6 +119,17 @@ export function useJiraWarnings() {
     )
   }
 
+  async function setBillingMode(
+    clientId: string,
+    mode: BillingMode
+  ): Promise<void> {
+    await directus.request(
+      updateItem('Clients', clientId, {
+        billing_mode: mode
+      } as Partial<Client>)
+    )
+  }
+
   return {
     listForClients,
     isHalted,
@@ -129,6 +140,7 @@ export function useJiraWarnings() {
     silence,
     unsilence,
     setPause,
-    setWeeklyReportPause
+    setWeeklyReportPause,
+    setBillingMode
   }
 }

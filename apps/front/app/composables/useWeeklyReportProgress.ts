@@ -4,6 +4,7 @@ export type BudgetStatus =
   | 'behind_schedule'
   | 'close_to_limit'
   | 'over_budget'
+  | 'no_budget'
 
 export interface WeeklyReportProgress {
   budgetUsedPercent: number
@@ -13,6 +14,7 @@ export interface WeeklyReportProgress {
   daysRemaining: number
   periodDurationDays: number
   daysElapsed: number
+  totalUsedHours: number
 }
 
 const ON_TRACK_TOLERANCE = 10
@@ -43,6 +45,7 @@ export function useWeeklyReportProgress() {
     const now = args.now ?? new Date()
     const totalTopUps = Number(args.totalTopUps) || 0
     const totalUsedHours = Number(args.totalUsedHours) || 0
+    const hasNoBudgetButUsedHours = totalTopUps <= 0 && totalUsedHours > 0
 
     const budgetUsedPercent =
       totalTopUps > 0 ? (totalUsedHours * 100) / totalTopUps : 0
@@ -74,10 +77,15 @@ export function useWeeklyReportProgress() {
       budgetUsedPercent,
       timeElapsedPercent,
       deltaPercent,
-      status: deriveStatus(budgetUsedPercent, deltaPercent),
+      status: deriveStatus({
+        budgetUsedPercent,
+        deltaPercent,
+        hasNoBudgetButUsedHours
+      }),
       periodDurationDays,
       daysRemaining,
-      daysElapsed
+      daysElapsed,
+      totalUsedHours
     }
   }
 
@@ -87,6 +95,8 @@ export function useWeeklyReportProgress() {
     switch (status) {
       case 'over_budget':
         return 'error'
+      case 'no_budget':
+        return 'warning'
       case 'close_to_limit':
         return 'warning'
       case 'behind_schedule':
@@ -103,6 +113,8 @@ export function useWeeklyReportProgress() {
     switch (status) {
       case 'over_budget':
         return 'Budget überschritten'
+      case 'no_budget':
+        return 'Kein Budget hinterlegt'
       case 'close_to_limit':
         return 'Budget fast aufgebraucht'
       case 'behind_schedule':
@@ -119,10 +131,13 @@ export function useWeeklyReportProgress() {
     const usedFmt = formatPercent(progress.budgetUsedPercent)
     const timeFmt = formatPercent(progress.timeElapsedPercent)
     const absDeltaFmt = formatPercent(Math.abs(progress.deltaPercent))
+    const hoursFmt = formatHours(progress.totalUsedHours)
 
     switch (progress.status) {
       case 'over_budget':
         return `${usedFmt} des Budgets verbraucht. Bitte mit dem Projektverantwortlichen Rücksprache nehmen.`
+      case 'no_budget':
+        return `${hoursFmt} bereits erfasst, aber kein Top-Up hinterlegt. Diese Stunden werden separat in Rechnung gestellt, sofern kein Budget nachgetragen wird.`
       case 'close_to_limit':
         return `${usedFmt} des Budgets verbraucht, ${timeFmt} der Zeit vergangen. Letzte Stunden bewusst planen.`
       case 'behind_schedule':
@@ -139,6 +154,8 @@ export function useWeeklyReportProgress() {
     switch (status) {
       case 'over_budget':
         return 'material-symbols:warning-rounded'
+      case 'no_budget':
+        return 'material-symbols:account-balance-wallet-outline-rounded'
       case 'close_to_limit':
         return 'material-symbols:error-outline-rounded'
       case 'behind_schedule':
@@ -160,14 +177,17 @@ export function useWeeklyReportProgress() {
   }
 }
 
-function deriveStatus(
-  budgetUsedPercent: number,
+function deriveStatus(args: {
+  budgetUsedPercent: number
   deltaPercent: number
-): BudgetStatus {
-  if (budgetUsedPercent > OVER_BUDGET_THRESHOLD) return 'over_budget'
-  if (budgetUsedPercent >= CLOSE_TO_LIMIT_THRESHOLD) return 'close_to_limit'
-  if (deltaPercent > ON_TRACK_TOLERANCE) return 'behind_schedule'
-  if (deltaPercent < -ON_TRACK_TOLERANCE) return 'ahead_of_schedule'
+  hasNoBudgetButUsedHours: boolean
+}): BudgetStatus {
+  if (args.hasNoBudgetButUsedHours) return 'no_budget'
+  if (args.budgetUsedPercent > OVER_BUDGET_THRESHOLD) return 'over_budget'
+  if (args.budgetUsedPercent >= CLOSE_TO_LIMIT_THRESHOLD)
+    return 'close_to_limit'
+  if (args.deltaPercent > ON_TRACK_TOLERANCE) return 'behind_schedule'
+  if (args.deltaPercent < -ON_TRACK_TOLERANCE) return 'ahead_of_schedule'
   return 'on_track'
 }
 
@@ -179,4 +199,9 @@ function clamp(value: number, min: number, max: number): number {
 
 function formatPercent(value: number): string {
   return `${Math.round(value)} %`
+}
+
+function formatHours(value: number): string {
+  const rounded = Math.round(value * 100) / 100
+  return `${rounded.toLocaleString('de-CH', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} h`
 }

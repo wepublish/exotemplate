@@ -1,9 +1,24 @@
 <script lang="ts" setup>
-  import type { Client } from '~~/types/DirectusTypes'
+  import type { BillingMode, Client } from '~~/types/DirectusTypes'
 
   const userStore = useUserStore()
   const toast = useToast()
-  const { setPause, setWeeklyReportPause } = useJiraWarnings()
+  const { setPause, setWeeklyReportPause, setBillingMode } = useJiraWarnings()
+
+  const BILLING_MODE_OPTIONS: {
+    value: BillingMode
+    label: string
+  }[] = [
+    { value: 'prepaid', label: 'Prepaid (Top-Ups)' },
+    { value: 'monthly', label: 'Monatsrechnung' }
+  ]
+
+  function billingModeLabel(mode: BillingMode | null | undefined): string {
+    return (
+      BILLING_MODE_OPTIONS.find((o) => o.value === mode)?.label ??
+      'Prepaid (Top-Ups)'
+    )
+  }
 
   // Local mirror of the user's clients so we can update toggles
   // optimistically without re-fetching the global user store.
@@ -91,6 +106,29 @@
       }
     })
   }
+
+  async function onChangeBillingMode(
+    client: Client,
+    mode: BillingMode
+  ): Promise<void> {
+    await withPending(client.id, async () => {
+      try {
+        await setBillingMode(client.id, mode)
+        patchClient(client.id, { billing_mode: mode })
+        toast.add({
+          title: `Abrechnungsmodell für ${client.name} aktualisiert.`,
+          description: billingModeLabel(mode),
+          color: 'success'
+        })
+      } catch (err) {
+        toast.add({
+          title: 'Aktion fehlgeschlagen.',
+          description: err instanceof Error ? err.message : undefined,
+          color: 'error'
+        })
+      }
+    })
+  }
 </script>
 
 <template>
@@ -142,6 +180,42 @@
         </template>
 
         <ul class="divide-y">
+          <li class="py-3 flex items-start justify-between gap-4 flex-wrap">
+            <div class="min-w-0">
+              <p class="font-medium">Abrechnungsmodell</p>
+              <p class="text-xs text-muted">
+                Prepaid = niedrigerer Stundensatz, im Voraus bezahlte Top-Ups.
+                Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach
+                Aufwand. Nur Administrator:innen können dieses Modell ändern.
+              </p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <USelectMenu
+                v-if="userStore.amIAdministrator()"
+                :model-value="client.billing_mode ?? 'prepaid'"
+                :items="BILLING_MODE_OPTIONS"
+                value-key="value"
+                label-key="label"
+                :loading="pendingClientIds.has(client.id)"
+                class="min-w-52"
+                @update:model-value="
+                  (value: BillingMode) => onChangeBillingMode(client, value)
+                "
+              />
+              <UBadge
+                v-else
+                :color="
+                  (client.billing_mode ?? 'prepaid') === 'monthly'
+                    ? 'warning'
+                    : 'primary'
+                "
+                variant="subtle"
+              >
+                {{ billingModeLabel(client.billing_mode) }}
+              </UBadge>
+            </div>
+          </li>
+
           <li class="py-3 flex items-start justify-between gap-4 flex-wrap">
             <div class="min-w-0">
               <p class="font-medium">Jira-Schwellenwarnungen</p>

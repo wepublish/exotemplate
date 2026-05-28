@@ -1,9 +1,42 @@
 <script lang="ts" setup>
-  import type { Client, ClientPeriod, Period } from '~~/types/DirectusTypes'
+  import type {
+    BillingMode,
+    Client,
+    ClientPeriod,
+    Period
+  } from '~~/types/DirectusTypes'
 
   const route = useRoute()
   const userStore = useUserStore()
   const topUpsComp = useTopUps()
+  const toast = useToast()
+  const { setBillingMode } = useJiraWarnings()
+
+  const BILLING_MODE_OPTIONS: {
+    value: BillingMode
+    label: string
+    description: string
+  }[] = [
+    {
+      value: 'prepaid',
+      label: 'Prepaid (Top-Ups)',
+      description: 'Niedrigerer Stundensatz, im Voraus bezahlte Top-Ups.'
+    },
+    {
+      value: 'monthly',
+      label: 'Monatsrechnung',
+      description: 'Höherer Stundensatz, monatliche Abrechnung nach Aufwand.'
+    }
+  ]
+
+  function billingModeLabel(mode: BillingMode | null | undefined): string {
+    return (
+      BILLING_MODE_OPTIONS.find((o) => o.value === mode)?.label ??
+      'Prepaid (Top-Ups)'
+    )
+  }
+
+  const billingModePending = ref(false)
 
   const clientPeriodId = computed<number | undefined>(() => {
     const raw = route.params?.clientPeriodId
@@ -66,6 +99,29 @@
       Bexio: topUp.bexioInvoiceId
     }))
   )
+
+  async function onChangeBillingMode(value: BillingMode): Promise<void> {
+    const client = resolved.value?.client
+    if (!client) return
+    billingModePending.value = true
+    try {
+      await setBillingMode(client.id, value)
+      client.billing_mode = value
+      toast.add({
+        title: `Abrechnungsmodell für ${client.name} aktualisiert.`,
+        description: billingModeLabel(value),
+        color: 'success'
+      })
+    } catch (err) {
+      toast.add({
+        title: 'Speichern fehlgeschlagen.',
+        description: err instanceof Error ? err.message : undefined,
+        color: 'error'
+      })
+    } finally {
+      billingModePending.value = false
+    }
+  }
 </script>
 
 <template>
@@ -108,7 +164,44 @@
           :description="error.message"
         />
 
-        <div v-else class="mt-6">
+        <div
+          v-if="resolved?.client"
+          class="mt-6 flex flex-wrap items-center gap-3"
+        >
+          <span class="text-sm font-medium">Abrechnungsmodell:</span>
+          <USelectMenu
+            v-if="userStore.amIAdministrator()"
+            :model-value="resolved.client.billing_mode ?? 'prepaid'"
+            :items="BILLING_MODE_OPTIONS"
+            value-key="value"
+            label-key="label"
+            :loading="billingModePending"
+            class="min-w-60"
+            @update:model-value="
+              (value: BillingMode) => onChangeBillingMode(value)
+            "
+          />
+          <UBadge
+            v-else
+            :color="
+              (resolved.client.billing_mode ?? 'prepaid') === 'monthly'
+                ? 'warning'
+                : 'primary'
+            "
+            variant="subtle"
+          >
+            {{ billingModeLabel(resolved.client.billing_mode) }}
+          </UBadge>
+          <span class="text-xs text-muted">
+            {{
+              (resolved.client.billing_mode ?? 'prepaid') === 'monthly'
+                ? 'Monatliche Abrechnung nach Aufwand (höherer Stundensatz).'
+                : 'Im Voraus bezahlte Top-Ups (niedrigerer Stundensatz).'
+            }}
+          </span>
+        </div>
+
+        <div v-if="!pending && !error" class="mt-6">
           <UTable :data="topUpsForTable">
             <template #Bexio-cell="{ row }">
               <UButton
