@@ -18,7 +18,7 @@
     "readonly": false,
     "required": false,
     "searchable": false,
-    "sort": 21,
+    "sort": 23,
     "special": [
       "cast-json"
     ],

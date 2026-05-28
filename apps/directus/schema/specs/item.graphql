@@ -246,10 +246,10 @@ type Clients {
   billing_mode: String
   allowedUsers(filter: Clients_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_directus_users]
   allowedUsers_func: count_functions
-  articles(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [PeerArticles]
-  articles_func: count_functions
   periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods]
   periods_func: count_functions
+  articles(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [PeerArticles]
+  articles_func: count_functions
   jiraWarnings(filter: JiraWarnings_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [JiraWarnings]
 }
 
@@ -314,8 +314,8 @@ type Clients_aggregated_count {
   """
   billing_mode: Int
   allowedUsers: Int
-  articles: Int
   periods: Int
+  articles: Int
 }
 
 type Clients_aggregated_fields {
@@ -1529,8 +1529,8 @@ type version_Clients {
   """
   billing_mode: String
   allowedUsers: JSON
-  articles: JSON
   periods: JSON
+  articles: JSON
   jiraWarnings: JSON
 }
 
@@ -1761,10 +1761,10 @@ input Clients_filter {
   billing_mode: string_filter_operators
   allowedUsers: Clients_directus_users_quantifier_filter
   allowedUsers_func: count_function_filter_operators
-  articles: PeerArticles_quantifier_filter
-  articles_func: count_function_filter_operators
   periods: Clients_Periods_quantifier_filter
   periods_func: count_function_filter_operators
+  articles: PeerArticles_quantifier_filter
+  articles_func: count_function_filter_operators
   _and: [Clients_filter]
   _or: [Clients_filter]
   jiraWarnings: JiraWarnings_quantifier_filter
@@ -1855,8 +1855,8 @@ input create_Clients_input {
   """
   billing_mode: String
   allowedUsers: [create_Clients_directus_users_input]
-  articles: [create_PeerArticles_input]
   periods: [create_Clients_Periods_input]
+  articles: [create_PeerArticles_input]
   jiraWarnings: [create_JiraWarnings_input]
 }
 
@@ -2952,8 +2952,8 @@ input update_Clients_input {
   """
   billing_mode: String
   allowedUsers: [update_Clients_directus_users_input]
-  articles: [update_PeerArticles_input]
   periods: [update_Clients_Periods_input]
+  articles: [update_PeerArticles_input]
   jiraWarnings: [update_JiraWarnings_input]
 }
 

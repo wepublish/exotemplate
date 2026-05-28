@@ -3,7 +3,7 @@
   "info": {
     "title": "Dynamic API Specification",
     "description": "This is a dynamically generated API specification for all endpoints existing on the current project.",
-    "version": "29ff1267d12a582caf3d968c7cbaae7faeec1f93"
+    "version": "9dba8348c3a28348eb8ae4579df28995326441a1"
   },
   "servers": [
     {
@@ -14341,6 +14341,20 @@
               ]
             }
           },
+          "periods": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "$ref": "#/components/schemas/ItemsClientsPeriods"
+                }
+              ]
+            }
+          },
           "articles": {
             "nullable": true,
             "type": "array",
@@ -14352,20 +14366,6 @@
                 },
                 {
                   "$ref": "#/components/schemas/ItemsPeerArticles"
-                }
-              ]
-            }
-          },
-          "periods": {
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "$ref": "#/components/schemas/ItemsClientsPeriods"
                 }
               ]
             }
