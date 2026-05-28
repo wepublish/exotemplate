@@ -7,6 +7,7 @@ import type {
   TopUp
 } from '../DirectusTypes'
 import { computeClientPeriodBilling, readBillingEnv } from '../shared/billing'
+import { findCurrentClientPeriod } from '../shared/clientPeriods'
 import { postSlackMessage } from '../shared/notifications'
 import {
   composeGermanOverBudgetEscalationMessage,
@@ -99,7 +100,8 @@ async function processClient(args: ProcessClientArgs): Promise<void> {
   const activePeriod = await findCurrentClientPeriod(
     args.clientPeriodService,
     client.id,
-    args.now
+    args.now,
+    { extraFields: ['topUps.*', 'manualWorkEntries.*'] }
   )
   if (!activePeriod) return
 
@@ -174,41 +176,4 @@ async function processClient(args: ProcessClientArgs): Promise<void> {
       )
     }
   }
-}
-
-/**
- * Mirrors the helper used by the jira-threshold-notifier: returns the period
- * that overlaps `now`, with the latest `from` date winning when several do.
- */
-async function findCurrentClientPeriod(
-  service: ItemsServiceLike<ClientPeriod>,
-  clientId: string,
-  now: Date
-): Promise<ClientPeriod | null> {
-  const today = now.toISOString()
-
-  const rows = await service.readByQuery({
-    filter: {
-      Clients_id: { _eq: clientId },
-      Periods_id: { from: { _lte: today }, to: { _gte: today } }
-    },
-    fields: [
-      'id',
-      'topUps.*',
-      'manualWorkEntries.*',
-      'Periods_id.id',
-      'Periods_id.from',
-      'Periods_id.to',
-      'Periods_id.name'
-    ],
-    limit: -1
-  })
-
-  if (rows.length === 0) return null
-
-  return rows.reduce((best, candidate) => {
-    const bestFrom = (best.Periods_id as Period).from
-    const candidateFrom = (candidate.Periods_id as Period).from
-    return candidateFrom > bestFrom ? candidate : best
-  })
 }

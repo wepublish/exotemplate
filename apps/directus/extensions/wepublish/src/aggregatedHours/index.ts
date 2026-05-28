@@ -12,7 +12,13 @@ import type {
   Period,
   TopUp
 } from '../DirectusTypes'
-import { computeClientPeriodBilling, readBillingEnv } from '../shared/billing'
+import {
+  computeClientPeriodBilling,
+  persistBillingSnapshotSuccess,
+  readBillingEnv,
+  type SnapshotsServiceLike,
+  type Sums
+} from '../shared/billing'
 import {
   billingCacheKey,
   getBillingCache,
@@ -111,6 +117,19 @@ export default defineEndpoint((router, context) => {
         )
       )
 
+      // Side-effect: when this request actually recomputed (cache miss), also
+      // upsert the persistent BillingSnapshots row so the /overview tile stays
+      // fresh. Fire-and-forget — the user doesn't wait for it, and a write
+      // failure must not bleed into the live response.
+      if (!response.cache.hit && context.getSchema && services?.ItemsService) {
+        void persistSnapshotInBackground(
+          context,
+          accountability,
+          Number(clientPeriodId),
+          response.data.sums
+        )
+      }
+
       return res.send(response)
     } catch (e) {
       return next(e)
@@ -170,4 +189,39 @@ export default defineEndpoint((router, context) => {
       return next(e)
     }
   })
+
+  /**
+   * Best-effort persistence to the `BillingSnapshots` table so the /overview
+   * tiles stay current as users browse single-period detail pages. Skips
+   * silently if the snapshot collection isn't in the schema yet (pre
+   * `schema:load`) or if the write fails — the /aggregatedHours response has
+   * already been sent and a snapshot mismatch isn't worth a 500.
+   */
+  async function persistSnapshotInBackground(
+    ctx: any,
+    accountability: any,
+    clientPeriodId: number,
+    sums: Sums
+  ): Promise<void> {
+    try {
+      const schema = await ctx.getSchema()
+      if (!schema?.collections?.BillingSnapshots) return
+      const snapshotsService: SnapshotsServiceLike =
+        new ctx.services.ItemsService('BillingSnapshots', {
+          schema,
+          accountability
+        })
+      await persistBillingSnapshotSuccess({
+        service: snapshotsService,
+        clientPeriodId,
+        sums,
+        computedAt: new Date()
+      })
+    } catch (error) {
+      console.warn(
+        '[aggregatedHours] snapshot upsert failed (non-fatal):',
+        error instanceof Error ? error.message : error
+      )
+    }
+  }
 })

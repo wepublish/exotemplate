@@ -108,8 +108,13 @@ export function computeEntryGroups(
   )
   const totalUsedHours = billableHours + totalManualWorkHours
   const totalAvailableHours = totalTopUps - totalUsedHours
+  // Guard zero top-ups explicitly: `x / 0 = Infinity`, and `Math.round(Inf)`
+  // stays Infinity, which slips past the `|| 0` fallback (Infinity is truthy)
+  // and later blows up the typed `BillingSnapshots.totalUsedPercentage`
+  // column. Monthly-billing clients legitimately have zero top-ups, so this
+  // is the normal path for them.
   const totalUsedPercentage =
-    Math.round((totalUsedHours * 100) / totalTopUps) || 0
+    totalTopUps > 0 ? Math.round((totalUsedHours * 100) / totalTopUps) || 0 : 0
 
   return {
     groups: entryGroupsWithinPeriod.groups,
@@ -121,8 +126,7 @@ export function computeEntryGroups(
       totalManualWorkHours,
       totalUsedHours,
       totalAvailableHours,
-      totalUsedPercentage:
-        totalUsedPercentage === null ? 100 : totalUsedPercentage
+      totalUsedPercentage
     }
   }
 }

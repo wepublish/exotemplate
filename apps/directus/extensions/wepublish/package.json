@@ -45,6 +45,19 @@
         "source": "src/time-tracking/index.ts"
       },
       {
+        "type": "endpoint",
+        "name": "clientsOverview",
+        "source": "src/clientsOverview/index.ts"
+      },
+      {
+        "type": "operation",
+        "name": "billing-snapshot-refresh",
+        "source": {
+          "app": "src/billing-snapshot-refresh/app.ts",
+          "api": "src/billing-snapshot-refresh/api.ts"
+        }
+      },
+      {
         "type": "operation",
         "name": "daily-capture-reminder",
         "source": {

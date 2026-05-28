@@ -439,6 +439,20 @@ describe('computeEntryGroups', () => {
     expect(result.sums.totalUsedPercentage).toBe(0)
   })
 
+  it('returns percentage 0 (not Infinity) when used hours > 0 but topUps is zero (monthly-billing)', () => {
+    const groups: EntryGroups = {
+      groups: [buildEntryGroup({ duration: 4 * SECONDS_PER_HOUR })]
+    }
+    // No top-ups — classic monthly-billing setup where the client gets billed
+    // for whatever was logged. The percentage is undefined as a real number;
+    // we report 0 so the typed snapshot column stays integer-clean.
+    const result = computeEntryGroups(groups, [], [])
+    expect(result.sums.totalTopUps).toBe(0)
+    expect(result.sums.totalUsedHours).toBe(4)
+    expect(result.sums.totalUsedPercentage).toBe(0)
+    expect(Number.isFinite(result.sums.totalUsedPercentage)).toBe(true)
+  })
+
   it('passes manual entries with string hours through parseFloat', () => {
     const groups: EntryGroups = { groups: [] }
     const manual = [manualWorkEntry('2.5' as unknown as number)]

@@ -15,6 +15,7 @@ import {
   type EntryGroup,
   type EntryGroupComputed
 } from '../shared/billing'
+import { findCurrentClientPeriod } from '../shared/clientPeriods'
 import {
   composeGermanWarningMessage,
   computePendingWarnings,
@@ -134,7 +135,8 @@ async function processClient(args: ProcessClientArgs): Promise<void> {
   const activePeriod = await findCurrentClientPeriod(
     args.clientPeriodService,
     client.id,
-    args.now
+    args.now,
+    { extraFields: ['topUps.*', 'manualWorkEntries.*'] }
   )
   if (!activePeriod) return
 
@@ -193,44 +195,6 @@ async function processClient(args: ProcessClientArgs): Promise<void> {
   }
 
   await persistWarnings(args.warningService, client.id, pending, warningsByKey)
-}
-
-/**
- * Returns the single Clients_Periods row considered "current" for this client.
- * When more than one period overlaps `now`, the one with the latest
- * `Periods.from` wins — billing cycles don't normally overlap, and when they
- * do the most recently started cycle is the effective one.
- */
-async function findCurrentClientPeriod(
-  service: ItemsServiceLike<ClientPeriod>,
-  clientId: string,
-  now: Date
-): Promise<ClientPeriod | null> {
-  const today = now.toISOString()
-
-  const rows = await service.readByQuery({
-    filter: {
-      Clients_id: { _eq: clientId },
-      Periods_id: { from: { _lte: today }, to: { _gte: today } }
-    },
-    fields: [
-      'id',
-      'topUps.*',
-      'manualWorkEntries.*',
-      'Periods_id.id',
-      'Periods_id.from',
-      'Periods_id.to'
-    ],
-    limit: -1
-  })
-
-  if (rows.length === 0) return null
-
-  return rows.reduce((best, candidate) => {
-    const bestFrom = (best.Periods_id as Period).from
-    const candidateFrom = (candidate.Periods_id as Period).from
-    return candidateFrom > bestFrom ? candidate : best
-  })
 }
 
 /**

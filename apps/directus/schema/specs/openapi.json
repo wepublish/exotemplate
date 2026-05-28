@@ -3,7 +3,7 @@
   "info": {
     "title": "Dynamic API Specification",
     "description": "This is a dynamically generated API specification for all endpoints existing on the current project.",
-    "version": "09a30b4fe91ca197b0a2e954c6f9144c2f19c944"
+    "version": "30ed8e7e27feaf53577b223cffb444d663d8b09b"
   },
   "servers": [
     {
@@ -12174,6 +12174,395 @@
           }
         ]
       }
+    },
+    "/items/BillingSnapshots": {
+      "post": {
+        "summary": "Create an Item",
+        "description": "Create a new BillingSnapshots item.",
+        "tags": [
+          "Items",
+          "ItemsBillingSnapshots"
+        ],
+        "operationId": "createItemsBillingSnapshots",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Meta"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ItemsBillingSnapshots"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/ItemsBillingSnapshots"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ItemsBillingSnapshots"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "get": {
+        "summary": "List Items",
+        "description": "List the BillingSnapshots items.",
+        "tags": [
+          "Items",
+          "ItemsBillingSnapshots"
+        ],
+        "operationId": "readItemsBillingSnapshots",
+        "security": [
+          {
+            "Auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "#/components/schemas/ItemsBillingSnapshots"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/x-metadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update Multiple Items",
+        "description": "Update multiple BillingSnapshots items at the same time.",
+        "tags": [
+          "Items",
+          "ItemsBillingSnapshots"
+        ],
+        "operationId": "updateItemsBillingSnapshots",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ItemsBillingSnapshots"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/ItemsBillingSnapshots"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ItemsBillingSnapshots"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Multiple Items",
+        "description": "Delete multiple existing BillingSnapshots items.",
+        "tags": [
+          "Items",
+          "ItemsBillingSnapshots"
+        ],
+        "operationId": "deleteItemsBillingSnapshots",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/items/BillingSnapshots/{id}": {
+      "get": {
+        "summary": "Retrieve an Item",
+        "description": "Retrieve a single BillingSnapshots item by unique identifier.",
+        "tags": [
+          "Items",
+          "ItemsBillingSnapshots"
+        ],
+        "operationId": "readSingleItemsBillingSnapshots",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Version"
+          },
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/ItemsBillingSnapshots"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update an Item",
+        "description": "Update an existing BillingSnapshots item.",
+        "tags": [
+          "Items",
+          "ItemsBillingSnapshots"
+        ],
+        "operationId": "updateSingleItemsBillingSnapshots",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "$ref": "#/components/schemas/ItemsBillingSnapshots"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/ItemsBillingSnapshots"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an Item",
+        "description": "Delete an existing BillingSnapshots item.",
+        "tags": [
+          "Items",
+          "ItemsBillingSnapshots"
+        ],
+        "operationId": "deleteSingleItemsBillingSnapshots",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ]
+      }
     }
   },
   "tags": [
@@ -12350,6 +12739,11 @@
       "name": "ItemsSettings",
       "x-collection": "Settings",
       "description": "Globale Einstellungen für die BI-Oberfläche (z.B. Slack-Channel für die tägliche Stunden-Erinnerung). Nur für Administratoren sichtbar."
+    },
+    {
+      "name": "ItemsBillingSnapshots",
+      "x-collection": "BillingSnapshots",
+      "description": "System-gepflegt: pro Clients_Periods eine Zeile mit den aktuellen Budget-Sums. Wird vom billing-snapshot-refresh-Flow alle 30 min und beim Aufruf von /aggregatedHours aktualisiert. Speist die /overview-Kacheln, damit dort keine externen API-Aufrufe nötig sind."
     }
   ],
   "components": {
@@ -15210,6 +15604,90 @@
         },
         "x-collection": "Settings",
         "required": [
+          "id"
+        ]
+      },
+      "ItemsBillingSnapshots": {
+        "type": "object",
+        "properties": {
+          "billableHours": {
+            "nullable": false,
+            "description": "Spiegelt sums.billableHours.",
+            "type": "number"
+          },
+          "clientPeriodId": {
+            "nullable": false,
+            "description": "Referenz auf Clients_Periods. Pro Periode hält der Refresh-Job genau einen Snapshot aktuell (Upsert per Lookup).",
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "$ref": "#/components/schemas/ItemsClientsPeriods"
+              }
+            ]
+          },
+          "computedAt": {
+            "nullable": true,
+            "description": "Zeitpunkt der letzten erfolgreichen Aktualisierung.",
+            "type": "string",
+            "format": "timestamp"
+          },
+          "date_created": {
+            "nullable": true,
+            "type": "string",
+            "format": "timestamp"
+          },
+          "date_updated": {
+            "nullable": true,
+            "type": "string",
+            "format": "timestamp"
+          },
+          "id": {
+            "nullable": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          "lastError": {
+            "nullable": true,
+            "description": "Fehlermeldung der letzten fehlgeschlagenen Aktualisierung. Wird gelöscht, sobald ein neuer erfolgreicher Snapshot vorliegt.",
+            "type": "string"
+          },
+          "lastErrorAt": {
+            "nullable": true,
+            "description": "Zeitpunkt der letzten fehlgeschlagenen Aktualisierung.",
+            "type": "string",
+            "format": "timestamp"
+          },
+          "totalAvailableHours": {
+            "nullable": false,
+            "description": "Spiegelt sums.totalAvailableHours.",
+            "type": "number"
+          },
+          "totalManualWorkHours": {
+            "nullable": false,
+            "description": "Spiegelt sums.totalManualWorkHours.",
+            "type": "number"
+          },
+          "totalTopUps": {
+            "nullable": false,
+            "description": "Spiegelt sums.totalTopUps.",
+            "type": "number"
+          },
+          "totalUsedHours": {
+            "nullable": false,
+            "description": "Spiegelt sums.totalUsedHours.",
+            "type": "number"
+          },
+          "totalUsedPercentage": {
+            "nullable": false,
+            "description": "Spiegelt sums.totalUsedPercentage. Wird auf der Übersicht als Default-Sortierkriterium genutzt.",
+            "type": "integer"
+          }
+        },
+        "x-collection": "BillingSnapshots",
+        "required": [
+          "clientPeriodId",
           "id"
         ]
       }

@@ -275,6 +275,7 @@ type Subscription {
   Clients_mutated(event: EventEnum): Clients_mutated
   CaptureIgnoredUsers_mutated(event: EventEnum): CaptureIgnoredUsers_mutated
   Settings_mutated(event: EventEnum): Settings_mutated
+  BillingSnapshots_mutated(event: EventEnum): BillingSnapshots_mutated
 }
 
 """The `Boolean` scalar type represents `true` or `false`."""
@@ -343,6 +344,53 @@ type auth_tokens {
   access_token: String
   expires: GraphQLBigInt
   refresh_token: String
+}
+
+type BillingSnapshots {
+  """Spiegelt sums.billableHours."""
+  billableHours: Float!
+  clientPeriodId(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients_Periods
+
+  """Zeitpunkt der letzten erfolgreichen Aktualisierung."""
+  computedAt: Date
+  computedAt_func: datetime_functions
+  date_created: Date
+  date_created_func: datetime_functions
+  date_updated: Date
+  date_updated_func: datetime_functions
+  id: ID!
+
+  """
+  Fehlermeldung der letzten fehlgeschlagenen Aktualisierung. Wird gelöscht, sobald ein neuer erfolgreicher Snapshot vorliegt.
+  """
+  lastError: String
+
+  """Zeitpunkt der letzten fehlgeschlagenen Aktualisierung."""
+  lastErrorAt: Date
+  lastErrorAt_func: datetime_functions
+
+  """Spiegelt sums.totalAvailableHours."""
+  totalAvailableHours: Float!
+
+  """Spiegelt sums.totalManualWorkHours."""
+  totalManualWorkHours: Float!
+
+  """Spiegelt sums.totalTopUps."""
+  totalTopUps: Float!
+
+  """Spiegelt sums.totalUsedHours."""
+  totalUsedHours: Float!
+
+  """
+  Spiegelt sums.totalUsedPercentage. Wird auf der Übersicht als Default-Sortierkriterium genutzt.
+  """
+  totalUsedPercentage: Int!
+}
+
+type BillingSnapshots_mutated {
+  key: ID!
+  event: EventEnum
+  data: BillingSnapshots
 }
 
 type CaptureIgnoredUsers {

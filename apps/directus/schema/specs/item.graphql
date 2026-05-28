@@ -45,6 +45,10 @@ type Query {
   CaptureIgnoredUsers_by_version(version: String!, id: ID!): version_CaptureIgnoredUsers
   Settings(version: String): Settings
   Settings_by_version(version: String!): version_Settings
+  BillingSnapshots(filter: BillingSnapshots_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [BillingSnapshots!]!
+  BillingSnapshots_by_id(id: ID!, version: String): BillingSnapshots
+  BillingSnapshots_aggregated(groupBy: [String], filter: BillingSnapshots_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [BillingSnapshots_aggregated!]!
+  BillingSnapshots_by_version(version: String!, id: ID!): version_BillingSnapshots
 }
 
 type Mutation {
@@ -70,6 +74,8 @@ type Mutation {
   create_Clients_item(data: create_Clients_input!): Clients
   create_CaptureIgnoredUsers_items(filter: CaptureIgnoredUsers_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_CaptureIgnoredUsers_input!]): [CaptureIgnoredUsers!]!
   create_CaptureIgnoredUsers_item(data: create_CaptureIgnoredUsers_input!): CaptureIgnoredUsers
+  create_BillingSnapshots_items(filter: BillingSnapshots_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_BillingSnapshots_input!]): [BillingSnapshots!]!
+  create_BillingSnapshots_item(data: create_BillingSnapshots_input!): BillingSnapshots
   update_directus_sync_id_map_items(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_sync_id_map_input!): [directus_sync_id_map!]!
   update_directus_sync_id_map_batch(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_sync_id_map_input!]): [directus_sync_id_map!]!
   update_directus_sync_id_map_item(id: ID!, data: update_directus_sync_id_map_input!): directus_sync_id_map
@@ -104,6 +110,9 @@ type Mutation {
   update_CaptureIgnoredUsers_batch(filter: CaptureIgnoredUsers_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_CaptureIgnoredUsers_input!]): [CaptureIgnoredUsers!]!
   update_CaptureIgnoredUsers_item(id: ID!, data: update_CaptureIgnoredUsers_input!): CaptureIgnoredUsers
   update_Settings(data: update_Settings_input!): Settings
+  update_BillingSnapshots_items(filter: BillingSnapshots_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_BillingSnapshots_input!): [BillingSnapshots!]!
+  update_BillingSnapshots_batch(filter: BillingSnapshots_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_BillingSnapshots_input!]): [BillingSnapshots!]!
+  update_BillingSnapshots_item(id: ID!, data: update_BillingSnapshots_input!): BillingSnapshots
   delete_directus_sync_id_map_items(ids: [ID]!): delete_many
   delete_directus_sync_id_map_item(id: ID!): delete_one
   delete_Clients_Periods_items(ids: [ID]!): delete_many
@@ -126,6 +135,8 @@ type Mutation {
   delete_Clients_item(id: ID!): delete_one
   delete_CaptureIgnoredUsers_items(ids: [ID]!): delete_many
   delete_CaptureIgnoredUsers_item(id: ID!): delete_one
+  delete_BillingSnapshots_items(ids: [ID]!): delete_many
+  delete_BillingSnapshots_item(id: ID!): delete_one
 }
 
 type Subscription {
@@ -162,6 +173,7 @@ type Subscription {
   Clients_mutated(event: EventEnum): Clients_mutated
   CaptureIgnoredUsers_mutated(event: EventEnum): CaptureIgnoredUsers_mutated
   Settings_mutated(event: EventEnum): Settings_mutated
+  BillingSnapshots_mutated(event: EventEnum): BillingSnapshots_mutated
 }
 
 """The `Boolean` scalar type represents `true` or `false`."""
@@ -208,6 +220,134 @@ enum EventEnum {
   create
   update
   delete
+}
+
+type BillingSnapshots {
+  """Spiegelt sums.billableHours."""
+  billableHours: Float!
+  clientPeriodId(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients_Periods
+
+  """Zeitpunkt der letzten erfolgreichen Aktualisierung."""
+  computedAt: Date
+  computedAt_func: datetime_functions
+  date_created: Date
+  date_created_func: datetime_functions
+  date_updated: Date
+  date_updated_func: datetime_functions
+  id: ID!
+
+  """
+  Fehlermeldung der letzten fehlgeschlagenen Aktualisierung. Wird gelöscht, sobald ein neuer erfolgreicher Snapshot vorliegt.
+  """
+  lastError: String
+
+  """Zeitpunkt der letzten fehlgeschlagenen Aktualisierung."""
+  lastErrorAt: Date
+  lastErrorAt_func: datetime_functions
+
+  """Spiegelt sums.totalAvailableHours."""
+  totalAvailableHours: Float!
+
+  """Spiegelt sums.totalManualWorkHours."""
+  totalManualWorkHours: Float!
+
+  """Spiegelt sums.totalTopUps."""
+  totalTopUps: Float!
+
+  """Spiegelt sums.totalUsedHours."""
+  totalUsedHours: Float!
+
+  """
+  Spiegelt sums.totalUsedPercentage. Wird auf der Übersicht als Default-Sortierkriterium genutzt.
+  """
+  totalUsedPercentage: Int!
+}
+
+type BillingSnapshots_aggregated {
+  group: JSON
+  countAll: Int
+  count: BillingSnapshots_aggregated_count
+  countDistinct: BillingSnapshots_aggregated_count
+  avg: BillingSnapshots_aggregated_fields
+  sum: BillingSnapshots_aggregated_fields
+  avgDistinct: BillingSnapshots_aggregated_fields
+  sumDistinct: BillingSnapshots_aggregated_fields
+  min: BillingSnapshots_aggregated_fields
+  max: BillingSnapshots_aggregated_fields
+}
+
+type BillingSnapshots_aggregated_count {
+  """Spiegelt sums.billableHours."""
+  billableHours: Int
+
+  """
+  Referenz auf Clients_Periods. Pro Periode hält der Refresh-Job genau einen Snapshot aktuell (Upsert per Lookup).
+  """
+  clientPeriodId: Int
+
+  """Zeitpunkt der letzten erfolgreichen Aktualisierung."""
+  computedAt: Int
+  date_created: Int
+  date_updated: Int
+  id: Int
+
+  """
+  Fehlermeldung der letzten fehlgeschlagenen Aktualisierung. Wird gelöscht, sobald ein neuer erfolgreicher Snapshot vorliegt.
+  """
+  lastError: Int
+
+  """Zeitpunkt der letzten fehlgeschlagenen Aktualisierung."""
+  lastErrorAt: Int
+
+  """Spiegelt sums.totalAvailableHours."""
+  totalAvailableHours: Int
+
+  """Spiegelt sums.totalManualWorkHours."""
+  totalManualWorkHours: Int
+
+  """Spiegelt sums.totalTopUps."""
+  totalTopUps: Int
+
+  """Spiegelt sums.totalUsedHours."""
+  totalUsedHours: Int
+
+  """
+  Spiegelt sums.totalUsedPercentage. Wird auf der Übersicht als Default-Sortierkriterium genutzt.
+  """
+  totalUsedPercentage: Int
+}
+
+type BillingSnapshots_aggregated_fields {
+  """Spiegelt sums.billableHours."""
+  billableHours: Float
+
+  """
+  Referenz auf Clients_Periods. Pro Periode hält der Refresh-Job genau einen Snapshot aktuell (Upsert per Lookup).
+  """
+  clientPeriodId: Float
+
+  """Spiegelt sums.totalAvailableHours."""
+  totalAvailableHours: Float
+
+  """Spiegelt sums.totalManualWorkHours."""
+  totalManualWorkHours: Float
+
+  """Spiegelt sums.totalTopUps."""
+  totalTopUps: Float
+
+  """Spiegelt sums.totalUsedHours."""
+  totalUsedHours: Float
+
+  """
+  Spiegelt sums.totalUsedPercentage. Wird auf der Übersicht als Default-Sortierkriterium genutzt.
+  """
+  totalUsedPercentage: Float
+}
+
+type BillingSnapshots_mutated {
+  key: ID!
+  event: EventEnum
+  data: BillingSnapshots
 }
 
 type CaptureIgnoredUsers {
@@ -1571,6 +1711,44 @@ type TopUps_mutated {
 }
 
 """"""
+type version_BillingSnapshots {
+  """Spiegelt sums.billableHours."""
+  billableHours: Float
+  clientPeriodId: JSON
+
+  """Zeitpunkt der letzten erfolgreichen Aktualisierung."""
+  computedAt: Date
+  date_created: Date
+  date_updated: Date
+  id: ID
+
+  """
+  Fehlermeldung der letzten fehlgeschlagenen Aktualisierung. Wird gelöscht, sobald ein neuer erfolgreicher Snapshot vorliegt.
+  """
+  lastError: String
+
+  """Zeitpunkt der letzten fehlgeschlagenen Aktualisierung."""
+  lastErrorAt: Date
+
+  """Spiegelt sums.totalAvailableHours."""
+  totalAvailableHours: Float
+
+  """Spiegelt sums.totalManualWorkHours."""
+  totalManualWorkHours: Float
+
+  """Spiegelt sums.totalTopUps."""
+  totalTopUps: Float
+
+  """Spiegelt sums.totalUsedHours."""
+  totalUsedHours: Float
+
+  """
+  Spiegelt sums.totalUsedPercentage. Wird auf der Übersicht als Default-Sortierkriterium genutzt.
+  """
+  totalUsedPercentage: Int
+}
+
+""""""
 type version_CaptureIgnoredUsers {
   date_created: Date
   id: ID
@@ -1828,6 +2006,28 @@ input big_int_filter_operators {
   _nbetween: [GraphQLBigInt]
 }
 
+input BillingSnapshots_filter {
+  billableHours: number_filter_operators
+  clientPeriodId: Clients_Periods_filter
+  computedAt: date_filter_operators
+  computedAt_func: datetime_function_filter_operators
+  date_created: date_filter_operators
+  date_created_func: datetime_function_filter_operators
+  date_updated: date_filter_operators
+  date_updated_func: datetime_function_filter_operators
+  id: id_filter_operators
+  lastError: string_filter_operators
+  lastErrorAt: date_filter_operators
+  lastErrorAt_func: datetime_function_filter_operators
+  totalAvailableHours: number_filter_operators
+  totalManualWorkHours: number_filter_operators
+  totalTopUps: number_filter_operators
+  totalUsedHours: number_filter_operators
+  totalUsedPercentage: number_filter_operators
+  _and: [BillingSnapshots_filter]
+  _or: [BillingSnapshots_filter]
+}
+
 input boolean_filter_operators {
   _eq: Boolean
   _neq: Boolean
@@ -1927,6 +2127,43 @@ input Clients_Periods_quantifier_filter {
 
 input count_function_filter_operators {
   count: number_filter_operators
+}
+
+input create_BillingSnapshots_input {
+  """Spiegelt sums.billableHours."""
+  billableHours: Float!
+  clientPeriodId: create_Clients_Periods_input
+
+  """Zeitpunkt der letzten erfolgreichen Aktualisierung."""
+  computedAt: Date
+  date_created: Date
+  date_updated: Date
+  id: ID
+
+  """
+  Fehlermeldung der letzten fehlgeschlagenen Aktualisierung. Wird gelöscht, sobald ein neuer erfolgreicher Snapshot vorliegt.
+  """
+  lastError: String
+
+  """Zeitpunkt der letzten fehlgeschlagenen Aktualisierung."""
+  lastErrorAt: Date
+
+  """Spiegelt sums.totalAvailableHours."""
+  totalAvailableHours: Float!
+
+  """Spiegelt sums.totalManualWorkHours."""
+  totalManualWorkHours: Float!
+
+  """Spiegelt sums.totalTopUps."""
+  totalTopUps: Float!
+
+  """Spiegelt sums.totalUsedHours."""
+  totalUsedHours: Float!
+
+  """
+  Spiegelt sums.totalUsedPercentage. Wird auf der Übersicht als Default-Sortierkriterium genutzt.
+  """
+  totalUsedPercentage: Int!
 }
 
 input create_CaptureIgnoredUsers_input {
@@ -3040,6 +3277,43 @@ input TopUps_quantifier_filter {
   _or: [TopUps_filter]
   _some: TopUps_filter
   _none: TopUps_filter
+}
+
+input update_BillingSnapshots_input {
+  """Spiegelt sums.billableHours."""
+  billableHours: Float
+  clientPeriodId: update_Clients_Periods_input
+
+  """Zeitpunkt der letzten erfolgreichen Aktualisierung."""
+  computedAt: Date
+  date_created: Date
+  date_updated: Date
+  id: ID
+
+  """
+  Fehlermeldung der letzten fehlgeschlagenen Aktualisierung. Wird gelöscht, sobald ein neuer erfolgreicher Snapshot vorliegt.
+  """
+  lastError: String
+
+  """Zeitpunkt der letzten fehlgeschlagenen Aktualisierung."""
+  lastErrorAt: Date
+
+  """Spiegelt sums.totalAvailableHours."""
+  totalAvailableHours: Float
+
+  """Spiegelt sums.totalManualWorkHours."""
+  totalManualWorkHours: Float
+
+  """Spiegelt sums.totalTopUps."""
+  totalTopUps: Float
+
+  """Spiegelt sums.totalUsedHours."""
+  totalUsedHours: Float
+
+  """
+  Spiegelt sums.totalUsedPercentage. Wird auf der Übersicht als Default-Sortierkriterium genutzt.
+  """
+  totalUsedPercentage: Int
 }
 
 input update_CaptureIgnoredUsers_input {
