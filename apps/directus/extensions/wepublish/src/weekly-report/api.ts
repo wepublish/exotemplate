@@ -55,7 +55,8 @@ export default defineOperationApi({
         'jira_short_code',
         'clockodo_customer_id',
         'slack_channel_id',
-        'weekly_report_paused'
+        'weekly_report_paused',
+        'billing_mode'
       ],
       limit: -1
     })
@@ -134,7 +135,8 @@ async function processClient(args: ProcessClientArgs): Promise<void> {
     totalUsedHours: billing.sums.totalUsedHours,
     totalAvailableHours: billing.sums.totalAvailableHours,
     progress,
-    dashboardBaseUrl: args.dashboardBaseUrl
+    dashboardBaseUrl: args.dashboardBaseUrl,
+    billingMode: client.billing_mode ?? 'prepaid'
   }
 
   const projectMessage = composeGermanWeeklyReportMessage(

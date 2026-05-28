@@ -1,3 +1,4 @@
+import type { BillingMode } from '../../DirectusTypes'
 import type { ComposedSlackMessage, SlackMessageBlock } from '../notifications'
 import type { BudgetStatus, WeeklyReportProgress } from './progress'
 
@@ -12,6 +13,7 @@ export interface ComposeWeeklyReportInput {
   totalAvailableHours: number
   progress: WeeklyReportProgress
   dashboardBaseUrl: string
+  billingMode: BillingMode
 }
 
 const HOURS_FORMATTER = new Intl.NumberFormat('de-CH', {
@@ -74,16 +76,31 @@ function statusCopy(
     deltaPercent: number
     budgetUsedPercent: number
     timeElapsedPercent: number
+    totalUsedHours: number
   }
 ): StatusCopy {
-  const { clientName, deltaPercent, budgetUsedPercent, timeElapsedPercent } =
-    args
+  const {
+    clientName,
+    deltaPercent,
+    budgetUsedPercent,
+    timeElapsedPercent,
+    totalUsedHours
+  } = args
 
   const usedFmt = formatPercent(budgetUsedPercent)
   const timeFmt = formatPercent(timeElapsedPercent)
   const absDeltaFmt = formatPercent(Math.abs(deltaPercent))
 
   switch (status) {
+    case 'no_budget':
+      return {
+        emoji: ':warning:',
+        headline: `Kein Budget hinterlegt – ${clientName}`,
+        body:
+          `Es wurden bereits ${formatHours(totalUsedHours)} erfasst, aber für diese Periode ist noch ` +
+          'kein Top-Up hinterlegt. Diese Stunden werden separat in Rechnung gestellt, sofern kein Budget nachgetragen wird. ' +
+          'Bitte mit dem Projekt­verantwortlichen klären.'
+      }
     case 'over_budget':
       return {
         emoji: ':rotating_light:',
@@ -145,13 +162,24 @@ function makeBar(percent: number): string {
 }
 
 /**
- * Compose the weekly Slack report. The message leads with the status verdict
- * (chosen via `status`), shows a side-by-side bar of budget vs. time, and
- * links back to the dashboard for the full picture.
+ * Compose the weekly Slack report. Routes by `billingMode`:
+ *  - `monthly`: no progress bars — shows the hours that will be billed.
+ *  - `prepaid`: existing budget-vs-time layout, with a dedicated layout for
+ *    the `no_budget` status (top-ups missing but hours logged).
  */
 export function composeGermanWeeklyReportMessage(
   input: ComposeWeeklyReportInput,
   clientPeriodId: number | null = null
+): ComposedSlackMessage {
+  if (input.billingMode === 'monthly') {
+    return composeMonthlyWeeklyReportMessage(input, clientPeriodId)
+  }
+  return composePrepaidWeeklyReportMessage(input, clientPeriodId)
+}
+
+function composePrepaidWeeklyReportMessage(
+  input: ComposeWeeklyReportInput,
+  clientPeriodId: number | null
 ): ComposedSlackMessage {
   const {
     clientName,
@@ -176,7 +204,8 @@ export function composeGermanWeeklyReportMessage(
     clientName,
     deltaPercent: progress.deltaPercent,
     budgetUsedPercent: progress.budgetUsedPercent,
-    timeElapsedPercent: progress.timeElapsedPercent
+    timeElapsedPercent: progress.timeElapsedPercent,
+    totalUsedHours
   })
 
   const periodLabel = periodName
@@ -188,14 +217,25 @@ export function composeGermanWeeklyReportMessage(
     `_Periode:_ ${periodLabel}\n` +
     `_Verbleibende Tage:_ ${progress.daysRemaining} von ${progress.periodDurationDays}`
 
-  const budgetBar = makeBar(progress.budgetUsedPercent)
-  const timeBar = makeBar(progress.timeElapsedPercent)
+  // The no_budget case keeps the prepaid frame (it's still a prepaid client)
+  // but the budget bar is meaningless — there's nothing to divide by. We
+  // surface the raw hours instead and keep the time bar for context.
+  const isNoBudget = progress.status === 'no_budget'
 
-  const comparison =
-    `*Budget:* \`${budgetBar}\` ${formatPercent(progress.budgetUsedPercent)} ` +
-    `(${formatHours(totalUsedHours)} / ${formatHours(totalTopUpHours)})\n` +
-    `*Zeit:*    \`${timeBar}\` ${formatPercent(progress.timeElapsedPercent)}\n` +
-    `*Verfügbar:* ${formatHours(totalAvailableHours)}`
+  const timeBar = makeBar(progress.timeElapsedPercent)
+  const comparison = isNoBudget
+    ? `*Verbrauchte Stunden:* ${formatHours(totalUsedHours)} *(werden separat verrechnet)*\n` +
+      `*Top-Up-Budget:* ${formatHours(totalTopUpHours)}\n` +
+      `*Zeit:*    \`${timeBar}\` ${formatPercent(progress.timeElapsedPercent)}`
+    : (() => {
+        const budgetBar = makeBar(progress.budgetUsedPercent)
+        return (
+          `*Budget:* \`${budgetBar}\` ${formatPercent(progress.budgetUsedPercent)} ` +
+          `(${formatHours(totalUsedHours)} / ${formatHours(totalTopUpHours)})\n` +
+          `*Zeit:*    \`${timeBar}\` ${formatPercent(progress.timeElapsedPercent)}\n` +
+          `*Verfügbar:* ${formatHours(totalAvailableHours)}`
+        )
+      })()
 
   const blocks: SlackMessageBlock[] = [
     {
@@ -233,10 +273,100 @@ export function composeGermanWeeklyReportMessage(
     }
   ]
 
+  const fallbackText = isNoBudget
+    ? `${copy.headline}: ${formatHours(totalUsedHours)} erfasst, kein Top-Up hinterlegt (${periodLabel}).`
+    : `${copy.headline}: ${formatPercent(progress.budgetUsedPercent)} Budget / ` +
+      `${formatPercent(progress.timeElapsedPercent)} Zeit. ` +
+      `Verfügbar: ${formatHours(totalAvailableHours)} (${periodLabel}).`
+
+  return { text: fallbackText, blocks }
+}
+
+/**
+ * Monthly billing variant: no progress bar, no budget comparison. Clients on
+ * `billing_mode: 'monthly'` get invoiced after the fact at the higher hourly
+ * rate, so the weekly report's job is to surface the hours that will land on
+ * the next invoice — nothing else.
+ */
+function composeMonthlyWeeklyReportMessage(
+  input: ComposeWeeklyReportInput,
+  clientPeriodId: number | null
+): ComposedSlackMessage {
+  const {
+    clientName,
+    clientId,
+    periodName,
+    periodFromIso,
+    periodToIso,
+    totalAvailableHours,
+    dashboardBaseUrl
+  } = input
+
+  const url = buildWeeklyReportDashboardUrl(
+    dashboardBaseUrl,
+    clientId,
+    clientPeriodId
+  )
+
+  const periodLabel = periodName
+    ? `${periodName} (${formatDate(periodFromIso)} – ${formatDate(periodToIso)})`
+    : `${formatDate(periodFromIso)} – ${formatDate(periodToIso)}`
+
+  // For monthly clients the dashboard's "Verfügbare Arbeitsstunden" (=
+  // totalAvailableHours) goes negative as soon as work outstrips already-
+  // invoiced top-ups. The next invoice covers exactly that gap, so the
+  // amount to bill is the negation, floored at 0 (positive availability
+  // means a credit balance: nothing to bill yet).
+  const remainingToBillHours = Math.max(0, -totalAvailableHours)
+
+  const headline = `:receipt: *Aktueller Abrechnungsstand – ${clientName}*`
+  const body =
+    remainingToBillHours > 0
+      ? `Aktuell sind *${formatHours(remainingToBillHours)}* offen, die am Periodenende monatlich in Rechnung gestellt werden.`
+      : 'Aktuell sind keine offenen Stunden zu verrechnen.'
+
+  const summary =
+    `${headline}\n` +
+    `_Periode:_ ${periodLabel}\n` +
+    `_Aktuell zu verrechnen:_ *${formatHours(remainingToBillHours)}*`
+
+  const blocks: SlackMessageBlock[] = [
+    {
+      type: 'header',
+      text: {
+        type: 'plain_text',
+        text: 'Wöchentlicher Projektbericht',
+        emoji: false
+      }
+    },
+    { type: 'section', text: { type: 'mrkdwn', text: summary } },
+    { type: 'section', text: { type: 'mrkdwn', text: body } },
+    {
+      type: 'actions',
+      elements: [
+        {
+          type: 'button',
+          text: { type: 'plain_text', text: 'Dashboard öffnen' },
+          url
+        }
+      ]
+    },
+    {
+      type: 'context',
+      elements: [
+        {
+          type: 'mrkdwn',
+          text:
+            'Dieser Bericht wird einmal pro Woche automatisch erstellt. ' +
+            'Im Dashboard kann er pro Projekt stummgeschaltet werden.'
+        }
+      ]
+    }
+  ]
+
   const fallbackText =
-    `${copy.headline}: ${formatPercent(progress.budgetUsedPercent)} Budget / ` +
-    `${formatPercent(progress.timeElapsedPercent)} Zeit. ` +
-    `Verfügbar: ${formatHours(totalAvailableHours)} (${periodLabel}).`
+    `Abrechnungsstand ${clientName}: ${formatHours(remainingToBillHours)} ` +
+    `werden monatlich verrechnet (${periodLabel}).`
 
   return { text: fallbackText, blocks }
 }

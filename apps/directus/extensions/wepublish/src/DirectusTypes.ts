@@ -14,6 +14,8 @@ export interface Schema {
   directus_sync_id_map: DirectusSyncIdMap[]
 }
 
+export type BillingMode = 'prepaid' | 'monthly'
+
 export interface Client {
   clockodo_customer_id: string | null
   date_created: string | null
@@ -32,6 +34,7 @@ export interface Client {
   onboarding_manual_checklist: string[] | null
   notifications_paused: boolean
   weekly_report_paused: boolean
+  billing_mode: BillingMode
   allowedUsers: string[] | ClientDirectusUser[]
   periods: string[] | ClientPeriod[]
   articles: string[] | PeerArticle[]

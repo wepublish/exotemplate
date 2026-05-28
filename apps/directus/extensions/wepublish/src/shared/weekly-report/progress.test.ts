@@ -69,7 +69,7 @@ describe('computeWeeklyReportProgress', () => {
     expect(result.daysRemaining).toBe(0)
   })
 
-  it('treats a zero-hour budget as 0 % usage instead of dividing by zero', () => {
+  it('treats a zero-hour budget with zero usage as 0 % (on track)', () => {
     const result = computeWeeklyReportProgress({
       sums: { totalUsedHours: 0, totalTopUps: 0 },
       periodFrom: PERIOD_FROM,
@@ -78,5 +78,21 @@ describe('computeWeeklyReportProgress', () => {
     })
     expect(result.budgetUsedPercent).toBe(0)
     expect(Number.isFinite(result.budgetUsedPercent)).toBe(true)
+    expect(result.status).not.toBe('no_budget')
+  })
+
+  it('flags no_budget when hours are used without any top-ups', () => {
+    // Bug regression: previously this case computed budgetUsedPercent=0 and
+    // fell through to `ahead_of_schedule` ("Reichlich Spielraum"), masking
+    // the fact that the client has logged billable hours without budget.
+    const result = computeWeeklyReportProgress({
+      sums: { totalUsedHours: 2.5, totalTopUps: 0 },
+      periodFrom: PERIOD_FROM,
+      periodTo: PERIOD_TO,
+      now: new Date('2026-05-15T00:00:00.000Z')
+    })
+    expect(result.status).toBe('no_budget')
+    expect(result.budgetUsedPercent).toBe(0)
+    expect(isOverBudget(result.status)).toBe(false)
   })
 })

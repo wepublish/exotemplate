@@ -6,6 +6,7 @@ export type BudgetStatus =
   | 'behind_schedule'
   | 'close_to_limit'
   | 'over_budget'
+  | 'no_budget'
 
 export interface WeeklyReportProgress {
   /** Percentage of budgeted hours already consumed (0-∞). */
@@ -54,6 +55,7 @@ export function computeWeeklyReportProgress(args: {
 
   const totalTopUps = Number(sums.totalTopUps) || 0
   const totalUsedHours = Number(sums.totalUsedHours) || 0
+  const hasNoBudgetButUsedHours = totalTopUps <= 0 && totalUsedHours > 0
 
   const budgetUsedPercent =
     totalTopUps > 0 ? (totalUsedHours * 100) / totalTopUps : 0
@@ -84,20 +86,30 @@ export function computeWeeklyReportProgress(args: {
     budgetUsedPercent,
     timeElapsedPercent,
     deltaPercent,
-    status: deriveStatus(budgetUsedPercent, deltaPercent),
+    status: deriveStatus({
+      budgetUsedPercent,
+      deltaPercent,
+      hasNoBudgetButUsedHours
+    }),
     daysRemaining,
     periodDurationDays
   }
 }
 
-function deriveStatus(
-  budgetUsedPercent: number,
+function deriveStatus(args: {
+  budgetUsedPercent: number
   deltaPercent: number
-): BudgetStatus {
-  if (budgetUsedPercent > OVER_BUDGET_THRESHOLD) return 'over_budget'
-  if (budgetUsedPercent >= CLOSE_TO_LIMIT_THRESHOLD) return 'close_to_limit'
-  if (deltaPercent > ON_TRACK_TOLERANCE) return 'behind_schedule'
-  if (deltaPercent < -ON_TRACK_TOLERANCE) return 'ahead_of_schedule'
+  hasNoBudgetButUsedHours: boolean
+}): BudgetStatus {
+  // Catches the bug where a prepaid client has logged hours but no top-ups
+  // are configured yet. Previously this fell through to `ahead_of_schedule`
+  // ("reichlich Spielraum") because the percentage was 0/0 → 0.
+  if (args.hasNoBudgetButUsedHours) return 'no_budget'
+  if (args.budgetUsedPercent > OVER_BUDGET_THRESHOLD) return 'over_budget'
+  if (args.budgetUsedPercent >= CLOSE_TO_LIMIT_THRESHOLD)
+    return 'close_to_limit'
+  if (args.deltaPercent > ON_TRACK_TOLERANCE) return 'behind_schedule'
+  if (args.deltaPercent < -ON_TRACK_TOLERANCE) return 'ahead_of_schedule'
   return 'on_track'
 }
 

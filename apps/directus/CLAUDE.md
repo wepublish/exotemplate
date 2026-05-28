@@ -48,15 +48,15 @@ uploads/                          # Local file storage (dev)
 
 All TypeScript interfaces are defined in [extensions/wepublish/src/DirectusTypes.ts](extensions/wepublish/src/DirectusTypes.ts):
 
-| Collection               | Purpose                                                         |
-| ------------------------ | --------------------------------------------------------------- |
-| `Clients`                | Media organisations. Holds Clockodo, Jira, Bexio IDs/configs.   |
-| `Periods`                | Billing periods with from/to dates.                             |
-| `Clients_Periods`        | Junction table: links clients to periods. Has `bexioInvoiceId`. |
-| `TopUps`                 | Budget/payment entries for a client-period.                     |
-| `ManualWorkEntries`      | Manually logged billable hours.                                 |
-| `PeerArticles`           | Articles pulled from peer We.Publish media APIs.                |
-| `Clients_directus_users` | Access control: which users can see which clients.              |
+| Collection               | Purpose                                                                                                                                                                                                          |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Clients`                | Media organisations. Holds Clockodo, Jira, Bexio IDs/configs. `billing_mode` (`prepaid` default / `monthly`) drives both the weekly Slack report layout and the dashboard's "Verfügbare Arbeitsstunden" wording. |
+| `Periods`                | Billing periods with from/to dates.                                                                                                                                                                              |
+| `Clients_Periods`        | Junction table: links clients to periods. Has `bexioInvoiceId`.                                                                                                                                                  |
+| `TopUps`                 | Budget/payment entries for a client-period.                                                                                                                                                                      |
+| `ManualWorkEntries`      | Manually logged billable hours.                                                                                                                                                                                  |
+| `PeerArticles`           | Articles pulled from peer We.Publish media APIs.                                                                                                                                                                 |
+| `Clients_directus_users` | Access control: which users can see which clients.                                                                                                                                                               |
 
 All collections follow Directus conventions: `status` (published/draft/archived), `sort`, `date_created`, `date_updated`, `user_created`, `user_updated`.
 

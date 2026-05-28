@@ -264,15 +264,15 @@ type Subscription {
   directus_versions_mutated(event: EventEnum): directus_versions_mutated
   directus_comments_mutated(event: EventEnum): directus_comments_mutated
   directus_sync_id_map_mutated(event: EventEnum): directus_sync_id_map_mutated
-  TopUps_mutated(event: EventEnum): TopUps_mutated
   Clients_Periods_mutated(event: EventEnum): Clients_Periods_mutated
   Periods_mutated(event: EventEnum): Periods_mutated
   Clients_directus_users_mutated(event: EventEnum): Clients_directus_users_mutated
-  ManualWorkEntries_mutated(event: EventEnum): ManualWorkEntries_mutated
-  PeerArticles_mutated(event: EventEnum): PeerArticles_mutated
   JiraWarnings_mutated(event: EventEnum): JiraWarnings_mutated
-  Clients_mutated(event: EventEnum): Clients_mutated
+  ManualWorkEntries_mutated(event: EventEnum): ManualWorkEntries_mutated
   NotificationThresholds_mutated(event: EventEnum): NotificationThresholds_mutated
+  PeerArticles_mutated(event: EventEnum): PeerArticles_mutated
+  TopUps_mutated(event: EventEnum): TopUps_mutated
+  Clients_mutated(event: EventEnum): Clients_mutated
 }
 
 """The `Boolean` scalar type represents `true` or `false`."""
@@ -344,6 +344,12 @@ type auth_tokens {
 }
 
 type Clients {
+  apiUrl: String
+
+  """
+  Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
+  """
+  bexio_contact_id: Int
   clockodo_customer_id: String
   date_created: Date
   date_created_func: datetime_functions
@@ -354,19 +360,11 @@ type Clients {
   """The project shortcode in Jira. Eg. HAS or BA"""
   jira_short_code: String
   name: String!
-  sort: Int
-  status: String
-  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
-  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
 
   """
-  Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
+  Wenn aktiv, werden sämtliche Slack-Warnungen für diesen Kunden unterdrückt, bis der Schalter wieder deaktiviert wird.
   """
-  bexio_contact_id: Int
-  apiUrl: String
-
-  """Slack channel ID created during client onboarding"""
-  slack_channel_id: String
+  notifications_paused: Boolean!
 
   """
   Index of the last active onboarding step (0-based). Used to track progress for manual/email steps that have no service ID.
@@ -379,21 +377,28 @@ type Clients {
   onboarding_manual_checklist: JSON
   onboarding_manual_checklist_func: count_functions
 
-  """
-  Wenn aktiv, werden sämtliche Slack-Warnungen für diesen Kunden unterdrückt, bis der Schalter wieder deaktiviert wird.
-  """
-  notifications_paused: Boolean!
+  """Slack channel ID created during client onboarding"""
+  slack_channel_id: String
+  sort: Int
+  status: String
+  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
 
   """
   Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.
   """
   weekly_report_paused: Boolean!
+
+  """
+  Abrechnungsmodell des Kunden. Prepaid = günstigerer Stundensatz, im Voraus bezahlte Top-Ups. Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach Aufwand.
+  """
+  billing_mode: String
   allowedUsers(filter: Clients_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_directus_users]
   allowedUsers_func: count_functions
-  periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods]
-  periods_func: count_functions
   articles(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [PeerArticles]
   articles_func: count_functions
+  periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods]
+  periods_func: count_functions
   jiraWarnings(filter: JiraWarnings_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [JiraWarnings]
 }
 
@@ -1734,25 +1739,6 @@ type JiraWarnings {
   date_created_func: datetime_functions
   date_updated: Date
   date_updated_func: datetime_functions
-  id: ID!
-
-  """Jira-Issue-Key, z.B. ABC-123."""
-  jira_issue_key: String!
-  silenced_at: Date
-  silenced_at_func: datetime_functions
-  silenced_by(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
-
-  """
-  Wenn aktiv, wird dieses Ticket dauerhaft nicht mehr per Slack gemeldet.
-  """
-  silenced_permanently: Boolean!
-  sort: Int
-  status: String
-  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
-  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
-
-  """Stundenwert der zuletzt benachrichtigten Schwelle."""
-  last_notified_hours: Float
 
   """
   Wenn aktiv, hat der Kunde einen Arbeitsstopp für dieses Ticket angefordert. Das Team wird via Slack informiert und soll die Arbeit daran einstellen, bis der Stopp aufgehoben wird.
@@ -1768,11 +1754,30 @@ type JiraWarnings {
   halt_resolved_at: Date
   halt_resolved_at_func: datetime_functions
   halt_resolved_by(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  id: ID!
+
+  """Jira-Issue-Key, z.B. ABC-123."""
+  jira_issue_key: String!
+
+  """Stundenwert der zuletzt benachrichtigten Schwelle."""
+  last_notified_hours: Float
 
   """
   Stundenwert, ab dem die nächste Slack-Meldung ausgelöst wird, sofern das Ticket nicht stummgeschaltet ist.
   """
   next_threshold_hours: Float
+  silenced_at: Date
+  silenced_at_func: datetime_functions
+  silenced_by(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+
+  """
+  Wenn aktiv, wird dieses Ticket dauerhaft nicht mehr per Slack gemeldet.
+  """
+  silenced_permanently: Boolean!
+  sort: Int
+  status: String
+  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
 }
 
 type JiraWarnings_mutated {
@@ -1811,15 +1816,11 @@ type NotificationThresholds {
   date_updated: Date
   date_updated_func: datetime_functions
   id: ID!
-  sort: Int
-  status: String
-  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
-  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
 
   """
-  Intervall zwischen wiederkehrenden Meldungen in Stunden (z.B. 4 = weitere Meldung alle 4 h über der initialen Schwelle). Muss grösser als 0 sein.
+  Toleranz gegenüber der Jira-Schätzung in Stunden (vorzeichenbehaftet). Beispiel: +2 = erste Meldung 2 h nach Erreichen der Schätzung. -1 = erste Meldung 1 h vor Erreichen der Schätzung.
   """
-  recurring_threshold_hours: Float
+  initial_threshold_offset_hours: Float!
 
   """
   Schätzwert-Untergrenze (inklusiv). Ein Ticket nutzt diesen Eintrag, wenn seine Schätzung mindestens diesem Wert entspricht und kein Eintrag mit grösserem Wert zutrifft.
@@ -1827,9 +1828,13 @@ type NotificationThresholds {
   min_hours_inclusive: Float!
 
   """
-  Toleranz gegenüber der Jira-Schätzung in Stunden (vorzeichenbehaftet). Beispiel: +2 = erste Meldung 2 h nach Erreichen der Schätzung. -1 = erste Meldung 1 h vor Erreichen der Schätzung.
+  Intervall zwischen wiederkehrenden Meldungen in Stunden (z.B. 4 = weitere Meldung alle 4 h über der initialen Schwelle). Muss grösser als 0 sein.
   """
-  initial_threshold_offset_hours: Float!
+  recurring_threshold_hours: Float
+  sort: Int
+  status: String
+  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
 }
 
 type NotificationThresholds_mutated {
@@ -1839,24 +1844,24 @@ type NotificationThresholds_mutated {
 }
 
 type PeerArticles {
-  id: ID!
-  status: String
-  sort: Int
-  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  client(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients
   date_created: Date
   date_created_func: datetime_functions
-  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   date_updated: Date
   date_updated_func: datetime_functions
+  id: ID!
+  sort: Int
   source_id: String!
+  source_imageUrl: String
+  source_lead: String
   source_publishedAt: Date!
   source_publishedAt_func: datetime_functions
-  source_url: String
-  source_title: String
   source_slug: String!
-  source_imageUrl: String
-  client(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients
-  source_lead: String
+  source_title: String
+  source_url: String
+  status: String
+  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
 }
 
 type PeerArticles_mutated {
@@ -1923,6 +1928,9 @@ type server_info_query_limit {
 
 type TopUps {
   amount: Float
+
+  """Connected invoice from Bexio"""
+  bexioInvoiceId: Int
   clientPeriod(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients_Periods
   date_created: Date
   date_created_func: datetime_functions
@@ -1936,9 +1944,6 @@ type TopUps {
   user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   wepPercentage: Int
-
-  """Connected invoice from Bexio"""
-  bexioInvoiceId: Int
 }
 
 type TopUps_mutated {
@@ -2110,6 +2115,8 @@ input Clients_directus_users_quantifier_filter {
 }
 
 input Clients_filter {
+  apiUrl: string_filter_operators
+  bexio_contact_id: number_filter_operators
   clockodo_customer_id: string_filter_operators
   date_created: date_filter_operators
   date_created_func: datetime_function_filter_operators
@@ -2118,24 +2125,23 @@ input Clients_filter {
   id: id_filter_operators
   jira_short_code: string_filter_operators
   name: string_filter_operators
+  notifications_paused: boolean_filter_operators
+  onboarding_current_step: number_filter_operators
+  onboarding_manual_checklist: string_filter_operators
+  onboarding_manual_checklist_func: count_function_filter_operators
+  slack_channel_id: string_filter_operators
   sort: number_filter_operators
   status: string_filter_operators
   user_created: directus_users_filter
   user_updated: directus_users_filter
-  bexio_contact_id: number_filter_operators
-  apiUrl: string_filter_operators
-  slack_channel_id: string_filter_operators
-  onboarding_current_step: number_filter_operators
-  onboarding_manual_checklist: string_filter_operators
-  onboarding_manual_checklist_func: count_function_filter_operators
-  notifications_paused: boolean_filter_operators
   weekly_report_paused: boolean_filter_operators
+  billing_mode: string_filter_operators
   allowedUsers: Clients_directus_users_quantifier_filter
   allowedUsers_func: count_function_filter_operators
-  periods: Clients_Periods_quantifier_filter
-  periods_func: count_function_filter_operators
   articles: PeerArticles_quantifier_filter
   articles_func: count_function_filter_operators
+  periods: Clients_Periods_quantifier_filter
+  periods_func: count_function_filter_operators
   _and: [Clients_filter]
   _or: [Clients_filter]
   jiraWarnings: JiraWarnings_quantifier_filter
@@ -2179,6 +2185,12 @@ input create_Clients_directus_users_input {
 }
 
 input create_Clients_input {
+  apiUrl: String
+
+  """
+  Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
+  """
+  bexio_contact_id: Int
   clockodo_customer_id: String
   date_created: Date
   date_updated: Date
@@ -2187,19 +2199,11 @@ input create_Clients_input {
   """The project shortcode in Jira. Eg. HAS or BA"""
   jira_short_code: String
   name: String!
-  sort: Int
-  status: String
-  user_created: create_directus_users_input
-  user_updated: create_directus_users_input
 
   """
-  Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
+  Wenn aktiv, werden sämtliche Slack-Warnungen für diesen Kunden unterdrückt, bis der Schalter wieder deaktiviert wird.
   """
-  bexio_contact_id: Int
-  apiUrl: String
-
-  """Slack channel ID created during client onboarding"""
-  slack_channel_id: String
+  notifications_paused: Boolean!
 
   """
   Index of the last active onboarding step (0-based). Used to track progress for manual/email steps that have no service ID.
@@ -2211,18 +2215,25 @@ input create_Clients_input {
   """
   onboarding_manual_checklist: JSON
 
-  """
-  Wenn aktiv, werden sämtliche Slack-Warnungen für diesen Kunden unterdrückt, bis der Schalter wieder deaktiviert wird.
-  """
-  notifications_paused: Boolean!
+  """Slack channel ID created during client onboarding"""
+  slack_channel_id: String
+  sort: Int
+  status: String
+  user_created: create_directus_users_input
+  user_updated: create_directus_users_input
 
   """
   Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.
   """
   weekly_report_paused: Boolean!
+
+  """
+  Abrechnungsmodell des Kunden. Prepaid = günstigerer Stundensatz, im Voraus bezahlte Top-Ups. Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach Aufwand.
+  """
+  billing_mode: String
   allowedUsers: [create_Clients_directus_users_input]
-  periods: [create_Clients_Periods_input]
   articles: [create_PeerArticles_input]
+  periods: [create_Clients_Periods_input]
   jiraWarnings: [create_JiraWarnings_input]
 }
 
@@ -2508,24 +2519,6 @@ input create_JiraWarnings_input {
   client: create_Clients_input
   date_created: Date
   date_updated: Date
-  id: ID
-
-  """Jira-Issue-Key, z.B. ABC-123."""
-  jira_issue_key: String!
-  silenced_at: Date
-  silenced_by: create_directus_users_input
-
-  """
-  Wenn aktiv, wird dieses Ticket dauerhaft nicht mehr per Slack gemeldet.
-  """
-  silenced_permanently: Boolean!
-  sort: Int
-  status: String
-  user_created: create_directus_users_input
-  user_updated: create_directus_users_input
-
-  """Stundenwert der zuletzt benachrichtigten Schwelle."""
-  last_notified_hours: Float
 
   """
   Wenn aktiv, hat der Kunde einen Arbeitsstopp für dieses Ticket angefordert. Das Team wird via Slack informiert und soll die Arbeit daran einstellen, bis der Stopp aufgehoben wird.
@@ -2539,11 +2532,29 @@ input create_JiraWarnings_input {
   """Zeitpunkt, zu dem der letzte Arbeitsstopp aufgehoben wurde."""
   halt_resolved_at: Date
   halt_resolved_by: create_directus_users_input
+  id: ID
+
+  """Jira-Issue-Key, z.B. ABC-123."""
+  jira_issue_key: String!
+
+  """Stundenwert der zuletzt benachrichtigten Schwelle."""
+  last_notified_hours: Float
 
   """
   Stundenwert, ab dem die nächste Slack-Meldung ausgelöst wird, sofern das Ticket nicht stummgeschaltet ist.
   """
   next_threshold_hours: Float
+  silenced_at: Date
+  silenced_by: create_directus_users_input
+
+  """
+  Wenn aktiv, wird dieses Ticket dauerhaft nicht mehr per Slack gemeldet.
+  """
+  silenced_permanently: Boolean!
+  sort: Int
+  status: String
+  user_created: create_directus_users_input
+  user_updated: create_directus_users_input
 }
 
 input create_ManualWorkEntries_input {
@@ -2562,21 +2573,21 @@ input create_ManualWorkEntries_input {
 }
 
 input create_PeerArticles_input {
-  id: ID
-  status: String
-  sort: Int
-  user_created: create_directus_users_input
-  date_created: Date
-  user_updated: create_directus_users_input
-  date_updated: Date
-  source_id: String!
-  source_publishedAt: Date!
-  source_url: String
-  source_title: String
-  source_slug: String!
-  source_imageUrl: String
   client: create_Clients_input
+  date_created: Date
+  date_updated: Date
+  id: ID
+  sort: Int
+  source_id: String!
+  source_imageUrl: String
   source_lead: String
+  source_publishedAt: Date!
+  source_slug: String!
+  source_title: String
+  source_url: String
+  status: String
+  user_created: create_directus_users_input
+  user_updated: create_directus_users_input
 }
 
 input create_Periods_input {
@@ -2594,6 +2605,9 @@ input create_Periods_input {
 
 input create_TopUps_input {
   amount: Float
+
+  """Connected invoice from Bexio"""
+  bexioInvoiceId: Int
   clientPeriod: create_Clients_Periods_input
   date_created: Date
   date_updated: Date
@@ -2605,9 +2619,6 @@ input create_TopUps_input {
   user_created: create_directus_users_input
   user_updated: create_directus_users_input
   wepPercentage: Int
-
-  """Connected invoice from Bexio"""
-  bexioInvoiceId: Int
 }
 
 input date_filter_operators {
@@ -3211,8 +3222,17 @@ input JiraWarnings_filter {
   date_created_func: datetime_function_filter_operators
   date_updated: date_filter_operators
   date_updated_func: datetime_function_filter_operators
+  halt_requested: boolean_filter_operators
+  halt_requested_at: date_filter_operators
+  halt_requested_at_func: datetime_function_filter_operators
+  halt_requested_by: directus_users_filter
+  halt_resolved_at: date_filter_operators
+  halt_resolved_at_func: datetime_function_filter_operators
+  halt_resolved_by: directus_users_filter
   id: id_filter_operators
   jira_issue_key: string_filter_operators
+  last_notified_hours: number_filter_operators
+  next_threshold_hours: number_filter_operators
   silenced_at: date_filter_operators
   silenced_at_func: datetime_function_filter_operators
   silenced_by: directus_users_filter
@@ -3221,15 +3241,6 @@ input JiraWarnings_filter {
   status: string_filter_operators
   user_created: directus_users_filter
   user_updated: directus_users_filter
-  last_notified_hours: number_filter_operators
-  halt_requested: boolean_filter_operators
-  halt_requested_at: date_filter_operators
-  halt_requested_at_func: datetime_function_filter_operators
-  halt_requested_by: directus_users_filter
-  halt_resolved_at: date_filter_operators
-  halt_resolved_at_func: datetime_function_filter_operators
-  halt_resolved_by: directus_users_filter
-  next_threshold_hours: number_filter_operators
   _and: [JiraWarnings_filter]
   _or: [JiraWarnings_filter]
 }
@@ -3241,8 +3252,17 @@ input JiraWarnings_quantifier_filter {
   date_created_func: datetime_function_filter_operators
   date_updated: date_filter_operators
   date_updated_func: datetime_function_filter_operators
+  halt_requested: boolean_filter_operators
+  halt_requested_at: date_filter_operators
+  halt_requested_at_func: datetime_function_filter_operators
+  halt_requested_by: directus_users_filter
+  halt_resolved_at: date_filter_operators
+  halt_resolved_at_func: datetime_function_filter_operators
+  halt_resolved_by: directus_users_filter
   id: id_filter_operators
   jira_issue_key: string_filter_operators
+  last_notified_hours: number_filter_operators
+  next_threshold_hours: number_filter_operators
   silenced_at: date_filter_operators
   silenced_at_func: datetime_function_filter_operators
   silenced_by: directus_users_filter
@@ -3251,15 +3271,6 @@ input JiraWarnings_quantifier_filter {
   status: string_filter_operators
   user_created: directus_users_filter
   user_updated: directus_users_filter
-  last_notified_hours: number_filter_operators
-  halt_requested: boolean_filter_operators
-  halt_requested_at: date_filter_operators
-  halt_requested_at_func: datetime_function_filter_operators
-  halt_requested_by: directus_users_filter
-  halt_resolved_at: date_filter_operators
-  halt_resolved_at_func: datetime_function_filter_operators
-  halt_resolved_by: directus_users_filter
-  next_threshold_hours: number_filter_operators
   _and: [JiraWarnings_filter]
   _or: [JiraWarnings_filter]
   _some: JiraWarnings_filter
@@ -3325,48 +3336,48 @@ input number_filter_operators {
 }
 
 input PeerArticles_filter {
-  id: id_filter_operators
-  status: string_filter_operators
-  sort: number_filter_operators
-  user_created: directus_users_filter
+  client: Clients_filter
   date_created: date_filter_operators
   date_created_func: datetime_function_filter_operators
-  user_updated: directus_users_filter
   date_updated: date_filter_operators
   date_updated_func: datetime_function_filter_operators
+  id: id_filter_operators
+  sort: number_filter_operators
   source_id: string_filter_operators
+  source_imageUrl: string_filter_operators
+  source_lead: string_filter_operators
   source_publishedAt: date_filter_operators
   source_publishedAt_func: datetime_function_filter_operators
-  source_url: string_filter_operators
-  source_title: string_filter_operators
   source_slug: string_filter_operators
-  source_imageUrl: string_filter_operators
-  client: Clients_filter
-  source_lead: string_filter_operators
+  source_title: string_filter_operators
+  source_url: string_filter_operators
+  status: string_filter_operators
+  user_created: directus_users_filter
+  user_updated: directus_users_filter
   _and: [PeerArticles_filter]
   _or: [PeerArticles_filter]
 }
 
 """"""
 input PeerArticles_quantifier_filter {
-  id: id_filter_operators
-  status: string_filter_operators
-  sort: number_filter_operators
-  user_created: directus_users_filter
+  client: Clients_filter
   date_created: date_filter_operators
   date_created_func: datetime_function_filter_operators
-  user_updated: directus_users_filter
   date_updated: date_filter_operators
   date_updated_func: datetime_function_filter_operators
+  id: id_filter_operators
+  sort: number_filter_operators
   source_id: string_filter_operators
+  source_imageUrl: string_filter_operators
+  source_lead: string_filter_operators
   source_publishedAt: date_filter_operators
   source_publishedAt_func: datetime_function_filter_operators
-  source_url: string_filter_operators
-  source_title: string_filter_operators
   source_slug: string_filter_operators
-  source_imageUrl: string_filter_operators
-  client: Clients_filter
-  source_lead: string_filter_operators
+  source_title: string_filter_operators
+  source_url: string_filter_operators
+  status: string_filter_operators
+  user_created: directus_users_filter
+  user_updated: directus_users_filter
   _and: [PeerArticles_filter]
   _or: [PeerArticles_filter]
   _some: PeerArticles_filter
@@ -3416,6 +3427,7 @@ input string_filter_operators {
 
 input TopUps_filter {
   amount: number_filter_operators
+  bexioInvoiceId: number_filter_operators
   clientPeriod: Clients_Periods_filter
   date_created: date_filter_operators
   date_created_func: datetime_function_filter_operators
@@ -3429,7 +3441,6 @@ input TopUps_filter {
   user_created: directus_users_filter
   user_updated: directus_users_filter
   wepPercentage: number_filter_operators
-  bexioInvoiceId: number_filter_operators
   _and: [TopUps_filter]
   _or: [TopUps_filter]
 }
@@ -3437,6 +3448,7 @@ input TopUps_filter {
 """"""
 input TopUps_quantifier_filter {
   amount: number_filter_operators
+  bexioInvoiceId: number_filter_operators
   clientPeriod: Clients_Periods_filter
   date_created: date_filter_operators
   date_created_func: datetime_function_filter_operators
@@ -3450,7 +3462,6 @@ input TopUps_quantifier_filter {
   user_created: directus_users_filter
   user_updated: directus_users_filter
   wepPercentage: number_filter_operators
-  bexioInvoiceId: number_filter_operators
   _and: [TopUps_filter]
   _or: [TopUps_filter]
   _some: TopUps_filter
@@ -3464,6 +3475,12 @@ input update_Clients_directus_users_input {
 }
 
 input update_Clients_input {
+  apiUrl: String
+
+  """
+  Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
+  """
+  bexio_contact_id: Int
   clockodo_customer_id: String
   date_created: Date
   date_updated: Date
@@ -3472,19 +3489,11 @@ input update_Clients_input {
   """The project shortcode in Jira. Eg. HAS or BA"""
   jira_short_code: String
   name: String
-  sort: Int
-  status: String
-  user_created: update_directus_users_input
-  user_updated: update_directus_users_input
 
   """
-  Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
+  Wenn aktiv, werden sämtliche Slack-Warnungen für diesen Kunden unterdrückt, bis der Schalter wieder deaktiviert wird.
   """
-  bexio_contact_id: Int
-  apiUrl: String
-
-  """Slack channel ID created during client onboarding"""
-  slack_channel_id: String
+  notifications_paused: Boolean
 
   """
   Index of the last active onboarding step (0-based). Used to track progress for manual/email steps that have no service ID.
@@ -3496,18 +3505,25 @@ input update_Clients_input {
   """
   onboarding_manual_checklist: JSON
 
-  """
-  Wenn aktiv, werden sämtliche Slack-Warnungen für diesen Kunden unterdrückt, bis der Schalter wieder deaktiviert wird.
-  """
-  notifications_paused: Boolean
+  """Slack channel ID created during client onboarding"""
+  slack_channel_id: String
+  sort: Int
+  status: String
+  user_created: update_directus_users_input
+  user_updated: update_directus_users_input
 
   """
   Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.
   """
   weekly_report_paused: Boolean
+
+  """
+  Abrechnungsmodell des Kunden. Prepaid = günstigerer Stundensatz, im Voraus bezahlte Top-Ups. Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach Aufwand.
+  """
+  billing_mode: String
   allowedUsers: [update_Clients_directus_users_input]
-  periods: [update_Clients_Periods_input]
   articles: [update_PeerArticles_input]
+  periods: [update_Clients_Periods_input]
   jiraWarnings: [update_JiraWarnings_input]
 }
 
@@ -3867,24 +3883,6 @@ input update_JiraWarnings_input {
   client: update_Clients_input
   date_created: Date
   date_updated: Date
-  id: ID
-
-  """Jira-Issue-Key, z.B. ABC-123."""
-  jira_issue_key: String
-  silenced_at: Date
-  silenced_by: update_directus_users_input
-
-  """
-  Wenn aktiv, wird dieses Ticket dauerhaft nicht mehr per Slack gemeldet.
-  """
-  silenced_permanently: Boolean
-  sort: Int
-  status: String
-  user_created: update_directus_users_input
-  user_updated: update_directus_users_input
-
-  """Stundenwert der zuletzt benachrichtigten Schwelle."""
-  last_notified_hours: Float
 
   """
   Wenn aktiv, hat der Kunde einen Arbeitsstopp für dieses Ticket angefordert. Das Team wird via Slack informiert und soll die Arbeit daran einstellen, bis der Stopp aufgehoben wird.
@@ -3898,11 +3896,29 @@ input update_JiraWarnings_input {
   """Zeitpunkt, zu dem der letzte Arbeitsstopp aufgehoben wurde."""
   halt_resolved_at: Date
   halt_resolved_by: update_directus_users_input
+  id: ID
+
+  """Jira-Issue-Key, z.B. ABC-123."""
+  jira_issue_key: String
+
+  """Stundenwert der zuletzt benachrichtigten Schwelle."""
+  last_notified_hours: Float
 
   """
   Stundenwert, ab dem die nächste Slack-Meldung ausgelöst wird, sofern das Ticket nicht stummgeschaltet ist.
   """
   next_threshold_hours: Float
+  silenced_at: Date
+  silenced_by: update_directus_users_input
+
+  """
+  Wenn aktiv, wird dieses Ticket dauerhaft nicht mehr per Slack gemeldet.
+  """
+  silenced_permanently: Boolean
+  sort: Int
+  status: String
+  user_created: update_directus_users_input
+  user_updated: update_directus_users_input
 }
 
 input update_ManualWorkEntries_input {
@@ -3921,21 +3937,21 @@ input update_ManualWorkEntries_input {
 }
 
 input update_PeerArticles_input {
-  id: ID
-  status: String
-  sort: Int
-  user_created: update_directus_users_input
-  date_created: Date
-  user_updated: update_directus_users_input
-  date_updated: Date
-  source_id: String
-  source_publishedAt: Date
-  source_url: String
-  source_title: String
-  source_slug: String
-  source_imageUrl: String
   client: update_Clients_input
+  date_created: Date
+  date_updated: Date
+  id: ID
+  sort: Int
+  source_id: String
+  source_imageUrl: String
   source_lead: String
+  source_publishedAt: Date
+  source_slug: String
+  source_title: String
+  source_url: String
+  status: String
+  user_created: update_directus_users_input
+  user_updated: update_directus_users_input
 }
 
 input update_Periods_input {
@@ -3953,6 +3969,9 @@ input update_Periods_input {
 
 input update_TopUps_input {
   amount: Float
+
+  """Connected invoice from Bexio"""
+  bexioInvoiceId: Int
   clientPeriod: update_Clients_Periods_input
   date_created: Date
   date_updated: Date
@@ -3964,9 +3983,6 @@ input update_TopUps_input {
   user_created: update_directus_users_input
   user_updated: update_directus_users_input
   wepPercentage: Int
-
-  """Connected invoice from Bexio"""
-  bexioInvoiceId: Int
 }
 
 input write_directus_collections_input {
