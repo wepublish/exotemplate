@@ -1,6 +1,7 @@
 import type { DirectusUser } from '@directus/sdk'
 
 export interface Schema {
+  BillingSnapshots: BillingSnapshot[]
   CaptureIgnoredUsers: CaptureIgnoredUser[]
   Clients: Client[]
   Clients_Periods: ClientPeriod[]
@@ -14,6 +15,22 @@ export interface Schema {
   TopUps: TopUp[]
   directus_users: CustomDirectusUser
   directus_sync_id_map: DirectusSyncIdMap[]
+}
+
+export interface BillingSnapshot {
+  id: string
+  clientPeriodId: number | ClientPeriod
+  totalUsedHours: number
+  totalTopUps: number
+  totalUsedPercentage: number
+  totalAvailableHours: number
+  totalManualWorkHours: number
+  billableHours: number
+  computedAt: string | null
+  lastError: string | null
+  lastErrorAt: string | null
+  date_created: string | null
+  date_updated: string | null
 }
 
 export interface Settings {

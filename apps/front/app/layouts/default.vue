@@ -32,14 +32,19 @@
     if (userStore.amIAdministrator()) {
       groups.push([
         {
-          label: 'Onboarding',
-          icon: 'material-symbols:person-add-rounded',
-          to: '/onboarding'
+          label: 'Projektübersicht',
+          icon: 'material-symbols:grid-view-rounded',
+          to: '/overview'
         },
         {
           label: 'Übersicht Zeiterfassung',
           icon: 'material-symbols:monitoring',
           to: '/time-tracking'
+        },
+        {
+          label: 'Onboarding',
+          icon: 'material-symbols:person-add-rounded',
+          to: '/onboarding'
         }
       ])
     }

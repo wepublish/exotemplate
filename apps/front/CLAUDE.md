@@ -32,6 +32,7 @@ app/
 ├── pages/               # File-based routes (Nuxt auto-routing)
 │   ├── index.vue
 │   ├── auth/login.vue
+│   ├── overview/index.vue       # admin-only: Projektübersicht (tile grid; budget bars per active client period)
 │   ├── time-tracking/index.vue  # admin-only: Übersicht Zeiterfassung (per-user capture status + ignore toggle)
 │   └── [clientPeriodId]/
 │       ├── create-bexio-invoice.vue
@@ -95,12 +96,13 @@ The frontend talks to **one-directus** (Directus instance, default port 8055):
   - `GET /aggregatedHours?clientPeriodId=X` — billing summary with Clockodo hours and Jira estimates.
   - `GET /networkContribution?clientPeriodId=X` — network-wide work (we.share buckets + other media organisations) delivered during the period, surfaced in the dashboard's "Netzwerk-Beitrag" card via [`components/dashboard/NetworkContribution.vue`](app/components/dashboard/NetworkContribution.vue).
   - `GET /time-tracking/missing-hours?from=…&to=…` — admin-only; per-employee day-by-day capture status, plus an `ignored` flag per user. Consumed by [`composables/useTimeTracking.ts`](app/composables/useTimeTracking.ts) and rendered by [`components/time-tracking/MissingHoursList.vue`](app/components/time-tracking/MissingHoursList.vue) on the [`/time-tracking`](app/pages/time-tracking/index.vue) page (Übersicht Zeiterfassung). Ignored users are toggled via standard Directus CRUD on the `CaptureIgnoredUsers` collection (SDK `createItem`/`deleteItem`); ignored rows are dimmed and pinned to the bottom of the list.
+  - `GET /clientsOverview` — admin-only; reads pre-computed billing sums from the `BillingSnapshots` table for every currently-active client period and returns them in one shot. Consumed by [`composables/useClientsOverview.ts`](app/composables/useClientsOverview.ts) and rendered by [`components/overview/ClientTile.vue`](app/components/overview/ClientTile.vue) on the [`/overview`](app/pages/overview/index.vue) page (Projektübersicht). The tiles reuse `useWeeklyReportProgress.compute()` for the two progress bars, so the colours/headlines match `/[clientPeriodId]/available-hours` and the weekly Slack report. Per-tile force-refresh uses `POST /clientsOverview/refresh?clientPeriodId=…`.
   - `POST /invoice-with-topup` — create a Bexio invoice.
 - **Bexio SDK** (`bexio`) is used client-side for invoice management on the `/[clientPeriodId]/create-bexio-invoice` page.
 
 ### Admin nav entries
 
-The sidebar in [`layouts/default.vue`](app/layouts/default.vue) renders admin-only entries by checking `userStore.amIAdministrator()` inline (no middleware). Today there are two: **Onboarding** (`/onboarding`) and **Übersicht Zeiterfassung** (`/time-tracking`). Pages themselves repeat the check and render an access-denied card for non-admins — keeps direct URL hits from bypassing the hidden nav.
+The sidebar in [`layouts/default.vue`](app/layouts/default.vue) renders admin-only entries by checking `userStore.amIAdministrator()` inline (no middleware). Today there are three: **Projektübersicht** (`/overview`), **Onboarding** (`/onboarding`) and **Übersicht Zeiterfassung** (`/time-tracking`). Pages themselves repeat the check and render an access-denied card for non-admins — keeps direct URL hits from bypassing the hidden nav.
 
 ### Environment Variables
 
