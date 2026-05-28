@@ -7,15 +7,38 @@ export interface SlackPostResult {
   ts?: string
 }
 
-/**
- * Post a pre-composed message to a Slack channel using the chat.postMessage
- * API. Throws on network / non-2xx errors; returns the Slack response
- * otherwise so callers can log partial failures per client.
- *
- * Pass a Slack user id as `channel` to send a direct message — the API
- * resolves it to the bot ↔ user IM channel automatically.
- */
-export async function postSlackMessage(args: {
+interface SlackJoinResult {
+  ok: boolean
+  error?: string
+  channel?: { id: string }
+}
+
+// Public-channel IDs start with `C`. Private channels (`G`) cannot be joined
+// via `conversations.join`, and user IDs (`U`/`W`) are DM targets where
+// `not_in_channel` is not the failure mode. Guarding by prefix keeps the
+// auto-join scoped to the only case it actually helps.
+function isPublicChannelId(channel: string): boolean {
+  return /^C[A-Z0-9]+$/.test(channel)
+}
+
+async function joinSlackChannel(
+  token: string,
+  channel: string
+): Promise<SlackJoinResult> {
+  const response = await axios.post<SlackJoinResult>(
+    'https://slack.com/api/conversations.join',
+    { channel },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json; charset=utf-8'
+      }
+    }
+  )
+  return response.data
+}
+
+async function postChatMessage(args: {
   token: string
   channel: string
   message: ComposedSlackMessage
@@ -35,6 +58,40 @@ export async function postSlackMessage(args: {
     }
   )
   return response.data
+}
+
+/**
+ * Post a pre-composed message to a Slack channel using the chat.postMessage
+ * API. Throws on network / non-2xx errors; returns the Slack response
+ * otherwise so callers can log partial failures per client.
+ *
+ * Pass a Slack user id as `channel` to send a direct message — the API
+ * resolves it to the bot ↔ user IM channel automatically.
+ *
+ * If Slack rejects with `not_in_channel` and the target is a public channel
+ * (id starts with `C`), the bot auto-joins via `conversations.join` and
+ * retries once. Requires the `channels:join` OAuth scope on the bot token.
+ */
+export async function postSlackMessage(args: {
+  token: string
+  channel: string
+  message: ComposedSlackMessage
+}): Promise<SlackPostResult> {
+  const first = await postChatMessage(args)
+  if (first.ok || first.error !== 'not_in_channel') return first
+  if (!isPublicChannelId(args.channel)) return first
+
+  const join = await joinSlackChannel(args.token, args.channel)
+  if (!join.ok) {
+    console.warn(
+      `[slack] auto-join failed for channel ${args.channel}: ${
+        join.error ?? 'unknown'
+      } — original chat.postMessage error: not_in_channel`
+    )
+    return first
+  }
+
+  return postChatMessage(args)
 }
 
 interface SlackUserLookupResult {
