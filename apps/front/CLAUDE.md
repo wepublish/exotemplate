@@ -32,6 +32,7 @@ app/
 ├── pages/               # File-based routes (Nuxt auto-routing)
 │   ├── index.vue
 │   ├── auth/login.vue
+│   ├── time-tracking/index.vue  # admin-only: Übersicht Zeiterfassung (per-user capture status + ignore toggle)
 │   └── [clientPeriodId]/
 │       ├── create-bexio-invoice.vue
 │       ├── top-ups.vue          # detail page: Zahlungen / Top-Ups
@@ -93,8 +94,13 @@ The frontend talks to **one-directus** (Directus instance, default port 8055):
 - **Custom endpoints** exposed by Directus extensions:
   - `GET /aggregatedHours?clientPeriodId=X` — billing summary with Clockodo hours and Jira estimates.
   - `GET /networkContribution?clientPeriodId=X` — network-wide work (we.share buckets + other media organisations) delivered during the period, surfaced in the dashboard's "Netzwerk-Beitrag" card via [`components/dashboard/NetworkContribution.vue`](app/components/dashboard/NetworkContribution.vue).
+  - `GET /time-tracking/missing-hours?from=…&to=…` — admin-only; per-employee day-by-day capture status, plus an `ignored` flag per user. Consumed by [`composables/useTimeTracking.ts`](app/composables/useTimeTracking.ts) and rendered by [`components/time-tracking/MissingHoursList.vue`](app/components/time-tracking/MissingHoursList.vue) on the [`/time-tracking`](app/pages/time-tracking/index.vue) page (Übersicht Zeiterfassung). Ignored users are toggled via standard Directus CRUD on the `CaptureIgnoredUsers` collection (SDK `createItem`/`deleteItem`); ignored rows are dimmed and pinned to the bottom of the list.
   - `POST /invoice-with-topup` — create a Bexio invoice.
 - **Bexio SDK** (`bexio`) is used client-side for invoice management on the `/[clientPeriodId]/create-bexio-invoice` page.
+
+### Admin nav entries
+
+The sidebar in [`layouts/default.vue`](app/layouts/default.vue) renders admin-only entries by checking `userStore.amIAdministrator()` inline (no middleware). Today there are two: **Onboarding** (`/onboarding`) and **Übersicht Zeiterfassung** (`/time-tracking`). Pages themselves repeat the check and render an access-denied card for non-admins — keeps direct URL hits from bypassing the hidden nav.
 
 ### Environment Variables
 
