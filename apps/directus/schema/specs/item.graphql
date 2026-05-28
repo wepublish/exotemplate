@@ -39,6 +39,12 @@ type Query {
   Clients_by_id(id: ID!, version: String): Clients
   Clients_aggregated(groupBy: [String], filter: Clients_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [Clients_aggregated!]!
   Clients_by_version(version: String!, id: ID!): version_Clients
+  CaptureIgnoredUsers(filter: CaptureIgnoredUsers_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [CaptureIgnoredUsers!]!
+  CaptureIgnoredUsers_by_id(id: ID!, version: String): CaptureIgnoredUsers
+  CaptureIgnoredUsers_aggregated(groupBy: [String], filter: CaptureIgnoredUsers_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [CaptureIgnoredUsers_aggregated!]!
+  CaptureIgnoredUsers_by_version(version: String!, id: ID!): version_CaptureIgnoredUsers
+  Settings(version: String): Settings
+  Settings_by_version(version: String!): version_Settings
 }
 
 type Mutation {
@@ -62,6 +68,8 @@ type Mutation {
   create_TopUps_item(data: create_TopUps_input!): TopUps
   create_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Clients_input!]): [Clients!]!
   create_Clients_item(data: create_Clients_input!): Clients
+  create_CaptureIgnoredUsers_items(filter: CaptureIgnoredUsers_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_CaptureIgnoredUsers_input!]): [CaptureIgnoredUsers!]!
+  create_CaptureIgnoredUsers_item(data: create_CaptureIgnoredUsers_input!): CaptureIgnoredUsers
   update_directus_sync_id_map_items(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_sync_id_map_input!): [directus_sync_id_map!]!
   update_directus_sync_id_map_batch(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_sync_id_map_input!]): [directus_sync_id_map!]!
   update_directus_sync_id_map_item(id: ID!, data: update_directus_sync_id_map_input!): directus_sync_id_map
@@ -92,6 +100,10 @@ type Mutation {
   update_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Clients_input!): [Clients!]!
   update_Clients_batch(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Clients_input!]): [Clients!]!
   update_Clients_item(id: ID!, data: update_Clients_input!): Clients
+  update_CaptureIgnoredUsers_items(filter: CaptureIgnoredUsers_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_CaptureIgnoredUsers_input!): [CaptureIgnoredUsers!]!
+  update_CaptureIgnoredUsers_batch(filter: CaptureIgnoredUsers_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_CaptureIgnoredUsers_input!]): [CaptureIgnoredUsers!]!
+  update_CaptureIgnoredUsers_item(id: ID!, data: update_CaptureIgnoredUsers_input!): CaptureIgnoredUsers
+  update_Settings(data: update_Settings_input!): Settings
   delete_directus_sync_id_map_items(ids: [ID]!): delete_many
   delete_directus_sync_id_map_item(id: ID!): delete_one
   delete_Clients_Periods_items(ids: [ID]!): delete_many
@@ -112,6 +124,8 @@ type Mutation {
   delete_TopUps_item(id: ID!): delete_one
   delete_Clients_items(ids: [ID]!): delete_many
   delete_Clients_item(id: ID!): delete_one
+  delete_CaptureIgnoredUsers_items(ids: [ID]!): delete_many
+  delete_CaptureIgnoredUsers_item(id: ID!): delete_one
 }
 
 type Subscription {
@@ -146,6 +160,8 @@ type Subscription {
   PeerArticles_mutated(event: EventEnum): PeerArticles_mutated
   TopUps_mutated(event: EventEnum): TopUps_mutated
   Clients_mutated(event: EventEnum): Clients_mutated
+  CaptureIgnoredUsers_mutated(event: EventEnum): CaptureIgnoredUsers_mutated
+  Settings_mutated(event: EventEnum): Settings_mutated
 }
 
 """The `Boolean` scalar type represents `true` or `false`."""
@@ -192,6 +208,65 @@ enum EventEnum {
   create
   update
   delete
+}
+
+type CaptureIgnoredUsers {
+  date_created: Date
+  date_created_func: datetime_functions
+  id: ID!
+
+  """
+  Optionaler Grund, warum diese Person ignoriert wird (z.B. "Externer Auftrag", "Geschäftsleitung erfasst separat").
+  """
+  reason: String
+  user_created: ID
+
+  """
+  Clockodo-Benutzer-ID. Diese Person wird in der Übersicht Zeiterfassung ignoriert.
+  """
+  users_id: Int!
+}
+
+type CaptureIgnoredUsers_aggregated {
+  group: JSON
+  countAll: Int
+  count: CaptureIgnoredUsers_aggregated_count
+  countDistinct: CaptureIgnoredUsers_aggregated_count
+  avg: CaptureIgnoredUsers_aggregated_fields
+  sum: CaptureIgnoredUsers_aggregated_fields
+  avgDistinct: CaptureIgnoredUsers_aggregated_fields
+  sumDistinct: CaptureIgnoredUsers_aggregated_fields
+  min: CaptureIgnoredUsers_aggregated_fields
+  max: CaptureIgnoredUsers_aggregated_fields
+}
+
+type CaptureIgnoredUsers_aggregated_count {
+  date_created: Int
+  id: Int
+
+  """
+  Optionaler Grund, warum diese Person ignoriert wird (z.B. "Externer Auftrag", "Geschäftsleitung erfasst separat").
+  """
+  reason: Int
+  user_created: Int
+
+  """
+  Clockodo-Benutzer-ID. Diese Person wird in der Übersicht Zeiterfassung ignoriert.
+  """
+  users_id: Int
+}
+
+type CaptureIgnoredUsers_aggregated_fields {
+  """
+  Clockodo-Benutzer-ID. Diese Person wird in der Übersicht Zeiterfassung ignoriert.
+  """
+  users_id: Float
+}
+
+type CaptureIgnoredUsers_mutated {
+  key: ID!
+  event: EventEnum
+  data: CaptureIgnoredUsers
 }
 
 type Clients {
@@ -1412,6 +1487,21 @@ type Periods_mutated {
   data: Periods
 }
 
+type Settings {
+  id: ID!
+
+  """
+  Slack-Channel-ID für die tägliche Stunden-Erinnerung (z.B. C0AB12CD3EF). Leer lassen, um die Erinnerung zu deaktivieren.
+  """
+  slack_time_tracking_channel_id: String
+}
+
+type Settings_mutated {
+  key: ID!
+  event: EventEnum
+  data: Settings
+}
+
 type TopUps {
   amount: Float
 
@@ -1478,6 +1568,23 @@ type TopUps_mutated {
   key: ID!
   event: EventEnum
   data: TopUps
+}
+
+""""""
+type version_CaptureIgnoredUsers {
+  date_created: Date
+  id: ID
+
+  """
+  Optionaler Grund, warum diese Person ignoriert wird (z.B. "Externer Auftrag", "Geschäftsleitung erfasst separat").
+  """
+  reason: String
+  user_created: ID
+
+  """
+  Clockodo-Benutzer-ID. Diese Person wird in der Übersicht Zeiterfassung ignoriert.
+  """
+  users_id: Int
 }
 
 """"""
@@ -1678,6 +1785,16 @@ type version_Periods {
 }
 
 """"""
+type version_Settings {
+  id: ID
+
+  """
+  Slack-Channel-ID für die tägliche Stunden-Erinnerung (z.B. C0AB12CD3EF). Leer lassen, um die Erinnerung zu deaktivieren.
+  """
+  slack_time_tracking_channel_id: String
+}
+
+""""""
 type version_TopUps {
   amount: Float
 
@@ -1716,6 +1833,17 @@ input boolean_filter_operators {
   _neq: Boolean
   _null: Boolean
   _nnull: Boolean
+}
+
+input CaptureIgnoredUsers_filter {
+  date_created: date_filter_operators
+  date_created_func: datetime_function_filter_operators
+  id: id_filter_operators
+  reason: string_filter_operators
+  user_created: id_filter_operators
+  users_id: number_filter_operators
+  _and: [CaptureIgnoredUsers_filter]
+  _or: [CaptureIgnoredUsers_filter]
 }
 
 input Clients_directus_users_filter {
@@ -1799,6 +1927,22 @@ input Clients_Periods_quantifier_filter {
 
 input count_function_filter_operators {
   count: number_filter_operators
+}
+
+input create_CaptureIgnoredUsers_input {
+  date_created: Date
+  id: ID
+
+  """
+  Optionaler Grund, warum diese Person ignoriert wird (z.B. "Externer Auftrag", "Geschäftsleitung erfasst separat").
+  """
+  reason: String
+  user_created: ID
+
+  """
+  Clockodo-Benutzer-ID. Diese Person wird in der Übersicht Zeiterfassung ignoriert.
+  """
+  users_id: Int!
 }
 
 input create_Clients_directus_users_input {
@@ -2898,6 +3042,22 @@ input TopUps_quantifier_filter {
   _none: TopUps_filter
 }
 
+input update_CaptureIgnoredUsers_input {
+  date_created: Date
+  id: ID
+
+  """
+  Optionaler Grund, warum diese Person ignoriert wird (z.B. "Externer Auftrag", "Geschäftsleitung erfasst separat").
+  """
+  reason: String
+  user_created: ID
+
+  """
+  Clockodo-Benutzer-ID. Diese Person wird in der Übersicht Zeiterfassung ignoriert.
+  """
+  users_id: Int
+}
+
 input update_Clients_directus_users_input {
   Clients_id: update_Clients_input
   directus_users_id: update_directus_users_input
@@ -3197,6 +3357,15 @@ input update_Periods_input {
   to: Date
   user_created: update_directus_users_input
   user_updated: update_directus_users_input
+}
+
+input update_Settings_input {
+  id: ID
+
+  """
+  Slack-Channel-ID für die tägliche Stunden-Erinnerung (z.B. C0AB12CD3EF). Leer lassen, um die Erinnerung zu deaktivieren.
+  """
+  slack_time_tracking_channel_id: String
 }
 
 input update_TopUps_input {

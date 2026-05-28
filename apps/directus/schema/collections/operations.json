@@ -1,5 +1,29 @@
 [
   {
+    "name": "Daily Capture Reminder",
+    "key": "daily_capture_reminder_dvzva",
+    "type": "daily-capture-reminder",
+    "position_x": 19,
+    "position_y": 1,
+    "options": {},
+    "resolve": null,
+    "reject": null,
+    "flow": "cf7f8432-619a-4240-be17-4255fa040a31",
+    "_syncId": "d8befd8a-8368-4e7c-9590-d97278967090"
+  },
+  {
+    "name": "Daily Capture Reminder",
+    "key": "daily_capture_reminder_hv7st",
+    "type": "daily-capture-reminder",
+    "position_x": 19,
+    "position_y": 1,
+    "options": {},
+    "resolve": null,
+    "reject": null,
+    "flow": "6eab0966-18c3-4069-8cdf-ce66e32791dc",
+    "_syncId": "ca108fe7-fe46-4dfc-8e88-822a12ec5d67"
+  },
+  {
     "name": "Notifier ausführen",
     "key": "jira_threshold_notifier",
     "type": "jira-threshold-notifier",

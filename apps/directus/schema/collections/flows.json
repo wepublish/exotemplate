@@ -77,6 +77,38 @@
     "_syncId": "47276210-d22c-4d0f-af03-6a451600c1c9"
   },
   {
+    "name": "Manually Timetracking",
+    "icon": "bolt",
+    "color": null,
+    "description": null,
+    "status": "active",
+    "trigger": "manual",
+    "accountability": "all",
+    "options": {
+      "collections": [
+        "CaptureIgnoredUsers"
+      ],
+      "async": true,
+      "requireSelection": false
+    },
+    "operation": "ca108fe7-fe46-4dfc-8e88-822a12ec5d67",
+    "_syncId": "6eab0966-18c3-4069-8cdf-ce66e32791dc"
+  },
+  {
+    "name": "Timetracking automatically",
+    "icon": "bolt",
+    "color": null,
+    "description": null,
+    "status": "inactive",
+    "trigger": "schedule",
+    "accountability": "all",
+    "options": {
+      "cron": "0 45 8 * * *"
+    },
+    "operation": "d8befd8a-8368-4e7c-9590-d97278967090",
+    "_syncId": "cf7f8432-619a-4240-be17-4255fa040a31"
+  },
+  {
     "name": "Manually Jira Threshold Notifier",
     "icon": "bolt",
     "color": null,

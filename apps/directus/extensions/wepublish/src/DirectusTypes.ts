@@ -1,6 +1,7 @@
 import type { DirectusUser } from '@directus/sdk'
 
 export interface Schema {
+  CaptureIgnoredUsers: CaptureIgnoredUser[]
   Clients: Client[]
   Clients_Periods: ClientPeriod[]
   Clients_directus_users: ClientDirectusUser[]
@@ -9,9 +10,22 @@ export interface Schema {
   NotificationThresholds: NotificationThreshold[]
   PeerArticles: PeerArticle[]
   Periods: Period[]
+  Settings: Settings
   TopUps: TopUp[]
   directus_users: CustomDirectusUser
   directus_sync_id_map: DirectusSyncIdMap[]
+}
+
+export interface Settings {
+  slack_time_tracking_channel_id: string | null
+}
+
+export interface CaptureIgnoredUser {
+  id: string
+  users_id: number
+  reason: string | null
+  date_created: string | null
+  user_created: string | DirectusUser<Schema> | null
 }
 
 export type BillingMode = 'prepaid' | 'monthly'

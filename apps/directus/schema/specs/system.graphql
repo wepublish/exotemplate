@@ -273,6 +273,8 @@ type Subscription {
   PeerArticles_mutated(event: EventEnum): PeerArticles_mutated
   TopUps_mutated(event: EventEnum): TopUps_mutated
   Clients_mutated(event: EventEnum): Clients_mutated
+  CaptureIgnoredUsers_mutated(event: EventEnum): CaptureIgnoredUsers_mutated
+  Settings_mutated(event: EventEnum): Settings_mutated
 }
 
 """The `Boolean` scalar type represents `true` or `false`."""
@@ -341,6 +343,29 @@ type auth_tokens {
   access_token: String
   expires: GraphQLBigInt
   refresh_token: String
+}
+
+type CaptureIgnoredUsers {
+  date_created: Date
+  date_created_func: datetime_functions
+  id: ID!
+
+  """
+  Optionaler Grund, warum diese Person ignoriert wird (z.B. "Externer Auftrag", "Geschäftsleitung erfasst separat").
+  """
+  reason: String
+  user_created: ID
+
+  """
+  Clockodo-Benutzer-ID. Diese Person wird in der Übersicht Zeiterfassung ignoriert.
+  """
+  users_id: Int!
+}
+
+type CaptureIgnoredUsers_mutated {
+  key: ID!
+  event: EventEnum
+  data: CaptureIgnoredUsers
 }
 
 type Clients {
@@ -1924,6 +1949,21 @@ type server_info_project {
 type server_info_query_limit {
   default: Int
   max: Int
+}
+
+type Settings {
+  id: ID!
+
+  """
+  Slack-Channel-ID für die tägliche Stunden-Erinnerung (z.B. C0AB12CD3EF). Leer lassen, um die Erinnerung zu deaktivieren.
+  """
+  slack_time_tracking_channel_id: String
+}
+
+type Settings_mutated {
+  key: ID!
+  event: EventEnum
+  data: Settings
 }
 
 type TopUps {

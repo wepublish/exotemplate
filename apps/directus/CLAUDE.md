@@ -57,6 +57,8 @@ All TypeScript interfaces are defined in [extensions/wepublish/src/DirectusTypes
 | `ManualWorkEntries`      | Manually logged billable hours.                                                                                                                                                                                  |
 | `PeerArticles`           | Articles pulled from peer We.Publish media APIs.                                                                                                                                                                 |
 | `Clients_directus_users` | Access control: which users can see which clients.                                                                                                                                                               |
+| `Settings`               | Singleton with global settings (currently `slack_time_tracking_channel_id` for the daily capture-reminder). Administrator-only; no explicit permission entries are needed since admin_access covers it.          |
+| `CaptureIgnoredUsers`    | Per-row list of Clockodo `users_id` values that should be ignored by the Übersicht Zeiterfassung — no Slack reminder, dimmed + pinned-to-bottom in the UI. Managed from the frontend via standard Directus CRUD. |
 
 All collections follow Directus conventions: `status` (published/draft/archived), `sort`, `date_created`, `date_updated`, `user_created`, `user_updated`.
 
@@ -103,6 +105,40 @@ The Jira and Clockodo round-trips inside `aggregatedHours` are slow and rate-lim
 
 - Scheduled operation that queries peer We.Publish media GraphQL APIs.
 - Upserts fetched articles into the `PeerArticles` collection.
+
+**`time-tracking` endpoint** ([extensions/wepublish/src/time-tracking/index.ts](extensions/wepublish/src/time-tracking/index.ts)):
+
+Serves the "Übersicht Zeiterfassung" admin page.
+
+- `GET /time-tracking/missing-hours?from=YYYY-MM-DD&to=YYYY-MM-DD` — per-employee day-by-day capture status across the requested range. Defaults to the last 7 days ending yesterday when params are omitted. Each row carries `ignored` + `ignoredRecordId` for the front-end's bell toggle.
+- Admin-only: gates on `accountability.admin === true` (in addition to `accountability.user`). Non-admins get a 403 even if they're authenticated.
+- Pure logic lives in [`shared/capture-overview/missingHours.ts`](extensions/wepublish/src/shared/capture-overview/missingHours.ts) — fully unit-tested. The endpoint just wires Clockodo wrappers + caches + the `CaptureIgnoredUsers` join into that function and adds the `{ data, range, cache }` envelope.
+- `DELETE /time-tracking/missing-hours/cache?from=…&to=…` — invalidates the user-daily-hours cache entry for that exact range so the dashboard's refresh button can force-pull Clockodo. The users / absences / target-hours / non-business-days caches are left alone — they change rarely enough that an extra hour of staleness is fine.
+
+**`daily-capture-reminder` operation** ([extensions/wepublish/src/daily-capture-reminder/api.ts](extensions/wepublish/src/daily-capture-reminder/api.ts)):
+
+- Reads `Settings.slack_time_tracking_channel_id`, computes the reference date (yesterday, or the previous Friday on Monday/weekend runs), figures out who didn't capture, and posts a friendly German reminder to Slack. Skips the post entirely when nobody is missing — no daily "all clear" spam. Ignored users (`CaptureIgnoredUsers`) are filtered out _before_ the missing check; their absence from the reminder is silent.
+- Designed to be wired to a Directus Flow with a `0 45 8 * * *` schedule (08:45 daily). The Flow itself is set up in the admin UI; the operation is the registered handler.
+- Slack tone is intentionally friendly + lightly funny (`shared/capture-overview/composeReminderMessage.ts`), with a date-deterministic opener rotation so the message varies day-to-day but is reproducible in tests. Resolves Slack user IDs via `users.lookupByEmail` when possible for personal mentions, falls back to plain names otherwise.
+
+**Clockodo wrappers** ([extensions/wepublish/src/shared/clockodo/](extensions/wepublish/src/shared/clockodo/)):
+
+The original `shared/billing/clockodo.ts` is the entry-groups-by-customer client. The newer `shared/clockodo/` directory holds the time-tracking-side wrappers — users, absences, per-user daily hours, target hours, and non-business days — plus a shared `headers.ts` helper that all of them share. Each Clockodo wrapper is paired with a cache singleton under `shared/cache/`:
+
+- `clockodoUsersCache.ts` — TTL 1 h, key `'all'`
+- `clockodoAbsencesCache.ts` — TTL 1 h, key per year
+- `clockodoUserDailyHoursCache.ts` — TTL 15 min, key `${fromIso}:${toIso}`
+- `clockodoTargetHoursCache.ts` — TTL 1 h, key `'all'`
+- `clockodoNonBusinessDaysCache.ts` — TTL 1 h, key per year
+
+The shorter TTL on daily hours matters: that's the data the dashboard wants to feel current. If someone catches up on capturing after being flagged, they should see themselves go green within the quarter hour.
+
+**Clockodo gotchas**:
+
+1. **Target hours**: `/v2/users` does **not** expose `weekly_target_hours` — that field doesn't exist there. The per-user weekly target lives on `/api/targethours/` (Clockodo's older v1 surface), as date-bounded rows with per-weekday columns (`monday`..`sunday`) for weekly contracts and a `monthly_target` + workday flags for monthly contracts. [`shared/capture-overview/missingHours.ts`](extensions/wepublish/src/shared/capture-overview/missingHours.ts) reads per-day expectations from the row whose `[date_since, date_until]` window covers the date in question, so part-time contracts with day-specific hours (e.g. M=8, T=8, W=0, Th=8, F=0) compute correctly — a 0-hour weekday becomes status `off`, not `missing`. Users without an active target-hours row that intersects the requested range are excluded entirely (freelancers, system accounts).
+2. **Public holidays**: live on `/api/nonbusinessdays/` (v1 surface again), keyed per year. Each row has a `nonbusinessgroups_id`; each user has one too (from `/v2/users`). A user on a workday that's a full-day holiday in their group gets status `holiday` (no expectation). Half-day holidays (`half_day === 1`) halve the day's expected hours and keep the row in the captured/partial/missing flow so a no-show morning still surfaces.
+3. **`entrygroups` response shape**: uses **snake_case** (`sub_groups`, not `subGroups`) and reports work as **seconds** in `duration` — there is no `hours` field. Mixing those up silently returns 0 for every (user, day) pair. The wrapper at [`shared/clockodo/userDailyHours.ts`](extensions/wepublish/src/shared/clockodo/userDailyHours.ts) has a regression test.
+4. **`time_until` is exclusive at midnight**: passing `to=2026-05-27` formatted as `2026-05-27T00:00:00Z` excludes everything logged on the 27th. The userDailyHours wrapper advances `time_until` by one calendar day so the requested last day is fully included.
 
 ## Code Style & Conventions
 

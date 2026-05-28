@@ -40,6 +40,19 @@
         "source": "src/client-onboarding/index.ts"
       },
       {
+        "type": "endpoint",
+        "name": "time-tracking",
+        "source": "src/time-tracking/index.ts"
+      },
+      {
+        "type": "operation",
+        "name": "daily-capture-reminder",
+        "source": {
+          "app": "src/daily-capture-reminder/app.ts",
+          "api": "src/daily-capture-reminder/api.ts"
+        }
+      },
+      {
         "type": "operation",
         "name": "peering-articles",
         "source": {
