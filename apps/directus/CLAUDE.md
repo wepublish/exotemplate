@@ -251,6 +251,7 @@ The Directus app layer itself (schema, migrations, hooks wired into the framewor
 - Docker image: `node:22.22.0-trixie-slim`, exposes port 8055.
 - On container start, `entrypoint.sh` runs migrations and schema sync before starting Directus.
 - Images are pushed to GitHub Container Registry (`ghcr.io/wepublish/inside-backend`) and an OpenShift registry.
+- **Timezone**: the image sets `ENV TZ=Europe/Zurich` (see [Dockerfile](Dockerfile)). Scheduled Directus Flows fire in the process's local timezone — Directus passes no timezone to the `cron` library ([`scheduleSynchronizedJob`](node_modules/@directus/api/dist/utils/schedule.js)), and flow `options` only carry `cron` (no per-flow timezone knob). Without `TZ` the container defaults to UTC, so a `0 7` cron ran at 09:00 CEST; `Europe/Zurich` makes crons fire at Swiss wall-clock time year-round (DST-aware). The extension date logic is deliberately UTC-first (`getUTC*` / `Date.UTC` / `toISOString` / `getTime()` ms math) and billing date fields (`Periods.from`/`to`, `ManualWorkEntries.date`) are Directus `date` (date-only), so they're unaffected by the process timezone. Keep new scheduled/date code UTC-explicit; the only timezone-naive (`dateTime`) field is `PeerArticles.source_publishedAt`. If overriding `TZ` per environment, set it as a real process env var (Dockerfile `ENV` or the OpenShift deployment), **not** in the dotenv `.env` — Node fixes its timezone at process start, before Directus loads dotenv.
 
 ## Important Notes
 
