@@ -71,7 +71,7 @@
     "trigger": "schedule",
     "accountability": "all",
     "options": {
-      "cron": "0 7 * * 1"
+      "cron": "0 13 * * 1"
     },
     "operation": "cc593600-6f95-4f78-96ff-b42d875bba42",
     "_syncId": "47276210-d22c-4d0f-af03-6a451600c1c9"
