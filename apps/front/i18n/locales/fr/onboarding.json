@@ -308,7 +308,8 @@
         "successToast": "Contrat téléversé.",
         "errorTitle": "Impossible de téléverser le contrat",
         "completedTitle": "Contrat téléversé",
-        "completedDescription": "Le contrat a été enregistré. Vous pouvez ajouter de nouvelles versions dans les paramètres."
+        "completedDescription": "Le contrat a été enregistré. Vous pouvez ajouter de nouvelles versions dans les paramètres.",
+        "fileTooLarge": "Le fichier est trop volumineux (max. 10 Mo)."
       }
     },
     "infrastructure": {

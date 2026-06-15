@@ -39,6 +39,7 @@
       "signedTitle": "Upload signed version",
       "signedHint": "Upload the signed version of this contract as a PDF to clear the warning.",
       "submitSigned": "Upload signed version"
-    }
+    },
+    "fileTooLarge": "The file is too large (max. 10 MB)."
   }
 }

@@ -308,7 +308,8 @@
         "successToast": "Vertrag hochgeladen.",
         "errorTitle": "Vertrag konnte nicht hochgeladen werden",
         "completedTitle": "Vertrag hochgeladen",
-        "completedDescription": "Der Vertrag wurde gespeichert. Neuere Versionen kannst du in den Einstellungen hinzufügen."
+        "completedDescription": "Der Vertrag wurde gespeichert. Neuere Versionen kannst du in den Einstellungen hinzufügen.",
+        "fileTooLarge": "Die Datei ist zu gross (max. 10 MB)."
       }
     },
     "infrastructure": {

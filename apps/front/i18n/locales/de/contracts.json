@@ -39,6 +39,7 @@
       "signedTitle": "Unterschriebene Version hochladen",
       "signedHint": "Lade die unterschriebene Version dieses Vertrags als PDF hoch, um die Warnung zu entfernen.",
       "submitSigned": "Unterschriebene Version hochladen"
-    }
+    },
+    "fileTooLarge": "Die Datei ist zu gross (max. 10 MB)."
   }
 }

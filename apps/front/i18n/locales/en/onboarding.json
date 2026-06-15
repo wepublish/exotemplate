@@ -308,7 +308,8 @@
         "successToast": "Contract uploaded.",
         "errorTitle": "Could not upload the contract",
         "completedTitle": "Contract uploaded",
-        "completedDescription": "The contract was saved. You can add newer versions in the settings."
+        "completedDescription": "The contract was saved. You can add newer versions in the settings.",
+        "fileTooLarge": "The file is too large (max. 10 MB)."
       }
     },
     "infrastructure": {

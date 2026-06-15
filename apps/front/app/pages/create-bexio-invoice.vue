@@ -31,6 +31,12 @@
       new Date().getDate()
     )
   )
+  // UCalendar can emit a nullish value (e.g. on internal re-init with a
+  // CalendarDate from a skewed @internationalized/date version). Ignore those
+  // so `billingDate` is never undefined — the date display + submit rely on it.
+  function onBillingDateChange(value: any): void {
+    if (value) billingDate.value = value as CalendarDate
+  }
   const inputDate = useTemplateRef('inputDate')
 
   const clientPeriodId = computed<number | undefined>(() => {
@@ -84,8 +90,11 @@
     wepPercentage: z.coerce.number(
       t('billing.createInvoice.validation.wepPercentage')
     ),
-    note: z.string(t('billing.createInvoice.validation.note')),
-    billingDate: z.any()
+    note: z.string(t('billing.createInvoice.validation.note'))
+    // `billingDate` is intentionally NOT in the schema: it's a standalone ref
+    // (the calendar), not part of `state`. Listing it as `z.any()` made the
+    // form require the key, which now fails validation ("expected nonoptional,
+    // received undefined") and blocks submit.
   })
 
   type Schema = z.output<typeof schema>
@@ -391,7 +400,7 @@
             name="billingDate"
             class="col-span-12"
           >
-            {{ formatDate(billingDate.toString()) }}
+            {{ billingDate ? formatDate(billingDate.toString()) : '' }}
 
             <UPopover :reference="inputDate?.inputsRef[3]?.$el">
               <UButton
@@ -402,7 +411,10 @@
                 >{{ t('billing.createInvoice.pickDate') }}</UButton
               >
               <template #content>
-                <UCalendar v-model="billingDate" />
+                <UCalendar
+                  :model-value="billingDate"
+                  @update:model-value="onBillingDateChange"
+                />
               </template>
             </UPopover>
           </UFormField>
@@ -622,7 +634,7 @@
             name="billingDate"
             class="col-span-12"
           >
-            {{ formatDate(billingDate.toString()) }}
+            {{ billingDate ? formatDate(billingDate.toString()) : '' }}
             <UPopover>
               <UButton
                 size="xs"
@@ -632,7 +644,10 @@
                 >{{ t('billing.createInvoice.pickDate') }}</UButton
               >
               <template #content>
-                <UCalendar v-model="billingDate" />
+                <UCalendar
+                  :model-value="billingDate"
+                  @update:model-value="onBillingDateChange"
+                />
               </template>
             </UPopover>
           </UFormField>

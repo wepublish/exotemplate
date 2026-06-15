@@ -15,10 +15,17 @@
   const uploading = ref(false)
   const executionError = ref<string | null>(null)
 
+  const MAX_FILE_BYTES = 10 * 1024 * 1024 // 10 MB
+
   function onFileChange(event: Event) {
     const picked = (event.target as HTMLInputElement).files?.[0] ?? null
     if (picked && picked.type && picked.type !== 'application/pdf') {
       executionError.value = t('onboarding.steps.contract.mustBePdf')
+      file.value = null
+      return
+    }
+    if (picked && picked.size > MAX_FILE_BYTES) {
+      executionError.value = t('onboarding.steps.contract.fileTooLarge')
       file.value = null
       return
     }

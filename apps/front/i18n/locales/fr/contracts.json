@@ -39,6 +39,7 @@
       "signedTitle": "Téléverser la version signée",
       "signedHint": "Téléversez la version signée de ce contrat au format PDF pour supprimer l’avertissement.",
       "submitSigned": "Téléverser la version signée"
-    }
+    },
+    "fileTooLarge": "Le fichier est trop volumineux (max. 10 Mo)."
   }
 }

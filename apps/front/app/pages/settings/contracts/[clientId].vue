@@ -83,10 +83,17 @@
     showUpload.value = true
   }
 
+  const MAX_FILE_BYTES = 10 * 1024 * 1024 // 10 MB
+
   function onFileChange(event: Event): void {
     const picked = (event.target as HTMLInputElement).files?.[0] ?? null
     if (picked && picked.type && picked.type !== 'application/pdf') {
       uploadError.value = t('contracts.mustBePdf')
+      file.value = null
+      return
+    }
+    if (picked && picked.size > MAX_FILE_BYTES) {
+      uploadError.value = t('contracts.fileTooLarge')
       file.value = null
       return
     }
@@ -127,6 +134,11 @@
     const picked = (event.target as HTMLInputElement).files?.[0] ?? null
     if (picked && picked.type && picked.type !== 'application/pdf') {
       inlineError.value = t('contracts.mustBePdf')
+      inlineFile.value = null
+      return
+    }
+    if (picked && picked.size > MAX_FILE_BYTES) {
+      inlineError.value = t('contracts.fileTooLarge')
       inlineFile.value = null
       return
     }
