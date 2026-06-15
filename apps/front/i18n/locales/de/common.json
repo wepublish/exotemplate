@@ -1,0 +1,26 @@
+{
+  "common": {
+    "loading": "Lädt …",
+    "retry": "Erneut versuchen",
+    "refresh": "Aktualisieren",
+    "back": "Zurück",
+    "open": "Öffnen",
+    "close": "Schliessen",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "search": "Suchen",
+    "on": "An",
+    "off": "Aus",
+    "billingMode": {
+      "prepaid": "Prepaid (Top-Ups)",
+      "monthly": "Monatsrechnung"
+    },
+    "unexpectedError": "Ein unerwarteter Fehler ist aufgetreten",
+    "actionFailed": "Aktion fehlgeschlagen.",
+    "notLoggedIn": "Nicht angemeldet.",
+    "accessDenied": {
+      "title": "Kein Zugriff",
+      "body": "Diese Seite ist nur für Administrator:innen verfügbar."
+    }
+  }
+}

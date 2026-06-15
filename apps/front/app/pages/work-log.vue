@@ -11,6 +11,7 @@
   const route = useRoute()
   const userStore = useUserStore()
   const { listForClients, isHalted } = useJiraWarnings()
+  const { t } = useI18n()
 
   const clientPeriodId = computed<number | undefined>(() => {
     const raw = route.params?.clientPeriodId
@@ -37,17 +38,9 @@
     }
   )
 
-  const dashboardLink = computed(() => ({
-    path: '/',
-    query: {
-      ...(resolved.value?.client?.id
-        ? { clientId: resolved.value.client.id }
-        : {}),
-      ...(clientPeriodId.value
-        ? { clientPeriodId: String(clientPeriodId.value) }
-        : {})
-    }
-  }))
+  const dashboardLink = computed(() =>
+    clientPeriodId.value ? `/${clientPeriodId.value}/dashboard` : '/'
+  )
 
   const allWarnings = ref<JiraWarning[]>([])
 
@@ -117,12 +110,12 @@
   <div>
     <UButton
       :to="dashboardLink"
-      icon="material-symbols:arrow-back-ios"
+      icon="lucide:chevron-left"
       variant="ghost"
       size="sm"
       class="mb-4"
     >
-      Zurück zum Dashboard
+      {{ t('workLog.backToDashboard') }}
     </UButton>
 
     <USkeleton v-if="pending" class="h-32" />
@@ -132,7 +125,7 @@
       color="error"
       variant="soft"
       icon="i-heroicons-exclamation-triangle"
-      title="Beim Abrufen der Daten ist ein Fehler aufgetreten."
+      :title="t('dashboard.loadError')"
       :description="error.message"
     />
 

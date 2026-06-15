@@ -27,22 +27,16 @@
     dispatchWarningAction: [warning: JiraWarning, action: WarningAction]
   }>()
 
-  const { secondsToHours } = useHours()
   const { nextThresholdHours, lastNotifiedHours, isHalted } = useJiraWarnings()
+  const { t } = useI18n()
+  const { formatHours, formatDate, formatDateTime } = useFormatters()
+  const link = useClientPeriodLink()
 
-  const dateFormatter = new Intl.DateTimeFormat('de-CH', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-
-  function formatDate(value: string | null | undefined): string | null {
+  function formatHaltDate(value: string | null | undefined): string | null {
     if (!value) return null
     const date = new Date(value)
     if (Number.isNaN(date.getTime())) return null
-    return dateFormatter.format(date)
+    return formatDateTime(date)
   }
 
   function formatUser(
@@ -81,13 +75,14 @@
     if (resolved)
       return {
         color: 'success',
-        label: 'Erledigt',
-        icon: 'material-symbols:check-circle-rounded'
+        label: t('workLog.status.resolved'),
+        icon: 'lucide:circle-check'
       }
-    if (isHalted(warning)) return { color: 'error', label: 'Arbeitsstopp' }
+    if (isHalted(warning))
+      return { color: 'error', label: t('workLog.status.halt') }
     if (warning.silenced_permanently)
-      return { color: 'neutral', label: 'Stummgeschaltet' }
-    return { color: 'warning', label: 'Warnung' }
+      return { color: 'neutral', label: t('workLog.status.silenced') }
+    return { color: 'warning', label: t('workLog.status.warning') }
   }
 
   function nextThresholdForRow(row: { name?: string | null }): number | null {
@@ -166,10 +161,10 @@
 
   const entryGroupNavigation = ref<EntryGroup[]>([])
 
-  const columns: TableColumn<EntryGroup>[] = [
+  const columns = computed<TableColumn<EntryGroup>[]>(() => [
     {
       accessorKey: 'name',
-      header: 'Arbeit',
+      header: t('workLog.columns.work'),
       meta: {
         style: {
           td: 'max-width: 340px;'
@@ -178,17 +173,17 @@
     },
     {
       accessorKey: 'jiraIssue',
-      header: 'Details Abrechenbarkeit'
+      header: t('workLog.columns.billabilityDetails')
     },
     {
       accessorKey: 'duration',
-      header: 'Verrechenbare Zeit'
+      header: t('workLog.columns.billableTime')
     },
     {
       id: 'expand',
-      header: 'Details'
+      header: t('workLog.columns.details')
     }
-  ]
+  ])
 
   const selectedEntryGroup = computed<EntryGroup | undefined>(() =>
     entryGroupNavigation.value.at(-1)
@@ -273,9 +268,9 @@
     <UPageCard>
       <template #default>
         <div class="flex justify-between w-full font-bold">
-          <div>Arbeitsprotokoll</div>
+          <div>{{ t('workLog.title') }}</div>
           <div class="font-bold text-4xl text-primary">
-            {{ props.entryGroups?.sums?.billableHours || 0 }} h
+            {{ formatHours(props.entryGroups?.sums?.billableHours || 0) }}
           </div>
         </div>
 
@@ -283,16 +278,20 @@
           v-if="haltedCount > 0"
           color="error"
           variant="solid"
-          icon="material-symbols:stop-circle-rounded"
+          icon="lucide:circle-stop"
           class="my-3"
         >
           <template #title>
-            {{ haltedCount }}
-            {{ haltedCount === 1 ? 'Ticket ist' : 'Tickets sind' }} gestoppt
+            {{
+              t(
+                'workLog.haltedAlert.title',
+                { count: haltedCount },
+                haltedCount
+              )
+            }}
           </template>
           <template #description>
-            An rot markierten Tickets darf aktuell nicht gearbeitet werden, bis
-            der Stopp direkt am Ticket aufgehoben wird.
+            {{ t('workLog.haltedAlert.description') }}
           </template>
         </UAlert>
 
@@ -318,9 +317,13 @@
             >
               <UIcon
                 v-if="haltedIssueKeyForRow(row.row.original)"
-                name="material-symbols:stop-circle-rounded"
+                name="lucide:circle-stop"
                 class="text-error shrink-0 mt-0.5"
-                :title="`Arbeitsstopp für ${haltedIssueKeyForRow(row.row.original)}`"
+                :title="
+                  t('workLog.haltTitle', {
+                    key: haltedIssueKeyForRow(row.row.original)
+                  })
+                "
               />
               <div
                 class="flex-1 min-w-0"
@@ -335,11 +338,7 @@
                     (row.row.original.grouped_by as unknown as string) === 'day'
                   "
                 >
-                  {{
-                    new Date(row.row.original.name).toLocaleDateString('de', {
-                      dateStyle: 'medium'
-                    })
-                  }}
+                  {{ formatDate(row.row.original.name) }}
                 </p>
                 <p v-else class="whitespace-normal">
                   <LinkifiedText :text="row.row.original.name" />
@@ -348,7 +347,7 @@
                   v-if="isHaltedName(row.row.original.name)"
                   class="text-xs text-error font-medium mt-1"
                 >
-                  Arbeitsstopp aktiv
+                  {{ t('workLog.row.haltActive') }}
                 </p>
                 <div
                   v-else-if="
@@ -365,22 +364,26 @@
                       name="i-heroicons-exclamation-triangle"
                       class="shrink-0"
                     />
-                    {{ unresolvedWarningCountForRow(row.row.original) }}
                     {{
-                      unresolvedWarningCountForRow(row.row.original) === 1
-                        ? 'Warnung'
-                        : 'Warnungen'
+                      t(
+                        'workLog.row.warnings',
+                        {
+                          count: unresolvedWarningCountForRow(row.row.original)
+                        },
+                        unresolvedWarningCountForRow(row.row.original)
+                      )
                     }}
                   </p>
                   <p
                     v-if="resolvedWarningCountForRow(row.row.original) > 0"
                     class="text-xs text-success font-medium flex items-center gap-1"
                   >
-                    <UIcon
-                      name="material-symbols:check-circle-rounded"
-                      class="shrink-0"
-                    />
-                    {{ resolvedWarningCountForRow(row.row.original) }} erledigt
+                    <UIcon name="lucide:circle-check" class="shrink-0" />
+                    {{
+                      t('workLog.row.resolved', {
+                        count: resolvedWarningCountForRow(row.row.original)
+                      })
+                    }}
                   </p>
                 </div>
               </div>
@@ -391,52 +394,74 @@
             <div v-if="row.original.billability" class="grid grid-cols-2">
               <!-- if jira estimation available -->
               <div class="col-span-2 grid grid-cols-2">
-                <div>Jira Schätzung</div>
+                <div>{{ t('workLog.billability.jiraEstimate') }}</div>
                 <div class="text-right">
-                  {{ secondsToHours(row.original.billability.durationJira) }} h
+                  {{
+                    formatHours(row.original.billability.durationJira / 3600)
+                  }}
                 </div>
 
-                <div>Vor Abrechnungsperiode gleistet</div>
+                <div>{{ t('workLog.billability.deliveredBeforePeriod') }}</div>
                 <div class="text-right">
                   -
-                  {{ secondsToHours(row.original.billability.durationPast) }} h
+                  {{
+                    formatHours(row.original.billability.durationPast / 3600)
+                  }}
                 </div>
 
-                <div class="border-t border-b">Verfügbare Jira-Stunden</div>
+                <div class="border-t border-b">
+                  {{ t('workLog.billability.availableJiraHours') }}
+                </div>
                 <div class="border-t border-b text-right">
-                  {{ secondsToHours(row.original.billability.jiraAvailable) }} h
+                  {{
+                    formatHours(row.original.billability.jiraAvailable / 3600)
+                  }}
                 </div>
 
-                <div class="mt-4">In Abrechnungsperiode gleistet</div>
+                <div class="mt-4">
+                  {{ t('workLog.billability.deliveredInPeriod') }}
+                </div>
                 <div class="mt-4 text-right">
-                  {{ secondsToHours(row.original.billability.durationCurrent) }}
-                  h
+                  {{
+                    formatHours(row.original.billability.durationCurrent / 3600)
+                  }}
                 </div>
 
-                <div class="pl-3">Davon voll verrechenbar</div>
+                <div class="pl-3">
+                  {{ t('workLog.billability.fullyBillable') }}
+                </div>
                 <div class="text-right font-bold">
                   +
-                  {{ secondsToHours(row.original.billability.billableDirect) }}
-                  h
+                  {{
+                    formatHours(row.original.billability.billableDirect / 3600)
+                  }}
                 </div>
 
-                <div class="pl-3">Davon hälftig verrechenbar</div>
+                <div class="pl-3">
+                  {{ t('workLog.billability.halfBillable') }}
+                </div>
                 <div class="font-bold text-right">
                   +
-                  {{ secondsToHours(row.original.billability.billablePart) }} h
+                  {{
+                    formatHours(row.original.billability.billablePart / 3600)
+                  }}
                 </div>
 
                 <div class="border-b pl-3">
-                  Davon hälftig nicht verrechenbar
+                  {{ t('workLog.billability.halfNonBillable') }}
                 </div>
                 <div class="border-b text-right">
-                  {{ secondsToHours(row.original.billability.billablePart) }} h
+                  {{
+                    formatHours(row.original.billability.billablePart / 3600)
+                  }}
                 </div>
               </div>
 
-              <div class="font-bold mt-2">Total verrechenbar</div>
+              <div class="font-bold mt-2">
+                {{ t('workLog.billability.totalBillable') }}
+              </div>
               <div class="font-bold text-right mt-2">
-                {{ secondsToHours(row.original.billability.billableTotal) }} h
+                {{ formatHours(row.original.billability.billableTotal / 3600) }}
               </div>
             </div>
           </template>
@@ -444,12 +469,11 @@
           <template #duration-cell="{ row }">
             <UBadge size="lg">
               {{
-                secondsToHours(
-                  row.original?.billability?.billableTotal ||
-                    row.original.duration
+                formatHours(
+                  (row.original?.billability?.billableTotal ||
+                    row.original.duration) / 3600
                 )
               }}
-              h
             </UBadge>
           </template>
 
@@ -462,13 +486,13 @@
                   class="mr-2"
                   color="neutral"
                   variant="outline"
-                  >Zurück</UButton
+                  >{{ t('common.back') }}</UButton
                 >
                 <UButton
                   v-if="entryGroupNavigation.length < 2"
                   @click="navigateEntryGroup(row.original)"
                   variant="subtle"
-                  >Details anzeigen</UButton
+                  >{{ t('workLog.showDetails') }}</UButton
                 >
               </div>
 
@@ -510,10 +534,10 @@
                     }}
                   </UBadge>
                   <NuxtLink
-                    to="/info/thresholds"
+                    :to="link('/info/thresholds')"
                     class="text-muted underline hover:no-underline"
                   >
-                    Mehr erfahren
+                    {{ t('workLog.learnMore') }}
                   </NuxtLink>
                 </div>
 
@@ -521,16 +545,20 @@
                   v-if="!warningForRow(row.original)!.silenced_permanently"
                   class="text-muted"
                 >
-                  Zuletzt gemeldet bei
-                  <span class="font-medium">
-                    {{ lastNotifiedHours(warningForRow(row.original)!) ?? '–' }}
-                    h
-                  </span>
+                  {{
+                    t('workLog.thresholdInfo.lastReportedAt', {
+                      hours: formatHours(
+                        lastNotifiedHours(warningForRow(row.original)!)
+                      )
+                    })
+                  }}
                   <template v-if="nextThresholdForRow(row.original) != null">
-                    · Nächste Meldung bei
-                    <span class="font-medium">
-                      {{ nextThresholdForRow(row.original) }} h
-                    </span>
+                    ·
+                    {{
+                      t('workLog.thresholdInfo.nextReportAt', {
+                        hours: formatHours(nextThresholdForRow(row.original))
+                      })
+                    }}
                   </template>
                 </p>
 
@@ -538,12 +566,9 @@
                   v-if="isHalted(warningForRow(row.original)!)"
                   class="flex items-center gap-1 font-medium text-error"
                 >
-                  <UIcon
-                    name="material-symbols:stop-circle-rounded"
-                    class="shrink-0"
-                  />
+                  <UIcon name="lucide:circle-stop" class="shrink-0" />
                   <span>
-                    Gestoppt
+                    {{ t('workLog.halt.stopped') }}
                     <template
                       v-if="
                         formatUser(
@@ -551,23 +576,24 @@
                         )
                       "
                     >
-                      von
                       {{
-                        formatUser(
-                          warningForRow(row.original)!.halt_requested_by
-                        )
+                        t('workLog.halt.stoppedBy', {
+                          name: formatUser(
+                            warningForRow(row.original)!.halt_requested_by
+                          )
+                        })
                       }}
                     </template>
                     <template
                       v-if="
-                        formatDate(
+                        formatHaltDate(
                           warningForRow(row.original)!.halt_requested_at
                         )
                       "
                     >
                       ·
                       {{
-                        formatDate(
+                        formatHaltDate(
                           warningForRow(row.original)!.halt_requested_at
                         )
                       }}
@@ -579,11 +605,11 @@
                   class="flex items-center gap-1 text-muted"
                 >
                   <UIcon
-                    name="material-symbols:play-circle-rounded"
+                    name="lucide:circle-play"
                     class="text-success shrink-0"
                   />
                   <span>
-                    Stopp aufgehoben
+                    {{ t('workLog.halt.lifted') }}
                     <template
                       v-if="
                         formatUser(
@@ -591,23 +617,24 @@
                         )
                       "
                     >
-                      von
                       {{
-                        formatUser(
-                          warningForRow(row.original)!.halt_resolved_by
-                        )
+                        t('workLog.halt.liftedBy', {
+                          name: formatUser(
+                            warningForRow(row.original)!.halt_resolved_by
+                          )
+                        })
                       }}
                     </template>
                     <template
                       v-if="
-                        formatDate(
+                        formatHaltDate(
                           warningForRow(row.original)!.halt_resolved_at
                         )
                       "
                     >
                       ·
                       {{
-                        formatDate(
+                        formatHaltDate(
                           warningForRow(row.original)!.halt_resolved_at
                         )
                       }}
@@ -623,22 +650,29 @@
                 >
                   <UIcon name="i-heroicons-bell-slash" class="shrink-0" />
                   <span>
-                    Stummgeschaltet
+                    {{ t('workLog.silenced.label') }}
                     <template
                       v-if="
                         formatUser(warningForRow(row.original)!.silenced_by)
                       "
                     >
-                      von
-                      {{ formatUser(warningForRow(row.original)!.silenced_by) }}
+                      {{
+                        t('workLog.silenced.by', {
+                          name: formatUser(
+                            warningForRow(row.original)!.silenced_by
+                          )
+                        })
+                      }}
                     </template>
                     <template
                       v-if="
-                        formatDate(warningForRow(row.original)!.silenced_at)
+                        formatHaltDate(warningForRow(row.original)!.silenced_at)
                       "
                     >
                       ·
-                      {{ formatDate(warningForRow(row.original)!.silenced_at) }}
+                      {{
+                        formatHaltDate(warningForRow(row.original)!.silenced_at)
+                      }}
                     </template>
                   </span>
                 </p>

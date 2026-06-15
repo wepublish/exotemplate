@@ -8,6 +8,7 @@
   const advanceStep = inject(ADVANCE_STEP_KEY)!
   const directusStore = useDirectus()
   const toast = useToast()
+  const { t } = useI18n()
 
   // Pre-fill company name from step 1
   watch(
@@ -40,14 +41,12 @@
       !data.bexioZip.trim() ||
       !data.bexioCity.trim()
     ) {
-      executionError.value =
-        'Alle Felder (Firmenname, E-Mail, Strasse, Nr., PLZ, Ort) sind erforderlich.'
+      executionError.value = t('onboarding.steps.bexio.allFieldsRequired')
       return
     }
 
     if (!data.clientId) {
-      executionError.value =
-        'Schritt 1 (Directus) muss zuerst abgeschlossen werden.'
+      executionError.value = t('onboarding.steps.bexio.directusFirst')
       return
     }
 
@@ -73,16 +72,20 @@
       completed.value = true
       toast.add({
         color: 'success',
-        title: 'Bexio-Kontakt erfolgreich erstellt!'
+        title: t('onboarding.steps.bexio.successToast')
       })
       await advanceStep()
     } catch (e: any) {
       const msg =
         e?.response?.data?.errors?.[0]?.message ??
         e?.message ??
-        'Unbekannter Fehler'
+        t('common.unexpectedError')
       executionError.value = msg
-      toast.add({ color: 'error', title: 'Fehler', description: msg })
+      toast.add({
+        color: 'error',
+        title: t('onboarding.steps.bexio.errorTitle'),
+        description: msg
+      })
     } finally {
       loading.value = false
     }
@@ -92,16 +95,14 @@
 <template>
   <!-- Already completed -->
   <div v-if="completed && data.bexioContactId" class="flex flex-col gap-4">
-    <UAlert
-      color="success"
-      variant="soft"
-      icon="material-symbols:check-circle-rounded"
-    >
-      <template #title>Bexio-Kontakt erfolgreich erstellt</template>
+    <UAlert color="success" variant="soft" icon="lucide:circle-check">
+      <template #title>{{
+        t('onboarding.steps.bexio.completedTitle')
+      }}</template>
       <template #description>
-        Kontakt-ID:
+        {{ t('onboarding.steps.bexio.completedDescription') }}
         <span class="font-mono font-bold">{{ data.bexioContactId }}</span>
-        — wurde auf dem Client-Eintrag gespeichert.
+        {{ t('onboarding.steps.bexio.savedOnClient') }}
       </template>
     </UAlert>
 
@@ -109,19 +110,25 @@
       <div
         class="col-span-6 p-3 rounded-lg border border-neutral-200 dark:border-neutral-700"
       >
-        <p class="text-xs text-muted">Firmenname</p>
+        <p class="text-xs text-muted">
+          {{ t('onboarding.steps.bexio.company') }}
+        </p>
         <p class="font-medium">{{ data.bexioCompany }}</p>
       </div>
       <div
         class="col-span-6 p-3 rounded-lg border border-neutral-200 dark:border-neutral-700"
       >
-        <p class="text-xs text-muted">E-Mail</p>
+        <p class="text-xs text-muted">
+          {{ t('onboarding.steps.bexio.email') }}
+        </p>
         <p class="font-medium">{{ data.bexioEmail }}</p>
       </div>
       <div
         class="col-span-8 p-3 rounded-lg border border-neutral-200 dark:border-neutral-700"
       >
-        <p class="text-xs text-muted">Strasse</p>
+        <p class="text-xs text-muted">
+          {{ t('onboarding.steps.bexio.fieldStreet') }}
+        </p>
         <p class="font-medium">
           {{ data.bexioStreet }} {{ data.bexioStreetNumber }}
         </p>
@@ -129,7 +136,9 @@
       <div
         class="col-span-4 p-3 rounded-lg border border-neutral-200 dark:border-neutral-700"
       >
-        <p class="text-xs text-muted">PLZ / Ort</p>
+        <p class="text-xs text-muted">
+          {{ t('onboarding.steps.bexio.fieldZipCity') }}
+        </p>
         <p class="font-medium">{{ data.bexioZip }} {{ data.bexioCity }}</p>
       </div>
     </div>
@@ -140,78 +149,73 @@
       rel="noopener"
       class="inline-flex items-center gap-2 text-sm text-primary hover:underline"
     >
-      <UIcon
-        name="material-symbols:business-center-rounded"
-        class="text-base"
-      />
-      Kontakt in Bexio öffnen
-      <UIcon name="material-symbols:open-in-new-rounded" class="text-sm" />
+      <UIcon name="lucide:briefcase" class="text-base" />
+      {{ t('onboarding.steps.bexio.openContact') }}
+      <UIcon name="lucide:external-link" class="text-sm" />
     </a>
   </div>
 
   <!-- Form -->
   <div v-else class="grid grid-cols-12 gap-4">
     <div class="col-span-12">
-      <UAlert color="info" variant="soft" icon="material-symbols:info-rounded">
+      <UAlert color="info" variant="soft" icon="lucide:info">
         <template #description>
-          Den neuen Client in Bexio als Firmenkontakt erfassen. Die
-          Bexio-Kontakt-ID wird automatisch auf dem Client-Eintrag gespeichert
-          und für die spätere Rechnungsstellung benötigt.
+          {{ t('onboarding.steps.bexio.intro') }}
         </template>
       </UAlert>
     </div>
 
     <div v-if="!data.clientId" class="col-span-12">
-      <UAlert
-        color="warning"
-        variant="soft"
-        icon="material-symbols:warning-rounded"
-      >
+      <UAlert color="warning" variant="soft" icon="lucide:triangle-alert">
         <template #description>
-          Schritt 1 (Directus) muss zuerst abgeschlossen werden, damit der
-          Client-Eintrag nach der Erstellung aktualisiert werden kann.
+          {{ t('onboarding.steps.bexio.directusRequired') }}
         </template>
       </UAlert>
     </div>
 
     <UFormField
-      label="Firmenname"
+      :label="t('onboarding.steps.bexio.company')"
       name="bexioCompany"
       required
       class="col-span-12"
     >
       <UInput
         v-model="data.bexioCompany"
-        placeholder="Muster AG"
+        :placeholder="t('onboarding.steps.bexio.companyPlaceholder')"
         class="w-full"
       />
     </UFormField>
 
     <UFormField
-      label="E-Mail"
+      :label="t('onboarding.steps.bexio.email')"
       name="bexioEmail"
       required
       class="col-span-12"
-      hint="Wird als primäre E-Mail-Adresse des Kontakts hinterlegt"
+      :hint="t('onboarding.steps.bexio.emailHint')"
     >
       <UInput
         v-model="data.bexioEmail"
         type="email"
-        placeholder="info@muster.ch"
-        class="w-full"
-      />
-    </UFormField>
-
-    <UFormField label="Strasse" name="bexioStreet" required class="col-span-8">
-      <UInput
-        v-model="data.bexioStreet"
-        placeholder="Musterstrasse"
+        :placeholder="t('onboarding.steps.bexio.emailPlaceholder')"
         class="w-full"
       />
     </UFormField>
 
     <UFormField
-      label="Nr."
+      :label="t('onboarding.steps.bexio.street')"
+      name="bexioStreet"
+      required
+      class="col-span-8"
+    >
+      <UInput
+        v-model="data.bexioStreet"
+        :placeholder="t('onboarding.steps.bexio.streetPlaceholder')"
+        class="w-full"
+      />
+    </UFormField>
+
+    <UFormField
+      :label="t('onboarding.steps.bexio.streetNumber')"
       name="bexioStreetNumber"
       required
       class="col-span-4"
@@ -219,22 +223,32 @@
       <UInput v-model="data.bexioStreetNumber" placeholder="1" class="w-full" />
     </UFormField>
 
-    <UFormField label="PLZ" name="bexioZip" required class="col-span-4">
+    <UFormField
+      :label="t('onboarding.steps.bexio.zip')"
+      name="bexioZip"
+      required
+      class="col-span-4"
+    >
       <UInput v-model="data.bexioZip" placeholder="8000" class="w-full" />
     </UFormField>
 
-    <UFormField label="Ort" name="bexioCity" required class="col-span-8">
-      <UInput v-model="data.bexioCity" placeholder="Zürich" class="w-full" />
+    <UFormField
+      :label="t('onboarding.steps.bexio.city')"
+      name="bexioCity"
+      required
+      class="col-span-8"
+    >
+      <UInput
+        v-model="data.bexioCity"
+        :placeholder="t('onboarding.steps.bexio.cityPlaceholder')"
+        class="w-full"
+      />
     </UFormField>
 
     <!-- Error -->
     <div v-if="executionError" class="col-span-12">
-      <UAlert
-        color="error"
-        variant="soft"
-        icon="material-symbols:error-rounded"
-      >
-        <template #title>Fehler beim Erstellen</template>
+      <UAlert color="error" variant="soft" icon="lucide:circle-alert">
+        <template #title>{{ t('onboarding.steps.bexio.errorTitle') }}</template>
         <template #description>{{ executionError }}</template>
       </UAlert>
     </div>
@@ -242,12 +256,12 @@
     <!-- Execute -->
     <div class="col-span-12 flex justify-end pt-2">
       <UButton
-        icon="material-symbols:business-center-rounded"
+        icon="lucide:briefcase"
         :loading="loading"
         :disabled="!data.clientId"
         @click="execute"
       >
-        Bexio-Kontakt erstellen
+        {{ t('onboarding.steps.bexio.execute') }}
       </UButton>
     </div>
   </div>

@@ -11,29 +11,25 @@ export interface WarningActionRunnerOptions {
   onUpdate: (updated: JiraWarning) => void
 }
 
-const ACTION_LABELS: Record<
+const ACTION_TOAST_KEYS: Record<
   WarningAction,
-  { success: (key: string) => string; error: string }
+  { success: string; error: string }
 > = {
   requestHalt: {
-    success: (key) =>
-      `Arbeitsstopp für ${key} angefordert. Der Kanal wurde informiert.`,
-    error: 'Stopp konnte nicht angefordert werden.'
+    success: 'workLog.toast.requestHaltSuccess',
+    error: 'workLog.toast.requestHaltError'
   },
   resolveHalt: {
-    success: (key) =>
-      `Arbeitsstopp für ${key} aufgehoben. Die Arbeit kann wieder aufgenommen werden.`,
-    error: 'Stopp konnte nicht aufgehoben werden.'
+    success: 'workLog.toast.resolveHaltSuccess',
+    error: 'workLog.toast.resolveHaltError'
   },
   silence: {
-    success: (key) =>
-      `${key} dauerhaft stummgeschaltet. Es werden keine weiteren Slack-Meldungen gesendet.`,
-    error: 'Stummschalten fehlgeschlagen.'
+    success: 'workLog.toast.silenceSuccess',
+    error: 'workLog.toast.silenceError'
   },
   unsilence: {
-    success: (key) =>
-      `Stummschaltung für ${key} aufgehoben. Slack-Meldungen sind wieder aktiv.`,
-    error: 'Aufheben fehlgeschlagen.'
+    success: 'workLog.toast.unsilenceSuccess',
+    error: 'workLog.toast.unsilenceError'
   }
 }
 
@@ -47,6 +43,7 @@ export function useWarningActionRunner(options: WarningActionRunnerOptions) {
   const { requestHalt, resolveHalt, silence, unsilence } = useJiraWarnings()
   const userStore = useUserStore()
   const toast = useToast()
+  const { $i18n } = useNuxtApp()
 
   const pendingWarningActions = ref<Map<string, WarningAction>>(new Map())
   const haltConfirmWarning = ref<JiraWarning | null>(null)
@@ -109,12 +106,14 @@ export function useWarningActionRunner(options: WarningActionRunnerOptions) {
         })
       }
       toast.add({
-        title: ACTION_LABELS[action].success(warning.jira_issue_key),
+        title: $i18n.t(ACTION_TOAST_KEYS[action].success, {
+          key: warning.jira_issue_key
+        }),
         color: 'success'
       })
     } catch (err) {
       toast.add({
-        title: ACTION_LABELS[action].error,
+        title: $i18n.t(ACTION_TOAST_KEYS[action].error),
         description: err instanceof Error ? err.message : undefined,
         color: 'error'
       })

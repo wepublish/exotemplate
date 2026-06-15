@@ -9,14 +9,8 @@
     holidayName?: string
   }>()
 
-  const HOURS_FORMATTER = new Intl.NumberFormat('de-CH', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2
-  })
-
-  function formatHours(h: number): string {
-    return `${HOURS_FORMATTER.format(h)} h`
-  }
+  const { t } = useI18n()
+  const { formatHours } = useFormatters()
 
   const dotClass = computed<string>(() => {
     switch (props.status) {
@@ -40,24 +34,29 @@
   const statusLabel = computed<string>(() => {
     switch (props.status) {
       case 'captured':
-        return 'Erfasst'
+        return t('timeTracking.dot.captured')
       case 'partial':
-        return 'Teilweise erfasst'
+        return t('timeTracking.dot.partial')
       case 'missing':
-        return 'Nicht erfasst'
+        return t('timeTracking.dot.missing')
       case 'absent':
-        return 'Abwesend'
+        return t('timeTracking.dot.absent')
       case 'weekend':
-        return 'Wochenende'
+        return t('timeTracking.dot.weekend')
       case 'off':
-        return 'Frei (laut Vertrag)'
+        return t('timeTracking.dot.off')
       case 'holiday':
-        return props.holidayName ? `Feiertag: ${props.holidayName}` : 'Feiertag'
+        return props.holidayName
+          ? t('timeTracking.dot.holidayNamed', { name: props.holidayName })
+          : t('timeTracking.dot.holiday')
     }
   })
 
   const tooltipText = computed<string>(() => {
-    const base = `${props.date}: ${statusLabel.value}`
+    const base = t('timeTracking.dot.tooltipBase', {
+      date: props.date,
+      label: statusLabel.value
+    })
     if (
       props.status === 'weekend' ||
       props.status === 'off' ||
@@ -65,10 +64,11 @@
     ) {
       return base
     }
-    if (props.status === 'absent') return `${base} (in Clockodo)`
+    if (props.status === 'absent')
+      return t('timeTracking.dot.absentInClockodo', { base })
     const captured = formatHours(props.capturedHours)
     const expected = formatHours(props.expectedHours)
-    return `${base} — ${captured} von ${expected}`
+    return t('timeTracking.dot.tooltipHours', { base, captured, expected })
   })
 
   const ariaLabel = computed<string>(() => tooltipText.value)

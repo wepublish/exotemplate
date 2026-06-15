@@ -8,6 +8,9 @@
 
   const userStore = useUserStore()
   const onboardingProgress = useOnboardingProgress()
+  const { t } = useI18n()
+  const { formatDateTime } = useFormatters()
+  const link = useClientPeriodLink()
 
   const allClients = ref<Client[]>([])
   const clientsLoading = ref(false)
@@ -33,25 +36,32 @@
 
   // ── Display helpers ────────────────────────────────────────────────────────
 
-  const STEP_TITLES = [
-    'ONE',
-    'Jira',
-    'Slack',
-    'Bexio',
-    'Clockodo',
-    'Infrastruktur',
-    'Manuelle Schritte',
-    'E-Mail'
-  ]
+  const stepTitles = computed(() => [
+    t('onboarding.steps.directus.title'),
+    t('onboarding.steps.jira.title'),
+    t('onboarding.steps.slack.title'),
+    t('onboarding.steps.bexio.title'),
+    t('onboarding.steps.clockodo.title'),
+    t('onboarding.steps.infrastructure.title'),
+    t('onboarding.steps.manualTasks.title'),
+    t('onboarding.steps.email.title')
+  ])
 
   function stepLabel(client: Client): string {
     const statuses = deriveStepStatuses(client)
     const completedCount = statuses.filter((s) => s === 'completed').length
-    if (completedCount === ONBOARDING_STEP_COUNT) return 'Abgeschlossen'
+    if (completedCount === ONBOARDING_STEP_COUNT)
+      return t('onboarding.index.status.completed')
     const firstIncomplete = statuses.findIndex((s) => s !== 'completed')
     const idx = firstIncomplete === -1 ? statuses.length - 1 : firstIncomplete
-    const current = STEP_TITLES[idx] ?? `Schritt ${idx + 1}`
-    return `${completedCount}/${ONBOARDING_STEP_COUNT} — ${current}`
+    const current =
+      stepTitles.value[idx] ??
+      t('onboarding.index.status.stepFallback', { n: idx + 1 })
+    return t('onboarding.index.status.stepProgress', {
+      completed: completedCount,
+      total: ONBOARDING_STEP_COUNT,
+      current
+    })
   }
 
   function progressValue(client: Client): number {
@@ -76,14 +86,14 @@
   }
 
   function actionLabel(client: Client): string {
-    if (isComplete(client)) return 'Ansehen'
-    if (hasAnyProgress(client)) return 'Fortsetzen'
-    return 'Starten'
+    if (isComplete(client)) return t('onboarding.index.action.view')
+    if (hasAnyProgress(client)) return t('onboarding.index.action.continue')
+    return t('onboarding.index.action.start')
   }
 
   function actionIcon(client: Client): string {
-    if (isComplete(client)) return 'material-symbols:visibility-rounded'
-    return 'material-symbols:play-arrow-rounded'
+    if (isComplete(client)) return 'lucide:eye'
+    return 'lucide:play'
   }
 
   function actionColor(client: Client): 'neutral' | 'primary' {
@@ -91,26 +101,15 @@
   }
 
   function statusIcon(client: Client): string {
-    if (isComplete(client)) return 'material-symbols:verified-rounded'
-    if (hasAnyProgress(client)) return 'material-symbols:pending-rounded'
-    return 'material-symbols:business-rounded'
+    if (isComplete(client)) return 'lucide:badge-check'
+    if (hasAnyProgress(client)) return 'lucide:clock'
+    return 'lucide:building-2'
   }
 
   function statusIconColor(client: Client): string {
     if (isComplete(client)) return 'text-success'
     if (hasAnyProgress(client)) return 'text-primary'
     return 'text-muted'
-  }
-
-  function formatDate(dateStr: string | null): string {
-    if (!dateStr) return ''
-    return new Date(dateStr).toLocaleDateString('de-CH', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
   }
 </script>
 
@@ -120,37 +119,33 @@
     <UPageCard class="max-w-md w-full">
       <template #header>
         <div class="flex items-center gap-3">
-          <UIcon
-            name="material-symbols:lock-rounded"
-            class="text-3xl text-error"
-          />
+          <UIcon name="lucide:lock" class="text-3xl text-error" />
           <div>
-            <p class="font-bold text-lg">Kein Zugriff</p>
-            <p class="text-sm text-muted">Unzureichende Berechtigungen</p>
+            <p class="font-bold text-lg">
+              {{ t('common.accessDenied.title') }}
+            </p>
+            <p class="text-sm text-muted">
+              {{ t('onboarding.index.accessSubtitle') }}
+            </p>
           </div>
         </div>
       </template>
 
-      <UAlert
-        color="error"
-        variant="soft"
-        icon="material-symbols:no-accounts-rounded"
-      >
-        <template #title>Nur für Administratoren</template>
+      <UAlert color="error" variant="soft" icon="lucide:user-x">
+        <template #title>{{ t('common.accessDenied.title') }}</template>
         <template #description>
-          Diese Seite ist ausschliesslich für Administratoren zugänglich. Bitte
-          wende Dich an einen Administrator, falls Du Zugriff benötigst.
+          {{ t('common.accessDenied.body') }}
         </template>
       </UAlert>
 
       <div class="pt-4">
         <UButton
-          to="/"
-          icon="material-symbols:arrow-back-ios-rounded"
+          :to="link('/dashboard')"
+          icon="lucide:chevron-left"
           variant="ghost"
           color="neutral"
         >
-          Zurück zum Dashboard
+          {{ t('onboarding.index.backToDashboard') }}
         </UButton>
       </div>
     </UPageCard>
@@ -160,17 +155,13 @@
   <div v-else>
     <div class="flex items-center justify-between mb-6">
       <div>
-        <h1 class="text-2xl font-bold">Client Onboarding</h1>
+        <h1 class="text-2xl font-bold">{{ t('onboarding.index.title') }}</h1>
         <p class="text-muted">
-          Neuen Client Schritt für Schritt in allen Systemen einrichten.
+          {{ t('onboarding.index.subtitle') }}
         </p>
       </div>
-      <UBadge
-        color="primary"
-        variant="soft"
-        icon="material-symbols:admin-panel-settings-rounded"
-      >
-        Admin
+      <UBadge color="primary" variant="soft" icon="lucide:shield-check">
+        {{ t('onboarding.index.adminBadge') }}
       </UBadge>
     </div>
 
@@ -179,21 +170,17 @@
       <UPageCard>
         <template #header>
           <div class="flex items-center gap-3">
-            <UIcon
-              name="material-symbols:add-circle-rounded"
-              class="text-2xl text-primary"
-            />
-            <p class="font-semibold">Neues Onboarding starten</p>
+            <UIcon name="lucide:circle-plus" class="text-2xl text-primary" />
+            <p class="font-semibold">
+              {{ t('onboarding.index.startNew.title') }}
+            </p>
           </div>
         </template>
         <p class="text-sm text-muted mb-4">
-          Einen neuen Client von Grund auf in allen Systemen einrichten.
+          {{ t('onboarding.index.startNew.description') }}
         </p>
-        <UButton
-          icon="material-symbols:rocket-launch-rounded"
-          to="/onboarding/new"
-        >
-          Neues Onboarding starten
+        <UButton icon="lucide:rocket" :to="link('/onboarding/new')">
+          {{ t('onboarding.index.startNew.button') }}
         </UButton>
       </UPageCard>
 
@@ -202,32 +189,30 @@
         <template #header>
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <UIcon
-                name="material-symbols:manage-accounts-rounded"
-                class="text-2xl text-warning"
-              />
-              <p class="font-semibold">Clients</p>
+              <UIcon name="lucide:user-cog" class="text-2xl text-warning" />
+              <p class="font-semibold">
+                {{ t('onboarding.index.clients.title') }}
+              </p>
             </div>
             <UButton
               size="xs"
               variant="ghost"
               color="neutral"
-              icon="material-symbols:refresh-rounded"
+              icon="lucide:refresh-cw"
               :loading="clientsLoading"
               @click="loadAllClients"
             />
           </div>
         </template>
         <p class="text-sm text-muted mb-4">
-          Jeden Client ansehen, fortsetzen oder starten. Der Fortschritt wird
-          anhand der in den jeweiligen Diensten hinterlegten IDs ermittelt.
+          {{ t('onboarding.index.clients.description') }}
         </p>
 
         <div class="flex flex-col gap-3">
           <UInput
             v-model="clientSearch"
-            placeholder="Client suchen…"
-            icon="material-symbols:search-rounded"
+            :placeholder="t('onboarding.index.clients.searchPlaceholder')"
+            icon="lucide:search"
             :loading="clientsLoading"
           />
 
@@ -235,14 +220,14 @@
             v-if="!clientsLoading && filteredClients.length === 0"
             class="text-sm text-muted italic"
           >
-            Keine Clients gefunden.
+            {{ t('onboarding.index.clients.noneFound') }}
           </div>
 
           <div v-else class="flex flex-col gap-2 max-h-96 overflow-y-auto">
             <NuxtLink
               v-for="client in filteredClients"
               :key="client.id"
-              :to="`/onboarding/${client.id}`"
+              :to="link(`/onboarding/${client.id}`)"
               class="flex items-center gap-4 p-3 rounded-lg border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
             >
               <!-- Status icon -->
@@ -319,7 +304,7 @@
                 v-if="client.date_updated"
                 class="text-xs text-muted whitespace-nowrap shrink-0"
               >
-                {{ formatDate(client.date_updated) }}
+                {{ formatDateTime(client.date_updated) }}
               </p>
 
               <!-- Action -->

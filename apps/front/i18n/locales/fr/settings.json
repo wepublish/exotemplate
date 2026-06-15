@@ -1,0 +1,40 @@
+{
+  "settings": {
+    "title": "Paramètres",
+    "subtitle": "Définis par client les notifications Slack envoyées. Les interrupteurs sont immédiats — tant qu'un interrupteur est désactivé, aucune notification Slack correspondante n'est envoyée pour ce client.",
+    "noClients": "Aucun client ne t'est attribué pour le moment.",
+    "forClient": "Paramètres pour {client}",
+    "notifications": {
+      "title": "Notifications"
+    },
+    "billingMode": {
+      "label": "Modèle de facturation",
+      "description": "Prépayé = tarif horaire plus bas, top-ups payés à l'avance. Facturation mensuelle = tarif horaire plus élevé, facturation mensuelle selon la charge. Seuls les administrateurs peuvent modifier ce modèle.",
+      "updated": "Modèle de facturation mis à jour pour {client}."
+    },
+    "jiraWarnings": {
+      "label": "Alertes de seuil Jira",
+      "description": "Lorsqu'un ticket Jira dépasse un seuil configuré, une notification Slack est envoyée au canal du client. Si désactivé ici, le canal reste silencieux pour ces alertes.",
+      "howThresholds": "Comment fonctionnent les seuils ?",
+      "muted": "Alertes de seuil Jira désactivées pour {client}.",
+      "enabled": "Alertes de seuil Jira activées pour {client}."
+    },
+    "weeklyReport": {
+      "label": "Rapport hebdomadaire",
+      "description": "Résumé hebdomadaire par canal Slack client. La désactivation supprime le prochain rapport et tous les suivants pour ce client, jusqu'à réactivation de l'interrupteur.",
+      "muted": "Rapport hebdomadaire désactivé pour {client}.",
+      "enabled": "Rapport hebdomadaire activé pour {client}."
+    },
+    "language": {
+      "label": "Langue du projet",
+      "description": "Langue des messages Slack côté client (rapport hebdomadaire, alertes Jira, arrêt de travail) pour ce client.",
+      "updated": "Langue mise à jour.",
+      "clientUpdated": "Langue du projet mise à jour pour {client}."
+    },
+    "contract": {
+      "label": "Contrat",
+      "description": "Consulter les contrats de ce client, créer de nouvelles versions et téléverser les contrats signés.",
+      "manage": "Gérer"
+    }
+  }
+}

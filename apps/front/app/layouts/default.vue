@@ -2,11 +2,42 @@
   import type { NavigationMenuItem } from '@nuxt/ui'
 
   const userStore = useUserStore()
+  const selection = useClientSelection()
   const route = useRoute()
+  const router = useRouter()
+  const { t } = useI18n()
+  const link = useClientPeriodLink()
 
+  // Any /auth/* route renders its own content (login, forgot/reset password,
+  // accept invite) — these must be reachable while logged out. Every other
+  // route falls back to the login form when unauthenticated.
   const showLoginForm = computed<boolean>(() => {
-    return !userStore.loggedIn && !route.fullPath.startsWith('/auth/login')
+    return !userStore.loggedIn && !route.fullPath.startsWith('/auth/')
   })
+
+  // The selection lives in the `/:clientPeriodId` path prefix, so the selector
+  // shows on every app route (admin included) and is hidden only on the bare
+  // `/` redirect and `/auth/*`. Because every app route carries it, the nav
+  // never jumps between pages.
+  const showSelector = computed<boolean>(
+    () => userStore.loggedIn && !!route.params.clientPeriodId
+  )
+
+  // Guard against a stale / unknown period in the path (deleted period, a link
+  // to a client the user can no longer see): send them to their default once
+  // the client list has loaded.
+  watch(
+    [() => selection.selectedClientPeriodId, () => selection.clients.length],
+    () => {
+      if (!userStore.loggedIn) return
+      if (!selection.selectedClientPeriodId || !selection.clients.length) return
+      if (!selection.selectedClient) {
+        const fallback = selection.defaultClientPeriodId()
+        if (fallback) router.replace(`/${fallback}/dashboard`)
+      }
+    },
+    { immediate: true }
+  )
 
   /**
    * Nav items shaped for `UNavigationMenu`. The array-of-arrays layout
@@ -14,16 +45,29 @@
    * divider in vertical orientation.
    */
   const navItems = computed<NavigationMenuItem[][]>(() => {
+    // Every entry keeps the current `/:clientPeriodId` prefix via `link()`, so
+    // the selection is preserved when moving between pages — including the
+    // admin entries (so it isn't lost hopping admin ↔ client pages).
     const general: NavigationMenuItem[] = [
       {
-        label: 'Dashboard',
-        icon: 'material-symbols:home-rounded',
-        to: '/'
+        label: t('nav.dashboard'),
+        icon: 'lucide:house',
+        to: link('/dashboard')
       },
       {
-        label: 'Einstellungen',
-        icon: 'material-symbols:settings-rounded',
-        to: '/settings'
+        label: t('nav.invoices'),
+        icon: 'lucide:receipt-text',
+        to: link('/top-ups')
+      },
+      {
+        label: 'Team',
+        icon: 'lucide:users',
+        to: link('/team')
+      },
+      {
+        label: t('nav.settings'),
+        icon: 'lucide:settings',
+        to: link('/settings')
       }
     ]
 
@@ -32,19 +76,19 @@
     if (userStore.amIAdministrator()) {
       groups.push([
         {
-          label: 'Projektübersicht',
-          icon: 'material-symbols:grid-view-rounded',
-          to: '/overview'
+          label: t('nav.projectOverview'),
+          icon: 'lucide:layout-grid',
+          to: link('/overview')
         },
         {
-          label: 'Übersicht Zeiterfassung',
-          icon: 'material-symbols:monitoring',
-          to: '/time-tracking'
+          label: t('nav.timeTrackingOverview'),
+          icon: 'lucide:activity',
+          to: link('/time-tracking')
         },
         {
-          label: 'Onboarding',
-          icon: 'material-symbols:person-add-rounded',
-          to: '/onboarding'
+          label: t('nav.onboarding'),
+          icon: 'lucide:user-plus',
+          to: link('/onboarding')
         }
       ])
     }
@@ -62,12 +106,12 @@
         slide-out drawer can come later.
       -->
       <aside
-        class="hidden md:flex w-72 shrink-0 flex-col gap-6 border-r border-default bg-elevated p-4"
+        class="hidden md:flex sticky top-0 h-screen w-72 shrink-0 flex-col gap-6 border-r border-default bg-elevated p-4"
       >
         <NuxtLink
-          to="/"
-          class="flex min-w-0 items-center gap-2 hover:opacity-80 transition-opacity"
-          aria-label="Zum Dashboard"
+          :to="link('/dashboard')"
+          class="flex min-w-0 shrink-0 items-center gap-2 hover:opacity-80 transition-opacity"
+          :aria-label="t('nav.toDashboard')"
         >
           <img
             src="@/assets/images/wep-logo.png"
@@ -77,26 +121,31 @@
           <p class="text-xl text-primary font-bold shrink-0">ONE</p>
         </NuxtLink>
 
+        <ClientPeriodSelector v-if="showSelector" class="shrink-0" />
+
         <UNavigationMenu
           v-if="userStore.loggedIn"
           orientation="vertical"
           :items="navItems"
-          class="-mx-1 flex-1"
+          class="-mx-1 min-h-0 flex-1 overflow-y-auto"
         />
 
         <div
           v-if="userStore.loggedIn"
-          class="mt-auto flex items-center justify-between border-t border-default pt-3"
+          class="mt-auto flex shrink-0 items-center justify-between border-t border-default pt-3"
         >
-          <UColorModeButton />
+          <div class="flex items-center gap-1">
+            <UColorModeButton />
+            <LanguageSwitcher />
+          </div>
           <UButton
-            icon="i-material-symbols:logout"
-            aria-label="Abmelden"
+            icon="lucide:log-out"
+            :aria-label="t('nav.logout')"
             color="neutral"
             variant="ghost"
             @click="userStore.logout()"
           >
-            Abmelden
+            {{ t('nav.logout') }}
           </UButton>
         </div>
       </aside>
@@ -110,9 +159,9 @@
         class="md:hidden fixed top-0 inset-x-0 z-40 flex items-center justify-between border-b border-default bg-default p-3"
       >
         <NuxtLink
-          to="/"
+          :to="link('/dashboard')"
           class="flex items-center gap-2"
-          aria-label="Zum Dashboard"
+          :aria-label="t('nav.toDashboard')"
         >
           <img
             src="@/assets/images/wep-logo.png"
@@ -123,9 +172,10 @@
         </NuxtLink>
         <div class="flex items-center gap-1">
           <UColorModeButton />
+          <LanguageSwitcher />
           <UButton
-            icon="i-material-symbols:logout"
-            aria-label="Abmelden"
+            icon="lucide:log-out"
+            :aria-label="t('nav.logout')"
             color="neutral"
             variant="ghost"
             @click="userStore.logout()"
@@ -137,7 +187,14 @@
         <UMain class="flex-1 md:pt-0 pt-16">
           <UContainer class="pt-8 pb-8">
             <AuthLoginForm v-if="showLoginForm" />
-            <slot v-else />
+            <template v-else>
+              <!-- Mobile fallback: the sidebar selector is hidden below md. -->
+              <ClientPeriodSelector
+                v-if="showSelector"
+                class="md:hidden mb-6"
+              />
+              <slot />
+            </template>
           </UContainer>
         </UMain>
 
@@ -146,7 +203,7 @@
         <UFooter>
           <template #left>
             <p class="text-sm text-muted">
-              Built with Nuxt UI • © {{ new Date().getFullYear() }}
+              {{ t('nav.footer', { year: new Date().getFullYear() }) }}
             </p>
           </template>
 
@@ -154,8 +211,8 @@
             <UButton
               to="https://github.com/wepublish/wepublish"
               target="_blank"
-              icon="i-simple-icons-github"
-              aria-label="GitHub"
+              icon="lucide:github"
+              :aria-label="t('nav.github')"
               color="neutral"
               variant="ghost"
             />

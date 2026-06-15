@@ -3,6 +3,8 @@
    * Compact, clickable dashboard tile. Renders title (left) + hour total
    * (top-right) and links into the matching detail page when clicked.
    */
+  const { t } = useI18n()
+
   defineProps<{
     title: string
     hours: number | undefined
@@ -15,8 +17,8 @@
 <template>
   <NuxtLink
     :to="to"
-    class="block group focus:outline-none"
-    :aria-label="`${title} – Details anzeigen`"
+    class="block h-full group focus:outline-none"
+    :aria-label="t('dashboard.summaryCard.detailsAria', { title })"
   >
     <UPageCard
       class="h-full transition-shadow group-hover:shadow-lg group-focus-visible:ring-2 group-focus-visible:ring-primary cursor-pointer"
@@ -45,12 +47,14 @@
         <slot />
       </div>
 
-      <div class="flex justify-end items-center text-xs text-muted mt-2">
+      <div
+        class="flex justify-end items-center text-xs text-muted mt-auto pt-2"
+      >
         <span class="group-hover:text-primary transition-colors">
-          Details anzeigen
+          {{ t('dashboard.summaryCard.showDetails') }}
         </span>
         <UIcon
-          name="material-symbols:arrow-forward-rounded"
+          name="lucide:arrow-right"
           class="ml-1 group-hover:text-primary transition-colors"
         />
       </div>

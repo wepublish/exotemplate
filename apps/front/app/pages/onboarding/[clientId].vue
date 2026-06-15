@@ -5,6 +5,8 @@
   const router = useRouter()
   const userStore = useUserStore()
   const onboardingProgress = useOnboardingProgress()
+  const { t } = useI18n()
+  const link = useClientPeriodLink()
 
   const rawId = computed(() => String(route.params.clientId ?? ''))
   const isNew = computed(() => rawId.value === 'new')
@@ -40,7 +42,7 @@
   function handleClientCreated(newClient: Client) {
     client.value = newClient
     if (isNew.value) {
-      router.replace(`/onboarding/${newClient.id}`)
+      router.replace(link(`/onboarding/${newClient.id}`))
     }
   }
 
@@ -49,7 +51,7 @@
   }
 
   async function handleCompleted() {
-    await router.push('/onboarding')
+    await router.push(link('/onboarding'))
   }
 </script>
 
@@ -59,24 +61,21 @@
     <UPageCard class="max-w-md w-full">
       <template #header>
         <div class="flex items-center gap-3">
-          <UIcon
-            name="material-symbols:lock-rounded"
-            class="text-3xl text-error"
-          />
+          <UIcon name="lucide:lock" class="text-3xl text-error" />
           <div>
-            <p class="font-bold text-lg">Kein Zugriff</p>
-            <p class="text-sm text-muted">Unzureichende Berechtigungen</p>
+            <p class="font-bold text-lg">
+              {{ t('common.accessDenied.title') }}
+            </p>
+            <p class="text-sm text-muted">
+              {{ t('onboarding.index.accessSubtitle') }}
+            </p>
           </div>
         </div>
       </template>
-      <UAlert
-        color="error"
-        variant="soft"
-        icon="material-symbols:no-accounts-rounded"
-      >
-        <template #title>Nur für Administratoren</template>
+      <UAlert color="error" variant="soft" icon="lucide:user-x">
+        <template #title>{{ t('common.accessDenied.title') }}</template>
         <template #description>
-          Diese Seite ist ausschliesslich für Administratoren zugänglich.
+          {{ t('common.accessDenied.body') }}
         </template>
       </UAlert>
     </UPageCard>
@@ -86,24 +85,23 @@
     <UPageCard class="max-w-md w-full">
       <template #header>
         <div class="flex items-center gap-3">
-          <UIcon
-            name="material-symbols:search-off-rounded"
-            class="text-3xl text-warning"
-          />
+          <UIcon name="lucide:search-x" class="text-3xl text-warning" />
           <div>
-            <p class="font-bold text-lg">Client nicht gefunden</p>
+            <p class="font-bold text-lg">
+              {{ t('onboarding.detail.notFoundTitle') }}
+            </p>
             <p class="text-sm text-muted">
-              Der angefragte Client existiert nicht (mehr).
+              {{ t('onboarding.detail.notFoundDescription') }}
             </p>
           </div>
         </div>
       </template>
       <UButton
-        to="/onboarding"
-        icon="material-symbols:arrow-back-ios-rounded"
+        :to="link('/onboarding')"
+        icon="lucide:chevron-left"
         variant="outline"
       >
-        Zurück zur Übersicht
+        {{ t('onboarding.detail.backToOverview') }}
       </UButton>
     </UPageCard>
   </div>
@@ -111,35 +109,25 @@
   <div v-else>
     <div class="flex items-center gap-3 mb-4">
       <UButton
-        to="/onboarding"
-        icon="material-symbols:arrow-back-ios-rounded"
+        :to="link('/onboarding')"
+        icon="lucide:chevron-left"
         variant="ghost"
         color="neutral"
         size="sm"
       >
-        Zurück zur Übersicht
+        {{ t('onboarding.detail.backToOverview') }}
       </UButton>
-      <UBadge
-        v-if="client"
-        color="info"
-        variant="soft"
-        icon="material-symbols:history-rounded"
-      >
+      <UBadge v-if="client" color="info" variant="soft" icon="lucide:history">
         {{ client.name }}
       </UBadge>
-      <UBadge
-        v-else
-        color="success"
-        variant="soft"
-        icon="material-symbols:add-circle-rounded"
-      >
-        Neues Onboarding
+      <UBadge v-else color="success" variant="soft" icon="lucide:circle-plus">
+        {{ t('onboarding.detail.newOnboarding') }}
       </UBadge>
     </div>
 
     <div v-if="loading" class="flex justify-center py-12">
       <UIcon
-        name="material-symbols:sync-rounded"
+        name="lucide:refresh-cw"
         class="text-3xl text-muted animate-spin"
       />
     </div>

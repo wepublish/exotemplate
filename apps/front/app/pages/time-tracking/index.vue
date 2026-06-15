@@ -8,6 +8,8 @@
   const userStore = useUserStore()
   const { directus } = useDirectus()
   const toast = useToast()
+  const { t } = useI18n()
+  const link = useClientPeriodLink()
 
   function isoToday(): string {
     const d = new Date()
@@ -47,8 +49,8 @@
     if (fromInput.value > toInput.value) {
       toast.add({
         color: 'error',
-        title: 'Ungültiger Zeitraum',
-        description: '"Von" muss vor "Bis" liegen.'
+        title: t('timeTracking.range.invalidTitle'),
+        description: t('timeTracking.range.invalidDescription')
       })
       return
     }
@@ -65,17 +67,17 @@
       await invalidate()
       toast.add({
         color: 'success',
-        title: 'Daten neu geladen',
-        description: 'Frisch von Clockodo geholt.'
+        title: t('timeTracking.refresh.successTitle'),
+        description: t('timeTracking.refresh.successDescription')
       })
     } catch (err: any) {
       toast.add({
         color: 'error',
-        title: 'Aktualisieren fehlgeschlagen',
+        title: t('timeTracking.refresh.errorTitle'),
         description:
           err?.response?.data?.errors?.[0]?.message ||
           err?.message ||
-          'Unbekannter Fehler'
+          t('common.unexpectedError')
       })
     } finally {
       refreshing.value = false
@@ -101,7 +103,7 @@
         )
         toast.add({
           color: 'success',
-          title: `${row.name} wird wieder benachrichtigt`
+          title: t('timeTracking.toggle.renotifiedTitle', { name: row.name })
         })
       } else if (!row.ignored) {
         await directus.request(
@@ -109,16 +111,18 @@
         )
         toast.add({
           color: 'success',
-          title: `${row.name} wird ab sofort ignoriert`
+          title: t('timeTracking.toggle.ignoredTitle', { name: row.name })
         })
       }
       await refresh()
     } catch (err: any) {
       toast.add({
         color: 'error',
-        title: 'Ändern fehlgeschlagen',
+        title: t('timeTracking.toggle.errorTitle'),
         description:
-          err?.errors?.[0]?.message || err?.message || 'Unbekannter Fehler'
+          err?.errors?.[0]?.message ||
+          err?.message ||
+          t('common.unexpectedError')
       })
     } finally {
       togglingId.value = null
@@ -132,36 +136,33 @@
     <UPageCard class="max-w-md w-full">
       <template #header>
         <div class="flex items-center gap-3">
-          <UIcon
-            name="material-symbols:lock-rounded"
-            class="text-3xl text-error"
-          />
+          <UIcon name="lucide:lock" class="text-3xl text-error" />
           <div>
-            <p class="font-bold text-lg">Kein Zugriff</p>
-            <p class="text-sm text-muted">Unzureichende Berechtigungen</p>
+            <p class="font-bold text-lg">
+              {{ t('common.accessDenied.title') }}
+            </p>
+            <p class="text-sm text-muted">
+              {{ t('common.accessDenied.body') }}
+            </p>
           </div>
         </div>
       </template>
 
-      <UAlert
-        color="error"
-        variant="soft"
-        icon="material-symbols:no-accounts-rounded"
-      >
-        <template #title>Nur für Administratoren</template>
+      <UAlert color="error" variant="soft" icon="lucide:user-x">
+        <template #title>{{ t('common.accessDenied.title') }}</template>
         <template #description>
-          Diese Seite ist ausschliesslich für Administratoren zugänglich.
+          {{ t('common.accessDenied.body') }}
         </template>
       </UAlert>
 
       <div class="pt-4">
         <UButton
-          to="/"
-          icon="material-symbols:arrow-back-ios-rounded"
+          :to="link('/dashboard')"
+          icon="lucide:chevron-left"
           variant="ghost"
           color="neutral"
         >
-          Zurück zum Dashboard
+          {{ t('common.back') }}
         </UButton>
       </div>
     </UPageCard>
@@ -171,34 +172,27 @@
   <div v-else>
     <div class="flex items-center justify-between mb-6">
       <div>
-        <h1 class="text-2xl font-bold">Übersicht Zeiterfassung</h1>
+        <h1 class="text-2xl font-bold">{{ t('timeTracking.pageTitle') }}</h1>
         <p class="text-muted">
-          Wer hat seine Stunden bereits erfasst? Wochenenden, Feiertage,
-          Abwesenheiten und vertraglich freie Tage werden nicht als fehlend
-          gewertet. Über das Glocken-Symbol kannst Du einzelne Personen aus den
-          täglichen Slack-Erinnerungen ausschliessen.
+          {{ t('timeTracking.pageIntro') }}
         </p>
       </div>
-      <UBadge
-        color="primary"
-        variant="soft"
-        icon="material-symbols:admin-panel-settings-rounded"
-      >
-        Admin
+      <UBadge color="primary" variant="soft" icon="lucide:shield-check">
+        {{ t('timeTracking.adminBadge') }}
       </UBadge>
     </div>
 
     <div class="flex flex-col gap-6">
       <UPageCard>
         <div class="flex flex-wrap items-end gap-3">
-          <UFormField label="Von" name="from">
+          <UFormField :label="t('timeTracking.range.from')" name="from">
             <UInput
               v-model="fromInput"
               type="date"
               :max="toInput || isoToday()"
             />
           </UFormField>
-          <UFormField label="Bis" name="to">
+          <UFormField :label="t('timeTracking.range.to')" name="to">
             <UInput
               v-model="toInput"
               type="date"
@@ -208,20 +202,20 @@
           </UFormField>
           <UButton
             color="primary"
-            icon="i-lucide-search"
+            icon="lucide:search"
             :loading="pending"
             @click="applyRange"
           >
-            Anwenden
+            {{ t('timeTracking.range.apply') }}
           </UButton>
           <UButton
             color="neutral"
             variant="ghost"
-            icon="i-lucide-refresh-cw"
+            icon="lucide:refresh-cw"
             :loading="refreshing"
             @click="onRefreshClick"
           >
-            Neu laden
+            {{ t('common.refresh') }}
           </UButton>
         </div>
       </UPageCard>
@@ -230,8 +224,8 @@
         v-if="error"
         color="error"
         variant="soft"
-        icon="material-symbols:error-outline"
-        :title="error.message || 'Daten konnten nicht geladen werden'"
+        icon="lucide:circle-alert"
+        :title="error.message || t('timeTracking.loadError')"
       />
 
       <UPageCard>
@@ -239,45 +233,45 @@
           <div class="flex flex-wrap items-center gap-3 text-xs text-muted">
             <span class="inline-flex items-center gap-2">
               <span class="inline-block w-3 h-3 rounded-full bg-success" />
-              Erfasst
+              {{ t('timeTracking.status.captured') }}
             </span>
             <span class="inline-flex items-center gap-2">
               <span class="inline-block w-3 h-3 rounded-full bg-warning" />
-              Teilweise
+              {{ t('timeTracking.status.partial') }}
             </span>
             <span class="inline-flex items-center gap-2">
               <span class="inline-block w-3 h-3 rounded-full bg-error" />
-              Fehlt
+              {{ t('timeTracking.status.missing') }}
             </span>
             <span class="inline-flex items-center gap-2">
               <span
                 class="inline-block w-3 h-3 rounded-full bg-blue-300 dark:bg-blue-700"
               />
-              Feiertag
+              {{ t('timeTracking.status.holiday') }}
             </span>
             <span class="inline-flex items-center gap-2">
               <span
                 class="inline-block w-3 h-3 rounded-full bg-neutral-300 dark:bg-neutral-600"
               />
-              Abwesend
+              {{ t('timeTracking.status.absent') }}
             </span>
             <span class="inline-flex items-center gap-2">
               <span
                 class="inline-block w-3 h-3 rounded-full border border-dashed border-muted"
               />
-              Frei (laut Vertrag)
+              {{ t('timeTracking.legend.off') }}
             </span>
             <span class="inline-flex items-center gap-2">
               <span
                 class="inline-block w-3 h-3 rounded-full border border-default"
               />
-              Wochenende
+              {{ t('timeTracking.status.weekend') }}
             </span>
           </div>
         </template>
 
         <div v-if="pending && !data.length" class="text-sm text-muted py-6">
-          Lade Daten von Clockodo…
+          {{ t('timeTracking.loadingData') }}
         </div>
 
         <TimeTrackingMissingHoursList

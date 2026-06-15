@@ -1,11 +1,13 @@
-import type { DirectusUser } from '@directus/sdk'
+import type { DirectusRole, DirectusUser } from '@directus/sdk'
 
 export interface Schema {
   BillingSnapshots: BillingSnapshot[]
   CaptureIgnoredUsers: CaptureIgnoredUser[]
   Clients: Client[]
+  Contracts: Contract[]
   Clients_Periods: ClientPeriod[]
   Clients_directus_users: ClientDirectusUser[]
+  Invoices: Invoice[]
   JiraWarnings: JiraWarning[]
   ManualWorkEntries: ManualWorkEntry[]
   NotificationThresholds: NotificationThreshold[]
@@ -47,6 +49,9 @@ export interface CaptureIgnoredUser {
 
 export type BillingMode = 'prepaid' | 'monthly'
 
+/** Supported UI / Slack languages. Mirrors `Clients.language` in the backend. */
+export type AppLocale = 'de' | 'fr' | 'en'
+
 export interface Client {
   clockodo_customer_id: string | null
   date_created: string | null
@@ -66,9 +71,35 @@ export interface Client {
   notifications_paused: boolean
   weekly_report_paused: boolean
   billing_mode: BillingMode
+  /** Drives the language of this project's client-facing Slack messages. */
+  language: AppLocale
   allowedUsers: string[] | ClientDirectusUser[]
   periods: string[] | ClientPeriod[]
   articles: string[] | PeerArticle[]
+  contracts: number[] | Contract[]
+}
+
+/**
+ * A client contract version. Mirrors the `Contracts` collection in the backend
+ * (one-directus). Each row is an uploaded PDF (`file`) with a `signed` flag. The
+ * latest non-archived `version` is the one "in effect".
+ */
+export interface Contract {
+  id: number
+  status: 'published' | 'draft' | 'archived'
+  sort: number | null
+  client: string | Client | null
+  version: number
+  /** The uploaded contract PDF (directus_files id). */
+  file: string | null
+  /** Whether this version is the signed contract. */
+  signed: boolean
+  signed_at: string | null
+  notes: string | null
+  date_created: string | null
+  date_updated: string | null
+  user_created: string | DirectusUser<Schema> | null
+  user_updated: string | DirectusUser<Schema> | null
 }
 
 export interface NotificationThreshold {
@@ -112,6 +143,7 @@ export interface ClientPeriod {
   id: number
   manualWorkEntries: number[] | ManualWorkEntry[]
   topUps: number[] | TopUp[]
+  invoices: number[] | Invoice[]
 }
 
 export interface ClientDirectusUser {
@@ -182,9 +214,44 @@ export interface TopUp {
   bexioInvoiceId: number | null
 }
 
+/**
+ * Order-backed invoices (e.g. recurring hosting). A SEPARATE collection from
+ * `TopUp`: these never count toward available hours. Mirror of the backend
+ * `Invoice` interface. The `type` field discriminates future invoice kinds.
+ */
+export interface Invoice {
+  id: string
+  status: 'published' | 'draft' | 'archived'
+  sort: number | null
+  date_created: string | null
+  date_updated: string | null
+  user_created: string | DirectusUser<Schema> | null
+  user_updated: string | DirectusUser<Schema> | null
+  clientPeriod: number | ClientPeriod | null
+  type: string
+  title: string | null
+  description: string | null
+  bexioOrderId: number | null
+  bexioInvoiceId: number | null
+  unitPrice: number | null
+  quantity: number | null
+  billedUnits: number | null
+  weSharePercentage: number | null
+  periodicity: string | null
+  amount: number | null
+}
+
 export interface CustomDirectusUser {
   id: string
   accessToClients: string[] | ClientDirectusUser[]
+  /** The user's role; `readMe` requests `role: ['name']`. */
+  role: string | DirectusRole<Schema> | null
+  /**
+   * The user's preferred UI language. Stored in the built-in Directus
+   * `directus_users.language` field; may hold a bare code (`de`) or a legacy
+   * locale tag (`de-DE`) — resolve via `useAppLocale().resolveLocale()`.
+   */
+  language: string | null
 }
 
 export interface DirectusSyncIdMap {

@@ -9,30 +9,32 @@
     sums: Sums | undefined
   }>()
 
+  const { t } = useI18n()
+  const { formatDate, formatNumber, formatHours } = useFormatters()
   const clientPeriodComp = useUseClientPeriods()
 
   const selectedClientPeriod = computed<ClientPeriod | undefined>(() =>
     clientPeriodComp.getClientPeriodById(props.clientPeriodId)
   )
 
-  const columns: TableColumn<ManualWorkEntry>[] = [
+  const columns = computed<TableColumn<ManualWorkEntry>[]>(() => [
     {
       accessorKey: 'date',
-      header: 'Datum'
+      header: t('billing.manualCorrections.table.date')
     },
     {
       accessorKey: 'title',
-      header: 'Titel'
+      header: t('billing.manualCorrections.table.title')
     },
     {
       accessorKey: 'description',
-      header: 'Beschreibung'
+      header: t('billing.manualCorrections.table.description')
     },
     {
       accessorKey: 'hours',
-      header: 'Stunden'
+      header: t('billing.manualCorrections.table.hours')
     }
-  ]
+  ])
 </script>
 
 <template>
@@ -40,9 +42,9 @@
     <UPageCard>
       <template #default>
         <div class="flex justify-between w-full font-bold">
-          <div>Manuelle Korrekturen</div>
+          <div>{{ t('billing.manualCorrections.title') }}</div>
           <div class="font-bold text-4xl text-primary">
-            {{ sums?.totalManualWorkHours ?? 0 }} h
+            {{ formatHours(sums?.totalManualWorkHours ?? 0) }}
           </div>
         </div>
 
@@ -55,17 +57,13 @@
           sticky
         >
           <template #date-cell="{ row }">
-            {{
-              new Date(row.original.date as string).toLocaleDateString('de', {
-                dateStyle: 'medium'
-              })
-            }}
+            {{ formatDate(row.original.date as string) }}
           </template>
           <template #description-cell="{ row }">
             <LinkifiedText :text="row.original.description" />
           </template>
           <template #hours-cell="{ row }">
-            {{ Number(row.original.hours) }}
+            {{ formatNumber(Number(row.original.hours)) }}
           </template>
         </UTable>
       </template>

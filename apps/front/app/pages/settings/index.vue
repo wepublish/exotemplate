@@ -1,49 +1,48 @@
 <script lang="ts" setup>
-  import type { BillingMode, Client } from '~~/types/DirectusTypes'
+  import type { AppLocale, BillingMode, Client } from '~~/types/DirectusTypes'
 
   const userStore = useUserStore()
   const toast = useToast()
-  const { setPause, setWeeklyReportPause, setBillingMode } = useJiraWarnings()
+  const { t } = useI18n()
+  const link = useClientPeriodLink()
+  const { setPause, setWeeklyReportPause, setBillingMode, setClientLanguage } =
+    useJiraWarnings()
 
-  const BILLING_MODE_OPTIONS: {
-    value: BillingMode
-    label: string
-  }[] = [
-    { value: 'prepaid', label: 'Prepaid (Top-Ups)' },
-    { value: 'monthly', label: 'Monatsrechnung' }
-  ]
+  // Settings are per-client. The client to configure is the one in the URL
+  // (`/:clientPeriodId/settings`); we render just that one (plus the user-global
+  // "Mein Konto" card, which is account-wide and always shown).
+  const selection = useClientSelection()
+  const { selectedClient, clients } = storeToRefs(selection)
+
+  // Single-item list so the per-client card markup (and its non-null `client`)
+  // stays identical to the previous multi-client layout.
+  const selectedClients = computed<Client[]>(() =>
+    selectedClient.value ? [selectedClient.value] : []
+  )
+
+  const BILLING_MODE_OPTIONS = computed<
+    { value: BillingMode; label: string }[]
+  >(() => [
+    { value: 'prepaid', label: t('common.billingMode.prepaid') },
+    { value: 'monthly', label: t('common.billingMode.monthly') }
+  ])
+
+  const LANGUAGE_OPTIONS = computed<{ value: AppLocale; label: string }[]>(
+    () => [
+      { value: 'de', label: t('nav.language.de') },
+      { value: 'fr', label: t('nav.language.fr') },
+      { value: 'en', label: t('nav.language.en') }
+    ]
+  )
 
   function billingModeLabel(mode: BillingMode | null | undefined): string {
     return (
-      BILLING_MODE_OPTIONS.find((o) => o.value === mode)?.label ??
-      'Prepaid (Top-Ups)'
+      BILLING_MODE_OPTIONS.value.find((o) => o.value === mode)?.label ??
+      t('common.billingMode.prepaid')
     )
   }
 
-  // Local mirror of the user's clients so we can update toggles
-  // optimistically without re-fetching the global user store.
-  const clients = ref<Client[]>(
-    [...(userStore.clients as Client[])].sort((a, b) =>
-      a.name.localeCompare(b.name)
-    )
-  )
-
-  const search = ref('')
   const pendingClientIds = ref<Set<string>>(new Set())
-
-  const filteredClients = computed<Client[]>(() => {
-    const query = search.value.trim().toLowerCase()
-    if (!query) return clients.value
-    return clients.value.filter((client) =>
-      client.name.toLowerCase().includes(query)
-    )
-  })
-
-  function patchClient(clientId: string, patch: Partial<Client>): void {
-    const index = clients.value.findIndex((c) => c.id === clientId)
-    if (index === -1) return
-    clients.value[index] = { ...clients.value[index], ...patch } as Client
-  }
 
   async function withPending<T>(
     clientId: string,
@@ -65,16 +64,16 @@
     await withPending(client.id, async () => {
       try {
         await setPause(client.id, paused)
-        patchClient(client.id, { notifications_paused: paused })
+        userStore.patchClient(client.id, { notifications_paused: paused })
         toast.add({
           title: paused
-            ? `Jira-Schwellenwarnungen für ${client.name} stummgeschaltet.`
-            : `Jira-Schwellenwarnungen für ${client.name} aktiviert.`,
+            ? t('settings.jiraWarnings.muted', { client: client.name })
+            : t('settings.jiraWarnings.enabled', { client: client.name }),
           color: 'success'
         })
       } catch (err) {
         toast.add({
-          title: 'Aktion fehlgeschlagen.',
+          title: t('common.actionFailed'),
           description: err instanceof Error ? err.message : undefined,
           color: 'error'
         })
@@ -90,16 +89,16 @@
     await withPending(client.id, async () => {
       try {
         await setWeeklyReportPause(client.id, paused)
-        patchClient(client.id, { weekly_report_paused: paused })
+        userStore.patchClient(client.id, { weekly_report_paused: paused })
         toast.add({
           title: paused
-            ? `Wochenbericht für ${client.name} stummgeschaltet.`
-            : `Wochenbericht für ${client.name} aktiviert.`,
+            ? t('settings.weeklyReport.muted', { client: client.name })
+            : t('settings.weeklyReport.enabled', { client: client.name }),
           color: 'success'
         })
       } catch (err) {
         toast.add({
-          title: 'Aktion fehlgeschlagen.',
+          title: t('common.actionFailed'),
           description: err instanceof Error ? err.message : undefined,
           color: 'error'
         })
@@ -114,15 +113,37 @@
     await withPending(client.id, async () => {
       try {
         await setBillingMode(client.id, mode)
-        patchClient(client.id, { billing_mode: mode })
+        userStore.patchClient(client.id, { billing_mode: mode })
         toast.add({
-          title: `Abrechnungsmodell für ${client.name} aktualisiert.`,
+          title: t('settings.billingMode.updated', { client: client.name }),
           description: billingModeLabel(mode),
           color: 'success'
         })
       } catch (err) {
         toast.add({
-          title: 'Aktion fehlgeschlagen.',
+          title: t('common.actionFailed'),
+          description: err instanceof Error ? err.message : undefined,
+          color: 'error'
+        })
+      }
+    })
+  }
+
+  async function onChangeLanguage(
+    client: Client,
+    language: AppLocale
+  ): Promise<void> {
+    await withPending(client.id, async () => {
+      try {
+        await setClientLanguage(client.id, language)
+        userStore.patchClient(client.id, { language })
+        toast.add({
+          title: t('settings.language.clientUpdated', { client: client.name }),
+          color: 'success'
+        })
+      } catch (err) {
+        toast.add({
+          title: t('common.actionFailed'),
           description: err instanceof Error ? err.message : undefined,
           color: 'error'
         })
@@ -134,62 +155,106 @@
 <template>
   <div class="grid grid-cols-12 gap-4">
     <div class="col-span-12">
-      <div class="flex items-start justify-between gap-4 flex-wrap mb-2">
-        <div>
-          <h1 class="text-2xl font-bold">Einstellungen</h1>
-          <p class="text-muted text-sm">
-            Steuere pro Kunde, welche Slack-Benachrichtigungen verschickt
-            werden. Die Schalter wirken sofort — solange ein Schalter
-            ausgeschaltet ist, gehen für diesen Kunden keine entsprechenden
-            Slack-Meldungen mehr raus.
-          </p>
-        </div>
-        <UInput
-          v-model="search"
-          placeholder="Kunde suchen…"
-          icon="material-symbols:search-rounded"
-          class="min-w-60"
-        />
+      <div class="mb-2">
+        <h1 class="text-2xl font-bold">{{ t('settings.title') }}</h1>
+        <p class="text-muted text-sm">
+          {{ t('settings.subtitle') }}
+        </p>
       </div>
     </div>
 
-    <div v-if="!filteredClients.length" class="col-span-12">
+    <div class="col-span-12">
+      <UPageCard>
+        <template #header>
+          <div class="flex items-center gap-3 min-w-0">
+            <UIcon
+              name="lucide:user-cog"
+              class="text-2xl shrink-0 text-muted"
+            />
+            <div class="min-w-0">
+              <p class="font-semibold">Mein Konto</p>
+              <p class="text-xs text-muted">
+                Ändere hier dein Passwort. Zur Sicherheit musst du dein
+                aktuelles Passwort bestätigen.
+              </p>
+            </div>
+          </div>
+        </template>
+        <AccountPasswordChangeForm />
+      </UPageCard>
+    </div>
+
+    <div v-if="!clients.length" class="col-span-12">
       <UPageCard>
         <template #body>
           <div class="flex items-center gap-3 text-sm text-muted">
-            <UIcon
-              name="material-symbols:info-rounded"
-              class="text-2xl text-muted"
-            />
-            Keine Kunden entsprechen dem Filter.
+            <UIcon name="lucide:info" class="text-2xl text-muted" />
+            {{ t('settings.noClients') }}
           </div>
         </template>
       </UPageCard>
     </div>
 
-    <div v-for="client in filteredClients" :key="client.id" class="col-span-12">
-      <UPageCard>
-        <template #header>
-          <div class="flex items-center gap-3 min-w-0">
-            <UIcon
-              name="material-symbols:apartment-rounded"
-              class="text-2xl shrink-0 text-muted"
-            />
-            <p class="font-semibold truncate">{{ client.name }}</p>
-          </div>
-        </template>
+    <!-- Per-client settings, grouped into topical tiles (2 columns on desktop) -->
+    <template v-for="client in selectedClients" :key="client.id">
+      <div class="col-span-12">
+        <h2 class="flex items-center gap-2 text-lg font-semibold pt-2">
+          <UIcon name="lucide:building-2" class="text-muted shrink-0" />
+          {{ t('settings.forClient', { client: client.name }) }}
+        </h2>
+      </div>
 
-        <ul class="divide-y">
-          <li class="py-3 flex items-start justify-between gap-4 flex-wrap">
-            <div class="min-w-0">
-              <p class="font-medium">Abrechnungsmodell</p>
-              <p class="text-xs text-muted">
-                Prepaid = niedrigerer Stundensatz, im Voraus bezahlte Top-Ups.
-                Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach
-                Aufwand. Nur Administrator:innen können dieses Modell ändern.
+      <div
+        class="col-span-12 grid grid-cols-1 md:grid-cols-2 gap-4 items-start"
+      >
+        <!-- Vertrag -->
+        <UPageCard>
+          <template #header>
+            <div class="flex items-center gap-3 min-w-0">
+              <UIcon
+                name="lucide:scroll-text"
+                class="text-2xl shrink-0 text-muted"
+              />
+              <p class="font-semibold truncate">
+                {{ t('settings.contract.label') }}
               </p>
             </div>
-            <div class="flex items-center gap-2 shrink-0">
+          </template>
+          <div class="flex flex-col gap-3">
+            <p class="text-sm text-muted">
+              {{ t('settings.contract.description') }}
+            </p>
+            <div>
+              <UButton
+                :to="link(`/settings/contracts/${client.id}`)"
+                icon="lucide:file-text"
+                variant="outline"
+                color="primary"
+              >
+                {{ t('settings.contract.manage') }}
+              </UButton>
+            </div>
+          </div>
+        </UPageCard>
+
+        <!-- Abrechnung -->
+        <UPageCard>
+          <template #header>
+            <div class="flex items-center gap-3 min-w-0">
+              <UIcon
+                name="lucide:receipt-text"
+                class="text-2xl shrink-0 text-muted"
+              />
+              <p class="font-semibold truncate">
+                {{ t('settings.billingMode.label') }}
+              </p>
+            </div>
+          </template>
+          <div class="flex flex-col gap-3">
+            <p class="text-sm text-muted">
+              {{ t('settings.billingMode.description') }}
+            </p>
+            <div>
               <USelectMenu
                 v-if="userStore.amIAdministrator()"
                 :model-value="client.billing_mode ?? 'prepaid'"
@@ -197,7 +262,7 @@
                 value-key="value"
                 label-key="label"
                 :loading="pendingClientIds.has(client.id)"
-                class="min-w-52"
+                class="w-full sm:w-60"
                 @update:model-value="
                   (value: BillingMode) => onChangeBillingMode(client, value)
                 "
@@ -214,65 +279,123 @@
                 {{ billingModeLabel(client.billing_mode) }}
               </UBadge>
             </div>
-          </li>
+          </div>
+        </UPageCard>
 
-          <li class="py-3 flex items-start justify-between gap-4 flex-wrap">
-            <div class="min-w-0">
-              <p class="font-medium">Jira-Schwellenwarnungen</p>
-              <p class="text-xs text-muted">
-                Wenn ein Jira-Ticket eine konfigurierte Schwelle überschreitet,
-                geht eine Slack-Meldung an den Kanal des Kunden. Wird hier
-                ausgeschaltet, bleibt der Kanal für diese Warnungen still.
-              </p>
-              <UButton
-                to="/info/thresholds"
-                variant="outline"
-                color="neutral"
-                size="sm"
-                icon="material-symbols:info-rounded"
-                class="mt-2"
-              >
-                Wie funktionieren Schwellenwerte?
-              </UButton>
-            </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <USwitch
-                :model-value="!client.notifications_paused"
-                :loading="pendingClientIds.has(client.id)"
-                @update:model-value="
-                  (value: boolean) => onToggleSlack(client, value)
-                "
-              />
-              <span class="text-xs text-muted">
-                {{ client.notifications_paused ? 'Aus' : 'An' }}
-              </span>
-            </div>
-          </li>
-
-          <li class="py-3 flex items-start justify-between gap-4 flex-wrap">
-            <div class="min-w-0">
-              <p class="font-medium">Wochenbericht</p>
-              <p class="text-xs text-muted">
-                Wöchentliche Zusammenfassung pro Kunden-Slack-Kanal. Ausschalten
-                unterdrückt die nächste und alle weiteren Wochenberichte für
-                diesen Kunden, bis der Schalter wieder aktiviert wird.
+        <!-- Benachrichtigungen (Slack: Jira-Warnungen + Wochenbericht) -->
+        <UPageCard>
+          <template #header>
+            <div class="flex items-center gap-3 min-w-0">
+              <UIcon name="lucide:bell" class="text-2xl shrink-0 text-muted" />
+              <p class="font-semibold truncate">
+                {{ t('settings.notifications.title') }}
               </p>
             </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <USwitch
-                :model-value="!client.weekly_report_paused"
+          </template>
+          <ul class="divide-y">
+            <li
+              class="py-3 first:pt-0 flex items-start justify-between gap-4 flex-wrap"
+            >
+              <div class="min-w-0">
+                <p class="font-medium">
+                  {{ t('settings.jiraWarnings.label') }}
+                </p>
+                <p class="text-xs text-muted">
+                  {{ t('settings.jiraWarnings.description') }}
+                </p>
+                <UButton
+                  :to="link('/info/thresholds')"
+                  variant="outline"
+                  color="neutral"
+                  size="sm"
+                  icon="lucide:info"
+                  class="mt-2"
+                >
+                  {{ t('settings.jiraWarnings.howThresholds') }}
+                </UButton>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <USwitch
+                  :model-value="!client.notifications_paused"
+                  :loading="pendingClientIds.has(client.id)"
+                  @update:model-value="
+                    (value: boolean) => onToggleSlack(client, value)
+                  "
+                />
+                <span class="text-xs text-muted">
+                  {{
+                    client.notifications_paused
+                      ? t('common.off')
+                      : t('common.on')
+                  }}
+                </span>
+              </div>
+            </li>
+
+            <li
+              class="py-3 last:pb-0 flex items-start justify-between gap-4 flex-wrap"
+            >
+              <div class="min-w-0">
+                <p class="font-medium">
+                  {{ t('settings.weeklyReport.label') }}
+                </p>
+                <p class="text-xs text-muted">
+                  {{ t('settings.weeklyReport.description') }}
+                </p>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <USwitch
+                  :model-value="!client.weekly_report_paused"
+                  :loading="pendingClientIds.has(client.id)"
+                  @update:model-value="
+                    (value: boolean) => onToggleWeekly(client, value)
+                  "
+                />
+                <span class="text-xs text-muted">
+                  {{
+                    client.weekly_report_paused
+                      ? t('common.off')
+                      : t('common.on')
+                  }}
+                </span>
+              </div>
+            </li>
+          </ul>
+        </UPageCard>
+
+        <!-- Sprache -->
+        <UPageCard>
+          <template #header>
+            <div class="flex items-center gap-3 min-w-0">
+              <UIcon
+                name="lucide:languages"
+                class="text-2xl shrink-0 text-muted"
+              />
+              <p class="font-semibold truncate">
+                {{ t('settings.language.label') }}
+              </p>
+            </div>
+          </template>
+          <div class="flex flex-col gap-3">
+            <p class="text-sm text-muted">
+              {{ t('settings.language.description') }}
+            </p>
+            <div>
+              <USelectMenu
+                :model-value="client.language ?? 'de'"
+                :items="LANGUAGE_OPTIONS"
+                value-key="value"
+                label-key="label"
                 :loading="pendingClientIds.has(client.id)"
+                class="w-full sm:w-60"
                 @update:model-value="
-                  (value: boolean) => onToggleWeekly(client, value)
+                  (value: AppLocale) => onChangeLanguage(client, value)
                 "
               />
-              <span class="text-xs text-muted">
-                {{ client.weekly_report_paused ? 'Aus' : 'An' }}
-              </span>
             </div>
-          </li>
-        </ul>
-      </UPageCard>
-    </div>
+          </div>
+        </UPageCard>
+      </div>
+    </template>
   </div>
 </template>

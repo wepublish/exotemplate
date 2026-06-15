@@ -55,6 +55,7 @@ interface TimeTrackingResponse {
  */
 export async function useTimeTracking(from: Ref<string>, to: Ref<string>) {
   const { getCustomEndpoint, deleteCustomEndpoint } = useDirectus()
+  const { $i18n } = useNuxtApp()
 
   const dataLoaderKey = computed<string>(
     () => `time-tracking-missing-hours-${from.value}-${to.value}`
@@ -77,7 +78,9 @@ export async function useTimeTracking(from: Ref<string>, to: Ref<string>) {
       } catch (err: any) {
         const firstError = err.response?.data?.errors?.[0]
         throw new Error(
-          firstError?.message || err?.message || 'Unbekannter Fehler'
+          firstError?.message ||
+            err?.message ||
+            $i18n.t('common.unexpectedError')
         )
       }
     }

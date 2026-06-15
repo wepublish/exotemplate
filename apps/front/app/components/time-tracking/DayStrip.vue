@@ -5,12 +5,13 @@
     days: CaptureUserDay[]
   }>()
 
-  const WEEKDAY_FORMATTER = new Intl.DateTimeFormat('de-CH', {
-    weekday: 'short'
-  })
+  const { formatDate } = useFormatters()
 
   function weekdayLabel(date: string): string {
-    return WEEKDAY_FORMATTER.format(parseUtcDate(date)).replace(/\.$/, '')
+    return formatDate(parseUtcDate(date), {
+      weekday: 'short',
+      timeZone: 'UTC'
+    }).replace(/\.$/, '')
   }
 
   function dayOfMonth(date: string): string {

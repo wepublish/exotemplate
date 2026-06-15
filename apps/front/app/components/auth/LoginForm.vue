@@ -3,37 +3,40 @@
   import type { FormSubmitEvent, AuthFormField } from '@nuxt/ui'
 
   const userStore = useUserStore()
+  const { t } = useI18n()
 
   const loading = ref<boolean>(true)
 
-  const fields: AuthFormField[] = [
+  const fields = computed<AuthFormField[]>(() => [
     {
       name: 'email',
       type: 'email',
-      label: 'Email',
-      placeholder: 'Email eingeben',
+      label: t('auth.email'),
+      placeholder: t('auth.emailPlaceholder'),
       required: true
     },
     {
       name: 'password',
-      label: 'Passwort',
+      label: t('auth.password'),
       type: 'password',
-      placeholder: 'Passwort eingeben',
+      placeholder: t('auth.passwordPlaceholder'),
       required: true
     }
-  ]
+  ])
 
-  const schema = z.object({
-    email: z.email('Invalid email'),
-    password: z
-      .string('Password is required')
-      .min(8, 'Must be at least 8 characters')
-  })
+  type Schema = { email: string; password: string }
 
-  type Schema = z.output<typeof schema>
+  const schema = computed(() =>
+    z.object({
+      email: z.email(t('auth.validation.invalidEmail')),
+      password: z
+        .string(t('auth.validation.passwordRequired'))
+        .min(8, t('auth.validation.passwordMin'))
+    })
+  )
 
   async function onSubmit(payload: FormSubmitEvent<Schema>) {
-    const result = schema.safeParse(payload.data)
+    const result = schema.value.safeParse(payload.data)
     if (!result.success) {
       return
     }
@@ -56,12 +59,20 @@
       <UAuthForm
         :loading="loading"
         :schema="schema"
-        title="Login"
-        description="Melde dich mit deinem Account für We.Publish ONE an."
-        icon="i-lucide-user"
+        :title="t('auth.title')"
+        :description="t('auth.description')"
+        icon="lucide:user"
         :fields="fields"
         @submit="onSubmit"
       />
+      <div class="mt-4 text-center">
+        <ULink
+          to="/auth/forgot-password"
+          class="text-sm text-muted hover:text-primary"
+        >
+          Passwort vergessen?
+        </ULink>
+      </div>
     </UPageCard>
   </div>
 </template>

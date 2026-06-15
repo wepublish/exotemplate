@@ -3,6 +3,7 @@
 
   const userStore = useUserStore()
   const toast = useToast()
+  const { t } = useI18n()
 
   type SortKey =
     | 'budget_desc'
@@ -11,16 +12,16 @@
     | 'days_remaining_asc'
     | 'period_from_desc'
 
-  const sortOptions: { value: SortKey; label: string }[] = [
-    { value: 'budget_desc', label: 'Überfällige zuerst' },
-    { value: 'budget_asc', label: 'Wenig verbraucht zuerst' },
-    { value: 'client_name', label: 'Name (A–Z)' },
+  const sortOptions = computed<{ value: SortKey; label: string }[]>(() => [
+    { value: 'budget_desc', label: t('overview.sort.budgetDesc') },
+    { value: 'budget_asc', label: t('overview.sort.budgetAsc') },
+    { value: 'client_name', label: t('overview.sort.clientName') },
     {
       value: 'days_remaining_asc',
-      label: 'Verbleibende Tage (kürzeste zuerst)'
+      label: t('overview.sort.daysRemainingAsc')
     },
-    { value: 'period_from_desc', label: 'Periodenstart (neueste zuerst)' }
-  ]
+    { value: 'period_from_desc', label: t('overview.sort.periodFromDesc') }
+  ])
 
   const sortKey = ref<SortKey>('budget_desc')
   const search = ref<string>('')
@@ -111,23 +112,23 @@
     }
     if (newest === null) return null
     const minutes = Math.round((Date.now() - newest) / 60000)
-    if (minutes < 1) return 'gerade aktualisiert'
-    if (minutes < 60) return `vor ${minutes} Min.`
+    if (minutes < 1) return t('overview.tile.justUpdated')
+    if (minutes < 60) return t('overview.tile.minutesAgo', { n: minutes })
     const hours = Math.round(minutes / 60)
-    if (hours < 24) return `vor ${hours} Std.`
+    if (hours < 24) return t('overview.tile.hoursAgo', { n: hours })
     const days = Math.round(hours / 24)
-    return `vor ${days} Tagen`
+    return t('overview.tile.daysAgo', { n: days }, days)
   })
 
   async function onTileRefresh(clientPeriodId: number): Promise<void> {
     if (!overview) return
     try {
       await overview.refreshOne(clientPeriodId)
-      toast.add({ color: 'success', title: 'Aktualisiert' })
+      toast.add({ color: 'success', title: t('overview.refreshSuccess') })
     } catch (err) {
       toast.add({
         color: 'error',
-        title: 'Aktualisierung fehlgeschlagen',
+        title: t('overview.refreshError'),
         description: err instanceof Error ? err.message : String(err)
       })
     }
@@ -145,13 +146,11 @@
     <UPageCard class="max-w-md w-full">
       <template #header>
         <div class="flex items-center gap-3">
-          <UIcon
-            name="material-symbols:lock-rounded"
-            class="text-3xl text-error"
-          />
+          <UIcon name="lucide:lock" class="text-3xl text-error" />
           <div>
-            <p class="font-bold text-lg">Kein Zugriff</p>
-            <p class="text-sm text-muted">Unzureichende Berechtigungen</p>
+            <p class="font-bold text-lg">
+              {{ t('common.accessDenied.title') }}
+            </p>
           </div>
         </div>
       </template>
@@ -159,13 +158,10 @@
       <UAlert
         color="error"
         variant="soft"
-        icon="material-symbols:no-accounts-rounded"
-      >
-        <template #title>Nur für Administratoren</template>
-        <template #description>
-          Diese Seite ist ausschliesslich für Administratoren zugänglich.
-        </template>
-      </UAlert>
+        icon="lucide:user-x"
+        :title="t('common.accessDenied.title')"
+        :description="t('common.accessDenied.body')"
+      />
     </UPageCard>
   </div>
 
@@ -174,28 +170,41 @@
       <template #header>
         <div class="flex justify-between items-center w-full gap-4">
           <div>
-            <div class="font-bold text-xl">Projektübersicht</div>
+            <div class="font-bold text-xl">{{ t('overview.title') }}</div>
             <div class="text-xs text-muted mt-0.5">
-              {{ entries.length }} Projekte
+              {{
+                t(
+                  'overview.projectCount',
+                  { count: entries.length },
+                  entries.length
+                )
+              }}
               <span v-if="overdueCount > 0">
                 ·
                 <span class="text-error font-medium">
-                  {{ overdueCount }} überfällig
+                  {{
+                    t(
+                      'overview.overdueCount',
+                      { count: overdueCount },
+                      overdueCount
+                    )
+                  }}
                 </span>
               </span>
               <span v-if="freshestRelative">
-                · zuletzt aktualisiert {{ freshestRelative }}
+                ·
+                {{ t('overview.lastUpdated', { relative: freshestRelative }) }}
               </span>
             </div>
           </div>
           <UButton
-            icon="material-symbols:refresh-rounded"
+            icon="lucide:refresh-cw"
             variant="outline"
             size="sm"
             :loading="pending"
             @click="onRefreshAll"
           >
-            Aktualisieren
+            {{ t('common.refresh') }}
           </UButton>
         </div>
       </template>
@@ -204,8 +213,8 @@
       <div class="flex flex-col sm:flex-row gap-3 mb-4">
         <UInput
           v-model="search"
-          placeholder="Suchen nach Projekt oder Periode…"
-          icon="material-symbols:search-rounded"
+          :placeholder="t('overview.searchPlaceholder')"
+          icon="lucide:search"
           class="flex-1"
         />
         <USelect
@@ -222,9 +231,9 @@
         class="mb-4"
         color="warning"
         variant="soft"
-        icon="material-symbols:warning-rounded"
-        title="BillingSnapshots-Tabelle fehlt"
-        description="Bitte im Backend npm run schema:load ausführen, um die neue Tabelle anzulegen."
+        icon="lucide:triangle-alert"
+        :title="t('overview.schemaMissing.title')"
+        :description="t('overview.schemaMissing.description')"
       />
 
       <!-- Loading -->
@@ -240,8 +249,8 @@
         v-else-if="error"
         color="error"
         variant="soft"
-        icon="material-symbols:warning-rounded"
-        title="Übersicht konnte nicht geladen werden"
+        icon="lucide:triangle-alert"
+        :title="t('overview.loadError')"
         :description="error.message"
       />
 
@@ -250,9 +259,9 @@
         v-else-if="!sorted.length"
         color="neutral"
         variant="soft"
-        icon="material-symbols:info-outline-rounded"
-        title="Keine Projekte gefunden"
-        description="Entweder fehlt für jeden Kunden eine aktive Periode oder die Suche liefert keine Treffer."
+        icon="lucide:info"
+        :title="t('overview.empty.title')"
+        :description="t('overview.empty.description')"
       />
 
       <!-- Tile grid -->

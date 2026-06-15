@@ -9,6 +9,7 @@
   const directusStore = useDirectus()
   const userStore = useUserStore()
   const toast = useToast()
+  const { t } = useI18n()
 
   // ── Jira users (shared: lead picker + team member multi-select) ──────────
 
@@ -59,7 +60,7 @@
       usersError.value =
         e?.response?.data?.errors?.[0]?.message ??
         e?.message ??
-        'Jira-Benutzer konnten nicht geladen werden.'
+        t('onboarding.steps.jira.toast.usersLoadFailed')
     } finally {
       loadingUsers.value = false
     }
@@ -89,11 +90,13 @@
 
   async function execute() {
     if (!data.jiraProjectName.trim() || !data.jiraProjectKey.trim()) {
-      executionError.value = 'Projektname und Projektkürzel sind erforderlich.'
+      executionError.value = t(
+        'onboarding.steps.jira.validation.nameAndKeyRequired'
+      )
       return
     }
     if (!data.jiraLeadAccountId.trim()) {
-      executionError.value = 'Bitte einen Projektverantwortlichen auswählen.'
+      executionError.value = t('onboarding.steps.jira.validation.leadRequired')
       return
     }
 
@@ -116,7 +119,7 @@
       completed.value = true
       toast.add({
         color: 'success',
-        title: 'Jira-Projekt erfolgreich erstellt!'
+        title: t('onboarding.steps.jira.toast.created')
       })
       await advanceStep({ jira_short_code: result.data.project.key })
       await fetchProjectMembers()
@@ -124,9 +127,13 @@
       const msg =
         e?.response?.data?.errors?.[0]?.message ??
         e?.message ??
-        'Unbekannter Fehler'
+        t('common.unexpectedError')
       executionError.value = msg
-      toast.add({ color: 'error', title: 'Fehler', description: msg })
+      toast.add({
+        color: 'error',
+        title: t('onboarding.steps.jira.errorTitle'),
+        description: msg
+      })
     } finally {
       loading.value = false
     }
@@ -153,7 +160,10 @@
     const email = newClientEmail.value.trim().toLowerCase()
     if (!email) return
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      toast.add({ color: 'warning', title: 'Ungültige E-Mail-Adresse' })
+      toast.add({
+        color: 'warning',
+        title: t('onboarding.steps.jira.validation.invalidEmail')
+      })
       return
     }
     if (!data.jiraClientEmails.includes(email)) {
@@ -189,7 +199,7 @@
   async function inviteAdmins() {
     if (!data.jiraResult?.key) return
     if (data.jiraTeamAccountIds.length === 0) {
-      adminError.value = 'Bitte mindestens einen Team-Benutzer auswählen.'
+      adminError.value = t('onboarding.steps.jira.validation.teamRequired')
       return
     }
 
@@ -206,13 +216,23 @@
       )
       toast.add({
         color: 'success',
-        title: `${result.data.added} Benutzer zu "${result.data.roleName}" hinzugefügt`
+        title: t('onboarding.steps.jira.toast.adminsAdded', {
+          count: result.data.added,
+          roleName: result.data.roleName
+        })
       })
       await fetchProjectMembers()
     } catch (e: any) {
-      const msg = extractErrorMessage(e, 'Einladung fehlgeschlagen')
+      const msg = extractErrorMessage(
+        e,
+        t('onboarding.steps.jira.toast.inviteFailed')
+      )
       adminError.value = msg
-      toast.add({ color: 'error', title: 'Fehler', description: msg })
+      toast.add({
+        color: 'error',
+        title: t('onboarding.steps.jira.errorTitle'),
+        description: msg
+      })
     } finally {
       invitingAdmins.value = false
     }
@@ -221,7 +241,9 @@
   async function inviteCustomers() {
     if (!data.jiraResult?.key) return
     if (data.jiraClientEmails.length === 0) {
-      customerError.value = 'Bitte mindestens eine Kunden-E-Mail eingeben.'
+      customerError.value = t(
+        'onboarding.steps.jira.validation.customerEmailRequired'
+      )
       return
     }
 
@@ -245,15 +267,23 @@
       if (errors.length === 0) {
         toast.add({
           color: 'success',
-          title: `${added} Kunden zu "${roleName}" hinzugefügt`,
+          title: t('onboarding.steps.jira.toast.customersAdded', {
+            count: added,
+            roleName
+          }),
           description: invited.length
-            ? `${invited.length} neu eingeladen`
+            ? t('onboarding.steps.jira.toast.customersInvited', {
+                count: invited.length
+              })
             : undefined
         })
       } else {
         toast.add({
           color: 'warning',
-          title: `${added} erfolgreich, ${errors.length} Fehler`,
+          title: t('onboarding.steps.jira.toast.customersPartial', {
+            added,
+            failed: errors.length
+          }),
           description: errors
             .map(
               (e: { email: string; error: string }) => `${e.email}: ${e.error}`
@@ -263,9 +293,16 @@
       }
       await fetchProjectMembers()
     } catch (e: any) {
-      const msg = extractErrorMessage(e, 'Einladung fehlgeschlagen')
+      const msg = extractErrorMessage(
+        e,
+        t('onboarding.steps.jira.toast.inviteFailed')
+      )
       customerError.value = msg
-      toast.add({ color: 'error', title: 'Fehler', description: msg })
+      toast.add({
+        color: 'error',
+        title: t('onboarding.steps.jira.errorTitle'),
+        description: msg
+      })
     } finally {
       invitingCustomers.value = false
     }
@@ -286,17 +323,17 @@
 <template>
   <!-- Already completed -->
   <div v-if="completed && data.jiraResult" class="flex flex-col gap-4">
-    <UAlert
-      color="success"
-      variant="soft"
-      icon="material-symbols:check-circle-rounded"
-    >
-      <template #title>Jira-Projekt erfolgreich erstellt</template>
+    <UAlert color="success" variant="soft" icon="lucide:circle-check">
+      <template #title>{{
+        t('onboarding.steps.jira.completedTitle')
+      }}</template>
       <template #description>
-        Projekt-Key:
+        {{ t('onboarding.steps.jira.completedKey') }}
         <span class="font-mono font-bold">{{ data.jiraResult.key }}</span>
         <template v-if="data.jiraResult.id">
-          — ID: {{ data.jiraResult.id }}</template
+          {{
+            t('onboarding.steps.jira.completedId', { id: data.jiraResult.id })
+          }}</template
         >
       </template>
     </UAlert>
@@ -305,13 +342,17 @@
       <div
         class="col-span-6 p-3 rounded-lg border border-neutral-200 dark:border-neutral-700"
       >
-        <p class="text-xs text-muted">Projektname</p>
+        <p class="text-xs text-muted">
+          {{ t('onboarding.steps.jira.fieldProjectName') }}
+        </p>
         <p class="font-medium">{{ data.clientName }}</p>
       </div>
       <div
         class="col-span-6 p-3 rounded-lg border border-neutral-200 dark:border-neutral-700"
       >
-        <p class="text-xs text-muted">Projektkürzel</p>
+        <p class="text-xs text-muted">
+          {{ t('onboarding.steps.jira.fieldProjectKey') }}
+        </p>
         <p class="font-mono font-bold">{{ data.jiraResult.key }}</p>
       </div>
     </div>
@@ -322,17 +363,23 @@
       rel="noopener"
       class="inline-flex items-center gap-2 text-sm text-primary hover:underline"
     >
-      <UIcon name="simple-icons:jira" class="text-base" />
-      Projekt in Jira öffnen
-      <UIcon name="material-symbols:open-in-new-rounded" class="text-sm" />
+      <UIcon name="lucide:square-kanban" class="text-base" />
+      {{ t('onboarding.steps.jira.openProject') }}
+      <UIcon name="lucide:external-link" class="text-sm" />
     </a>
 
     <!-- ── User invitations ─────────────────────────────────────────────── -->
     <div class="flex flex-col gap-3 mt-2">
       <div class="flex items-center justify-between">
-        <p class="text-sm font-semibold">Benutzer einladen</p>
+        <p class="text-sm font-semibold">
+          {{ t('onboarding.steps.jira.invite.heading') }}
+        </p>
         <UBadge variant="subtle" color="neutral">
-          {{ projectMembers.length }} Mitglied(er)
+          {{
+            t('onboarding.steps.jira.invite.memberCount', {
+              count: projectMembers.length
+            })
+          }}
         </UBadge>
       </div>
 
@@ -341,11 +388,10 @@
         class="p-3 rounded-lg border border-neutral-200 dark:border-neutral-700 flex flex-col gap-2"
       >
         <p class="text-xs font-semibold text-muted uppercase tracking-wider">
-          Team-Mitglieder (Administratoren-Zugriff)
+          {{ t('onboarding.steps.jira.invite.teamTitle') }}
         </p>
         <p class="text-xs text-muted">
-          Bestehende Jira-Benutzer auswählen — sie erhalten vollen Admin-Zugriff
-          auf das Projekt.
+          {{ t('onboarding.steps.jira.invite.teamDescription') }}
         </p>
         <USkeleton v-if="loadingUsers" class="h-8 w-full" />
         <USelectMenu
@@ -357,7 +403,7 @@
           label-key="label"
           searchable
           :search-attributes="['label']"
-          placeholder="Team-Mitglieder auswählen…"
+          :placeholder="t('onboarding.steps.jira.invite.teamPlaceholder')"
           class="w-full"
         />
 
@@ -365,19 +411,19 @@
           v-if="adminError"
           color="error"
           variant="soft"
-          icon="material-symbols:error-rounded"
+          icon="lucide:circle-alert"
         >
           <template #description>{{ adminError }}</template>
         </UAlert>
 
         <div class="flex justify-end">
           <UButton
-            icon="material-symbols:shield-person-rounded"
+            icon="lucide:shield-user"
             :loading="invitingAdmins"
             :disabled="data.jiraTeamAccountIds.length === 0"
             @click="inviteAdmins"
           >
-            Administratoren hinzufügen
+            {{ t('onboarding.steps.jira.invite.addAdmins') }}
           </UButton>
         </div>
       </div>
@@ -387,28 +433,29 @@
         class="p-3 rounded-lg border border-neutral-200 dark:border-neutral-700 flex flex-col gap-2"
       >
         <p class="text-xs font-semibold text-muted uppercase tracking-wider">
-          Kunden-E-Mails (Kunden-Rolle)
+          {{ t('onboarding.steps.jira.invite.customerTitle') }}
         </p>
         <p class="text-xs text-muted">
-          Externe Kunden: Falls noch kein Jira-Account existiert, wird eine
-          Einladung per E-Mail versendet.
+          {{ t('onboarding.steps.jira.invite.customerDescription') }}
         </p>
         <div class="flex gap-2">
           <UInput
             v-model="newClientEmail"
             type="email"
-            placeholder="kunde@beispiel.ch"
+            :placeholder="
+              t('onboarding.steps.jira.invite.customerEmailPlaceholder')
+            "
             class="flex-1"
             @keydown.enter.prevent="addClientEmail"
           />
           <UButton
-            icon="material-symbols:add-rounded"
+            icon="lucide:plus"
             variant="outline"
             color="neutral"
             :disabled="!newClientEmail.trim()"
             @click="addClientEmail"
           >
-            Hinzufügen
+            {{ t('onboarding.steps.jira.invite.add') }}
           </UButton>
         </div>
 
@@ -423,7 +470,7 @@
               class="hover:text-error transition-colors"
               @click="removeClientEmail(index)"
             >
-              <UIcon name="material-symbols:close-rounded" class="text-sm" />
+              <UIcon name="lucide:x" class="text-sm" />
             </button>
           </div>
         </div>
@@ -432,19 +479,19 @@
           v-if="customerError"
           color="error"
           variant="soft"
-          icon="material-symbols:error-rounded"
+          icon="lucide:circle-alert"
         >
           <template #description>{{ customerError }}</template>
         </UAlert>
 
         <div class="flex justify-end">
           <UButton
-            icon="material-symbols:mail-rounded"
+            icon="lucide:mail"
             :loading="invitingCustomers"
             :disabled="data.jiraClientEmails.length === 0"
             @click="inviteCustomers"
           >
-            Kunden einladen
+            {{ t('onboarding.steps.jira.invite.inviteCustomers') }}
           </UButton>
         </div>
       </div>
@@ -455,17 +502,17 @@
       >
         <div class="flex items-center justify-between">
           <p class="text-xs font-semibold text-muted uppercase tracking-wider">
-            Aktuelle Projekt-Mitglieder
+            {{ t('onboarding.steps.jira.invite.currentMembers') }}
           </p>
           <UButton
             size="xs"
             variant="ghost"
             color="neutral"
-            icon="material-symbols:refresh-rounded"
+            icon="lucide:refresh-cw"
             :loading="loadingMembers"
             @click="fetchProjectMembers"
           >
-            Aktualisieren
+            {{ t('common.refresh') }}
           </UButton>
         </div>
 
@@ -475,7 +522,7 @@
           v-else-if="projectMembers.length === 0"
           class="text-sm text-muted italic"
         >
-          Keine Mitglieder gefunden.
+          {{ t('onboarding.steps.jira.invite.noMembers') }}
         </p>
 
         <div v-else class="flex flex-col gap-1.5">
@@ -527,50 +574,44 @@
   <!-- Form -->
   <div v-else class="grid grid-cols-12 gap-4">
     <div class="col-span-12">
-      <UAlert color="info" variant="soft" icon="material-symbols:info-rounded">
+      <UAlert color="info" variant="soft" icon="lucide:info">
         <template #description>
-          Ein neues Jira-Projekt mit dem Workflow-Schema «Default Media
-          Workflow» anlegen und das Board konfigurieren.
+          {{ t('onboarding.steps.jira.intro') }}
         </template>
       </UAlert>
     </div>
 
     <div v-if="!data.clientId" class="col-span-12">
-      <UAlert
-        color="warning"
-        variant="soft"
-        icon="material-symbols:warning-rounded"
-      >
+      <UAlert color="warning" variant="soft" icon="lucide:triangle-alert">
         <template #description>
-          Schritt 1 (Directus) muss zuerst abgeschlossen werden, damit der
-          Client-Eintrag nach der Projekterstellung aktualisiert werden kann.
+          {{ t('onboarding.steps.jira.directusRequired') }}
         </template>
       </UAlert>
     </div>
 
     <UFormField
-      label="Projektname"
+      :label="t('onboarding.steps.jira.projectName')"
       name="jiraProjectName"
       required
       class="col-span-6"
     >
       <UInput
         v-model="data.jiraProjectName"
-        placeholder="z.B. Muster AG"
+        :placeholder="t('onboarding.steps.jira.projectNamePlaceholder')"
         class="w-full"
       />
     </UFormField>
 
     <UFormField
-      label="Projektkürzel (Key)"
+      :label="t('onboarding.steps.jira.projectKey')"
       name="jiraProjectKey"
       required
       class="col-span-6"
-      hint="Max. 10 Zeichen, nur Grossbuchstaben und Zahlen"
+      :hint="t('onboarding.steps.jira.projectKeyHint')"
     >
       <UInput
         v-model="data.jiraProjectKey"
-        placeholder="z.B. MUSTERAG"
+        :placeholder="t('onboarding.steps.jira.projectKeyPlaceholder')"
         class="w-full font-mono"
         @input="
           data.jiraProjectKey = data.jiraProjectKey
@@ -582,11 +623,11 @@
     </UFormField>
 
     <UFormField
-      label="Projektverantwortliche/r (Lead)"
+      :label="t('onboarding.steps.jira.lead')"
       name="jiraLeadAccountId"
       required
       class="col-span-12"
-      hint="Jira-Account-ID wird automatisch gesetzt"
+      :hint="t('onboarding.steps.jira.leadHint')"
     >
       <USkeleton v-if="loadingUsers" class="h-8 w-full" />
 
@@ -594,27 +635,29 @@
         <UAlert
           color="warning"
           variant="soft"
-          icon="material-symbols:warning-rounded"
+          icon="lucide:triangle-alert"
           class="text-sm"
         >
           <template #description>
-            {{ usersError }} — Account-ID manuell eingeben:
+            {{
+              t('onboarding.steps.jira.leadManualHint', { error: usersError })
+            }}
           </template>
         </UAlert>
         <div class="flex gap-2">
           <UInput
             v-model="data.jiraLeadAccountId"
-            placeholder="z.B. 5b10a2844c20165700ede21g"
+            :placeholder="t('onboarding.steps.jira.leadIdPlaceholder')"
             class="w-full font-mono"
           />
           <UButton
             size="sm"
             variant="outline"
-            icon="material-symbols:refresh-rounded"
+            icon="lucide:refresh-cw"
             :loading="loadingUsers"
             @click="fetchJiraUsers"
           >
-            Erneut laden
+            {{ t('common.retry') }}
           </UButton>
         </div>
       </div>
@@ -627,45 +670,43 @@
           label-key="label"
           searchable
           :search-attributes="['label']"
-          placeholder="Jira-Benutzer suchen…"
+          :placeholder="t('onboarding.steps.jira.userSearchPlaceholder')"
           class="w-full"
         />
         <p
           v-if="data.jiraLeadAccountId"
           class="text-xs text-muted mt-1 font-mono"
         >
-          Account-ID: {{ data.jiraLeadAccountId }}
+          {{
+            t('onboarding.steps.jira.accountId', { id: data.jiraLeadAccountId })
+          }}
         </p>
       </template>
     </UFormField>
 
     <UFormField
-      label="Beschreibung (optional)"
+      :label="t('onboarding.steps.jira.descriptionLabel')"
       name="jiraDescription"
       class="col-span-12"
     >
       <UTextarea
         v-model="data.jiraDescription"
-        placeholder="Kurze Beschreibung des Projekts..."
+        :placeholder="t('onboarding.steps.jira.descriptionPlaceholder')"
         :rows="2"
         class="w-full"
       />
     </UFormField>
 
     <div v-if="executionError" class="col-span-12">
-      <UAlert
-        color="error"
-        variant="soft"
-        icon="material-symbols:error-rounded"
-      >
-        <template #title>Fehler beim Erstellen</template>
+      <UAlert color="error" variant="soft" icon="lucide:circle-alert">
+        <template #title>{{ t('onboarding.steps.jira.errorTitle') }}</template>
         <template #description>{{ executionError }}</template>
       </UAlert>
     </div>
 
     <div class="col-span-12 flex justify-end pt-2">
-      <UButton icon="simple-icons:jira" :loading="loading" @click="execute">
-        Jira-Projekt erstellen
+      <UButton icon="lucide:square-kanban" :loading="loading" @click="execute">
+        {{ t('onboarding.steps.jira.execute') }}
       </UButton>
     </div>
   </div>

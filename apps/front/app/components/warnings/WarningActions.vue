@@ -19,6 +19,8 @@
     unsilence: [warning: JiraWarning]
   }>()
 
+  const { t } = useI18n()
+
   const busy = computed<boolean>(() => props.pendingAction != null)
   function isPending(action: WarningAction): boolean {
     return props.pendingAction === action
@@ -32,24 +34,24 @@
       size="xs"
       color="error"
       variant="outline"
-      icon="material-symbols:stop-circle-rounded"
+      icon="lucide:circle-stop"
       :loading="isPending('requestHalt')"
       :disabled="busy && !isPending('requestHalt')"
       @click="emit('requestHalt', warning)"
     >
-      Arbeit stoppen
+      {{ t('workLog.actions.stopWork') }}
     </UButton>
     <UButton
       v-else
       size="xs"
       color="success"
       variant="solid"
-      icon="material-symbols:play-circle-rounded"
+      icon="lucide:circle-play"
       :loading="isPending('resolveHalt')"
       :disabled="busy && !isPending('resolveHalt')"
       @click="emit('resolveHalt', warning)"
     >
-      Stopp aufheben
+      {{ t('workLog.actions.resolveHalt') }}
     </UButton>
     <UButton
       v-if="!warning.silenced_permanently"
@@ -61,7 +63,7 @@
       :disabled="busy && !isPending('silence')"
       @click="emit('silence', warning)"
     >
-      Stummschalten
+      {{ t('workLog.actions.silence') }}
     </UButton>
     <UButton
       v-else
@@ -73,7 +75,7 @@
       :disabled="busy && !isPending('unsilence')"
       @click="emit('unsilence', warning)"
     >
-      Stummschaltung aufheben
+      {{ t('workLog.actions.unsilence') }}
     </UButton>
   </div>
 </template>

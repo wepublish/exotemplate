@@ -1,0 +1,60 @@
+{
+  "timeTracking": {
+    "pageTitle": "Übersicht Zeiterfassung",
+    "pageIntro": "Wer hat seine Stunden bereits erfasst? Wochenenden, Feiertage, Abwesenheiten und vertraglich freie Tage werden nicht als fehlend gewertet. Über das Glocken-Symbol kannst Du einzelne Personen aus den täglichen Slack-Erinnerungen ausschliessen.",
+    "adminBadge": "Admin",
+    "range": {
+      "from": "Von",
+      "to": "Bis",
+      "apply": "Anwenden",
+      "invalidTitle": "Ungültiger Zeitraum",
+      "invalidDescription": "\"Von\" muss vor \"Bis\" liegen."
+    },
+    "loadError": "Daten konnten nicht geladen werden",
+    "loadingData": "Lade Daten von Clockodo…",
+    "refresh": {
+      "successTitle": "Daten neu geladen",
+      "successDescription": "Frisch von Clockodo geholt.",
+      "errorTitle": "Aktualisieren fehlgeschlagen"
+    },
+    "toggle": {
+      "renotifiedTitle": "{name} wird wieder benachrichtigt",
+      "ignoredTitle": "{name} wird ab sofort ignoriert",
+      "errorTitle": "Ändern fehlgeschlagen"
+    },
+    "legend": {
+      "off": "Frei (laut Vertrag)"
+    },
+    "status": {
+      "captured": "Erfasst",
+      "partial": "Teilweise",
+      "missing": "Fehlt",
+      "holiday": "Feiertag",
+      "absent": "Abwesend",
+      "off": "Frei",
+      "weekend": "Wochenende"
+    },
+    "dot": {
+      "captured": "Erfasst",
+      "partial": "Teilweise erfasst",
+      "missing": "Nicht erfasst",
+      "absent": "Abwesend",
+      "weekend": "Wochenende",
+      "off": "Frei (laut Vertrag)",
+      "holiday": "Feiertag",
+      "holidayNamed": "Feiertag: {name}",
+      "absentInClockodo": "{base} (in Clockodo)",
+      "tooltipBase": "{date}: {label}",
+      "tooltipHours": "{base} — {captured} von {expected}"
+    },
+    "list": {
+      "empty": "Keine Mitarbeiter:innen mit aktivem Clockodo-Soll-Vertrag im Zeitraum gefunden.",
+      "ignoredBadge": "Ignoriert",
+      "daysSummary": "{captured} / {expected} Tage",
+      "reactivateTitle": "Benachrichtigungen wieder aktivieren",
+      "reactivateAria": "Benachrichtigungen wieder aktivieren",
+      "ignoreTitle": "Diese Person ignorieren (keine Slack-Erinnerung)",
+      "ignoreAria": "Diese Person ignorieren"
+    }
+  }
+}

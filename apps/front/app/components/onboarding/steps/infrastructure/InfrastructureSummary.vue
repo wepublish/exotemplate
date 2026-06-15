@@ -8,19 +8,17 @@
   }>()
 
   const data = inject(ONBOARDING_DATA_KEY)!
+  const { t } = useI18n()
 </script>
 
 <template>
   <div v-if="data.infraResult" class="flex flex-col gap-4">
-    <UAlert
-      color="success"
-      variant="soft"
-      icon="material-symbols:check-circle-rounded"
-    >
-      <template #title>Infrastruktur-PRs erfolgreich erstellt</template>
+    <UAlert color="success" variant="soft" icon="lucide:circle-check">
+      <template #title>{{
+        t('onboarding.infrastructure.summary.title')
+      }}</template>
       <template #description>
-        Pull Requests wurden auf beiden Repositories eröffnet und warten auf
-        Review.
+        {{ t('onboarding.infrastructure.summary.description') }}
       </template>
     </UAlert>
 
@@ -29,11 +27,10 @@
         class="flex flex-col gap-2 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700"
       >
         <div class="flex items-center gap-2">
-          <UIcon
-            name="material-symbols:settings-rounded"
-            class="text-lg text-primary"
-          />
-          <span class="text-sm font-semibold">Konfigurations-PR</span>
+          <UIcon name="lucide:settings" class="text-lg text-primary" />
+          <span class="text-sm font-semibold">{{
+            t('onboarding.infrastructure.summary.configPr')
+          }}</span>
         </div>
         <p class="text-xs text-muted font-mono">
           {{ data.infraResult.config_pr.branch }}
@@ -44,8 +41,12 @@
           rel="noopener"
           class="text-sm text-primary hover:underline flex items-center gap-1"
         >
-          <UIcon name="material-symbols:open-in-new-rounded" class="text-sm" />
-          PR #{{ data.infraResult.config_pr.pr_number }} ansehen
+          <UIcon name="lucide:external-link" class="text-sm" />
+          {{
+            t('onboarding.infrastructure.summary.viewPr', {
+              number: data.infraResult.config_pr.pr_number
+            })
+          }}
         </a>
       </div>
 
@@ -53,11 +54,10 @@
         class="flex flex-col gap-2 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700"
       >
         <div class="flex items-center gap-2">
-          <UIcon
-            name="material-symbols:language-rounded"
-            class="text-lg text-primary"
-          />
-          <span class="text-sm font-semibold">Website-PR</span>
+          <UIcon name="lucide:languages" class="text-lg text-primary" />
+          <span class="text-sm font-semibold">{{
+            t('onboarding.infrastructure.summary.websitePr')
+          }}</span>
         </div>
         <p class="text-xs text-muted font-mono">
           {{ data.infraResult.website_pr.branch }}
@@ -68,8 +68,12 @@
           rel="noopener"
           class="text-sm text-primary hover:underline flex items-center gap-1"
         >
-          <UIcon name="material-symbols:open-in-new-rounded" class="text-sm" />
-          PR #{{ data.infraResult.website_pr.pr_number }} ansehen
+          <UIcon name="lucide:external-link" class="text-sm" />
+          {{
+            t('onboarding.infrastructure.summary.viewPr', {
+              number: data.infraResult.website_pr.pr_number
+            })
+          }}
         </a>
       </div>
     </div>
@@ -78,49 +82,53 @@
       class="grid grid-cols-2 gap-3 p-4 rounded-lg bg-neutral-50 dark:bg-neutral-800/50"
     >
       <div class="flex items-center gap-2">
-        <UIcon
-          name="material-symbols:edit-square-rounded"
-          class="text-muted text-lg"
-        />
+        <UIcon name="lucide:square-pen" class="text-muted text-lg" />
         <div>
-          <p class="text-xs text-muted">Editor-URL</p>
+          <p class="text-xs text-muted">
+            {{ t('onboarding.infrastructure.summary.editorUrl') }}
+          </p>
           <p class="text-sm font-mono">{{ editorUrl }}</p>
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <UIcon
-          name="material-symbols:language-rounded"
-          class="text-muted text-lg"
-        />
+        <UIcon name="lucide:languages" class="text-muted text-lg" />
         <div>
-          <p class="text-xs text-muted">Website-URL</p>
+          <p class="text-xs text-muted">
+            {{ t('onboarding.infrastructure.summary.websiteUrl') }}
+          </p>
           <p class="text-sm font-mono">{{ websiteUrl }}</p>
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <UIcon name="material-symbols:api-rounded" class="text-muted text-lg" />
+        <UIcon name="lucide:plug" class="text-muted text-lg" />
         <div>
-          <p class="text-xs text-muted">API-URL</p>
+          <p class="text-xs text-muted">
+            {{ t('onboarding.infrastructure.summary.apiUrl') }}
+          </p>
           <p class="text-sm font-mono">{{ apiUrl }}</p>
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <UIcon
-          name="material-symbols:deployed-code-rounded"
-          class="text-muted text-lg"
-        />
+        <UIcon name="lucide:package" class="text-muted text-lg" />
         <div>
-          <p class="text-xs text-muted">Staging</p>
-          <p class="text-sm">{{ data.infraHasStaging ? 'Ja' : 'Nein' }}</p>
+          <p class="text-xs text-muted">
+            {{ t('onboarding.infrastructure.summary.staging') }}
+          </p>
+          <p class="text-sm">
+            {{
+              data.infraHasStaging
+                ? t('onboarding.infrastructure.summary.stagingYes')
+                : t('onboarding.infrastructure.summary.stagingNo')
+            }}
+          </p>
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <UIcon
-          name="material-symbols:code-rounded"
-          class="text-muted text-lg"
-        />
+        <UIcon name="lucide:code" class="text-muted text-lg" />
         <div>
-          <p class="text-xs text-muted">Medium-Name</p>
+          <p class="text-xs text-muted">
+            {{ t('onboarding.infrastructure.summary.mediumName') }}
+          </p>
           <p class="text-sm font-mono">{{ data.infraMediumName }}</p>
         </div>
       </div>

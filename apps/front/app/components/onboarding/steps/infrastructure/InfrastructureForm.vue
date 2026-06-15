@@ -14,6 +14,19 @@
   }>()
 
   const data = inject(ONBOARDING_DATA_KEY)!
+  const { t } = useI18n()
+
+  // Repo names rendered with monospace styling; kept as literals (not
+  // translatable) and injected into the intro message via v-html.
+  const repoSpan = (name: string) =>
+    `<span class="font-mono font-semibold">${name}</span>`
+
+  const introHtml = computed(() =>
+    t('onboarding.infrastructure.form.intro', {
+      configRepo: repoSpan('application-configuration'),
+      websiteRepo: repoSpan('wepublish')
+    })
+  )
 
   const clientSlug = computed(() =>
     data.clientName
@@ -59,28 +72,23 @@
 <template>
   <div class="grid grid-cols-12 gap-4">
     <div class="col-span-12">
-      <UAlert color="info" variant="soft" icon="material-symbols:info-rounded">
+      <UAlert color="info" variant="soft" icon="lucide:info">
         <template #description>
-          Erstellt automatisch Pull Requests auf den Repositories
-          <span class="font-mono font-semibold">application-configuration</span>
-          und
-          <span class="font-mono font-semibold">wepublish</span>, um die
-          Terraform-Konfiguration und Website-App für das neue Medium
-          einzurichten.
+          <span v-html="introHtml" />
         </template>
       </UAlert>
     </div>
 
     <UFormField
-      label="Medium-Name"
+      :label="t('onboarding.infrastructure.form.mediumName')"
       name="infraMediumName"
       required
       class="col-span-6"
-      hint="Terraform-Bezeichner: Kleinbuchstaben, Ziffern, Unterstriche"
+      :hint="t('onboarding.infrastructure.form.mediumNameHint')"
     >
       <UInput
         :model-value="data.infraMediumName"
-        placeholder="muster_ag"
+        :placeholder="t('onboarding.infrastructure.form.mediumNamePlaceholder')"
         class="w-full font-mono"
         :color="data.infraMediumName && !mediumNameValid ? 'error' : undefined"
         @update:model-value="normalizeMediumName($event as string)"
@@ -89,19 +97,13 @@
 
     <div class="col-span-6 flex flex-col justify-center gap-1">
       <p class="text-xs text-muted">
-        <UIcon
-          name="material-symbols:edit-square-rounded"
-          class="text-sm align-text-bottom"
-        />
-        Editor:
+        <UIcon name="lucide:square-pen" class="text-sm align-text-bottom" />
+        {{ t('onboarding.infrastructure.form.editor') }}
         <span class="font-mono">{{ editorUrl }}</span>
       </p>
       <p class="text-xs text-muted">
-        <UIcon
-          name="material-symbols:language-rounded"
-          class="text-sm align-text-bottom"
-        />
-        Website:
+        <UIcon name="lucide:languages" class="text-sm align-text-bottom" />
+        {{ t('onboarding.infrastructure.form.website') }}
         <span class="font-mono">{{ websiteUrl }}</span>
       </p>
     </div>
@@ -112,8 +114,10 @@
       >
         <USwitch
           v-model="data.infraWebsiteEnabled"
-          label="Website aktivieren"
-          description="Website-App für das Medium erstellen"
+          :label="t('onboarding.infrastructure.form.websiteEnabled')"
+          :description="
+            t('onboarding.infrastructure.form.websiteEnabledDescription')
+          "
         />
       </div>
     </div>
@@ -124,31 +128,31 @@
       >
         <USwitch
           v-model="data.infraHasStaging"
-          label="Staging-Umgebung"
-          description="Zusätzliche Staging-Umgebung einrichten"
+          :label="t('onboarding.infrastructure.form.staging')"
+          :description="t('onboarding.infrastructure.form.stagingDescription')"
         />
       </div>
     </div>
 
     <div class="col-span-12">
       <p class="text-sm font-medium mb-2">
-        Benutzerdefinierte Hostnamen (optional)
+        {{ t('onboarding.infrastructure.form.customHostnames') }}
       </p>
       <div class="flex gap-2 mb-2">
         <UInput
           v-model="newHostname"
-          placeholder="www.muster-ag.ch"
+          :placeholder="t('onboarding.infrastructure.form.hostnamePlaceholder')"
           class="flex-1 font-mono"
           @keydown.enter.prevent="addHostname"
         />
         <UButton
-          icon="material-symbols:add-rounded"
+          icon="lucide:plus"
           variant="outline"
           color="neutral"
           :disabled="!newHostname.trim()"
           @click="addHostname"
         >
-          Hinzufügen
+          {{ t('onboarding.infrastructure.form.add') }}
         </UButton>
       </div>
 
@@ -163,31 +167,29 @@
             class="hover:text-error transition-colors"
             @click="removeHostname(index)"
           >
-            <UIcon name="material-symbols:close-rounded" class="text-sm" />
+            <UIcon name="lucide:x" class="text-sm" />
           </button>
         </div>
       </div>
     </div>
 
     <div v-if="error" class="col-span-12">
-      <UAlert
-        color="error"
-        variant="soft"
-        icon="material-symbols:error-rounded"
-      >
-        <template #title>Fehler</template>
+      <UAlert color="error" variant="soft" icon="lucide:circle-alert">
+        <template #title>{{
+          t('onboarding.infrastructure.form.errorTitle')
+        }}</template>
         <template #description>{{ error }}</template>
       </UAlert>
     </div>
 
     <div class="col-span-12 flex justify-end pt-2">
       <UButton
-        icon="material-symbols:cloud-upload-rounded"
+        icon="lucide:cloud-upload"
         :loading="loading"
         :disabled="!mediumNameValid"
         @click="$emit('execute')"
       >
-        Infrastruktur erstellen
+        {{ t('onboarding.infrastructure.form.execute') }}
       </UButton>
     </div>
   </div>

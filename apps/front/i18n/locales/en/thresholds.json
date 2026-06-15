@@ -1,0 +1,30 @@
+{
+  "thresholds": {
+    "pageTitle": "When is a Jira ticket reported?",
+    "intro": "We compare the time worked on a Jira ticket (all hours logged so far, including the 12 months before the current billing period) with the effort estimate on the Jira ticket. As soon as the time used reaches a threshold, the bot posts in the Slack channel.",
+    "firstNotificationHeading": "First notification = estimate + tolerance",
+    "firstNotificationBody": "The first notification is triggered as soon as a Jira ticket's estimate, plus or minus the tolerance, is reached. The <em>tolerance</em> comes from the table below and can be positive (notification after reaching the estimate) or negative (notification before reaching it). After that, a further notification follows at each <em>recurring interval</em>, with no upper limit.",
+    "table": {
+      "range": "Range (estimate)",
+      "tolerance": "Tolerance",
+      "recurring": "Recurring",
+      "example": "Example"
+    },
+    "cellFrom": "from {hours}",
+    "cellTolerance": "Estimate {offset}",
+    "cellRecurring": "every {hours}",
+    "exampleLine": "Estimate {min} → {points}, …",
+    "offsetZero": "±0 h",
+    "readingExamplesHeading": "Reading examples",
+    "readingExamples": {
+      "item1": "Tolerance <strong>+2 h</strong>, recurring <strong>4 h</strong>: ticket estimated at <strong>5 h</strong> → first notification at <strong>7 h</strong>, then 11 h, 15 h …",
+      "item2": "Same range, ticket estimated at <strong>9 h</strong> → first notification at <strong>11 h</strong>, then 15 h, 19 h … (no more \"too early\").",
+      "item3": "Tolerance <strong>−1 h</strong>: we deliberately warn shortly <em>before</em> the estimate is used up – useful for larger tickets."
+    },
+    "afterNotificationHeading": "What happens after a notification?",
+    "afterNotification": {
+      "halt": "<strong>Stop work:</strong> marks the ticket as blocked. The team is instructed in Slack to stop work immediately, and the assigned person also receives a personal direct message.",
+      "silence": "<strong>Mute:</strong> permanently suppresses future notifications for this ticket, until muting is explicitly lifted."
+    }
+  }
+}

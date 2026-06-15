@@ -1,13 +1,19 @@
 import { readItems, updateItem } from '@directus/sdk'
-import type { BillingMode, Client, JiraWarning } from '~~/types/DirectusTypes'
+import type {
+  AppLocale,
+  BillingMode,
+  Client,
+  JiraWarning
+} from '~~/types/DirectusTypes'
 
 export function useJiraWarnings() {
   const { directus } = useDirectus()
   const userStore = useUserStore()
+  const { $i18n } = useNuxtApp()
 
   function currentUserId(): string {
     const id = userStore.user?.id
-    if (!id) throw new Error('Nicht angemeldet.')
+    if (!id) throw new Error($i18n.t('common.notLoggedIn'))
     return id
   }
 
@@ -130,6 +136,21 @@ export function useJiraWarnings() {
     )
   }
 
+  /**
+   * Set the project's language. Drives the language of the client-facing
+   * Slack messages (weekly report, Jira warnings, halt) on the backend.
+   */
+  async function setClientLanguage(
+    clientId: string,
+    language: AppLocale
+  ): Promise<void> {
+    await directus.request(
+      updateItem('Clients', clientId, {
+        language
+      } as Partial<Client>)
+    )
+  }
+
   return {
     listForClients,
     isHalted,
@@ -141,6 +162,7 @@ export function useJiraWarnings() {
     unsilence,
     setPause,
     setWeeklyReportPause,
-    setBillingMode
+    setBillingMode,
+    setClientLanguage
   }
 }

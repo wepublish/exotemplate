@@ -1,0 +1,24 @@
+{
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "invoices": "Factures",
+    "settings": "Paramètres",
+    "projectOverview": "Aperçu des projets",
+    "timeTrackingOverview": "Aperçu de la saisie des temps",
+    "onboarding": "Onboarding",
+    "toDashboard": "Vers le tableau de bord",
+    "logout": "Se déconnecter",
+    "github": "GitHub",
+    "footer": "Built with Nuxt UI • © {year}",
+    "language": {
+      "label": "Langue",
+      "de": "Deutsch",
+      "fr": "Français",
+      "en": "English"
+    },
+    "selector": {
+      "project": "Choisir un projet",
+      "period": "Choisir une période"
+    }
+  }
+}

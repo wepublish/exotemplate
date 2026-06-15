@@ -45,8 +45,39 @@ export const useFinanceCalculations = () => {
     }
   }
 
+  /**
+   * Hosting / recurring invoice totals. Deliberately kept apart from the
+   * hour-based functions above: hosting is amount-only and must never touch the
+   * hours calculation. `gross = net + VAT`, VAT at the Swiss 8.1% rate (same
+   * 0.081 used elsewhere). `billedUnits` is the number of units (e.g. months)
+   * actually invoiced now (e.g. 7 of 12).
+   */
+  function getHostingInvoiceTotals(
+    unitPrice: number | undefined,
+    billedUnits: number | undefined
+  ): { net: number; vat: number; gross: number } {
+    const net = (unitPrice || 0) * (billedUnits || 0)
+    const vat = Math.round(net * 0.081 * 100) / 100
+    const gross = net + vat
+    return { net, vat, gross }
+  }
+
+  /**
+   * Full annual net total of the recurring order (e.g. 12 × 390), shown in the
+   * hosting preview so the admin sees the yearly arrangement behind the first
+   * (partial) invoice.
+   */
+  function getHostingOrderAnnualTotal(
+    unitPrice: number | undefined,
+    quantity: number | undefined
+  ): number {
+    return (unitPrice || 0) * (quantity || 0)
+  }
+
   return {
     getHoursWithWepPercentageOnTop,
-    getHoursByAmount
+    getHoursByAmount,
+    getHostingInvoiceTotals,
+    getHostingOrderAnnualTotal
   }
 }

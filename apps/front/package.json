@@ -8,6 +8,8 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "typecheck": "nuxt typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "prepare": "husky",
     "lint": "prettier . --write --ignore-unknown"
   },
@@ -17,8 +19,8 @@
   "dependencies": {
     "@directus/sdk": "^20.2.0",
     "@iconify-json/lucide": "^1.2.74",
-    "@iconify-json/simple-icons": "^1.2.59",
     "@nuxt/ui": "^4.2.1",
+    "@nuxtjs/i18n": "^10.4.0",
     "@pinia/nuxt": "0.11.3",
     "axios": "^1.13.2",
     "bexio": "^3.5.0",
@@ -28,10 +30,14 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@nuxt/test-utils": "^4.0.3",
+    "@vue/test-utils": "^2.4.11",
+    "happy-dom": "^20.10.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "3.8.1",
     "typescript": "^5.9.3",
+    "vitest": "^4.1.8",
     "vue-tsc": "^3.1.5"
   },
   "packageManager": "pnpm@10.23.0"

@@ -29,6 +29,9 @@ const MS_PER_DAY = 1000 * 60 * 60 * 24
  * is on track, ahead, behind, close to or over budget.
  */
 export function useWeeklyReportProgress() {
+  const { $i18n } = useNuxtApp()
+  const { formatHours, formatPercent } = useFormatters()
+
   function compute(args: {
     totalUsedHours: number | undefined
     totalTopUps: number | undefined
@@ -110,61 +113,33 @@ export function useWeeklyReportProgress() {
   }
 
   function statusHeadline(status: BudgetStatus): string {
-    switch (status) {
-      case 'over_budget':
-        return 'Budget überschritten'
-      case 'no_budget':
-        return 'Kein Budget hinterlegt'
-      case 'close_to_limit':
-        return 'Budget fast aufgebraucht'
-      case 'behind_schedule':
-        return 'Budget verbraucht sich schneller als die Zeit'
-      case 'ahead_of_schedule':
-        return 'Mehr Budget übrig als erwartet'
-      case 'on_track':
-      default:
-        return 'Budget und Zeit im Gleichlauf'
-    }
+    return $i18n.t(`dashboard.weeklyStatus.${status}.headline`)
   }
 
   function statusBody(progress: WeeklyReportProgress): string {
-    const usedFmt = formatPercent(progress.budgetUsedPercent)
-    const timeFmt = formatPercent(progress.timeElapsedPercent)
-    const absDeltaFmt = formatPercent(Math.abs(progress.deltaPercent))
-    const hoursFmt = formatHours(progress.totalUsedHours)
-
-    switch (progress.status) {
-      case 'over_budget':
-        return `${usedFmt} des Budgets verbraucht. Bitte mit dem Projektverantwortlichen Rücksprache nehmen.`
-      case 'no_budget':
-        return `${hoursFmt} bereits erfasst, aber kein Top-Up hinterlegt. Diese Stunden werden separat in Rechnung gestellt, sofern kein Budget nachgetragen wird.`
-      case 'close_to_limit':
-        return `${usedFmt} des Budgets verbraucht, ${timeFmt} der Zeit vergangen. Letzte Stunden bewusst planen.`
-      case 'behind_schedule':
-        return `${usedFmt} des Budgets verbraucht, aber erst ${timeFmt} der Zeit vergangen (${absDeltaFmt} schneller als geplant).`
-      case 'ahead_of_schedule':
-        return `Erst ${usedFmt} des Budgets verbraucht, ${timeFmt} der Zeit vergangen (${absDeltaFmt} unter Plan). Reichlich Spielraum.`
-      case 'on_track':
-      default:
-        return `${usedFmt} Budget, ${timeFmt} Zeit. Alles im erwarteten Rahmen.`
-    }
+    return $i18n.t(`dashboard.weeklyStatus.${progress.status}.body`, {
+      used: formatPercent(progress.budgetUsedPercent),
+      time: formatPercent(progress.timeElapsedPercent),
+      delta: formatPercent(Math.abs(progress.deltaPercent)),
+      hours: formatHours(progress.totalUsedHours)
+    })
   }
 
   function statusIcon(status: BudgetStatus): string {
     switch (status) {
       case 'over_budget':
-        return 'material-symbols:warning-rounded'
+        return 'lucide:triangle-alert'
       case 'no_budget':
-        return 'material-symbols:account-balance-wallet-outline-rounded'
+        return 'lucide:wallet'
       case 'close_to_limit':
-        return 'material-symbols:error-outline-rounded'
+        return 'lucide:circle-alert'
       case 'behind_schedule':
-        return 'material-symbols:hourglass-bottom-rounded'
+        return 'lucide:hourglass'
       case 'ahead_of_schedule':
-        return 'material-symbols:check-circle-rounded'
+        return 'lucide:circle-check'
       case 'on_track':
       default:
-        return 'material-symbols:trending-flat-rounded'
+        return 'lucide:move-right'
     }
   }
 
@@ -195,13 +170,4 @@ function clamp(value: number, min: number, max: number): number {
   if (value < min) return min
   if (value > max) return max
   return value
-}
-
-function formatPercent(value: number): string {
-  return `${Math.round(value)} %`
-}
-
-function formatHours(value: number): string {
-  const rounded = Math.round(value * 100) / 100
-  return `${rounded.toLocaleString('de-CH', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} h`
 }

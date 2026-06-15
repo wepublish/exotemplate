@@ -27,6 +27,7 @@
   const { deleteCustomEndpoint } = useDirectus()
   const userStore = useUserStore()
   const toast = useToast()
+  const { t } = useI18n()
 
   // Tick every 30s so "vor X Min." stays accurate without user interaction.
   // Browser-only — avoids SSR memory leaks and hydration mismatch.
@@ -38,26 +39,30 @@
     onScopeDispose(() => clearInterval(timer))
   }
 
-  function formatDurationDe(ms: number): string {
+  function formatDuration(ms: number): string {
     const seconds = Math.max(0, Math.round(ms / 1000))
-    if (seconds < 60) return `${seconds} Sek.`
+    if (seconds < 60) return t('dashboard.cache.unit.seconds', { n: seconds })
     const minutes = Math.round(seconds / 60)
-    if (minutes < 60) return `${minutes} Min.`
+    if (minutes < 60) return t('dashboard.cache.unit.minutes', { n: minutes })
     const hours = Math.floor(minutes / 60)
     const remMin = minutes % 60
-    return remMin ? `${hours} Std. ${remMin} Min.` : `${hours} Std.`
+    return remMin
+      ? t('dashboard.cache.unit.hoursMinutes', { h: hours, m: remMin })
+      : t('dashboard.cache.unit.hours', { n: hours })
   }
 
   const cacheAgeText = computed<string | null>(() => {
     if (!props.cacheInfo) return null
-    return formatDurationDe(nowMs.value - props.cacheInfo.cachedAt)
+    return formatDuration(nowMs.value - props.cacheInfo.cachedAt)
   })
 
   const cacheExpiresInText = computed<string | null>(() => {
     if (!props.cacheInfo) return null
     const remaining = props.cacheInfo.expiresAt - nowMs.value
-    if (remaining <= 0) return 'läuft jetzt ab'
-    return `läuft in ${formatDurationDe(remaining)} ab`
+    if (remaining <= 0) return t('dashboard.cache.expiresNow')
+    return t('dashboard.cache.expiresIn', {
+      duration: formatDuration(remaining)
+    })
   })
 
   const isLive = computed<boolean>(
@@ -66,8 +71,8 @@
 
   const statusLabel = computed<string | null>(() => {
     if (!props.cacheInfo) return null
-    if (isLive.value) return 'Live-Daten'
-    return `Aus Cache (vor ${cacheAgeText.value})`
+    if (isLive.value) return t('dashboard.cache.live')
+    return t('dashboard.cache.fromCache', { age: cacheAgeText.value })
   })
 
   const statusColor = computed<'success' | 'neutral'>(() =>
@@ -75,17 +80,22 @@
   )
 
   const statusIcon = computed<string>(() =>
-    isLive.value ? 'i-lucide-zap' : 'i-lucide-database'
+    isLive.value ? 'lucide:zap' : 'lucide:database'
   )
 
   const refreshTooltip = computed<string>(() => {
     if (!props.cacheInfo) {
-      return 'Daten aus Jira und Clockodo neu laden'
+      return t('dashboard.cache.refreshTooltip.noCache')
     }
     if (isLive.value) {
-      return `Cache leeren und neu laden — die Daten sind bereits live (Cache ${cacheExpiresInText.value}). Nur klicken, wenn sich seitdem etwas in Jira oder Clockodo geändert hat.`
+      return t('dashboard.cache.refreshTooltip.live', {
+        expires: cacheExpiresInText.value
+      })
     }
-    return `Cache leeren und Daten frisch von Jira & Clockodo holen. (Cache derzeit vor ${cacheAgeText.value} angelegt, ${cacheExpiresInText.value}.)`
+    return t('dashboard.cache.refreshTooltip.cached', {
+      age: cacheAgeText.value,
+      expires: cacheExpiresInText.value
+    })
   })
 
   const refreshing = ref(false)
@@ -104,19 +114,21 @@
       const meta = props.cacheInfo
       toast.add({
         color: 'success',
-        title: 'Daten neu geladen',
+        title: t('dashboard.cache.refreshSuccessTitle'),
         description: meta
-          ? `Frisch von Jira & Clockodo geholt — Cache ${cacheExpiresInText.value}.`
-          : 'Jira- und Clockodo-Daten wurden frisch geladen.'
+          ? t('dashboard.cache.refreshSuccessWithMeta', {
+              expires: cacheExpiresInText.value
+            })
+          : t('dashboard.cache.refreshSuccessWithoutMeta')
       })
     } catch (err: any) {
       toast.add({
         color: 'error',
-        title: 'Aktualisieren fehlgeschlagen',
+        title: t('dashboard.cache.refreshErrorTitle'),
         description:
           err?.response?.data?.errors?.[0]?.message ||
           err?.message ||
-          'Unbekannter Fehler'
+          t('dashboard.cache.unknownError')
       })
     } finally {
       refreshing.value = false
@@ -135,33 +147,28 @@
         size="sm"
         color="neutral"
         variant="link"
-        icon="i-lucide-info"
-        aria-label="Wie funktioniert der Cache?"
+        icon="lucide:info"
+        :aria-label="t('dashboard.cache.infoAria')"
       />
       <template #content>
         <div class="p-3 max-w-sm text-sm space-y-2">
-          <p class="font-semibold">Wie funktioniert das Caching?</p>
-          <p>
-            Jira und Clockodo limitieren Abfragen ("429 Too Many Requests").
-            Damit das Dashboard für alle schnell und stabil bleibt, werden die
-            zusammengefassten Stunden pro Projekt und Zeitraum auf dem Server
-            für eine Stunde zwischengespeichert.
-          </p>
+          <p class="font-semibold">{{ t('dashboard.cache.infoTitle') }}</p>
+          <p>{{ t('dashboard.cache.infoIntro') }}</p>
           <ul class="list-disc list-inside space-y-1">
             <li>
-              <span class="font-medium text-success">Live-Daten</span> — gerade
-              direkt von Jira &amp; Clockodo geholt.
+              <span class="font-medium text-success">{{
+                t('dashboard.cache.infoLiveLabel')
+              }}</span>
+              — {{ t('dashboard.cache.infoLiveText') }}
             </li>
             <li>
-              <span class="font-medium">Aus Cache</span> — gespeicherte Kopie,
-              kann bis zu eine Stunde alt sein.
+              <span class="font-medium">{{
+                t('dashboard.cache.infoCacheLabel')
+              }}</span>
+              — {{ t('dashboard.cache.infoCacheText') }}
             </li>
           </ul>
-          <p>
-            Klicke auf das Aktualisieren-Symbol, um den Cache für den aktuell
-            gewählten Zeitraum zu leeren und Jira &amp; Clockodo neu abzufragen.
-            Andere Projekte oder Zeiträume bleiben unberührt.
-          </p>
+          <p>{{ t('dashboard.cache.infoOutro') }}</p>
         </div>
       </template>
     </UPopover>
@@ -171,14 +178,14 @@
       size="md"
       color="primary"
       variant="ghost"
-      icon="i-lucide-refresh-cw"
+      icon="lucide:refresh-cw"
       :loading="refreshing"
       :disabled="pending"
       :title="refreshTooltip"
-      aria-label="Daten neu laden"
+      :aria-label="t('dashboard.cache.reloadAria')"
       @click="onRefreshClick"
     >
-      Neu laden
+      {{ t('dashboard.cache.reload') }}
     </UButton>
   </div>
 </template>

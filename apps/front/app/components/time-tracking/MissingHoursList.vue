@@ -10,6 +10,8 @@
     'toggle-ignored': [row: CaptureUserRow]
   }>()
 
+  const { t } = useI18n()
+
   function initials(name: string): string {
     const parts = name.trim().split(/\s+/).filter(Boolean)
     if (parts.length === 0) return '?'
@@ -46,8 +48,7 @@
 <template>
   <div class="space-y-3">
     <div v-if="sortedRows.length === 0" class="text-sm text-muted">
-      Keine Mitarbeiter:innen mit aktivem Clockodo-Soll-Vertrag im Zeitraum
-      gefunden.
+      {{ t('timeTracking.list.empty') }}
     </div>
 
     <div
@@ -66,9 +67,9 @@
             color="neutral"
             variant="subtle"
             size="sm"
-            icon="material-symbols:person-off-outline"
+            icon="lucide:user-x"
           >
-            Ignoriert
+            {{ t('timeTracking.list.ignoredBadge') }}
           </UBadge>
         </div>
         <p class="text-xs text-muted truncate">
@@ -87,28 +88,29 @@
         size="md"
         class="shrink-0"
       >
-        {{ row.capturedDays }} / {{ row.expectedDays }} Tage
+        {{
+          t('timeTracking.list.daysSummary', {
+            captured: row.capturedDays,
+            expected: row.expectedDays
+          })
+        }}
       </UBadge>
 
       <UButton
-        :icon="
-          row.ignored
-            ? 'material-symbols:notifications-active-outline'
-            : 'material-symbols:notifications-off-outline'
-        "
+        :icon="row.ignored ? 'lucide:bell-ring' : 'lucide:bell-off'"
         size="sm"
         :color="row.ignored ? 'primary' : 'neutral'"
         variant="ghost"
         :loading="togglingId === row.id"
         :title="
           row.ignored
-            ? 'Benachrichtigungen wieder aktivieren'
-            : 'Diese Person ignorieren (keine Slack-Erinnerung)'
+            ? t('timeTracking.list.reactivateTitle')
+            : t('timeTracking.list.ignoreTitle')
         "
         :aria-label="
           row.ignored
-            ? 'Benachrichtigungen wieder aktivieren'
-            : 'Diese Person ignorieren'
+            ? t('timeTracking.list.reactivateAria')
+            : t('timeTracking.list.ignoreAria')
         "
         @click="emit('toggle-ignored', row)"
       />

@@ -10,13 +10,15 @@ const CLIENT_FIELDS = [
   'clockodo_customer_id',
   'slack_channel_id',
   'apiUrl',
+  'language',
   'onboarding_current_step',
   'onboarding_manual_checklist',
+  'contracts.id',
   'date_created',
   'date_updated'
 ]
 
-export const ONBOARDING_STEP_COUNT = 8
+export const ONBOARDING_STEP_COUNT = 10
 
 export function useOnboardingProgress() {
   const directusStore = useDirectus()
@@ -64,7 +66,7 @@ export function useOnboardingProgress() {
 }
 
 /**
- * Derives the 8-element step status array from a Client record.
+ * Derives the 10-element step status array from a Client record.
  *
  * Step indices:
  *   0 Directus              → client record exists
@@ -73,8 +75,10 @@ export function useOnboardingProgress() {
  *   3 Bexio                 → bexio_contact_id is set
  *   4 Clockodo              → clockodo_customer_id is set
  *   5 Infrastruktur         → apiUrl is set
- *   6 Manuelle Schritte     → onboarding_current_step > 6
- *   7 E-Mail                → onboarding_current_step > 7
+ *   6 Vertrag               → a contract exists, or onboarding_current_step > 6
+ *   7 Rechnung              → onboarding_current_step > 7
+ *   8 Manuelle Schritte     → onboarding_current_step > 8
+ *   9 E-Mail                → onboarding_current_step > 9
  */
 export type StepStatus = 'pending' | 'active' | 'completed' | 'error'
 
@@ -88,11 +92,15 @@ export function deriveStepStatuses(
     | 'slack_channel_id'
     | 'apiUrl'
     | 'onboarding_current_step'
+    | 'contracts'
   > | null
 ): StepStatus[] {
   const s = Array<StepStatus>(ONBOARDING_STEP_COUNT).fill('pending')
   if (!client) return s
   const step = client.onboarding_current_step ?? 0
+  const hasContract = Array.isArray(client.contracts)
+    ? client.contracts.length > 0
+    : false
 
   if (client.id) s[0] = 'completed'
   if (client.jira_short_code) s[1] = 'completed'
@@ -100,8 +108,10 @@ export function deriveStepStatuses(
   if (client.bexio_contact_id) s[3] = 'completed'
   if (client.clockodo_customer_id) s[4] = 'completed'
   if (client.apiUrl) s[5] = 'completed'
-  if (step > 6) s[6] = 'completed'
+  if (hasContract || step > 6) s[6] = 'completed'
   if (step > 7) s[7] = 'completed'
+  if (step > 8) s[8] = 'completed'
+  if (step > 9) s[9] = 'completed'
   return s
 }
 

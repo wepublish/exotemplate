@@ -1,0 +1,78 @@
+{
+  "workLog": {
+    "title": "Arbeitsprotokoll",
+    "backToDashboard": "Zurück zum Dashboard",
+    "haltedAlert": {
+      "title": "{count} Ticket ist gestoppt | {count} Tickets sind gestoppt",
+      "description": "An rot markierten Tickets darf aktuell nicht gearbeitet werden, bis der Stopp direkt am Ticket aufgehoben wird."
+    },
+    "columns": {
+      "work": "Arbeit",
+      "billabilityDetails": "Details Abrechenbarkeit",
+      "billableTime": "Verrechenbare Zeit",
+      "details": "Details"
+    },
+    "row": {
+      "haltActive": "Arbeitsstopp aktiv",
+      "warnings": "{count} Warnung | {count} Warnungen",
+      "resolved": "{count} erledigt"
+    },
+    "haltTitle": "Arbeitsstopp für {key}",
+    "billability": {
+      "jiraEstimate": "Jira Schätzung",
+      "deliveredBeforePeriod": "Vor Abrechnungsperiode gleistet",
+      "availableJiraHours": "Verfügbare Jira-Stunden",
+      "deliveredInPeriod": "In Abrechnungsperiode gleistet",
+      "fullyBillable": "Davon voll verrechenbar",
+      "halfBillable": "Davon hälftig verrechenbar",
+      "halfNonBillable": "Davon hälftig nicht verrechenbar",
+      "totalBillable": "Total verrechenbar"
+    },
+    "showDetails": "Details anzeigen",
+    "learnMore": "Mehr erfahren",
+    "status": {
+      "resolved": "Erledigt",
+      "halt": "Arbeitsstopp",
+      "silenced": "Stummgeschaltet",
+      "warning": "Warnung"
+    },
+    "thresholdInfo": {
+      "lastReportedAt": "Zuletzt gemeldet bei {hours}",
+      "nextReportAt": "Nächste Meldung bei {hours}"
+    },
+    "halt": {
+      "stopped": "Gestoppt",
+      "stoppedBy": "von {name}",
+      "lifted": "Stopp aufgehoben",
+      "liftedBy": "von {name}"
+    },
+    "silenced": {
+      "label": "Stummgeschaltet",
+      "by": "von {name}"
+    },
+    "actions": {
+      "stopWork": "Arbeit stoppen",
+      "resolveHalt": "Stopp aufheben",
+      "silence": "Stummschalten",
+      "unsilence": "Stummschaltung aufheben"
+    },
+    "confirmDialog": {
+      "title": "Arbeit an Ticket stoppen?",
+      "intro": "Du bist dabei, einen Arbeitsstopp für {key} anzufordern.",
+      "whatHappens": "<strong>Was passiert jetzt:</strong> Im Slack-Kanal Deines Projekts erscheint eine Stopp-Meldung mit Deinem Namen. Das Team wird aufgefordert, die Arbeit an diesem Ticket sofort einzustellen.",
+      "untilWhen": "<strong>Bis wann gilt das:</strong> Der Stopp bleibt so lange aktiv, bis Du ihn im Dashboard wieder aufhebst. Erst dann darf weitergearbeitet werden.",
+      "hint": "Nutze diese Funktion, wenn Du Rücksprache halten willst, bevor zusätzliche Stunden verrechnet werden. Für Tickets, die Dich einfach nicht mehr interessieren, nutze stattdessen „Stummschalten“.",
+      "confirm": "Arbeit stoppen & Kanal informieren"
+    },
+    "toast": {
+      "requestHaltSuccess": "Arbeitsstopp für {key} angefordert. Der Kanal wurde informiert.",
+      "requestHaltError": "Stopp konnte nicht angefordert werden.",
+      "resolveHaltSuccess": "Arbeitsstopp für {key} aufgehoben. Die Arbeit kann wieder aufgenommen werden.",
+      "resolveHaltError": "Stopp konnte nicht aufgehoben werden.",
+      "silenceSuccess": "{key} dauerhaft stummgeschaltet. Es werden keine weiteren Slack-Meldungen gesendet.",
+      "silenceError": "Stummschalten fehlgeschlagen.",
+      "unsilenceSuccess": "Stummschaltung für {key} aufgehoben. Slack-Meldungen sind wieder aktiv.",
+      "unsilenceError": "Aufheben fehlgeschlagen."
+    }
+  }
+}

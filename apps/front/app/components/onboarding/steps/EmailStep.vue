@@ -3,8 +3,10 @@
 
   const data = inject(ONBOARDING_DATA_KEY)!
   const toast = useToast()
+  const { invite, listMembers } = useTeam()
+  const { $i18n } = useNuxtApp()
 
-  // Pre-fill recipient from step 1 user
+  // Pre-fill recipient from the (single) onboarding user
   watch(
     () => data.users[0]?.email,
     (email) => {
@@ -12,6 +14,67 @@
     },
     { immediate: true }
   )
+
+  // ── Activation link ────────────────────────────────────────────────────────
+  // The user was created in step 1 (status 'invited', no password). Instead of
+  // sending a separate Directus invite, we fetch the tokenized activation link
+  // here and embed it in the welcome mail text below. The /team/invite call is
+  // idempotent (re-links if needed, never re-mails for sendInvite:false) and
+  // returns the link only for invited users (so an existing active account
+  // yields an empty link and we fall back to a plain login URL).
+
+  const inviteAcceptUrl = ref('')
+
+  // On a *resumed* onboarding the step-1 user isn't held in memory, so pull the
+  // client's primary member here. Without this the welcome mail has no
+  // recipient/name and the activation link can't be generated (it would fall
+  // back to a plain login URL).
+  async function hydrateRecipientFromClient() {
+    if (!data.clientId) return
+    if (data.users[0]?.email?.trim()) return // already entered this session
+    try {
+      const members = await listMembers(data.clientId)
+      const m = members[0]
+      if (m && data.users[0]) {
+        data.users[0].firstName = m.first_name ?? ''
+        data.users[0].lastName = m.last_name ?? ''
+        data.users[0].email = m.email
+        data.users[0].directusUserId = m.id
+        if (!data.emailTo) data.emailTo = m.email
+      }
+    } catch {
+      // ignore — falls back to the login link
+    }
+  }
+
+  async function fetchInviteLink() {
+    const u = data.users[0]
+    if (!data.clientId || !u?.email?.trim()) {
+      inviteAcceptUrl.value = ''
+      return
+    }
+    try {
+      const res = await invite({
+        email: u.email.trim(),
+        firstName: u.firstName || undefined,
+        lastName: u.lastName || undefined,
+        clientIds: [data.clientId],
+        sendInvite: false,
+        returnInviteUrl: true
+      })
+      inviteAcceptUrl.value = res.acceptInviteUrl ?? ''
+    } catch {
+      // Backend not reachable / not an invited user → fall back to login URL.
+      inviteAcceptUrl.value = ''
+    }
+  }
+
+  onMounted(async () => {
+    await hydrateRecipientFromClient()
+    await fetchInviteLink()
+    await loadAndRegenerate()
+  })
+  watch(() => [data.clientId, data.users[0]?.email], fetchInviteLink)
 
   // ── Derived links ─────────────────────────────────────────────────────────
 
@@ -35,77 +98,90 @@
       : 'https://editor.<medium>.wepublish.cloud'
   }
 
-  function buildFirstName() {
-    return data.users[0]?.firstName?.trim() || 'zämme'
+  // ── Subject + body generation (in the new client user's language) ──────────
+  // Copy lives in the i18n catalog (onboarding.steps.email.welcome.*); we
+  // render it in `data.language` (chosen in step 1), independent of the admin's
+  // active UI locale. Locale catalogs are lazy-loaded, so the target locale is
+  // loaded on demand before rendering (see loadAndRegenerate).
+
+  function welcomeT(key: string, named?: Record<string, unknown>): string {
+    return $i18n.t(`onboarding.steps.email.welcome.${key}`, named ?? {}, {
+      locale: data.language
+    })
   }
 
-  // ── Body generation ───────────────────────────────────────────────────────
+  function welcomeSubject(): string {
+    return $i18n.t(
+      'onboarding.steps.email.welcome.subject',
+      {},
+      { locale: data.language }
+    )
+  }
 
   function generateBody(): string {
-    const channelName = buildSlackChannelName()
-    const slackBlock = channelName
-      ? `  ${buildSlackUrl()}\n  Unser gemeinsamer Kanal: #${channelName}`
-      : `  ${buildSlackUrl()}`
-
-    return `Hoi ${buildFirstName()}
-
-schön, dass du bei We.Publish an Bord bist! Damit du direkt loslegen kannst, hier die vier Plattformen, mit denen wir zusammenarbeiten – jede mit einem klaren Zweck, damit du immer weisst, wo du was findest:
-
-• ONE – transparente Finanzen
-  ${oneUrl}
-  Hier siehst du jederzeit, wie viele Stunden wir für dich gearbeitet haben, was auf deinem Guthaben steht und alle Rechnungen. Volle Transparenz über die Kosten.
-
-• Jira – Projektmanagement & Arbeitsfortschritt
-  ${buildJiraUrl()}
-  Dein Projektboard: Hier verfolgen wir alle Aufgaben, Bugs und Features. Du kannst jederzeit nachschauen, woran wir arbeiten, Tickets kommentieren oder neue Anfragen erfassen.
-
-• Slack – tägliche Kommunikation
-${slackBlock}
-  Für den kurzen Draht: Fragen, Absprachen und direkter Austausch mit dem Team – schneller und persönlicher als E-Mail.
-
-• Editor – Website & CRM verwalten
-  ${buildEditorUrl()}
-  Dein Redaktions-Cockpit: Artikel, Seiten und Inhalte deiner Website pflegen sowie Abonnent:innen und CRM verwalten.
-
-Kurz zusammengefasst: ONE für die Finanzen, Jira für die Projektarbeit, Slack für die Kommunikation und der Editor für deine Inhalte. So bleibt alles an seinem Platz.
-
-Die Zugangsdaten solltest du als Einladungen bereits erhalten haben.
-
-In den nächsten Tagen melden wir uns bei dir, um einen Termin für ein persönliches Treffen zu vereinbaren – damit wir uns in Ruhe kennenlernen und gemeinsam die nächsten Schritte besprechen.
-
-Bis bald und liebe Grüsse
-Dein We.Publish-Team`
+    return buildWelcomeEmailBody(welcomeT, {
+      firstName: data.users[0]?.firstName ?? '',
+      oneUrl,
+      activationUrl: inviteAcceptUrl.value || null,
+      loginUrl: `${oneUrl}/auth/login`,
+      jiraUrl: buildJiraUrl(),
+      slackUrl: buildSlackUrl(),
+      slackChannelName: buildSlackChannelName() || null,
+      editorUrl: buildEditorUrl()
+    })
   }
 
-  // Editable body. `lastGenerated` tracks the latest auto-generated text so
-  // we can tell whether the user has edited it: if the current body still
-  // matches, it's safe to overwrite when upstream data (e.g. a late-arriving
-  // Slack channel id) changes. Otherwise we leave the user's edits alone.
+  // Editable body/subject. `lastGenerated`/`lastSubject` track the latest
+  // auto-generated text so we only overwrite when the admin hasn't edited it —
+  // e.g. when the language changes or a late-arriving Slack channel id lands.
   let lastGenerated = generateBody()
   const emailBody = ref(lastGenerated)
 
+  let lastSubject = welcomeSubject()
+  if (!data.emailSubject) data.emailSubject = lastSubject
+
+  function applyRegeneration(): void {
+    const next = generateBody()
+    if (emailBody.value === lastGenerated) {
+      emailBody.value = next
+    }
+    lastGenerated = next
+
+    const nextSubject = welcomeSubject()
+    if (!data.emailSubject || data.emailSubject === lastSubject) {
+      data.emailSubject = nextSubject
+    }
+    lastSubject = nextSubject
+  }
+
+  // Locale catalogs load per-locale on demand; make sure the chosen language is
+  // present before rendering so a non-active locale isn't silently rendered in
+  // the fallback language.
+  async function loadAndRegenerate(): Promise<void> {
+    await $i18n.loadLocaleMessages(data.language)
+    applyRegeneration()
+  }
+
   watch(
     [
+      () => data.language,
       () => data.slackResult?.channel?.id,
       () => data.slackResult?.channel?.name,
       () => data.slackChannel,
       () => data.jiraResult?.key,
       () => data.infraMediumName,
-      () => data.users[0]?.firstName
+      () => data.users[0]?.firstName,
+      () => inviteAcceptUrl.value
     ],
-    () => {
-      const next = generateBody()
-      if (emailBody.value === lastGenerated) {
-        emailBody.value = next
-      }
-      lastGenerated = next
-    }
+    loadAndRegenerate
   )
 
   function regenerate() {
     const next = generateBody()
     lastGenerated = next
     emailBody.value = next
+    data.emailSubject = welcomeSubject()
+    lastSubject = data.emailSubject
     toast.add({ color: 'success', title: 'Text neu generiert' })
   }
 
@@ -128,10 +204,13 @@ Dein We.Publish-Team`
 <template>
   <div class="grid grid-cols-12 gap-4">
     <div class="col-span-12">
-      <UAlert color="info" variant="soft" icon="material-symbols:info-rounded">
+      <UAlert color="info" variant="soft" icon="lucide:info">
         <template #description>
-          Der Text unten ist aus den vorherigen Schritten vorformuliert. Bei
-          Bedarf anpassen, dann kopieren und aus deinem Mail-Client versenden.
+          Diese Willkommens-E-Mail enthält bereits den Aktivierungslink, mit dem
+          der Benutzer sein Passwort setzt. Aus den vorherigen Schritten
+          vorformuliert — bei Bedarf anpassen, dann kopieren und aus deinem
+          Mail-Client versenden. Sie wird in der im ersten Schritt gewählten
+          Sprache des Hauptbenutzers erstellt.
         </template>
       </UAlert>
     </div>
@@ -148,7 +227,7 @@ Dein We.Publish-Team`
             size="xs"
             variant="ghost"
             color="neutral"
-            icon="material-symbols:content-copy-rounded"
+            icon="lucide:copy"
             :disabled="!data.emailTo"
             @click="copy(data.emailTo, 'Empfänger')"
           />
@@ -163,7 +242,7 @@ Dein We.Publish-Team`
             size="xs"
             variant="ghost"
             color="neutral"
-            icon="material-symbols:content-copy-rounded"
+            icon="lucide:copy"
             :disabled="!data.emailSubject"
             @click="copy(data.emailSubject, 'Betreff')"
           />
@@ -178,14 +257,14 @@ Dein We.Publish-Team`
             size="xs"
             variant="ghost"
             color="neutral"
-            icon="material-symbols:refresh-rounded"
+            icon="lucide:refresh-cw"
             @click="regenerate"
           >
             Neu generieren
           </UButton>
           <UButton
             size="xs"
-            icon="material-symbols:content-copy-rounded"
+            icon="lucide:copy"
             @click="copy(emailBody, 'E-Mail-Text')"
           >
             Text kopieren
@@ -201,16 +280,12 @@ Dein We.Publish-Team`
     </UFormField>
 
     <div class="col-span-12">
-      <UAlert
-        color="warning"
-        variant="soft"
-        icon="material-symbols:construction-rounded"
-      >
+      <UAlert color="warning" variant="soft" icon="lucide:construction">
         <template #description>
-          Der automatische E-Mail-Versand ist nicht implementiert. Text kopieren
-          und aus deinem Mail-Client an
+          Diese E-Mail wird nicht automatisch versendet. Text kopieren und aus
+          deinem Mail-Client an
           <span class="font-mono">{{ data.emailTo || '(Empfänger)' }}</span>
-          senden.
+          senden — der Aktivierungslink ist bereits enthalten.
         </template>
       </UAlert>
     </div>

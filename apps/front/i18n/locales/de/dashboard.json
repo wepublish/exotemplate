@@ -1,0 +1,91 @@
+{
+  "dashboard": {
+    "noClientAccess": {
+      "title": "Kein Mandantenzugriff",
+      "description": "Dir ist aktuell kein Mandant zugewiesen. Sobald dir ein Mandant zugewiesen wurde, erscheinen hier deine Kennzahlen."
+    },
+    "loadError": "Beim Abrufen der Daten ist ein Fehler aufgetreten.",
+    "cards": {
+      "topUps": "Zahlungen / Top-Ups",
+      "availableHours": "Verfügbare Arbeitsstunden",
+      "toBill": "Aktuell zu verrechnen",
+      "workLog": "Arbeitsprotokoll",
+      "manualCorrections": "Manuelle Korrekturen"
+    },
+    "summaryCard": {
+      "detailsAria": "{title} – Details anzeigen",
+      "showDetails": "Details anzeigen"
+    },
+    "workLogAlert": {
+      "haltedTitle": "{count} Ticket ist gestoppt | {count} Tickets sind gestoppt",
+      "haltedDescription": "An den betroffenen Tickets darf aktuell nicht gearbeitet werden, bis der Stopp aufgehoben wird.",
+      "openWarningsTitle": "{count} offene Warnung | {count} offene Warnungen",
+      "openWarningsDescription": "Bei einigen Tickets ist die Jira-Schätzung aufgebraucht oder überschritten.",
+      "resolvedTitle": "{count} Warnung erledigt | {count} Warnungen erledigt",
+      "resolvedDescription": "Die zugehörigen Jira-Tickets sind als Done oder Cancelled markiert — kein Handlungsbedarf."
+    },
+    "weeklyStatus": {
+      "over_budget": {
+        "headline": "Budget überschritten",
+        "body": "{used} des Budgets verbraucht. Bitte mit dem Projektverantwortlichen Rücksprache nehmen."
+      },
+      "no_budget": {
+        "headline": "Kein Budget hinterlegt",
+        "body": "{hours} bereits erfasst, aber kein Top-Up hinterlegt. Diese Stunden werden separat in Rechnung gestellt, sofern kein Budget nachgetragen wird."
+      },
+      "close_to_limit": {
+        "headline": "Budget fast aufgebraucht",
+        "body": "{used} des Budgets verbraucht, {time} der Zeit vergangen. Letzte Stunden bewusst planen."
+      },
+      "behind_schedule": {
+        "headline": "Budget verbraucht sich schneller als die Zeit",
+        "body": "{used} des Budgets verbraucht, aber erst {time} der Zeit vergangen ({delta} schneller als geplant)."
+      },
+      "ahead_of_schedule": {
+        "headline": "Mehr Budget übrig als erwartet",
+        "body": "Erst {used} des Budgets verbraucht, {time} der Zeit vergangen ({delta} unter Plan). Reichlich Spielraum."
+      },
+      "on_track": {
+        "headline": "Budget und Zeit im Gleichlauf",
+        "body": "{used} Budget, {time} Zeit. Alles im erwarteten Rahmen."
+      }
+    },
+    "cache": {
+      "live": "Live-Daten",
+      "fromCache": "Aus Cache (vor {age})",
+      "unit": {
+        "seconds": "{n} Sek.",
+        "minutes": "{n} Min.",
+        "hours": "{n} Std.",
+        "hoursMinutes": "{h} Std. {m} Min."
+      },
+      "expiresNow": "läuft jetzt ab",
+      "expiresIn": "läuft in {duration} ab",
+      "refreshTooltip": {
+        "noCache": "Daten aus Jira und Clockodo neu laden",
+        "live": "Cache leeren und neu laden — die Daten sind bereits live (Cache {expires}). Nur klicken, wenn sich seitdem etwas in Jira oder Clockodo geändert hat.",
+        "cached": "Cache leeren und Daten frisch von Jira & Clockodo holen. (Cache derzeit vor {age} angelegt, {expires}.)"
+      },
+      "infoAria": "Wie funktioniert der Cache?",
+      "infoTitle": "Wie funktioniert das Caching?",
+      "infoIntro": "Jira und Clockodo limitieren Abfragen (\"429 Too Many Requests\"). Damit das Dashboard für alle schnell und stabil bleibt, werden die zusammengefassten Stunden pro Projekt und Zeitraum auf dem Server für eine Stunde zwischengespeichert.",
+      "infoLiveLabel": "Live-Daten",
+      "infoLiveText": "gerade direkt von Jira & Clockodo geholt.",
+      "infoCacheLabel": "Aus Cache",
+      "infoCacheText": "gespeicherte Kopie, kann bis zu eine Stunde alt sein.",
+      "infoOutro": "Klicke auf das Aktualisieren-Symbol, um den Cache für den aktuell gewählten Zeitraum zu leeren und Jira & Clockodo neu abzufragen. Andere Projekte oder Zeiträume bleiben unberührt.",
+      "reload": "Neu laden",
+      "reloadAria": "Daten neu laden",
+      "refreshSuccessTitle": "Daten neu geladen",
+      "refreshSuccessWithMeta": "Frisch von Jira & Clockodo geholt — Cache {expires}.",
+      "refreshSuccessWithoutMeta": "Jira- und Clockodo-Daten wurden frisch geladen.",
+      "refreshErrorTitle": "Aktualisieren fehlgeschlagen",
+      "unknownError": "Unbekannter Fehler"
+    },
+    "contractWarning": {
+      "title": "Vertrag nicht unterzeichnet",
+      "description": "Für diesen Kunden ist kein unterzeichneter Vertrag hinterlegt. Bitte den unterschriebenen Vertrag hochladen.",
+      "action": "Vertrag verwalten"
+    }
+  }
+}

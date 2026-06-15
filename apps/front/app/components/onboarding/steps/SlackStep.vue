@@ -9,6 +9,7 @@
   const directusStore = useDirectus()
   const userStore = useUserStore()
   const toast = useToast()
+  const { t } = useI18n()
 
   const loading = ref(false)
   const completed = ref(data.slackResult !== null)
@@ -45,13 +46,12 @@
 
   async function execute() {
     if (!userStore.amIAdministrator()) {
-      executionError.value =
-        'Nur Administratoren können diesen Schritt ausführen.'
+      executionError.value = t('onboarding.steps.slack.adminOnly')
       return
     }
 
     if (!data.slackChannel.trim()) {
-      executionError.value = 'Bitte einen Kanalnamen eingeben.'
+      executionError.value = t('onboarding.steps.slack.channelRequired')
       return
     }
 
@@ -72,16 +72,22 @@
       completed.value = true
       toast.add({
         color: 'success',
-        title: `#${result.data.channel.name} erfolgreich erstellt!`
+        title: t('onboarding.steps.slack.successToast', {
+          channel: result.data.channel.name
+        })
       })
       await advanceStep({ slack_channel_id: result.data.channel.id })
     } catch (e: any) {
       const msg =
         e?.response?.data?.errors?.[0]?.message ??
         e?.message ??
-        'Unbekannter Fehler'
+        t('common.unexpectedError')
       executionError.value = msg
-      toast.add({ color: 'error', title: 'Fehler', description: msg })
+      toast.add({
+        color: 'error',
+        title: t('onboarding.infrastructure.provisioning.errorTitle'),
+        description: msg
+      })
     } finally {
       loading.value = false
     }
@@ -91,12 +97,10 @@
 <template>
   <!-- ── Completed view ──────────────────────────────────────────────────── -->
   <div v-if="completed && data.slackResult" class="flex flex-col gap-4">
-    <UAlert
-      color="success"
-      variant="soft"
-      icon="material-symbols:check-circle-rounded"
-    >
-      <template #title>Slack-Kanal erfolgreich erstellt</template>
+    <UAlert color="success" variant="soft" icon="lucide:circle-check">
+      <template #title>{{
+        t('onboarding.steps.slack.completedTitle')
+      }}</template>
       <template #description>
         <template v-if="data.slackResult.channel.name">
           <span class="font-mono font-bold"
@@ -104,7 +108,7 @@
           >
           —
         </template>
-        ID:
+        {{ t('onboarding.steps.slack.completedId') }}
         <span class="font-mono">{{ data.slackResult.channel.id }}</span>
       </template>
     </UAlert>
@@ -115,33 +119,33 @@
       rel="noopener"
       class="inline-flex items-center gap-2 text-sm text-primary hover:underline"
     >
-      <UIcon name="simple-icons:slack" class="text-base" />
-      Kanal in Slack öffnen
-      <UIcon name="material-symbols:open-in-new-rounded" class="text-sm" />
+      <UIcon name="lucide:slack" class="text-base" />
+      {{ t('onboarding.steps.slack.openChannel') }}
+      <UIcon name="lucide:external-link" class="text-sm" />
     </a>
   </div>
 
   <!-- ── Form ───────────────────────────────────────────────────────────── -->
   <div v-else class="grid grid-cols-12 gap-4">
     <div class="col-span-12">
-      <UAlert color="info" variant="soft" icon="material-symbols:info-rounded">
+      <UAlert color="info" variant="soft" icon="lucide:info">
         <template #description>
-          Einen dedizierten Slack-Kanal für den Client erstellen.
+          {{ t('onboarding.steps.slack.intro') }}
         </template>
       </UAlert>
     </div>
 
     <!-- Channel name -->
     <UFormField
-      label="Kanalname"
+      :label="t('onboarding.steps.slack.channelName')"
       name="slackChannel"
       required
       class="col-span-6"
-      hint="Kleinbuchstaben, Zahlen, Bindestriche — wird automatisch normalisiert"
+      :hint="t('onboarding.steps.slack.channelNameHint')"
     >
       <UInput
         :model-value="data.slackChannel"
-        placeholder="wep-muster-ag"
+        :placeholder="t('onboarding.steps.slack.channelNamePlaceholder')"
         class="w-full font-mono"
         @update:model-value="normalizeChannelName($event as string)"
       />
@@ -149,25 +153,23 @@
 
     <!-- Description -->
     <UFormField
-      label="Beschreibung (optional)"
+      :label="t('onboarding.steps.slack.descriptionLabel')"
       name="slackDescription"
       class="col-span-6 self-end"
     >
       <UInput
         v-model="data.slackDescription"
-        placeholder="Client-Kommunikationskanal"
+        :placeholder="t('onboarding.steps.slack.descriptionPlaceholder')"
         class="w-full"
       />
     </UFormField>
 
     <!-- Error -->
     <div v-if="executionError" class="col-span-12">
-      <UAlert
-        color="error"
-        variant="soft"
-        icon="material-symbols:error-rounded"
-      >
-        <template #title>Fehler</template>
+      <UAlert color="error" variant="soft" icon="lucide:circle-alert">
+        <template #title>{{
+          t('onboarding.infrastructure.provisioning.errorTitle')
+        }}</template>
         <template #description>{{ executionError }}</template>
       </UAlert>
     </div>
@@ -175,12 +177,12 @@
     <!-- Execute -->
     <div class="col-span-12 flex justify-end pt-2">
       <UButton
-        icon="simple-icons:slack"
+        icon="lucide:slack"
         :loading="loading"
         :disabled="!data.slackChannel.trim()"
         @click="execute"
       >
-        Slack-Kanal erstellen
+        {{ t('onboarding.steps.slack.execute') }}
       </UButton>
     </div>
   </div>

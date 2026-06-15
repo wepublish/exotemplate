@@ -3,6 +3,9 @@
 
   const route = useRoute()
   const userStore = useUserStore()
+  const { t } = useI18n()
+  const { formatHours, formatPercent, formatNumber, formatDate } =
+    useFormatters()
   const { compute, statusColor, statusHeadline, statusBody, statusIcon } =
     useWeeklyReportProgress()
 
@@ -33,24 +36,14 @@
     }
   )
 
-  const dashboardLink = computed(() => ({
-    path: '/',
-    query: {
-      ...(resolved.value?.client?.id
-        ? { clientId: resolved.value.client.id }
-        : {}),
-      ...(clientPeriodId.value
-        ? { clientPeriodId: String(clientPeriodId.value) }
-        : {})
-    }
-  }))
+  const dashboardLink = computed(() =>
+    clientPeriodId.value ? `/${clientPeriodId.value}/dashboard` : '/'
+  )
 
   const formattedPeriod = computed(() => {
     const p = resolved.value?.period
     if (!p?.from || !p?.to) return ''
-    const fmt = (iso: string) =>
-      new Date(iso).toLocaleDateString('de-CH', { dateStyle: 'medium' })
-    return `${fmt(p.from)} – ${fmt(p.to)}`
+    return `${formatDate(p.from)} – ${formatDate(p.to)}`
   })
 
   const progress = computed(() =>
@@ -68,8 +61,8 @@
 
   const pageTitleSuffix = computed(() =>
     isMonthlyBilling.value
-      ? 'Aktuell zu verrechnen'
-      : 'Verfügbare Arbeitsstunden'
+      ? t('billing.availableHours.toBillTitleSuffix')
+      : t('billing.availableHours.titleSuffix')
   )
 
   // For monthly clients the "Aktuell zu verrechnen" headline carries the
@@ -94,9 +87,7 @@
   )
 
   const summaryIcon = computed(() =>
-    progress.value
-      ? statusIcon(progress.value.status)
-      : 'material-symbols:trending-flat-rounded'
+    progress.value ? statusIcon(progress.value.status) : 'lucide:move-right'
   )
 
   const summaryHeadline = computed(() =>
@@ -112,12 +103,12 @@
   <div>
     <UButton
       :to="dashboardLink"
-      icon="material-symbols:arrow-back-ios"
+      icon="lucide:chevron-left"
       variant="ghost"
       size="sm"
       class="mb-4"
     >
-      Zurück zum Dashboard
+      {{ t('billing.backToDashboard') }}
     </UButton>
 
     <UPageCard>
@@ -125,7 +116,8 @@
         <div class="flex justify-between items-start w-full">
           <div>
             <div class="font-bold text-xl">
-              {{ resolved?.client?.name || 'Projekt' }} · {{ pageTitleSuffix }}
+              {{ resolved?.client?.name || t('billing.fallbackProjectName') }} ·
+              {{ pageTitleSuffix }}
             </div>
             <div v-if="formattedPeriod" class="text-xs text-muted mt-0.5">
               {{ formattedPeriod }}
@@ -135,7 +127,7 @@
             class="font-bold text-4xl whitespace-nowrap"
             :class="isMonthlyBilling ? 'text-primary' : `text-${budgetColor}`"
           >
-            {{ headlineValue }} h
+            {{ formatHours(headlineValue) }}
           </div>
         </div>
 
@@ -147,7 +139,7 @@
           color="error"
           variant="soft"
           icon="i-heroicons-exclamation-triangle"
-          title="Beim Abrufen der Daten ist ein Fehler aufgetreten."
+          :title="t('billing.loadError')"
           :description="error.message"
         />
 
@@ -162,108 +154,82 @@
             :description="summaryBody"
           />
 
-          <div v-if="!isMonthlyBilling" class="mt-6 space-y-3">
-            <div v-if="progress?.status !== 'no_budget'">
-              <div class="flex justify-between text-xs mb-1">
-                <span class="font-medium">Budget verbraucht</span>
-                <span :class="`text-${budgetColor} font-medium`">
-                  {{ sums.totalUsedPercentage }} %
-                  <span class="text-muted font-normal">
-                    ({{ sums.totalUsedHours }} h / {{ sums.totalTopUps }} h)
-                  </span>
-                </span>
-              </div>
-              <UProgress
-                :model-value="Math.min(100, sums.totalUsedPercentage)"
-                size="lg"
-                :color="budgetColor"
-              />
-            </div>
-
-            <div v-else>
-              <div class="flex justify-between text-xs mb-1">
-                <span class="font-medium">Verbrauchte Stunden</span>
-                <span class="text-warning font-medium">
-                  {{ sums.totalUsedHours }} h
-                  <span class="text-muted font-normal">
-                    (werden separat verrechnet)
-                  </span>
-                </span>
-              </div>
-            </div>
-
-            <div v-if="progress">
-              <div class="flex justify-between text-xs mb-1">
-                <span class="font-medium">Zeit vergangen</span>
-                <span class="font-medium text-muted">
-                  {{ Math.round(progress.timeElapsedPercent) }} %
-                  <span class="ml-1">
-                    ({{ progress.daysElapsed }} /
-                    {{ progress.periodDurationDays }} Tagen)
-                  </span>
-                </span>
-              </div>
-              <UProgress
-                :model-value="Math.round(progress.timeElapsedPercent)"
-                size="lg"
-                color="neutral"
-              />
-            </div>
-          </div>
+          <BillingBudgetProgressBars
+            v-if="!isMonthlyBilling"
+            class="mt-6"
+            :sums="sums"
+            :progress="progress"
+            :budget-color="budgetColor"
+          />
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
             <div>
               <div class="font-bold pb-2">
                 {{
                   isMonthlyBilling
-                    ? 'Berechnung Aktuell zu verrechnen'
-                    : 'Berechnung Verfügbares Budget'
+                    ? t('billing.availableHours.calculationToBill')
+                    : t('billing.availableHours.calculationAvailableBudget')
                 }}
               </div>
               <div class="flex text-sm">
                 <div class="flex-1">
-                  <p>Zahlungen / Top-Ups</p>
-                  <p>Arbeitsprotokoll</p>
-                  <p class="border-b">Manuelle Korrekturen</p>
+                  <p>{{ t('billing.availableHours.rowTopUps') }}</p>
+                  <p>{{ t('billing.availableHours.rowWorkLog') }}</p>
+                  <p class="border-b">
+                    {{ t('billing.availableHours.rowManualCorrections') }}
+                  </p>
                   <p class="font-bold pt-1">
-                    {{ isMonthlyBilling ? 'Saldo' : 'Verfügbar' }}
+                    {{
+                      isMonthlyBilling
+                        ? t('billing.availableHours.rowBalance')
+                        : t('billing.availableHours.rowAvailable')
+                    }}
                   </p>
                 </div>
                 <div class="text-right">
-                  <p>{{ sums.totalTopUps }} h</p>
-                  <p>- {{ sums.billableHours }} h</p>
+                  <p>{{ formatHours(sums.totalTopUps) }}</p>
+                  <p>- {{ formatHours(sums.billableHours) }}</p>
                   <p class="border-b">
                     {{
                       sums.totalManualWorkHours < 0
-                        ? `+ ${sums.totalManualWorkHours * -1}`
-                        : `- ${sums.totalManualWorkHours}`
+                        ? `+ ${formatHours(sums.totalManualWorkHours * -1)}`
+                        : `- ${formatHours(sums.totalManualWorkHours)}`
                     }}
-                    h
                   </p>
-                  <p class="font-bold pt-1">{{ sums.totalAvailableHours }} h</p>
+                  <p class="font-bold pt-1">
+                    {{ formatHours(sums.totalAvailableHours) }}
+                  </p>
                 </div>
               </div>
             </div>
 
             <div v-if="progress && !isMonthlyBilling">
-              <div class="font-bold pb-2">Budget vs. Zeit</div>
+              <div class="font-bold pb-2">
+                {{ t('billing.availableHours.budgetVsTime') }}
+              </div>
               <div class="flex text-sm">
                 <div class="flex-1">
-                  <p>Budget verbraucht</p>
-                  <p>Zeit vergangen</p>
-                  <p class="border-b">Differenz</p>
-                  <p>Verbleibende Tage</p>
+                  <p>{{ t('billing.availableHours.budgetUsed') }}</p>
+                  <p>{{ t('billing.availableHours.timeElapsed') }}</p>
+                  <p class="border-b">
+                    {{ t('billing.availableHours.difference') }}
+                  </p>
+                  <p>{{ t('billing.availableHours.remainingDays') }}</p>
                 </div>
                 <div class="text-right">
-                  <p>{{ Math.round(progress.budgetUsedPercent) }} %</p>
-                  <p>{{ Math.round(progress.timeElapsedPercent) }} %</p>
-                  <p class="border-b">
-                    {{ progress.deltaPercent > 0 ? '+' : ''
-                    }}{{ Math.round(progress.deltaPercent) }} %
+                  <p>
+                    {{ formatPercent(Math.round(progress.budgetUsedPercent)) }}
                   </p>
                   <p>
-                    {{ progress.daysRemaining }} /
-                    {{ progress.periodDurationDays }}
+                    {{ formatPercent(Math.round(progress.timeElapsedPercent)) }}
+                  </p>
+                  <p class="border-b">
+                    {{ progress.deltaPercent > 0 ? '+' : ''
+                    }}{{ formatPercent(Math.round(progress.deltaPercent)) }}
+                  </p>
+                  <p>
+                    {{ formatNumber(progress.daysRemaining) }} /
+                    {{ formatNumber(progress.periodDurationDays) }}
                   </p>
                 </div>
               </div>
@@ -277,9 +243,9 @@
             <UButton
               :to="`/${clientPeriodId}/create-bexio-invoice?hours=${(sums.totalAvailableHours || 0) * -1}`"
               variant="outline"
-              icon="material-symbols:add-notes"
+              icon="lucide:file-plus"
             >
-              Bexio-Rechnung generieren
+              {{ t('billing.generateBexioInvoice') }}
             </UButton>
           </div>
         </template>

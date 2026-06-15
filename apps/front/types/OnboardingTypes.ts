@@ -1,12 +1,11 @@
 import type { InjectionKey } from 'vue'
-import type { Client } from './DirectusTypes'
+import type { AppLocale, Client } from './DirectusTypes'
 
 export interface OnboardingUser {
   id: string
   firstName: string
   lastName: string
   email: string
-  password: string
   directusUserId: string | null
 }
 
@@ -36,8 +35,12 @@ export interface OnboardingData {
   // Step 1: Directus
   clientName: string
   clientId: string | null
+  /**
+   * Language applied to the new client (`Clients.language`) and its primary
+   * user (`directus_users.language`); also the language of the welcome email.
+   */
+  language: AppLocale
   users: OnboardingUser[]
-  selectedRoleId: string | null
 
   // Step 2: Jira
   jiraProjectName: string
@@ -72,11 +75,16 @@ export interface OnboardingData {
   infraCustomHostnames: string[]
   infraResult: InfrastructureResult | null
 
-  // Step 7: Manual tasks
-  // Step 8: Invoices (reuses manualChecklist via TASK_ID)
+  // Step 7: Contract
+  /** True once a signed contract PDF has been uploaded for this client. */
+  contractCreated: boolean
+
+  // Step 8: Invoices (hosting + onboarding) — auto-detected from the Invoices /
+  //   TopUps collections, no persisted flags.
+  // Step 9: Manual tasks — completion stored here via task ids.
   manualChecklist: string[]
 
-  // Step 9: Email
+  // Step 10: Email
   emailTo: string
   emailSubject: string
 }
@@ -103,7 +111,6 @@ export function createEmptyUser(): OnboardingUser {
     firstName: '',
     lastName: '',
     email: '',
-    password: '',
     directusUserId: null
   }
 }
@@ -113,8 +120,8 @@ export function createEmptyOnboardingData(): OnboardingData {
   return {
     clientName: '',
     clientId: null,
+    language: 'de',
     users: [createEmptyUser()],
-    selectedRoleId: null,
     jiraProjectName: '',
     jiraProjectKey: '',
     jiraLeadAccountId: '',
@@ -138,8 +145,11 @@ export function createEmptyOnboardingData(): OnboardingData {
     infraWebsiteEnabled: true,
     infraCustomHostnames: [],
     infraResult: null,
+    contractCreated: false,
     manualChecklist: [],
     emailTo: '',
-    emailSubject: 'Willkommen bei We.Publish – deine wichtigsten Links'
+    // Display text is set in EmailStep.vue via i18n; kept empty here so this
+    // types file holds no user-facing strings.
+    emailSubject: ''
   }
 }

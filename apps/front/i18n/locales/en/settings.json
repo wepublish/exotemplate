@@ -1,0 +1,40 @@
+{
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Control per client which Slack notifications are sent. The switches take effect immediately — while a switch is off, no corresponding Slack messages go out for that client.",
+    "noClients": "You currently have no client assigned.",
+    "forClient": "Settings for {client}",
+    "notifications": {
+      "title": "Notifications"
+    },
+    "billingMode": {
+      "label": "Billing model",
+      "description": "Prepaid = lower hourly rate, prepaid top-ups. Monthly billing = higher hourly rate, monthly billing based on effort. Only administrators can change this model.",
+      "updated": "Billing model updated for {client}."
+    },
+    "jiraWarnings": {
+      "label": "Jira threshold warnings",
+      "description": "When a Jira ticket exceeds a configured threshold, a Slack message is sent to the client's channel. When switched off here, the channel stays silent for these warnings.",
+      "howThresholds": "How do thresholds work?",
+      "muted": "Jira threshold warnings muted for {client}.",
+      "enabled": "Jira threshold warnings enabled for {client}."
+    },
+    "weeklyReport": {
+      "label": "Weekly report",
+      "description": "Weekly summary per client Slack channel. Switching it off suppresses the next and all further weekly reports for this client, until the switch is enabled again.",
+      "muted": "Weekly report muted for {client}.",
+      "enabled": "Weekly report enabled for {client}."
+    },
+    "language": {
+      "label": "Project language",
+      "description": "Language of the client-facing Slack messages (weekly report, Jira warnings, work stop) for this client.",
+      "updated": "Language updated.",
+      "clientUpdated": "Project language updated for {client}."
+    },
+    "contract": {
+      "label": "Contract",
+      "description": "View this client's contracts, create new versions and upload signed contracts.",
+      "manage": "Manage"
+    }
+  }
+}

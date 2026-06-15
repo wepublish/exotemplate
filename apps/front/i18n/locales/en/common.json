@@ -1,0 +1,26 @@
+{
+  "common": {
+    "loading": "Loading …",
+    "retry": "Try again",
+    "refresh": "Refresh",
+    "back": "Back",
+    "open": "Open",
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save",
+    "search": "Search",
+    "on": "On",
+    "off": "Off",
+    "billingMode": {
+      "prepaid": "Prepaid (top-ups)",
+      "monthly": "Monthly billing"
+    },
+    "unexpectedError": "An unexpected error occurred",
+    "actionFailed": "Action failed.",
+    "notLoggedIn": "Not logged in.",
+    "accessDenied": {
+      "title": "No access",
+      "body": "This page is available to administrators only."
+    }
+  }
+}

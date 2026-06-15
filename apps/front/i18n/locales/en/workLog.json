@@ -1,0 +1,78 @@
+{
+  "workLog": {
+    "title": "Work log",
+    "backToDashboard": "Back to dashboard",
+    "haltedAlert": {
+      "title": "{count} ticket is stopped | {count} tickets are stopped",
+      "description": "Tickets marked in red must not be worked on for now, until the stop is lifted directly on the ticket."
+    },
+    "columns": {
+      "work": "Work",
+      "billabilityDetails": "Billability details",
+      "billableTime": "Billable time",
+      "details": "Details"
+    },
+    "row": {
+      "haltActive": "Work stop active",
+      "warnings": "{count} warning | {count} warnings",
+      "resolved": "{count} resolved"
+    },
+    "haltTitle": "Work stop for {key}",
+    "billability": {
+      "jiraEstimate": "Jira estimate",
+      "deliveredBeforePeriod": "Delivered before billing period",
+      "availableJiraHours": "Available Jira hours",
+      "deliveredInPeriod": "Delivered in billing period",
+      "fullyBillable": "Of which fully billable",
+      "halfBillable": "Of which half billable",
+      "halfNonBillable": "Of which half non-billable",
+      "totalBillable": "Total billable"
+    },
+    "showDetails": "Show details",
+    "learnMore": "Learn more",
+    "status": {
+      "resolved": "Done",
+      "halt": "Work stop",
+      "silenced": "Muted",
+      "warning": "Warning"
+    },
+    "thresholdInfo": {
+      "lastReportedAt": "Last reported at {hours}",
+      "nextReportAt": "Next report at {hours}"
+    },
+    "halt": {
+      "stopped": "Stopped",
+      "stoppedBy": "by {name}",
+      "lifted": "Stop lifted",
+      "liftedBy": "by {name}"
+    },
+    "silenced": {
+      "label": "Muted",
+      "by": "by {name}"
+    },
+    "actions": {
+      "stopWork": "Stop work",
+      "resolveHalt": "Lift stop",
+      "silence": "Mute",
+      "unsilence": "Unmute"
+    },
+    "confirmDialog": {
+      "title": "Stop work on ticket?",
+      "intro": "You are about to request a work stop for {key}.",
+      "whatHappens": "<strong>What happens now:</strong> a stop message with your name appears in your project's Slack channel. The team is asked to stop working on this ticket immediately.",
+      "untilWhen": "<strong>How long this applies:</strong> the stop stays active until you lift it again in the dashboard. Only then may work resume.",
+      "hint": "Use this function when you want to check in before additional hours are billed. For tickets you are simply no longer interested in, use “Mute” instead.",
+      "confirm": "Stop work & notify channel"
+    },
+    "toast": {
+      "requestHaltSuccess": "Work stop requested for {key}. The channel has been informed.",
+      "requestHaltError": "The stop could not be requested.",
+      "resolveHaltSuccess": "Work stop lifted for {key}. Work can resume.",
+      "resolveHaltError": "The stop could not be lifted.",
+      "silenceSuccess": "{key} permanently muted. No further Slack messages will be sent.",
+      "silenceError": "Muting failed.",
+      "unsilenceSuccess": "Mute lifted for {key}. Slack messages are active again.",
+      "unsilenceError": "Unmuting failed."
+    }
+  }
+}

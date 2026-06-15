@@ -9,6 +9,9 @@
     (event: 'refresh', clientPeriodId: number): void
   }>()
 
+  const { t } = useI18n()
+  const { formatHours, formatPercent, formatNumber, formatDate } =
+    useFormatters()
   const { compute, statusColor, statusHeadline } = useWeeklyReportProgress()
 
   const progress = computed(() =>
@@ -44,7 +47,7 @@
 
   const periodLabel = computed(() => {
     const fmt = (iso: string) =>
-      new Date(iso).toLocaleDateString('de-CH', {
+      formatDate(iso, {
         day: '2-digit',
         month: '2-digit',
         year: '2-digit'
@@ -52,25 +55,21 @@
     return `${fmt(props.entry.period.from)} – ${fmt(props.entry.period.to)}`
   })
 
-  const dashboardLink = computed(() => ({
-    path: '/',
-    query: {
-      clientId: props.entry.client.id,
-      clientPeriodId: String(props.entry.clientPeriodId)
-    }
-  }))
+  const dashboardLink = computed(
+    () => `/${props.entry.clientPeriodId}/dashboard`
+  )
 
   const relativeComputedAt = computed<string | null>(() => {
     if (!props.entry.computedAt) return null
     const then = new Date(props.entry.computedAt).getTime()
     const now = Date.now()
     const minutes = Math.round((now - then) / 60000)
-    if (minutes < 1) return 'gerade aktualisiert'
-    if (minutes < 60) return `vor ${minutes} Min.`
+    if (minutes < 1) return t('overview.tile.justUpdated')
+    if (minutes < 60) return t('overview.tile.minutesAgo', { n: minutes })
     const hours = Math.round(minutes / 60)
-    if (hours < 24) return `vor ${hours} Std.`
+    if (hours < 24) return t('overview.tile.hoursAgo', { n: hours })
     const days = Math.round(hours / 24)
-    return `vor ${days} Tagen`
+    return t('overview.tile.daysAgo', { n: days }, days)
   })
 
   function onRefreshClick(e: Event) {
@@ -84,7 +83,7 @@
   <NuxtLink
     :to="dashboardLink"
     class="block group focus:outline-none"
-    :aria-label="`${entry.client.name} – Details anzeigen`"
+    :aria-label="t('overview.tile.detailsAria', { name: entry.client.name })"
   >
     <UPageCard
       class="h-full transition-shadow group-hover:shadow-lg group-focus-visible:ring-2 group-focus-visible:ring-primary cursor-pointer"
@@ -101,18 +100,21 @@
             </div>
           </div>
           <div class="flex items-center gap-1 shrink-0">
+            <UTooltip
+              v-if="entry.contractWarning"
+              :text="t('overview.tile.noSignedContract')"
+            >
+              <UIcon name="lucide:clipboard-x" class="text-warning text-lg" />
+            </UTooltip>
             <UTooltip v-if="entry.lastError" :text="entry.lastError">
-              <UIcon
-                name="material-symbols:error-outline-rounded"
-                class="text-warning text-lg"
-              />
+              <UIcon name="lucide:circle-alert" class="text-warning text-lg" />
             </UTooltip>
             <UButton
-              icon="material-symbols:refresh-rounded"
+              icon="lucide:refresh-cw"
               variant="ghost"
               color="neutral"
               size="xs"
-              aria-label="Aktualisieren"
+              :aria-label="t('overview.tile.refreshAria')"
               @click="onRefreshClick"
             />
           </div>
@@ -129,7 +131,9 @@
         <div v-if="entry.pending" class="space-y-3">
           <USkeleton class="h-3 w-full" />
           <USkeleton class="h-3 w-full" />
-          <p class="text-xs text-muted text-center">wird berechnet…</p>
+          <p class="text-xs text-muted text-center">
+            {{ t('overview.tile.computing') }}
+          </p>
         </div>
 
         <!-- Monthly mode: only the time-elapsed bar; the budget concept doesn't
@@ -138,18 +142,20 @@
         <template v-else-if="isMonthly && entry.sums">
           <div>
             <div class="flex justify-between text-xs mb-1">
-              <span class="font-medium">Aktuell zu verrechnen</span>
+              <span class="font-medium">{{ t('overview.tile.toBill') }}</span>
               <span class="font-medium text-primary">
-                {{ Math.max(0, -entry.sums.totalAvailableHours) }} h
+                {{ formatHours(Math.max(0, -entry.sums.totalAvailableHours)) }}
               </span>
             </div>
           </div>
 
           <div v-if="progress">
             <div class="flex justify-between text-xs mb-1">
-              <span class="font-medium">Zeit vergangen</span>
+              <span class="font-medium">
+                {{ t('overview.tile.timeElapsed') }}
+              </span>
               <span class="font-medium text-muted">
-                {{ Math.round(progress.timeElapsedPercent) }} %
+                {{ formatPercent(Math.round(progress.timeElapsedPercent)) }}
               </span>
             </div>
             <UProgress
@@ -165,9 +171,11 @@
         <template v-else-if="entry.sums">
           <div>
             <div class="flex justify-between text-xs mb-1">
-              <span class="font-medium">Budget verbraucht</span>
+              <span class="font-medium">{{
+                t('overview.tile.budgetUsed')
+              }}</span>
               <span :class="`text-${budgetColor} font-medium`">
-                {{ entry.sums.totalUsedPercentage }} %
+                {{ formatPercent(entry.sums.totalUsedPercentage) }}
               </span>
             </div>
             <UProgress
@@ -176,15 +184,22 @@
               :color="budgetColor"
             />
             <div class="text-xs text-muted mt-1">
-              {{ entry.sums.totalUsedHours }} h / {{ entry.sums.totalTopUps }} h
+              {{
+                t('overview.tile.hoursOfTopUps', {
+                  used: formatNumber(entry.sums.totalUsedHours),
+                  total: formatNumber(entry.sums.totalTopUps)
+                })
+              }}
             </div>
           </div>
 
           <div v-if="progress">
             <div class="flex justify-between text-xs mb-1">
-              <span class="font-medium">Zeit vergangen</span>
+              <span class="font-medium">
+                {{ t('overview.tile.timeElapsed') }}
+              </span>
               <span class="font-medium text-muted">
-                {{ Math.round(progress.timeElapsedPercent) }} %
+                {{ formatPercent(Math.round(progress.timeElapsedPercent)) }}
               </span>
             </div>
             <UProgress
@@ -193,28 +208,36 @@
               color="neutral"
             />
             <div class="text-xs text-muted mt-1">
-              {{ progress.daysElapsed }} / {{ progress.periodDurationDays }}
-              Tagen
+              {{
+                t('overview.tile.daysOfTotal', {
+                  elapsed: formatNumber(progress.daysElapsed),
+                  total: formatNumber(progress.periodDurationDays)
+                })
+              }}
             </div>
           </div>
         </template>
 
         <!-- No sums + error: explicit error state. -->
         <div v-else-if="entry.lastError" class="text-xs text-error">
-          Aktualisierung fehlgeschlagen
+          {{ t('overview.tile.updateFailed') }}
         </div>
 
         <!-- Footer: freshness + arrow -->
         <div class="flex justify-between items-center text-xs text-muted pt-1">
           <span v-if="relativeComputedAt">
-            Aktualisiert {{ relativeComputedAt }}
+            {{
+              t('overview.tile.updatedRelative', {
+                relative: relativeComputedAt
+              })
+            }}
           </span>
           <span v-else />
           <span
             class="flex items-center group-hover:text-primary transition-colors"
           >
-            Öffnen
-            <UIcon name="material-symbols:arrow-forward-rounded" class="ml-1" />
+            {{ t('overview.tile.open') }}
+            <UIcon name="lucide:arrow-right" class="ml-1" />
           </span>
         </div>
       </div>

@@ -3,21 +3,15 @@
   import type { NotificationThreshold } from '~~/types/DirectusTypes'
 
   const { directus } = useDirectus()
-
-  const HOURS_FORMATTER = new Intl.NumberFormat('de-CH', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2
-  })
-
-  function formatHours(hours: number): string {
-    return `${HOURS_FORMATTER.format(hours)} h`
-  }
+  const { t } = useI18n()
+  const { formatHours } = useFormatters()
 
   function formatOffset(hours: number): string {
     const value = Number(hours)
-    if (!Number.isFinite(value) || Math.abs(value) < 0.005) return '±0 h'
+    if (!Number.isFinite(value) || Math.abs(value) < 0.005)
+      return t('thresholds.offsetZero')
     const sign = value > 0 ? '+' : '−'
-    return `${sign}${HOURS_FORMATTER.format(Math.abs(value))} h`
+    return `${sign}${formatHours(Math.abs(value))}`
   }
 
   /**
@@ -34,8 +28,27 @@
     if (Number.isFinite(recurring) && recurring > 0) {
       for (let i = 1; i < 4; i += 1) points.push(initial + i * recurring)
     }
-    return `Schätzung ${formatHours(min)} → ${points.map(formatHours).join(', ')}, …`
+    return t('thresholds.exampleLine', {
+      min: formatHours(min),
+      points: points.map(formatHours).join(', ')
+    })
   }
+
+  const columns = computed(() => [
+    {
+      accessorKey: 'min_hours_inclusive',
+      header: t('thresholds.table.range')
+    },
+    {
+      accessorKey: 'initial_threshold_offset_hours',
+      header: t('thresholds.table.tolerance')
+    },
+    {
+      accessorKey: 'recurring_threshold_hours',
+      header: t('thresholds.table.recurring')
+    },
+    { id: 'examples', header: t('thresholds.table.example') }
+  ])
 
   const { data: thresholds, pending } = await useAsyncData(
     'info-thresholds',
@@ -60,28 +73,17 @@
       <UPageCard>
         <template #header>
           <p class="text-2xl font-semibold">
-            Wann wird ein Jira-Ticket gemeldet?
+            {{ t('thresholds.pageTitle') }}
           </p>
         </template>
         <template #default>
           <section class="space-y-4 leading-relaxed">
-            <p>
-              Wir vergleichen die geleistete Arbeitszeit eines Jira-Tickets
-              (alle bisher gebuchten Stunden inklusive der letzten 12 Monate vor
-              der laufenden Abrechnungsperiode) mit der Aufwandsschätzung im
-              Jira-Ticket. Sobald die verbrauchte Zeit eine Schwelle erreicht,
-              meldet sich der Bot im Slack-Channel.
-            </p>
+            <p>{{ t('thresholds.intro') }}</p>
 
-            <h3 class="text-lg pt-2">Erste Meldung = Schätzung + Toleranz</h3>
-            <p>
-              Die erste Meldung erfolgt, sobald die Schätzung eines Jira-Tickets
-              zuzüglich oder abzüglich der Toleranz erreicht wird. Die
-              <em>Toleranz</em> kommt aus der Tabelle unten und kann positiv
-              (Meldung nach Erreichen der Schätzung) oder negativ (Meldung schon
-              vor Erreichen) sein. Danach folgt jeweils eine weitere Meldung im
-              <em>wiederkehrenden Abstand</em>, ohne Obergrenze.
-            </p>
+            <h3 class="text-lg pt-2">
+              {{ t('thresholds.firstNotificationHeading') }}
+            </h3>
+            <p v-html="t('thresholds.firstNotificationBody')" />
           </section>
 
           <USkeleton v-if="pending" class="h-32 mt-6" />
@@ -90,73 +92,52 @@
             v-else
             class="mt-6"
             :data="orderedThresholds"
-            :columns="[
-              {
-                accessorKey: 'min_hours_inclusive',
-                header: 'Bereich (Schätzung)'
-              },
-              {
-                accessorKey: 'initial_threshold_offset_hours',
-                header: 'Toleranz'
-              },
-              {
-                accessorKey: 'recurring_threshold_hours',
-                header: 'Wiederkehrend'
-              },
-              { id: 'examples', header: 'Beispiel' }
-            ]"
+            :columns="columns"
           >
             <template #min_hours_inclusive-cell="{ row }">
-              ab {{ formatHours(row.original.min_hours_inclusive) }}
+              {{
+                t('thresholds.cellFrom', {
+                  hours: formatHours(row.original.min_hours_inclusive)
+                })
+              }}
             </template>
             <template #initial_threshold_offset_hours-cell="{ row }">
-              Schätzung
-              {{ formatOffset(row.original.initial_threshold_offset_hours) }}
+              {{
+                t('thresholds.cellTolerance', {
+                  offset: formatOffset(
+                    row.original.initial_threshold_offset_hours
+                  )
+                })
+              }}
             </template>
             <template #recurring_threshold_hours-cell="{ row }">
-              alle
-              {{ formatHours(row.original.recurring_threshold_hours) }}
+              {{
+                t('thresholds.cellRecurring', {
+                  hours: formatHours(row.original.recurring_threshold_hours)
+                })
+              }}
             </template>
             <template #examples-cell="{ row }">
               {{ exampleNotifications(row.original) }}
             </template>
           </UTable>
 
-          <h3 class="text-lg font-semibold pt-2">Lesebeispiele</h3>
+          <h3 class="text-lg font-semibold pt-2">
+            {{ t('thresholds.readingExamplesHeading') }}
+          </h3>
           <ul class="list-disc ps-6 space-y-2">
-            <li>
-              Toleranz <strong>+2 h</strong>, Wiederkehrend
-              <strong>4 h</strong>: Ticket mit Schätzung <strong>5 h</strong> →
-              erste Meldung bei <strong>7 h</strong>, dann 11 h, 15 h …
-            </li>
-            <li>
-              Gleicher Bereich, Ticket mit Schätzung <strong>9 h</strong> →
-              erste Meldung bei <strong>11 h</strong>, dann 15 h, 19 h … (kein
-              „zu früh" mehr).
-            </li>
-            <li>
-              Toleranz <strong>−1 h</strong>: Wir warnen bewusst kurz
-              <em>bevor</em> die Schätzung aufgebraucht ist – nützlich bei
-              grösseren Tickets.
-            </li>
+            <li v-html="t('thresholds.readingExamples.item1')" />
+            <li v-html="t('thresholds.readingExamples.item2')" />
+            <li v-html="t('thresholds.readingExamples.item3')" />
           </ul>
 
           <section class="space-y-3 leading-relaxed mt-8">
             <h3 class="text-lg font-semibold">
-              Was passiert nach einer Meldung?
+              {{ t('thresholds.afterNotificationHeading') }}
             </h3>
             <ul class="list-disc ps-6 space-y-2">
-              <li>
-                <strong>Arbeit stoppen:</strong> markiert das Ticket als
-                blockiert. Das Team erhält in Slack die Anweisung, sofort die
-                Arbeit einzustellen, und die zugewiesene Person bekommt
-                zusätzlich eine persönliche Direktnachricht.
-              </li>
-              <li>
-                <strong>Stummschalten:</strong> unterdrückt zukünftige Meldungen
-                für dieses Ticket dauerhaft, bis die Stummschaltung explizit
-                aufgehoben wird.
-              </li>
+              <li v-html="t('thresholds.afterNotification.halt')" />
+              <li v-html="t('thresholds.afterNotification.silence')" />
             </ul>
           </section>
         </template>

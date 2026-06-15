@@ -20,6 +20,7 @@ export function useInfrastructureProvisioning() {
   const directusStore = useDirectus()
   const userStore = useUserStore()
   const toast = useToast()
+  const { $i18n } = useNuxtApp()
 
   const loading = ref(false)
   const polling = ref(false)
@@ -47,14 +48,16 @@ export function useInfrastructureProvisioning() {
 
   async function execute() {
     if (!userStore.amIAdministrator()) {
-      executionError.value =
-        'Nur Administratoren können diesen Schritt ausführen.'
+      executionError.value = $i18n.t(
+        'onboarding.infrastructure.provisioning.adminOnly'
+      )
       return
     }
 
     if (!mediumNameValid.value) {
-      executionError.value =
-        'Ungültiger Medium-Name. Nur Kleinbuchstaben, Ziffern und Unterstriche erlaubt (muss mit Buchstabe beginnen).'
+      executionError.value = $i18n.t(
+        'onboarding.infrastructure.provisioning.invalidMediumName'
+      )
       return
     }
 
@@ -82,15 +85,19 @@ export function useInfrastructureProvisioning() {
         e?.response?.data?.message ??
         e?.response?.data?.errors?.[0]?.message ??
         e?.message ??
-        'Unbekannter Fehler'
+        $i18n.t('common.unexpectedError')
       executionError.value = msg
-      toast.add({ color: 'error', title: 'Fehler', description: msg })
+      toast.add({
+        color: 'error',
+        title: $i18n.t('onboarding.infrastructure.provisioning.errorTitle'),
+        description: msg
+      })
     }
   }
 
   async function pollForCompletion() {
     polling.value = true
-    pollStatus.value = 'Infrastruktur wird erstellt...'
+    pollStatus.value = $i18n.t('onboarding.infrastructure.polling.creating')
 
     const maxAttempts = 60
     const intervalMs = 3000
@@ -112,7 +119,9 @@ export function useInfrastructureProvisioning() {
 
           toast.add({
             color: 'success',
-            title: 'Infrastruktur-PRs erfolgreich erstellt!'
+            title: $i18n.t(
+              'onboarding.infrastructure.provisioning.prSuccessToast'
+            )
           })
           await advanceStep({ apiUrl: apiUrl.value })
           return
@@ -121,16 +130,21 @@ export function useInfrastructureProvisioning() {
         if (job.status === 'failed') {
           polling.value = false
           pollStatus.value = null
-          executionError.value = job.error ?? 'PR-Erstellung fehlgeschlagen'
+          executionError.value =
+            job.error ??
+            $i18n.t('onboarding.infrastructure.provisioning.prCreationFailed')
           toast.add({
             color: 'error',
-            title: 'Fehler',
+            title: $i18n.t('onboarding.infrastructure.provisioning.errorTitle'),
             description: job.error
           })
           return
         }
 
-        pollStatus.value = `Infrastruktur wird erstellt... (${i + 1}/${maxAttempts})`
+        pollStatus.value = $i18n.t(
+          'onboarding.infrastructure.polling.creatingProgress',
+          { current: i + 1, total: maxAttempts }
+        )
         await new Promise((resolve) => setTimeout(resolve, intervalMs))
       } catch (e: any) {
         polling.value = false
@@ -138,14 +152,16 @@ export function useInfrastructureProvisioning() {
         executionError.value =
           e?.response?.data?.message ??
           e?.message ??
-          'Statusabfrage fehlgeschlagen'
+          $i18n.t('onboarding.infrastructure.provisioning.statusCheckFailed')
         return
       }
     }
 
     polling.value = false
     pollStatus.value = null
-    executionError.value = 'Zeitüberschreitung bei der Infrastruktur-Erstellung'
+    executionError.value = $i18n.t(
+      'onboarding.infrastructure.provisioning.timeout'
+    )
   }
 
   async function checkPendingPRs() {
@@ -206,13 +222,19 @@ export function useInfrastructureProvisioning() {
       completed.value = false
       toast.add({
         color: 'info',
-        title: 'Infrastruktur-PRs abgebrochen'
+        title: $i18n.t('onboarding.infrastructure.provisioning.cancelledToast')
       })
       await advanceStep({ apiUrl: null }, { bumpStep: false })
     } catch (e: any) {
       const msg =
-        e?.response?.data?.message ?? e?.message ?? 'Abbruch fehlgeschlagen'
-      toast.add({ color: 'error', title: 'Fehler', description: msg })
+        e?.response?.data?.message ??
+        e?.message ??
+        $i18n.t('onboarding.infrastructure.provisioning.cancelFailed')
+      toast.add({
+        color: 'error',
+        title: $i18n.t('onboarding.infrastructure.provisioning.errorTitle'),
+        description: msg
+      })
     } finally {
       cancelling.value = false
     }

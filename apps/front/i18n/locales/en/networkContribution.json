@@ -1,0 +1,50 @@
+{
+  "networkContribution": {
+    "header": {
+      "title": "Together we are building the journalism of the future!"
+    },
+    "intro": {
+      "p1": "We.Publish is far more than a technical solution. <b>Together we form the strongest network of independent and innovative media.</b>",
+      "p2": "With your investment in We.Publish you become part of a network that jointly invests in innovation, knowledge transfer and the advancement of journalism.",
+      "p3": "Your media organisation benefits directly too: through continuously improved infrastructure, new features, exchange with other publishers, as well as a growing and resilient media ecosystem.",
+      "p4": "Carried jointly by all media in the network and by the We.Publish foundation, which passes on all foundation funding directly to every network member."
+    },
+    "contributionBar": {
+      "label": "Your contribution is indispensable - thank you for letting us count on you!",
+      "caption": "Only together with you and {count} other independent media do we reach 100%!"
+    },
+    "error": {
+      "title": "An error occurred while fetching the network data."
+    },
+    "tiles": {
+      "engineering": {
+        "label": "Development & maintenance",
+        "description": "New features, software maintenance, deployments, reviews and bugfixes — out of the box for everyone."
+      },
+      "hosting": {
+        "label": "Hosting & infrastructure",
+        "description": "Fast, European hosting, monitoring and quick response to outages."
+      },
+      "acquisition": {
+        "label": "Acquisition",
+        "description": "Winning new media for the network — and thus spreading the total costs across more shoulders."
+      },
+      "weshareOther": {
+        "label": "Other We.Share work",
+        "description": "Remaining we.share work — e.g. exchange with the media, improving automated testing, etc."
+      },
+      "wepublishInternal": {
+        "label": "We.Publish internal",
+        "description": "Internal work of the foundation — finance, HR, fundraising, administration, communication, marketing, development of new products (e.g. FaaS, Co-Journalist), network maintenance, etc."
+      },
+      "otherMedia": {
+        "label": "Other media in the network",
+        "description": "What we build for {count} other media helps you too: new features, designs and improvements flow back into the whole network."
+      }
+    },
+    "footer": {
+      "hideDetails": "Hide details",
+      "showDetails": "Show details"
+    }
+  }
+}

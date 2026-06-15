@@ -1,7 +1,7 @@
 <script lang="ts" setup>
   import type { JiraWarning } from '~~/types/DirectusTypes'
 
-  defineProps<{
+  const props = defineProps<{
     warning: JiraWarning | null
   }>()
 
@@ -9,6 +9,16 @@
     confirm: []
     cancel: []
   }>()
+
+  const { t } = useI18n()
+
+  // The issue key is rendered with monospace emphasis inside the sentence, so
+  // we build the highlighted markup here and inject it into the (HTML) message.
+  const introHtml = computed<string>(() =>
+    t('workLog.confirmDialog.intro', {
+      key: `<span class="font-mono font-semibold">${props.warning?.jira_issue_key ?? ''}</span>`
+    })
+  )
 </script>
 
 <template>
@@ -23,47 +33,30 @@
     <template #content>
       <div class="p-6 space-y-4">
         <div class="flex items-center gap-3">
-          <UIcon
-            name="material-symbols:stop-circle-rounded"
-            class="text-3xl text-error"
-          />
-          <h3 class="text-lg font-bold">Arbeit an Ticket stoppen?</h3>
+          <UIcon name="lucide:circle-stop" class="text-3xl text-error" />
+          <h3 class="text-lg font-bold">
+            {{ t('workLog.confirmDialog.title') }}
+          </h3>
         </div>
-        <p class="text-sm">
-          Du bist dabei, einen Arbeitsstopp für
-          <span class="font-mono font-semibold">{{
-            warning?.jira_issue_key
-          }}</span>
-          anzufordern.
-        </p>
+        <p class="text-sm" v-html="introHtml" />
         <div class="text-sm space-y-2 border-l-4 border-error-500 pl-3">
-          <p>
-            <strong>Was passiert jetzt:</strong> Im Slack-Kanal Deines Projekts
-            erscheint eine Stopp-Meldung mit Deinem Namen. Das Team wird
-            aufgefordert, die Arbeit an diesem Ticket sofort einzustellen.
-          </p>
-          <p>
-            <strong>Bis wann gilt das:</strong> Der Stopp bleibt so lange aktiv,
-            bis Du ihn im Dashboard wieder aufhebst. Erst dann darf
-            weitergearbeitet werden.
-          </p>
+          <p v-html="t('workLog.confirmDialog.whatHappens')" />
+          <p v-html="t('workLog.confirmDialog.untilWhen')" />
           <p class="text-muted">
-            Nutze diese Funktion, wenn Du Rücksprache halten willst, bevor
-            zusätzliche Stunden verrechnet werden. Für Tickets, die Dich einfach
-            nicht mehr interessieren, nutze stattdessen „Stummschalten".
+            {{ t('workLog.confirmDialog.hint') }}
           </p>
         </div>
         <div class="flex justify-end gap-2">
           <UButton color="neutral" variant="ghost" @click="emit('cancel')">
-            Abbrechen
+            {{ t('common.cancel') }}
           </UButton>
           <UButton
             color="error"
             variant="solid"
-            icon="material-symbols:stop-circle-rounded"
+            icon="lucide:circle-stop"
             @click="emit('confirm')"
           >
-            Arbeit stoppen &amp; Kanal informieren
+            {{ t('workLog.confirmDialog.confirm') }}
           </UButton>
         </div>
       </div>

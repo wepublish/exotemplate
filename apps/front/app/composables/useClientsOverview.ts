@@ -27,6 +27,8 @@ export interface OverviewEntry {
   lastError: string | null
   lastErrorAt: string | null
   pending: boolean
+  /** True when the client has a contract whose current version is not signed. */
+  contractWarning: boolean
 }
 
 export interface ClientsOverviewResponse {
@@ -42,6 +44,7 @@ export interface ClientsOverviewResponse {
  */
 export async function useClientsOverview() {
   const { getCustomEndpoint, postCustomEndpoint } = useDirectus()
+  const { $i18n } = useNuxtApp()
 
   const { data, pending, error, refresh } = await useAsyncData<
     ClientsOverviewResponse | undefined
@@ -52,7 +55,7 @@ export async function useClientsOverview() {
     } catch (err: any) {
       const firstError = err.response?.data?.errors?.[0]
       throw new Error(
-        firstError?.message || err?.message || 'Unbekannter Fehler'
+        firstError?.message || err?.message || $i18n.t('common.unexpectedError')
       )
     }
   })

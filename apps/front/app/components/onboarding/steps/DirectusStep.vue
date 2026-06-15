@@ -1,79 +1,41 @@
 <script lang="ts" setup>
-  import {
-    createItem,
-    createUser,
-    readRoles,
-    type DirectusRole
-  } from '@directus/sdk'
+  import { createItem, updateUser } from '@directus/sdk'
+  import type { AppLocale } from '~~/types/DirectusTypes'
   import {
     ONBOARDING_DATA_KEY,
-    ADVANCE_STEP_KEY,
-    createEmptyUser,
-    type OnboardingUser
+    ADVANCE_STEP_KEY
   } from '~~/types/OnboardingTypes'
 
   const data = inject(ONBOARDING_DATA_KEY)!
   const advanceStep = inject(ADVANCE_STEP_KEY)!
   const directusStore = useDirectus()
+  const { invite } = useTeam()
   const toast = useToast()
 
   const loading = ref(false)
   const completed = ref(data.clientId !== null)
   const executionError = ref<string | null>(null)
 
-  // Role selection
-  const roles = ref<Array<{ id: string; name: string }>>([])
-  const rolesLoading = ref(false)
-  const rolesLoadFailed = ref(false)
+  // Native language names — shown the same in every UI language. Drives the
+  // new client's `Clients.language` and the primary user's `directus_users.language`.
+  const LANGUAGE_OPTIONS: { value: AppLocale; label: string }[] = [
+    { value: 'de', label: 'Deutsch' },
+    { value: 'fr', label: 'Français' },
+    { value: 'en', label: 'English' }
+  ]
 
-  onMounted(async () => {
-    rolesLoading.value = true
-    try {
-      const result =
-        await directusStore.directus.request(readRoles<DirectusRole<any>>())
-      roles.value = (result as DirectusRole<any>[])
-        .filter((r) => !r.admin_access)
-        .map((r) => ({ id: r.id as string, name: (r.name as string) ?? r.id }))
-    } catch {
-      rolesLoadFailed.value = true
-    } finally {
-      rolesLoading.value = false
-    }
-
-    // Auto-generate passwords for users that don't have one yet
-    data.users.forEach((user) => {
-      if (!user.password) {
-        user.password = generatePassword()
-      }
-    })
-  })
-
-  function generatePassword(): string {
-    const chars =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%'
-    return Array.from(
-      { length: 16 },
-      () => chars[Math.floor(Math.random() * chars.length)]
-    ).join('')
-  }
-
-  function addUser() {
-    const user = createEmptyUser()
-    user.password = generatePassword()
-    data.users.push(user)
-  }
-
-  function removeUser(index: number) {
-    data.users.splice(index, 1)
-  }
-
-  function refreshPassword(user: OnboardingUser) {
-    user.password = generatePassword()
-  }
+  // Onboarding provisions a single primary user for the new client; the client
+  // invites further teammates themselves later via the "Team" page.
+  const user = computed(() => data.users[0]!)
 
   async function execute() {
     if (!data.clientName.trim()) {
       executionError.value = 'Bitte einen Client-Namen eingeben.'
+      return
+    }
+    if (!user.value.email.trim()) {
+      executionError.value =
+        'Bitte eine E-Mail-Adresse für den Hauptbenutzer eingeben.'
       return
     }
 
@@ -85,64 +47,57 @@
       const createdClient = await directusStore.directus.request(
         createItem('Clients', {
           name: data.clientName.trim(),
-          status: 'published'
+          status: 'published',
+          language: data.language
         })
       )
       data.clientId = createdClient.id as string
 
-      // 2. Create each user and link to client via junction table
-      for (const user of data.users) {
-        if (!user.email.trim()) continue
+      // 2. Create the primary user (status 'invited', Client role) and link it
+      //    to the client via the /team endpoint. sendInvite:false → no mail is
+      //    sent here; the activation link is embedded in the final "E-Mail"
+      //    step. If the email already exists, access is granted to that account.
+      const res = await invite({
+        email: user.value.email.trim(),
+        firstName: user.value.firstName || undefined,
+        lastName: user.value.lastName || undefined,
+        clientIds: [data.clientId],
+        sendInvite: false
+      })
+      user.value.directusUserId = res.userId
 
-        const createdUser = await directusStore.directus.request(
-          createUser({
-            first_name: user.firstName || undefined,
-            last_name: user.lastName || undefined,
-            email: user.email.trim(),
-            password: user.password,
-            ...(data.selectedRoleId ? { role: data.selectedRoleId } : {})
-          })
-        )
-        user.directusUserId = createdUser.id as string
-
-        // 3. Link user to client
+      // Set the primary user's preferred language — but not when access was
+      // merely granted to a pre-existing account (don't override their choice).
+      if (res.status !== 'grant') {
         await directusStore.directus.request(
-          createItem('Clients_directus_users', {
-            Clients_id: data.clientId,
-            directus_users_id: user.directusUserId
-          })
+          updateUser(res.userId, { language: data.language })
         )
       }
 
       completed.value = true
       toast.add({
         color: 'success',
-        title: 'Client und Benutzer erfolgreich angelegt!'
+        title: 'Client und Hauptbenutzer erfolgreich angelegt!'
       })
       await advanceStep()
     } catch (e: any) {
-      const msg = e?.errors?.[0]?.message ?? e?.message ?? 'Unbekannter Fehler'
+      const msg =
+        e?.response?.data?.errors?.[0]?.message ??
+        e?.errors?.[0]?.message ??
+        e?.message ??
+        'Unbekannter Fehler'
       executionError.value = msg
       toast.add({ color: 'error', title: 'Fehler', description: msg })
     } finally {
       loading.value = false
     }
   }
-
-  const passwordVisible = ref<Record<string, boolean>>({})
-  function togglePasswordVisibility(userId: string) {
-    passwordVisible.value[userId] = !passwordVisible.value[userId]
-  }
 </script>
 
 <template>
   <!-- Already completed -->
   <div v-if="completed" class="flex flex-col gap-4">
-    <UAlert
-      color="success"
-      variant="soft"
-      icon="material-symbols:check-circle-rounded"
-    >
+    <UAlert color="success" variant="soft" icon="lucide:circle-check">
       <template #title>Client erfolgreich angelegt</template>
       <template #description>
         Directus Client-ID:
@@ -150,33 +105,40 @@
       </template>
     </UAlert>
 
-    <div class="grid grid-cols-12 gap-3">
-      <div
-        v-for="user in data.users.filter((u) => u.directusUserId)"
-        :key="user.id"
-        class="col-span-12 p-3 rounded-lg border border-neutral-200 dark:border-neutral-700 flex items-center justify-between"
-      >
-        <div class="flex items-center gap-2">
-          <UIcon name="material-symbols:person-rounded" class="text-success" />
-          <span class="font-medium"
-            >{{ user.firstName }} {{ user.lastName }}</span
-          >
-          <span class="text-muted text-sm">{{ user.email }}</span>
-        </div>
-        <UBadge variant="soft" color="success" size="sm">
-          {{ user.directusUserId }}
-        </UBadge>
+    <UAlert color="info" variant="soft" icon="lucide:mail">
+      <template #description>
+        Der Hauptbenutzer wurde ohne Passwort angelegt. Der Aktivierungslink zum
+        Setzen des Passworts wird im letzten Schritt („E-Mail“) in die
+        Willkommens-E-Mail eingefügt.
+      </template>
+    </UAlert>
+
+    <div
+      v-if="user.directusUserId"
+      class="p-3 rounded-lg border border-neutral-200 dark:border-neutral-700 flex items-center justify-between"
+    >
+      <div class="flex items-center gap-2">
+        <UIcon name="lucide:user" class="text-success" />
+        <span class="font-medium"
+          >{{ user.firstName }} {{ user.lastName }}</span
+        >
+        <span class="text-muted text-sm">{{ user.email }}</span>
       </div>
+      <UBadge variant="soft" color="success" size="sm">
+        {{ user.directusUserId }}
+      </UBadge>
     </div>
   </div>
 
   <!-- Form -->
   <div v-else class="grid grid-cols-12 gap-4">
     <div class="col-span-12">
-      <UAlert color="info" variant="soft" icon="material-symbols:info-rounded">
+      <UAlert color="info" variant="soft" icon="lucide:info">
         <template #description>
-          Einen neuen Client-Eintrag und ein oder mehrere Benutzerkonten in
-          Directus anlegen.
+          Lege den Mandanten und einen Hauptbenutzer an. Das Konto erhält die
+          Rolle „Client“ und wird per Einladung aktiviert — der Benutzer setzt
+          sein Passwort selbst. Weitere Teammitglieder kann der Kunde später
+          selbst im Bereich „Team“ einladen.
         </template>
       </UAlert>
     </div>
@@ -186,7 +148,7 @@
       label="Client-Name"
       name="clientName"
       required
-      class="col-span-6"
+      class="col-span-12"
     >
       <UInput
         v-model="data.clientName"
@@ -195,114 +157,52 @@
       />
     </UFormField>
 
-    <!-- Role selection -->
-    <UFormField label="Benutzer-Rolle" name="role" class="col-span-6">
-      <USkeleton v-if="rolesLoading" class="h-8 w-full" />
+    <!-- Language: applies to the client + primary user + welcome email -->
+    <UFormField
+      label="Sprache"
+      name="language"
+      description="Gilt für den Kunden und den Hauptbenutzer — Oberfläche und kundenseitige Slack-Meldungen. Auch die Willkommens-E-Mail im letzten Schritt wird in dieser Sprache erstellt."
+      class="col-span-12"
+    >
       <USelectMenu
-        v-else-if="roles.length"
-        v-model="data.selectedRoleId"
-        :items="roles"
-        value-key="id"
-        label-key="name"
-        placeholder="Rolle auswählen (optional)"
-        class="w-full"
-      />
-      <UInput
-        v-else
-        v-model="data.selectedRoleId"
-        placeholder="Rollen-UUID (konnte nicht geladen werden)"
-        class="w-full"
+        v-model="data.language"
+        :items="LANGUAGE_OPTIONS"
+        value-key="value"
+        label-key="label"
+        class="w-full md:w-60"
       />
     </UFormField>
 
-    <!-- Users -->
-    <div class="col-span-12 flex flex-col gap-3">
-      <div class="flex items-center justify-between">
-        <p class="text-sm font-semibold">Benutzer ({{ data.users.length }})</p>
-        <UButton
-          size="xs"
-          variant="outline"
-          icon="material-symbols:person-add-rounded"
-          @click="addUser"
-        >
-          Benutzer hinzufügen
-        </UButton>
-      </div>
-
-      <div
-        v-for="(user, index) in data.users"
-        :key="user.id"
-        class="p-4 rounded-lg border border-neutral-200 dark:border-neutral-700"
-      >
-        <div class="flex items-center justify-between mb-3">
-          <p class="text-sm font-medium text-muted">Benutzer {{ index + 1 }}</p>
-          <UButton
-            v-if="data.users.length > 1"
-            size="xs"
-            variant="ghost"
-            color="error"
-            icon="material-symbols:delete-rounded"
-            @click="removeUser(index)"
+    <!-- Primary user -->
+    <div
+      class="col-span-12 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700"
+    >
+      <p class="text-sm font-semibold mb-3">Hauptbenutzer</p>
+      <div class="grid grid-cols-12 gap-3">
+        <UFormField label="Vorname" class="col-span-6">
+          <UInput v-model="user.firstName" placeholder="Max" class="w-full" />
+        </UFormField>
+        <UFormField label="Nachname" class="col-span-6">
+          <UInput
+            v-model="user.lastName"
+            placeholder="Mustermann"
+            class="w-full"
           />
-        </div>
-
-        <div class="grid grid-cols-12 gap-3">
-          <UFormField label="Vorname" class="col-span-6">
-            <UInput v-model="user.firstName" placeholder="Max" class="w-full" />
-          </UFormField>
-          <UFormField label="Nachname" class="col-span-6">
-            <UInput
-              v-model="user.lastName"
-              placeholder="Mustermann"
-              class="w-full"
-            />
-          </UFormField>
-          <UFormField label="E-Mail" required class="col-span-6">
-            <UInput
-              v-model="user.email"
-              placeholder="max@muster-ag.ch"
-              type="email"
-              class="w-full"
-            />
-          </UFormField>
-          <UFormField label="Passwort" class="col-span-6">
-            <div class="flex gap-1.5">
-              <UInput
-                v-model="user.password"
-                :type="passwordVisible[user.id] ? 'text' : 'password'"
-                class="w-full font-mono"
-              />
-              <UButton
-                size="xs"
-                variant="ghost"
-                color="neutral"
-                :icon="
-                  passwordVisible[user.id]
-                    ? 'material-symbols:visibility-off-rounded'
-                    : 'material-symbols:visibility-rounded'
-                "
-                @click="togglePasswordVisibility(user.id)"
-              />
-              <UButton
-                size="xs"
-                variant="ghost"
-                color="neutral"
-                icon="material-symbols:refresh-rounded"
-                @click="refreshPassword(user)"
-              />
-            </div>
-          </UFormField>
-        </div>
+        </UFormField>
+        <UFormField label="E-Mail" required class="col-span-12">
+          <UInput
+            v-model="user.email"
+            placeholder="max@muster-ag.ch"
+            type="email"
+            class="w-full"
+          />
+        </UFormField>
       </div>
     </div>
 
     <!-- Error -->
     <div v-if="executionError" class="col-span-12">
-      <UAlert
-        color="error"
-        variant="soft"
-        icon="material-symbols:error-rounded"
-      >
+      <UAlert color="error" variant="soft" icon="lucide:circle-alert">
         <template #title>Fehler beim Anlegen</template>
         <template #description>{{ executionError }}</template>
       </UAlert>
@@ -310,11 +210,7 @@
 
     <!-- Execute -->
     <div class="col-span-12 flex justify-end pt-2">
-      <UButton
-        icon="material-symbols:play-circle-rounded"
-        :loading="loading"
-        @click="execute"
-      >
+      <UButton icon="lucide:circle-play" :loading="loading" @click="execute">
         In Directus anlegen
       </UButton>
     </div>

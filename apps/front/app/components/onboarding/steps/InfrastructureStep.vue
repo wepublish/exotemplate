@@ -6,6 +6,7 @@
   import InfrastructureReviewerNotification from './infrastructure/InfrastructureReviewerNotification.vue'
 
   const data = inject(ONBOARDING_DATA_KEY)!
+  const { t } = useI18n()
 
   const {
     loading,
@@ -34,12 +35,9 @@
     v-if="checkingPending && !completed"
     class="flex flex-col items-center gap-3 py-6"
   >
-    <UIcon
-      name="material-symbols:sync-rounded"
-      class="text-3xl text-muted animate-spin"
-    />
+    <UIcon name="lucide:refresh-cw" class="text-3xl text-muted animate-spin" />
     <p class="text-sm text-muted">
-      Bestehende Onboarding-PRs werden geprüft...
+      {{ t('onboarding.infrastructure.checkingPending') }}
     </p>
   </div>
 
@@ -56,11 +54,11 @@
       <UButton
         color="error"
         variant="outline"
-        icon="material-symbols:cancel-rounded"
+        icon="lucide:circle-x"
         :loading="cancelling"
         @click="cancelOnboarding"
       >
-        PRs abbrechen
+        {{ t('onboarding.infrastructure.cancelPrs') }}
       </UButton>
     </div>
   </div>

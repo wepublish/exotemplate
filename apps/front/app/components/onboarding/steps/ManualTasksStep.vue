@@ -12,31 +12,28 @@
     icon: string
   }
 
-  const tasks: ManualTask[] = [
+  const { t } = useI18n()
+
+  const tasks = computed<ManualTask[]>(() => [
     {
       id: 'jira-board-setup',
-      title: 'Jira Board einrichten',
-      description:
-        'Benutzerdefinierte Spalten zum Jira Board hinzufügen und den entsprechenden Task-States zuweisen.',
+      title: t('onboarding.steps.manualTasks.tasks.jiraBoardSetup.title'),
+      description: t(
+        'onboarding.steps.manualTasks.tasks.jiraBoardSetup.description'
+      ),
       docsUrl:
         'https://app.gitbook.com/o/YHqG3oopwvkm2NZlFuQH/s/KOvNQoZd9FglYBQaFQAf/manuelle-onboarding-schritte#jira-board-einrichten',
-      icon: 'simple-icons:jira'
+      icon: 'lucide:square-kanban'
     },
     {
       id: 'slack-invites',
-      title: 'Slack-Einladungen',
-      description:
-        'Benutzer in den dedizierten Slack-Kanal und #we-share einladen.',
-      icon: 'simple-icons:slack'
-    },
-    {
-      id: 'hosting-and-onboarding-invoice',
-      title: 'Rechnung für Hosting- und Onboarding erstellen',
-      description:
-        'Erstelle eine Rechnung für das Hosting (vom Zeitpunkt des Entwicklungsbegins) und für das Onboarding.',
-      icon: 'material-symbols:receipt-long-rounded'
+      title: t('onboarding.steps.manualTasks.tasks.slackInvites.title'),
+      description: t(
+        'onboarding.steps.manualTasks.tasks.slackInvites.description'
+      ),
+      icon: 'lucide:slack'
     }
-  ]
+  ])
 
   const data = inject(ONBOARDING_DATA_KEY)!
   const advanceStep = inject(ADVANCE_STEP_KEY)!
@@ -61,19 +58,17 @@
   }
 
   const completedCount = computed(
-    () => tasks.filter((t) => isChecked(t.id)).length
+    () => tasks.value.filter((task) => isChecked(task.id)).length
   )
 
-  const allDone = computed(() => completedCount.value === tasks.length)
+  const allDone = computed(() => completedCount.value === tasks.value.length)
 </script>
 
 <template>
   <div class="flex flex-col gap-4">
-    <UAlert color="info" variant="soft" icon="material-symbols:info-rounded">
+    <UAlert color="info" variant="soft" icon="lucide:info">
       <template #description>
-        Die folgenden Aufgaben müssen manuell erledigt werden. Hake jede Aufgabe
-        ab, sobald sie abgeschlossen ist. Die verlinkte Anleitung beschreibt die
-        einzelnen Schritte im Detail.
+        {{ t('onboarding.steps.manualTasks.intro') }}
       </template>
     </UAlert>
 
@@ -86,7 +81,12 @@
         class="flex-1"
       />
       <span class="text-xs text-muted whitespace-nowrap">
-        {{ completedCount }}/{{ tasks.length }} erledigt
+        {{
+          t('onboarding.steps.manualTasks.doneCount', {
+            completed: completedCount,
+            total: tasks.length
+          })
+        }}
       </span>
     </div>
 
@@ -140,10 +140,10 @@
             size="xs"
             variant="ghost"
             color="neutral"
-            icon="material-symbols:open-in-new-rounded"
+            icon="lucide:external-link"
             tabindex="-1"
           >
-            Anleitung
+            {{ t('onboarding.steps.manualTasks.docs') }}
           </UButton>
         </a>
       </div>
@@ -154,11 +154,10 @@
       v-if="allDone"
       color="success"
       variant="soft"
-      icon="material-symbols:check-circle-rounded"
+      icon="lucide:circle-check"
     >
       <template #description>
-        Alle manuellen Aufgaben sind erledigt. Du kannst den Schritt
-        abschliessen.
+        {{ t('onboarding.steps.manualTasks.allDone') }}
       </template>
     </UAlert>
   </div>

@@ -61,6 +61,8 @@
   }
 
   const { getCustomEndpoint } = useDirectus()
+  const { t } = useI18n()
+  const { formatHours, formatDate } = useFormatters()
 
   const dataLoaderKey = computed<string>(
     () => `networkContribution-${props.clientPeriodId}`
@@ -81,16 +83,14 @@
     } catch (err: any) {
       const firstError = err?.response?.data?.errors?.[0]
       throw new Error(
-        firstError?.message || err?.message || 'Unbekannter Fehler'
+        firstError?.message || err?.message || t('common.unexpectedError')
       )
     }
   })
 
   const formattedPeriod = computed(() => {
     if (!props.periodFrom || !props.periodTo) return ''
-    const fmt = (iso: string) =>
-      new Date(iso).toLocaleDateString('de-CH', { dateStyle: 'medium' })
-    return `${fmt(props.periodFrom)} – ${fmt(props.periodTo)}`
+    return `${formatDate(props.periodFrom)} – ${formatDate(props.periodTo)}`
   })
 
   // Display rule: round to whole hours in the UI even though the API returns
@@ -151,50 +151,49 @@
     return [
       {
         key: 'engineering',
-        label: 'Entwicklung & Wartung',
+        label: t('networkContribution.tiles.engineering.label'),
         hours: toFullHours(c.weShare.engineering),
-        icon: 'material-symbols:code-rounded',
-        description:
-          'Neue Features, Software-Wartung, Deployments, Reviews und Bugfixes — out of the box für alle.'
+        icon: 'lucide:code',
+        description: t('networkContribution.tiles.engineering.description')
       },
       {
         key: 'hosting',
-        label: 'Hosting & Infrastruktur',
+        label: t('networkContribution.tiles.hosting.label'),
         hours: toFullHours(c.weShare.hosting),
-        icon: 'material-symbols:cloud-outline',
-        description:
-          'Schnelles, europäisches Hosting, Monitoring und schnelle Reaktion bei Ausfällen.'
+        icon: 'lucide:cloud',
+        description: t('networkContribution.tiles.hosting.description')
       },
       {
         key: 'acquisition',
-        label: 'Akquise',
+        label: t('networkContribution.tiles.acquisition.label'),
         hours: toFullHours(c.weShare.acquisition),
-        icon: 'material-symbols:handshake-outline-rounded',
-        description:
-          'Neue Medien fürs Netzwerk gewinnen — und so die Gesamtkosten auf mehr Schultern verteilen.'
+        icon: 'lucide:handshake',
+        description: t('networkContribution.tiles.acquisition.description')
       },
       {
         key: 'weshare-other',
-        label: 'Weiteres aus We.Share',
+        label: t('networkContribution.tiles.weshareOther.label'),
         hours: toFullHours(c.weShare.other),
-        icon: 'material-symbols:more-horiz',
-        description:
-          'Übrige we.share-Arbeiten — z. B. Austausch mit den Medien, automatisierte Testings verbessern usw.'
+        icon: 'lucide:ellipsis',
+        description: t('networkContribution.tiles.weshareOther.description')
       },
       {
         key: 'wepublish-internal',
-        label: 'We.Publish intern',
+        label: t('networkContribution.tiles.wepublishInternal.label'),
         hours: toFullHours(c.wepublishInternal.hours),
-        icon: 'material-symbols:account-balance-outline-rounded',
-        description:
-          'Interne Arbeit der Stiftung — Finanzen, HR, Fundraising, Administration, Kommunikation, Marketing, Entwicklung neuer Produkte (z.B. FaaS, Co-Journalist), Netzwerkpflege usw.'
+        icon: 'lucide:landmark',
+        description: t(
+          'networkContribution.tiles.wepublishInternal.description'
+        )
       },
       {
         key: 'other-media',
-        label: 'Andere Medien im Netzwerk',
+        label: t('networkContribution.tiles.otherMedia.label'),
         hours: toFullHours(c.otherClients.hours),
-        icon: 'material-symbols:groups-outline-rounded',
-        description: `Was wir für ${c.otherClients.clientCount} andere Medien bauen, hilft auch dir: neue Features, Designs und Verbesserungen fliessen ins ganze Netzwerk zurück.`
+        icon: 'lucide:users',
+        description: t('networkContribution.tiles.otherMedia.description', {
+          count: c.otherClients.clientCount
+        })
       }
     ]
   })
@@ -219,12 +218,12 @@
           @click="expanded = !expanded"
         >
           <UIcon
-            :name="expanded ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+            :name="expanded ? 'lucide:chevron-up' : 'lucide:chevron-down'"
             class="text-xl shrink-0 group-hover:text-primary transition-colors"
           />
           <div class="min-w-0">
             <div class="font-bold group-hover:text-primary transition-colors">
-              Wir entwickeln gemeinsam den Journalismus der Zukunft!
+              {{ t('networkContribution.header.title') }}
             </div>
             <div v-if="formattedPeriod" class="text-xs text-muted mt-0.5">
               {{ formattedPeriod }}
@@ -232,35 +231,17 @@
           </div>
         </button>
         <div class="font-bold text-4xl text-primary whitespace-nowrap">
-          {{ grandTotalHours }} h
+          {{ formatHours(grandTotalHours) }}
         </div>
       </div>
 
       <div class="flex justify-between gap-8">
         <div class="w-1/2 text-sm">
           <!-- Short benefits-focused intro -->
-          <p>
-            We.Publish ist weit mehr als eine technische Lösung.
-            <b
-              >Zusammen bilden wir das stärkste Netzwerk unabhängiger und
-              innovativer Medien.</b
-            >
-          </p>
-          <p class="pt-2">
-            Mit deiner Investition in We.Publish wirst Du Teil eines Netzwerks,
-            das gemeinsam in Innovation, Wissenstransfer und die
-            Weiterentwicklung des Journalismus investiert.
-          </p>
-          <p class="pt-2">
-            Davon profitiert auch dein Medium direkt: durch laufend verbesserte
-            Infrastruktur, neue Features, Austausch mit anderen Publishern sowie
-            ein wachsendes und resilientes Medien-Ökosystem.
-          </p>
-          <p class="text-sm pt-2">
-            Gemeinsam getragen von allen Medien im Netzwerk und von der Stiftung
-            We.Publish, die sämtliche Stiftungsfördermittel direkt an alle
-            Netzwerk-Mitglieder weitergibt.
-          </p>
+          <p v-html="t('networkContribution.intro.p1')" />
+          <p class="pt-2">{{ t('networkContribution.intro.p2') }}</p>
+          <p class="pt-2">{{ t('networkContribution.intro.p3') }}</p>
+          <p class="text-sm pt-2">{{ t('networkContribution.intro.p4') }}</p>
         </div>
 
         <div v-if="contribution" class="w-1/2">
@@ -271,10 +252,9 @@
           >
             <div class="flex justify-between text-sm mb-1">
               <span>
-                <span class="font-medium"
-                  >Dein Beitrag ist unverzichtbar - Danke, dass wir auf dich
-                  zählen dürfen!</span
-                >
+                <span class="font-medium">{{
+                  t('networkContribution.contributionBar.label')
+                }}</span>
               </span>
             </div>
             <UProgress
@@ -283,9 +263,11 @@
               color="primary"
             />
             <p class="text-xs text-muted mt-2 leading-snug">
-              Nur zusammen mit Euch und
-              {{ contribution.otherClients.clientCount }} weiteren unabhängigen
-              Medien kommen wir auf 100%!
+              {{
+                t('networkContribution.contributionBar.caption', {
+                  count: contribution.otherClients.clientCount
+                })
+              }}
             </p>
           </div>
         </div>
@@ -295,7 +277,7 @@
 
       <UAlert
         v-else-if="error"
-        title="Beim Abrufen der Netzwerk-Daten ist ein Fehler aufgetreten."
+        :title="t('networkContribution.error.title')"
         :description="error.message"
         color="error"
         variant="soft"
@@ -323,7 +305,7 @@
                 <div class="font-medium">{{ tile.label }}</div>
               </div>
               <div class="font-bold text-2xl text-primary whitespace-nowrap">
-                {{ tile.hours }} h
+                {{ formatHours(tile.hours) }}
               </div>
             </div>
             <p class="text-xs text-muted leading-snug">
@@ -342,10 +324,12 @@
           @click="expanded = !expanded"
         >
           <span>{{
-            expanded ? 'Details ausblenden' : 'Details anzeigen'
+            expanded
+              ? t('networkContribution.footer.hideDetails')
+              : t('networkContribution.footer.showDetails')
           }}</span>
           <UIcon
-            :name="expanded ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+            :name="expanded ? 'lucide:chevron-up' : 'lucide:chevron-down'"
             class="ml-1"
           />
         </button>

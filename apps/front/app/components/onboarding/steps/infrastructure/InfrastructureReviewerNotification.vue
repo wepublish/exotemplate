@@ -4,6 +4,7 @@
   const data = inject(ONBOARDING_DATA_KEY)!
   const directusStore = useDirectus()
   const toast = useToast()
+  const { t } = useI18n()
 
   const REVIEWER_EMAILS = ['elias@wepublish.ch', 'lukas@wepublish.ch']
   const reviewerEmails = ref([...REVIEWER_EMAILS])
@@ -13,18 +14,17 @@
   const newReviewerEmail = ref('')
 
   function buildReviewerMessage(): string {
-    const name = data.clientName || data.infraMediumName || 'neues Medium'
+    const name =
+      data.clientName ||
+      data.infraMediumName ||
+      t('onboarding.infrastructure.reviewer.template.fallbackName')
     const configPr = data.infraResult?.config_pr?.pr_url ?? ''
     const websitePr = data.infraResult?.website_pr?.pr_url ?? ''
-    return `Hoi Elias und Lukas
-
-bitte reviewt die offenen Pull Requests für das neue Medium «${name}» und merged sie:
-• ${configPr}
-• ${websitePr}
-
-Sobald die Merges durch sind, kurze Rückmeldung, damit das Onboarding weitergeführt werden kann.
-
-Danke!`
+    return t('onboarding.infrastructure.reviewer.template.body', {
+      name,
+      configPr,
+      websitePr
+    })
   }
 
   // `lastGeneratedReviewerMessage` tracks the most recent auto-generated text
@@ -62,7 +62,7 @@ Danke!`
 
   async function sendReviewerNotification() {
     if (reviewerEmails.value.length === 0 || !reviewerMessage.value.trim()) {
-      dmError.value = 'Empfänger und Nachricht dürfen nicht leer sein.'
+      dmError.value = t('onboarding.infrastructure.reviewer.emptyError')
       return
     }
 
@@ -86,12 +86,17 @@ Danke!`
       if (failed.length === 0) {
         toast.add({
           color: 'success',
-          title: `Nachricht an ${sent.length} Reviewer gesendet.`
+          title: t('onboarding.infrastructure.reviewer.sentToast', {
+            count: sent.length
+          })
         })
       } else {
         toast.add({
           color: 'warning',
-          title: `${sent.length} gesendet, ${failed.length} fehlgeschlagen`,
+          title: t('onboarding.infrastructure.reviewer.partialToast', {
+            sent: sent.length,
+            failed: failed.length
+          }),
           description: failed.map((f) => `${f.email}: ${f.error}`).join(', ')
         })
       }
@@ -99,9 +104,13 @@ Danke!`
       const msg =
         e?.response?.data?.errors?.[0]?.message ??
         e?.message ??
-        'Unbekannter Fehler'
+        t('common.unexpectedError')
       dmError.value = msg
-      toast.add({ color: 'error', title: 'Fehler', description: msg })
+      toast.add({
+        color: 'error',
+        title: t('onboarding.infrastructure.provisioning.errorTitle'),
+        description: msg
+      })
     } finally {
       sendingDm.value = false
     }
@@ -111,7 +120,10 @@ Danke!`
     const email = newReviewerEmail.value.trim().toLowerCase()
     if (!email) return
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      toast.add({ color: 'warning', title: 'Ungültige E-Mail-Adresse' })
+      toast.add({
+        color: 'warning',
+        title: t('onboarding.infrastructure.reviewer.invalidEmail')
+      })
       return
     }
     if (!reviewerEmails.value.includes(email)) {
@@ -130,15 +142,16 @@ Danke!`
     class="flex flex-col gap-3 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700"
   >
     <div class="flex items-center gap-2">
-      <UIcon name="simple-icons:slack" class="text-lg text-primary" />
-      <p class="text-sm font-semibold">Reviewer per Slack benachrichtigen</p>
+      <UIcon name="lucide:slack" class="text-lg text-primary" />
+      <p class="text-sm font-semibold">
+        {{ t('onboarding.infrastructure.reviewer.title') }}
+      </p>
     </div>
     <p class="text-xs text-muted">
-      Sendet eine Direktnachricht in Slack an die unten aufgeführten Empfänger.
-      Nachrichtentext kann vor dem Senden angepasst werden.
+      {{ t('onboarding.infrastructure.reviewer.description') }}
     </p>
 
-    <UFormField label="Empfänger">
+    <UFormField :label="t('onboarding.infrastructure.reviewer.recipients')">
       <div class="flex flex-wrap gap-1.5 items-center">
         <div
           v-for="(email, index) in reviewerEmails"
@@ -150,7 +163,7 @@ Danke!`
             class="hover:text-error transition-colors"
             @click="removeReviewerEmail(index)"
           >
-            <UIcon name="material-symbols:close-rounded" class="text-sm" />
+            <UIcon name="lucide:x" class="text-sm" />
           </button>
         </div>
       </div>
@@ -158,7 +171,9 @@ Danke!`
         <UInput
           v-model="newReviewerEmail"
           type="email"
-          placeholder="weitere E-Mail hinzufügen"
+          :placeholder="
+            t('onboarding.infrastructure.reviewer.addEmailPlaceholder')
+          "
           class="flex-1 font-mono"
           size="xs"
           @keydown.enter.prevent="addReviewerEmail"
@@ -167,25 +182,25 @@ Danke!`
           size="xs"
           variant="outline"
           color="neutral"
-          icon="material-symbols:add-rounded"
+          icon="lucide:plus"
           :disabled="!newReviewerEmail.trim()"
           @click="addReviewerEmail"
         >
-          Hinzufügen
+          {{ t('onboarding.infrastructure.reviewer.add') }}
         </UButton>
       </div>
     </UFormField>
 
-    <UFormField label="Nachricht">
+    <UFormField :label="t('onboarding.infrastructure.reviewer.message')">
       <template #hint>
         <UButton
           size="xs"
           variant="ghost"
           color="neutral"
-          icon="material-symbols:refresh-rounded"
+          icon="lucide:refresh-cw"
           @click="resetReviewerMessage()"
         >
-          Neu generieren
+          {{ t('onboarding.infrastructure.reviewer.regenerate') }}
         </UButton>
       </template>
       <UTextarea
@@ -200,19 +215,19 @@ Danke!`
       v-if="dmError"
       color="error"
       variant="soft"
-      icon="material-symbols:error-rounded"
+      icon="lucide:circle-alert"
     >
       <template #description>{{ dmError }}</template>
     </UAlert>
 
     <div class="flex justify-end">
       <UButton
-        icon="material-symbols:send-rounded"
+        icon="lucide:send"
         :loading="sendingDm"
         :disabled="reviewerEmails.length === 0 || !reviewerMessage.trim()"
         @click="sendReviewerNotification"
       >
-        Nachricht senden
+        {{ t('onboarding.infrastructure.reviewer.send') }}
       </UButton>
     </div>
   </div>

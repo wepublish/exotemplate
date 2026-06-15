@@ -19,17 +19,21 @@
   import BexioStep from './steps/BexioStep.vue'
   import ClockodoStep from './steps/ClockodoStep.vue'
   import InfrastructureStep from './steps/InfrastructureStep.vue'
+  import ContractStep from './steps/ContractStep.vue'
+  import InvoicingStep from './steps/InvoicingStep.vue'
   import ManualTasksStep from './steps/ManualTasksStep.vue'
   import EmailStep from './steps/EmailStep.vue'
 
   interface StepConfig {
     id: string
-    title: string
-    description: string
+    titleKey: string
+    descriptionKey: string
     icon: string
     status: StepStatus
     component: Component
   }
+
+  const { t } = useI18n()
 
   const props = defineProps<{
     initialClient?: Client | null
@@ -54,65 +58,81 @@
   const steps = ref<StepConfig[]>([
     {
       id: 'directus',
-      title: 'ONE',
-      description: 'Neuen Client und Benutzer in der Directus-Instanz anlegen.',
-      icon: 'material-symbols:person-add-rounded',
+      titleKey: 'onboarding.steps.directus.title',
+      descriptionKey: 'onboarding.steps.directus.description',
+      icon: 'lucide:user-plus',
       status: 'active',
       component: DirectusStep
     },
     {
       id: 'jira',
-      title: 'Jira',
-      description: 'Ein neues Jira-Projekt für das Medium einrichten.',
-      icon: 'simple-icons:jira',
+      titleKey: 'onboarding.steps.jira.title',
+      descriptionKey: 'onboarding.steps.jira.description',
+      icon: 'lucide:square-kanban',
       status: 'pending',
       component: JiraStep
     },
     {
       id: 'slack',
-      title: 'Slack',
-      description: 'Einen dedizierten Slack-Kanal für den Client anlegen.',
-      icon: 'simple-icons:slack',
+      titleKey: 'onboarding.steps.slack.title',
+      descriptionKey: 'onboarding.steps.slack.description',
+      icon: 'lucide:slack',
       status: 'pending',
       component: SlackStep
     },
     {
       id: 'bexio',
-      title: 'Bexio',
-      description: 'Den neuen Client in Bexio als Kontakt / Kunde erfassen.',
-      icon: 'material-symbols:business-center-rounded',
+      titleKey: 'onboarding.steps.bexio.title',
+      descriptionKey: 'onboarding.steps.bexio.description',
+      icon: 'lucide:briefcase',
       status: 'pending',
       component: BexioStep
     },
     {
       id: 'clockodo',
-      title: 'Clockodo',
-      description: 'Den Bexio-Kunden mit Clockodo verknüpfen.',
-      icon: 'material-symbols:sync-rounded',
+      titleKey: 'onboarding.steps.clockodo.title',
+      descriptionKey: 'onboarding.steps.clockodo.description',
+      icon: 'lucide:refresh-cw',
       status: 'pending',
       component: ClockodoStep
     },
     {
       id: 'infrastructure',
-      title: 'Infrastruktur',
-      description: 'Editor- und Website-Umgebung für den Client aufsetzen.',
-      icon: 'material-symbols:cloud-upload-rounded',
+      titleKey: 'onboarding.steps.infrastructure.title',
+      descriptionKey: 'onboarding.steps.infrastructure.description',
+      icon: 'lucide:cloud-upload',
       status: 'pending',
       component: InfrastructureStep
     },
     {
+      id: 'contract',
+      titleKey: 'onboarding.steps.contract.title',
+      descriptionKey: 'onboarding.steps.contract.description',
+      icon: 'lucide:file-text',
+      status: 'pending',
+      component: ContractStep
+    },
+    {
+      id: 'invoicing',
+      titleKey: 'onboarding.steps.invoicing.title',
+      descriptionKey: 'onboarding.steps.invoicing.description',
+      icon: 'lucide:receipt',
+      status: 'pending',
+      component: InvoicingStep
+    },
+    {
       id: 'manual-tasks',
-      title: 'Manuelle Schritte',
-      description: 'Manuelle Aufgaben gemäss Checkliste abarbeiten.',
-      icon: 'material-symbols:checklist-rounded',
+      titleKey: 'onboarding.steps.manualTasks.title',
+      descriptionKey: 'onboarding.steps.manualTasks.description',
+      icon: 'lucide:list-checks',
       status: 'pending',
       component: ManualTasksStep
     },
     {
       id: 'email',
-      title: 'E-Mail',
-      description: 'Zusammenfassungs-E-Mail mit allen Zugangsdaten versenden.',
-      icon: 'material-symbols:mail-rounded',
+      titleKey: 'onboarding.steps.email.title',
+      descriptionKey: 'onboarding.steps.email.description',
+      icon: 'lucide:mail',
       status: 'pending',
       component: EmailStep
     }
@@ -158,6 +178,7 @@
 
     onboardingData.clientId = client.id
     onboardingData.clientName = client.name
+    onboardingData.language = client.language ?? 'de'
 
     const statuses = deriveStepStatuses(client)
     steps.value.forEach((step, i) => {
@@ -380,13 +401,13 @@
   function stepStatusIcon(status: StepStatus) {
     switch (status) {
       case 'completed':
-        return 'material-symbols:check-circle-rounded'
+        return 'lucide:circle-check'
       case 'active':
-        return 'material-symbols:radio-button-checked-rounded'
+        return 'lucide:circle-dot'
       case 'error':
-        return 'material-symbols:error-rounded'
+        return 'lucide:circle-alert'
       default:
-        return 'material-symbols:circle-outline'
+        return 'lucide:circle'
     }
   }
 
@@ -405,11 +426,11 @@
               <p
                 class="text-xs font-semibold text-muted uppercase tracking-wider"
               >
-                Fortschritt
+                {{ t('onboarding.stepper.progress') }}
               </p>
               <UIcon
                 v-if="isSaving || isHydrating"
-                name="material-symbols:sync-rounded"
+                name="lucide:refresh-cw"
                 class="text-sm text-muted animate-spin"
               />
             </div>
@@ -453,7 +474,7 @@
                 'text-error': step.status === 'error'
               }"
             >
-              {{ index + 1 }}. {{ step.title }}
+              {{ index + 1 }}. {{ t(step.titleKey) }}
             </p>
           </button>
         </div>
@@ -467,12 +488,13 @@
         v-if="allCompleted"
         color="success"
         variant="soft"
-        icon="material-symbols:verified-rounded"
+        icon="lucide:badge-check"
       >
-        <template #title>Onboarding abgeschlossen</template>
+        <template #title>{{
+          t('onboarding.stepper.completedBanner.title')
+        }}</template>
         <template #description>
-          Alle Schritte wurden erfolgreich durchgeführt. Du kannst jeden Schritt
-          weiterhin auswählen, um die hinterlegten Informationen einzusehen.
+          {{ t('onboarding.stepper.completedBanner.description') }}
         </template>
       </UAlert>
 
@@ -502,17 +524,24 @@
               </div>
               <div class="flex-1">
                 <p class="font-bold text-lg">
-                  Schritt {{ currentIndex + 1 }}: {{ currentStep.title }}
+                  {{
+                    t('onboarding.stepper.stepHeading', {
+                      step: currentIndex + 1,
+                      title: t(currentStep.titleKey)
+                    })
+                  }}
                 </p>
-                <p class="text-sm text-muted">{{ currentStep.description }}</p>
+                <p class="text-sm text-muted">
+                  {{ t(currentStep.descriptionKey) }}
+                </p>
               </div>
               <UBadge
                 v-if="currentStep.status === 'error'"
                 color="error"
                 variant="soft"
-                icon="material-symbols:warning-rounded"
+                icon="lucide:triangle-alert"
               >
-                Fehler
+                {{ t('onboarding.stepper.errorBadge') }}
               </UBadge>
             </div>
           </template>
@@ -525,12 +554,12 @@
         <div class="flex justify-between items-center">
           <UButton
             v-if="!isFirstStep"
-            icon="material-symbols:arrow-back-ios-rounded"
+            icon="lucide:chevron-left"
             variant="outline"
             color="neutral"
             @click="goBack"
           >
-            Zurück
+            {{ t('common.back') }}
           </UButton>
           <div v-else />
 
@@ -539,24 +568,24 @@
               v-if="currentStep.status === 'error'"
               color="warning"
               variant="outline"
-              icon="material-symbols:refresh-rounded"
+              icon="lucide:refresh-cw"
               @click="retryStep"
             >
-              Erneut versuchen
+              {{ t('common.retry') }}
             </UButton>
 
             <UButton
               :icon="
-                isLastStep
-                  ? 'material-symbols:check-circle-rounded'
-                  : 'material-symbols:arrow-forward-ios-rounded'
+                isLastStep ? 'lucide:circle-check' : 'lucide:chevron-right'
               "
               :trailing="!isLastStep"
               :loading="isSaving"
               @click="completeCurrentStep"
             >
               {{
-                isLastStep ? 'Onboarding abschliessen' : 'Schritt abschliessen'
+                isLastStep
+                  ? t('onboarding.stepper.finishOnboarding')
+                  : t('onboarding.stepper.completeStep')
               }}
             </UButton>
           </div>

@@ -1,0 +1,44 @@
+{
+  "contracts": {
+    "title": "Contrats",
+    "timeline": "Historique",
+    "empty": "Aucun contrat n'a encore été téléversé pour ce client.",
+    "loadError": "Impossible de charger les contrats.",
+    "versionLabel": "Version {n}",
+    "uploadedOn": "Téléversé le",
+    "signedOn": "Signé le",
+    "download": "Télécharger",
+    "downloadFailed": "Échec du téléchargement.",
+    "uploaded": "Contrat téléversé.",
+    "mustBePdf": "Veuillez téléverser un fichier PDF.",
+    "fileRequired": "Veuillez sélectionner un fichier.",
+    "status": {
+      "signed": "Signé",
+      "awaitingSignature": "En attente de signature",
+      "archived": "Archivé"
+    },
+    "current": {
+      "title": "Contrat valide actuel"
+    },
+    "warning": {
+      "title": "Contrat non signé",
+      "description": "La version actuelle du contrat n'est pas marquée comme signée. Veuillez téléverser la version signée."
+    },
+    "noAccess": {
+      "title": "Accès refusé",
+      "description": "Vous n'avez pas accès aux contrats de ce client."
+    },
+    "upload": {
+      "button": "Téléverser un contrat",
+      "title": "Téléverser un contrat",
+      "fileLabel": "Contrat (PDF)",
+      "fileHint": "Téléversez la version signée du contrat au format PDF.",
+      "signedLabel": "Ceci est la version signée",
+      "notesLabel": "Note (facultatif)",
+      "submit": "Téléverser",
+      "signedTitle": "Téléverser la version signée",
+      "signedHint": "Téléversez la version signée de ce contrat au format PDF pour supprimer l’avertissement.",
+      "submitSigned": "Téléverser la version signée"
+    }
+  }
+}
