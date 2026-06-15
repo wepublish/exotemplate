@@ -628,10 +628,10 @@ type Clients_Periods {
   Clients_id(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients
   Periods_id(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Periods
   id: ID!
-  manualWorkEntries(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [ManualWorkEntries]
-  manualWorkEntries_func: count_functions
   topUps(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [TopUps]
   topUps_func: count_functions
+  manualWorkEntries(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [ManualWorkEntries]
+  manualWorkEntries_func: count_functions
   invoices(filter: Invoices_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Invoices]
   invoices_func: count_functions
 }
@@ -653,8 +653,8 @@ type Clients_Periods_aggregated_count {
   Clients_id: Int
   Periods_id: Int
   id: Int
-  manualWorkEntries: Int
   topUps: Int
+  manualWorkEntries: Int
   invoices: Int
 }
 
@@ -2084,8 +2084,8 @@ type version_Clients_Periods {
   Clients_id: JSON
   Periods_id: JSON
   id: ID
-  manualWorkEntries: JSON
   topUps: JSON
+  manualWorkEntries: JSON
   invoices: JSON
 }
 
@@ -2425,10 +2425,10 @@ input Clients_Periods_filter {
   Clients_id: Clients_filter
   Periods_id: Periods_filter
   id: number_filter_operators
-  manualWorkEntries: ManualWorkEntries_quantifier_filter
-  manualWorkEntries_func: count_function_filter_operators
   topUps: TopUps_quantifier_filter
   topUps_func: count_function_filter_operators
+  manualWorkEntries: ManualWorkEntries_quantifier_filter
+  manualWorkEntries_func: count_function_filter_operators
   invoices: Invoices_quantifier_filter
   invoices_func: count_function_filter_operators
   _and: [Clients_Periods_filter]
@@ -2440,10 +2440,10 @@ input Clients_Periods_quantifier_filter {
   Clients_id: Clients_filter
   Periods_id: Periods_filter
   id: number_filter_operators
-  manualWorkEntries: ManualWorkEntries_quantifier_filter
-  manualWorkEntries_func: count_function_filter_operators
   topUps: TopUps_quantifier_filter
   topUps_func: count_function_filter_operators
+  manualWorkEntries: ManualWorkEntries_quantifier_filter
+  manualWorkEntries_func: count_function_filter_operators
   invoices: Invoices_quantifier_filter
   invoices_func: count_function_filter_operators
   _and: [Clients_Periods_filter]
@@ -2623,8 +2623,8 @@ input create_Clients_Periods_input {
   Clients_id: create_Clients_input
   Periods_id: create_Periods_input
   id: ID
-  manualWorkEntries: [create_ManualWorkEntries_input]
   topUps: [create_TopUps_input]
+  manualWorkEntries: [create_ManualWorkEntries_input]
   invoices: [create_Invoices_input]
 }
 
@@ -3899,8 +3899,8 @@ input update_Clients_Periods_input {
   Clients_id: update_Clients_input
   Periods_id: update_Periods_input
   id: ID
-  manualWorkEntries: [update_ManualWorkEntries_input]
   topUps: [update_TopUps_input]
+  manualWorkEntries: [update_ManualWorkEntries_input]
   invoices: [update_Invoices_input]
 }
 

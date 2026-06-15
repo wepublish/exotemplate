@@ -9,14 +9,16 @@
     "display_options": null,
     "field": "invoices",
     "group": null,
-    "hidden": true,
+    "hidden": false,
     "interface": "list-o2m",
     "note": null,
-    "options": null,
+    "options": {
+      "template": "{{title}}"
+    },
     "readonly": false,
     "required": false,
     "searchable": true,
-    "sort": 6,
+    "sort": 5,
     "special": [
       "o2m"
     ],
