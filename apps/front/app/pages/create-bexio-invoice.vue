@@ -101,7 +101,9 @@
 
   const state = reactive<Partial<Schema>>({
     title: '',
-    hours: hours.value,
+    // Never undefined: an undefined/NaN `hours` fails the form's
+    // z.coerce.number() validation ("Invalid input") and blocks submit.
+    hours: hours.value ?? 0,
     hourlyRate: 150,
     wepPercentage: 20,
     note: ''
@@ -271,12 +273,17 @@
     () => {
       // only update if in prePaid mode
       if (prePaid.value) {
-        // get hours from amount
-        state.hours = financeCalc.getHoursByAmount(
-          amount.value,
-          state.hourlyRate,
-          state.wepPercentage
+        // Derive hours from the entered amount. Coerce inputs to finite numbers
+        // and clamp the result so `state.hours` is NEVER undefined/NaN/Infinity
+        // (e.g. a transient empty hourly rate gives 0/0 = NaN). A non-finite
+        // value here intermittently failed the form's z.coerce.number()
+        // validation ("Invalid input") and blocked submit — the reported race.
+        const derived = financeCalc.getHoursByAmount(
+          Number(amount.value) || 0,
+          Number(state.hourlyRate) || 0,
+          Number(state.wepPercentage) || 0
         ).clientHours
+        state.hours = Number.isFinite(derived) ? derived : 0
       }
     },
     {
