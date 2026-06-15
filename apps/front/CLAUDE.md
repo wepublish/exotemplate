@@ -17,7 +17,7 @@ This is the **We.Publish ONE** frontend — a billing and time-tracking manageme
 | Validation       | zod                                                                                                |
 | Date Utilities   | date-fns                                                                                           |
 | Icons            | @iconify-json/lucide only — Nuxt UI's default set; referenced as `lucide:<name>` (bundled locally) |
-| Package Manager  | pnpm (10.23.0)                                                                                     |
+| Package Manager  | npm (Node 22.x; npm 10.x)                                                                          |
 
 ## Architecture
 
@@ -108,12 +108,12 @@ To sweep the whole app and confirm every referenced icon exists:
 ## Key Commands
 
 ```bash
-pnpm install        # Install dependencies (also runs nuxt prepare)
-pnpm dev            # Dev server at http://localhost:3000
-pnpm build          # Production build
-pnpm preview        # Preview production build locally
-pnpm typecheck      # Run vue-tsc type checking
-pnpm lint           # Format all files with Prettier
+npm install         # Install dependencies (also runs nuxt prepare)
+npm run dev         # Dev server at http://localhost:3000
+npm run build       # Production build
+npm run preview     # Preview production build locally
+npm run typecheck   # Run vue-tsc type checking
+npm run lint        # Format all files with Prettier
 ```
 
 ## Backend Integration
@@ -214,8 +214,8 @@ Key TypeScript interfaces live in [types/DirectusTypes.ts](types/DirectusTypes.t
 **Vitest + `@nuxt/test-utils` are configured.** Run from this directory:
 
 ```bash
-pnpm test          # one-shot (vitest run)
-pnpm test:watch    # watch mode
+npm test           # one-shot (vitest run)
+npm run test:watch # watch mode
 ```
 
 Config is [vitest.config.ts](vitest.config.ts) (default environment `node`; opt a spec into the Nuxt runtime with `// @vitest-environment nuxt`). Specs live in [test/](test/). Current suites: [test/i18n-parity.test.ts](test/i18n-parity.test.ts) (every locale defines the same keys, no empty values, matching plural-form counts) and [test/useAppLocale.test.ts](test/useAppLocale.test.ts) (locale resolution + fallback).
@@ -244,7 +244,6 @@ The dashboard is localized with **`@nuxtjs/i18n`** (vue-i18n). Locales: **German
 
 - Do **not** use Options API — stick to Composition API with `<script setup>`.
 - Do **not** add ESLint; the project intentionally uses Prettier only.
-- The `pnpm-workspace.yaml` is present but the frontend is a single-package workspace.
-- `shamefully-hoist=true` is set in `.npmrc` for compatibility.
+- **Package manager is npm** (matching the rest of the workspace). The single lockfile is `package-lock.json`; the Docker build runs `npm ci`. Do **not** reintroduce pnpm (`pnpm-lock.yaml` / `pnpm-workspace.yaml` / `shamefully-hoist`) — a mixed npm/pnpm state broke Nitro's dependency trace and shipped a server bundle missing `vue/server-renderer` (every SSR page 500'd).
 - Nuxt devtools are enabled in development.
 - **Keep this CLAUDE.md current**: when a change adds/removes a page, store, composable, env var, integration, or convention — or invalidates something written here — update this file in the same change. Skip the update for routine bug fixes, refactors that don't change shape, dep bumps, copy/UI tweaks, and anything obvious from reading the code.

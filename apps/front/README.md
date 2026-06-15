@@ -13,7 +13,7 @@ This project is deployed automatically via CI/CD:
 Make sure to install the dependencies:
 
 ```bash
-pnpm install
+npm install
 ```
 
 ## Development Server
@@ -21,7 +21,7 @@ pnpm install
 Start the development server on `http://localhost:3000`:
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
 ## Production
@@ -29,13 +29,13 @@ pnpm dev
 Build the application for production:
 
 ```bash
-pnpm build
+npm run build
 ```
 
 Locally preview production build:
 
 ```bash
-pnpm preview
+npm run preview
 ```
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.

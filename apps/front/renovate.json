@@ -9,5 +9,5 @@
       "enabled": false
     }
   ],
-  "postUpdateOptions": ["pnpmDedupe"]
+  "postUpdateOptions": ["npmDedupe"]
 }
