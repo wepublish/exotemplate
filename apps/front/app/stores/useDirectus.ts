@@ -13,21 +13,26 @@ export const useDirectus = defineStore('useDirectus', () => {
   const config = useRuntimeConfig()
 
   const API_URL = (): string => {
+    const clientUrl = config.public.directusClientApiUrl
+
+    // On the server we prefer the (often cluster-internal) server URL, but it
+    // must never be empty: `createDirectus('')` throws "Invalid URL" and 500s
+    // every SSR request. If it's unset, fall back to the public client URL so
+    // the app still boots (authenticated data loads client-side anyway).
     if (import.meta.server) {
-      const directusServerApiUrl = config.public.directusServerApiUrl
-      if (!directusServerApiUrl) {
-        console.error('Env variable missing: NUXT_DIRECTUS_SERVER_API_URL')
-      }
-      return directusServerApiUrl
+      const serverUrl = config.public.directusServerApiUrl
+      if (serverUrl) return serverUrl
+      console.error(
+        'Env variable missing: NUXT_PUBLIC_DIRECTUS_SERVER_API_URL — falling back to client URL for SSR'
+      )
+      return clientUrl
     }
 
-    const directusClientApiUrl = config.public.directusClientApiUrl
-
-    if (!directusClientApiUrl) {
-      console.error('Env variable missing: NUXT_DIRECTUS_SERVER_API_URL')
+    if (!clientUrl) {
+      console.error('Env variable missing: NUXT_PUBLIC_DIRECTUS_CLIENT_API_URL')
     }
 
-    return directusClientApiUrl
+    return clientUrl
   }
 
   const directus = createDirectus<Schema>(API_URL())

@@ -1,4 +1,4 @@
-import type { Client, ClientPeriod, Period } from '~~/types/DirectusTypes'
+import type { Client, Period } from '~~/types/DirectusTypes'
 
 /**
  * App-wide "current client / billing period" selection.
@@ -35,10 +35,6 @@ export const useClientSelection = defineStore('useClientSelection', () => {
     return Number.isFinite(id) ? id : undefined
   })
 
-  function periodsOf(client: Client | undefined): ClientPeriod[] {
-    return (client?.periods || []) as ClientPeriod[]
-  }
-
   const selectedClient = computed<Client | undefined>(() => {
     const id = selectedClientPeriodId.value
     if (!id) return undefined
@@ -72,14 +68,7 @@ export const useClientSelection = defineStore('useClientSelection', () => {
   /** Newest period id of an arbitrary client — used by the selector to navigate
    *  to a sensible period when the client is switched. */
   function newestPeriodIdForClient(clientId: string): number | undefined {
-    const list = periodsOf(clients.value.find((c) => c.id === clientId))
-    if (!list.length) return undefined
-    return list.reduce((a, b) =>
-      ((a.Periods_id as Period)?.from ?? '') >=
-      ((b.Periods_id as Period)?.from ?? '')
-        ? a
-        : b
-    ).id
+    return newestPeriodId(clients.value.find((c) => c.id === clientId))
   }
 
   function isValidClientPeriodId(id: number | undefined): boolean {
@@ -90,7 +79,11 @@ export const useClientSelection = defineStore('useClientSelection', () => {
   }
 
   /** Best default period for the bare `/` root: the last-used one if it's still
-   *  valid, otherwise the newest period of the first client. */
+   *  valid, otherwise the newest period of the first client that has one.
+   *  Skipping clients with no periods matters because the bare `/` page can
+   *  only redirect to a *period* — if the very first client has none (e.g. a
+   *  not-yet-onboarded client), picking it would yield `undefined` and leave
+   *  the user stranded on a blank root with no selection. */
   function defaultClientPeriodId(): number | undefined {
     if (import.meta.client) {
       try {
@@ -100,8 +93,7 @@ export const useClientSelection = defineStore('useClientSelection', () => {
         // ignore unavailable/blocked storage
       }
     }
-    const first = clients.value[0]
-    return first ? newestPeriodIdForClient(first.id) : undefined
+    return selectDefaultPeriodId(clients.value)
   }
 
   // Remember the last valid selection so a later visit to `/` resumes it.

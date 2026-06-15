@@ -74,9 +74,12 @@
   )
 
   function warningClientId(warning: JiraWarning): string | null {
-    const ref = warning.client
-    if (!ref) return null
-    return typeof ref === 'string' ? ref : (ref.id ?? null)
+    // NB: do not name this `ref` — a local `ref` shadows Vue's auto-imported
+    // `ref`, which makes Nuxt's auto-import skip injecting it and breaks the
+    // module-level `ref(...)` calls above ("ref is not defined").
+    const clientRef = warning.client
+    if (!clientRef) return null
+    return typeof clientRef === 'string' ? clientRef : (clientRef.id ?? null)
   }
 
   const haltedIssueKeys = computed<Set<string>>(
