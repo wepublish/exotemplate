@@ -1,0 +1,28 @@
+{
+  "collection": "Invoices",
+  "meta": {
+    "accountability": "all",
+    "archive_app_filter": true,
+    "archive_field": "status",
+    "archive_value": "archived",
+    "collapse": "open",
+    "collection": "Invoices",
+    "color": null,
+    "display_template": null,
+    "group": null,
+    "hidden": false,
+    "icon": "receipt_long",
+    "item_duplication_fields": null,
+    "note": "Order-backed invoices (e.g. recurring hosting). NOT part of the available-hours calculation — see the TopUps collection for hour-counting payments.",
+    "preview_url": null,
+    "singleton": false,
+    "sort": null,
+    "sort_field": "sort",
+    "translations": null,
+    "unarchive_value": "draft",
+    "versioning": false
+  },
+  "schema": {
+    "name": "Invoices"
+  }
+}

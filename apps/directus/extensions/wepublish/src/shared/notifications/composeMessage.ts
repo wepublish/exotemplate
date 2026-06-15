@@ -1,3 +1,5 @@
+import { createSlackFormatters, type SlackLocale } from '../i18n/locale'
+import { NOTIFICATIONS_COPY } from '../i18n/notificationsCopy'
 import type { ComputedWarning } from './thresholds'
 
 export interface SlackMessageBlock {
@@ -38,41 +40,16 @@ export interface ComposeHaltDmInput extends ComposeHaltMessageInput {
   assigneeName: string | null
 }
 
-const HOURS_FORMATTER = new Intl.NumberFormat('de-CH', {
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 2
-})
-
-const DATE_FORMATTER = new Intl.DateTimeFormat('de-CH', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit'
-})
-
-function formatHours(hours: number): string {
-  return `${HOURS_FORMATTER.format(hours)} h`
-}
-
-function formatOffset(hours: number): string {
-  if (Math.abs(hours) < 0.005) return '±0 h'
-  const sign = hours > 0 ? '+' : '−'
-  return `${sign}${HOURS_FORMATTER.format(Math.abs(hours))} h`
-}
-
-function formatTimestamp(iso: string): string {
-  const date = new Date(iso)
-  if (Number.isNaN(date.getTime())) return iso
-  return DATE_FORMATTER.format(date)
-}
-
-function formatActor(name: string, email: string | null): string {
+function formatActor(
+  name: string,
+  email: string | null,
+  unknownLabel: string
+): string {
   const trimmed = name.trim()
   if (trimmed && email) return `${trimmed} (${email})`
   if (trimmed) return trimmed
   if (email) return email
-  return 'Unbekannt'
+  return unknownLabel
 }
 
 /**
@@ -92,24 +69,25 @@ export function buildWorkLogUrl(
 }
 
 /**
- * Compose a single, batched German Slack message that covers all pending
- * threshold warnings for one client. Uses Slack Block Kit so the dashboard
- * links render as buttons and the fallback `text` keeps notifications usable
- * in e-mail digests or mobile previews.
+ * Compose a single, batched Slack message that covers all pending threshold
+ * warnings for one client, in the project's language. Uses Slack Block Kit so
+ * the dashboard links render as buttons and the fallback `text` keeps
+ * notifications usable in e-mail digests or mobile previews.
  */
-export function composeGermanWarningMessage(
-  input: ComposeMessageInput
+export function composeWarningMessage(
+  input: ComposeMessageInput,
+  locale: SlackLocale = 'de'
 ): ComposedSlackMessage {
+  const copy = NOTIFICATIONS_COPY[locale].warning
+  const fmt = createSlackFormatters(locale)
   const { clientName, clientPeriodId, warnings, dashboardBaseUrl } = input
 
-  const header = `Freundlicher Hinweis für ${clientName}: ${warnings.length} Jira-Ticket${
-    warnings.length === 1 ? '' : 's'
-  } ${warnings.length === 1 ? 'hat' : 'haben'} einen Schwellenwert überschritten.`
+  const header = copy.header(clientName, warnings.length)
 
   const blocks: SlackMessageBlock[] = [
     {
       type: 'header',
-      text: { type: 'plain_text', text: 'Budget-Warnung', emoji: false }
+      text: { type: 'plain_text', text: copy.blockHeader, emoji: false }
     },
     { type: 'section', text: { type: 'mrkdwn', text: header } },
     { type: 'divider' }
@@ -121,21 +99,23 @@ export function composeGermanWarningMessage(
       clientPeriodId,
       warning.jiraIssueKey
     )
-    const line =
-      `*<${url}|${warning.jiraIssueKey}>* — Schätzung: ${formatHours(
-        warning.estimatedHours
-      )}, ` +
-      `verbraucht: ${formatHours(warning.totalHoursUsed)} ` +
-      `(${warning.usedPercent}%).\n` +
-      `_Erste Meldung ab ${formatHours(warning.initialThresholdHours)} ` +
-      `Nächste Meldung ab ${formatHours(warning.nextThresholdHours)}._`
-
     blocks.push({
       type: 'section',
-      text: { type: 'mrkdwn', text: line },
+      text: {
+        type: 'mrkdwn',
+        text: copy.line({
+          url,
+          key: warning.jiraIssueKey,
+          estimate: fmt.formatHours(warning.estimatedHours),
+          used: fmt.formatHours(warning.totalHoursUsed),
+          usedPercent: warning.usedPercent,
+          initialThreshold: fmt.formatHours(warning.initialThresholdHours),
+          nextThreshold: fmt.formatHours(warning.nextThresholdHours)
+        })
+      },
       accessory: {
         type: 'button',
-        text: { type: 'plain_text', text: 'Arbeit stoppen oder prüfen' },
+        text: { type: 'plain_text', text: copy.stopButton },
         url
       }
     })
@@ -143,28 +123,22 @@ export function composeGermanWarningMessage(
 
   blocks.push({
     type: 'context',
-    elements: [
-      {
-        type: 'mrkdwn',
-        text:
-          'Im Dashboard kannst Du die Arbeit an einem Ticket stoppen, bis ' +
-          'Rücksprache erfolgt ist, oder die Warnung dauerhaft stummschalten. ' +
-          'Andernfalls meldet sich der Bot automatisch bei der nächsten ' +
-          'Schwelle wieder.'
-      }
-    ]
+    elements: [{ type: 'mrkdwn', text: copy.footer }]
   })
 
   const fallbackText =
     `${header}\n` +
     warnings
-      .map(
-        (w) =>
-          `• ${w.jiraIssueKey}: ${formatHours(w.totalHoursUsed)} / ${formatHours(
-            w.estimatedHours
-          )} (${w.usedPercent}%) — erste Schwelle ${formatHours(
-            w.initialThresholdHours
-          )}, nächste Meldung ab ${formatHours(w.nextThresholdHours)}`
+      .map((w) =>
+        copy.fallbackLine({
+          url: '',
+          key: w.jiraIssueKey,
+          estimate: fmt.formatHours(w.estimatedHours),
+          used: fmt.formatHours(w.totalHoursUsed),
+          usedPercent: w.usedPercent,
+          initialThreshold: fmt.formatHours(w.initialThresholdHours),
+          nextThreshold: fmt.formatHours(w.nextThresholdHours)
+        })
       )
       .join('\n')
 
@@ -173,12 +147,15 @@ export function composeGermanWarningMessage(
 
 /**
  * Compose the Slack message that goes out when a client requests a halt on a
- * Jira ticket. The message is intentionally blunt: it tells the channel to
- * stop working on the ticket immediately and explains how the halt is lifted.
+ * Jira ticket, in the project's language. Intentionally blunt: stop working on
+ * the ticket immediately and explain how the halt is lifted.
  */
-export function composeGermanHaltRequestedMessage(
-  input: ComposeHaltMessageInput
+export function composeHaltRequestedMessage(
+  input: ComposeHaltMessageInput,
+  locale: SlackLocale = 'de'
 ): ComposedSlackMessage {
+  const copy = NOTIFICATIONS_COPY[locale].haltRequested
+  const fmt = createSlackFormatters(locale)
   const {
     clientName,
     clientPeriodId,
@@ -190,23 +167,20 @@ export function composeGermanHaltRequestedMessage(
   } = input
 
   const url = buildWorkLogUrl(dashboardBaseUrl, clientPeriodId, jiraIssueKey)
-  const actor = formatActor(actorName, actorEmail)
-  const occurredAt = formatTimestamp(occurredAtIso)
+  const actor = formatActor(
+    actorName,
+    actorEmail,
+    NOTIFICATIONS_COPY[locale].unknownActor
+  )
+  const occurredAt = fmt.formatTimestamp(occurredAtIso)
 
-  const headline = `:octagonal_sign: Arbeitsstopp für *<${url}|${jiraIssueKey}>* (${clientName})`
-  const detail =
-    `${actor} hat am ${occurredAt} einen Arbeitsstopp angefordert.\n` +
-    '*@We.Publish bitte stellt die Arbeit an diesem Ticket sofort ein.* ' +
-    `@${actor} bitte nimm mit dem Projektverantwortlichen Kontakt auf, um das weitere Vorgehen gemeinsam zu besprechen.`
+  const headline = copy.headline({ url, key: jiraIssueKey, clientName })
+  const detail = copy.detail({ actor, occurredAt })
 
   const blocks: SlackMessageBlock[] = [
     {
       type: 'header',
-      text: {
-        type: 'plain_text',
-        text: 'Arbeitsstopp angefordert',
-        emoji: false
-      }
+      text: { type: 'plain_text', text: copy.header, emoji: false }
     },
     { type: 'section', text: { type: 'mrkdwn', text: headline } },
     { type: 'section', text: { type: 'mrkdwn', text: detail } },
@@ -216,7 +190,7 @@ export function composeGermanHaltRequestedMessage(
         {
           type: 'button',
           style: 'danger',
-          text: { type: 'plain_text', text: 'Im Dashboard ansehen' },
+          text: { type: 'plain_text', text: copy.button },
           url
         }
       ]
@@ -226,28 +200,35 @@ export function composeGermanHaltRequestedMessage(
       elements: [
         {
           type: 'mrkdwn',
-          text: `Erst wenn ${clientName} den Stop aufhebt, darf an <${url}|${jiraIssueKey}> weitergeareitet werden.`
+          text: copy.context({ clientName, url, key: jiraIssueKey })
         }
       ]
     }
   ]
 
-  const fallbackText =
-    `ARBEITSSTOPP: ${jiraIssueKey} (${clientName}). ${actor} hat am ${occurredAt} ` +
-    'einen Arbeitsstopp angefordert. Bitte stellt die Arbeit sofort ein, bis der ' +
-    'Stopp im Dashboard aufgehoben wird.'
+  const fallbackText = copy.fallback({
+    url,
+    key: jiraIssueKey,
+    clientName,
+    actor,
+    occurredAt
+  })
 
   return { text: fallbackText, blocks }
 }
 
 /**
  * Compose the Slack message confirming that a previously halted ticket has
- * been released for work again. Mirrors `composeGermanHaltRequestedMessage`
- * so the channel sees a clear "before/after" pair.
+ * been released for work again, in the project's language. Mirrors
+ * `composeHaltRequestedMessage` so the channel sees a clear "before/after"
+ * pair.
  */
-export function composeGermanHaltResolvedMessage(
-  input: ComposeHaltMessageInput
+export function composeHaltResolvedMessage(
+  input: ComposeHaltMessageInput,
+  locale: SlackLocale = 'de'
 ): ComposedSlackMessage {
+  const copy = NOTIFICATIONS_COPY[locale].haltResolved
+  const fmt = createSlackFormatters(locale)
   const {
     clientName,
     clientPeriodId,
@@ -259,22 +240,20 @@ export function composeGermanHaltResolvedMessage(
   } = input
 
   const url = buildWorkLogUrl(dashboardBaseUrl, clientPeriodId, jiraIssueKey)
-  const actor = formatActor(actorName, actorEmail)
-  const occurredAt = formatTimestamp(occurredAtIso)
+  const actor = formatActor(
+    actorName,
+    actorEmail,
+    NOTIFICATIONS_COPY[locale].unknownActor
+  )
+  const occurredAt = fmt.formatTimestamp(occurredAtIso)
 
-  const headline = `:white_check_mark: Arbeitsstopp aufgehoben für *<${url}|${jiraIssueKey}>* (${clientName})`
-  const detail =
-    `${actor} hat den Arbeitsstopp am ${occurredAt} aufgehoben.\n` +
-    'Die Arbeit an diesem Ticket darf wieder aufgenommen werden.'
+  const headline = copy.headline({ url, key: jiraIssueKey, clientName })
+  const detail = copy.detail({ actor, occurredAt })
 
   const blocks: SlackMessageBlock[] = [
     {
       type: 'header',
-      text: {
-        type: 'plain_text',
-        text: 'Arbeitsstopp aufgehoben',
-        emoji: false
-      }
+      text: { type: 'plain_text', text: copy.header, emoji: false }
     },
     { type: 'section', text: { type: 'mrkdwn', text: headline } },
     { type: 'section', text: { type: 'mrkdwn', text: detail } },
@@ -283,29 +262,34 @@ export function composeGermanHaltResolvedMessage(
       elements: [
         {
           type: 'button',
-          text: { type: 'plain_text', text: 'Im Dashboard ansehen' },
+          text: { type: 'plain_text', text: copy.button },
           url
         }
       ]
     }
   ]
 
-  const fallbackText =
-    `Arbeitsstopp für ${jiraIssueKey} (${clientName}) wurde von ${actor} ` +
-    `am ${occurredAt} aufgehoben. Die Arbeit an diesem Ticket kann wieder aufgenommen werden.`
+  const fallbackText = copy.fallback({
+    url,
+    key: jiraIssueKey,
+    clientName,
+    actor,
+    occurredAt
+  })
 
   return { text: fallbackText, blocks }
 }
 
 /**
- * Compose the personal Slack DM that goes to the Jira assignee when a halt
- * is requested. Mirrors the channel-wide message but addresses the assignee
- * directly so the person actually working on the ticket sees it without
- * having to scan #-channel chatter.
+ * Compose the personal Slack DM that goes to the Jira assignee when a halt is
+ * requested. Mirrors the channel-wide message but addresses the assignee
+ * directly. Stays German: the assignee is a We.Publish employee, so this DM is
+ * an internal message and does not follow the project's language.
  */
 export function composeGermanHaltRequestedDmMessage(
   input: ComposeHaltDmInput
 ): ComposedSlackMessage {
+  const fmt = createSlackFormatters('de')
   const {
     clientName,
     clientPeriodId,
@@ -318,8 +302,8 @@ export function composeGermanHaltRequestedDmMessage(
   } = input
 
   const url = buildWorkLogUrl(dashboardBaseUrl, clientPeriodId, jiraIssueKey)
-  const actor = formatActor(actorName, actorEmail)
-  const occurredAt = formatTimestamp(occurredAtIso)
+  const actor = formatActor(actorName, actorEmail, 'Unbekannt')
+  const occurredAt = fmt.formatTimestamp(occurredAtIso)
   const greeting = assigneeName?.trim()
     ? `Hallo ${assigneeName.trim()},`
     : 'Hallo,'

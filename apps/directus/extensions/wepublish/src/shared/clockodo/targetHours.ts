@@ -15,8 +15,9 @@ import { clockodoHeaders } from './headers'
  *     booleans. We approximate the daily expected from `monthly_target` for
  *     monthly contracts since per-weekday hours aren't on the row.
  *
- * Note: the endpoint lives on Clockodo's v1 surface (`/api/targethours/`),
- * unlike the `/api/v2/*` calls used elsewhere — v2 doesn't have an equivalent.
+ * Note: this endpoint is unversioned (`/api/targethours/`) and — unlike the
+ * versioned absences/users/non-business-days calls — was not deprecated in
+ * Clockodo's 2026-05-01 endpoint cleanup, so it stays as-is.
  */
 export interface ClockodoTargetHourRow {
   id: number

@@ -90,13 +90,41 @@
   },
   {
     "collection": "Clients_directus_users",
+    "action": "delete",
+    "permissions": {
+      "_and": [
+        {
+          "Clients_id": {
+            "allowedUsers": {
+              "directus_users_id": {
+                "id": {
+                  "_eq": "$CURRENT_USER"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "validation": null,
+    "presets": null,
+    "fields": null,
+    "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
+    "_syncId": "206e2bd6-cdd4-4ba6-b09c-9bd67d64c07a"
+  },
+  {
+    "collection": "Clients_directus_users",
     "action": "read",
     "permissions": {
       "_and": [
         {
-          "directus_users_id": {
-            "id": {
-              "_eq": "$CURRENT_USER"
+          "Clients_id": {
+            "allowedUsers": {
+              "directus_users_id": {
+                "id": {
+                  "_eq": "$CURRENT_USER"
+                }
+              }
             }
           }
         }
@@ -172,7 +200,8 @@
       "clockodo_customer_id",
       "jira_short_code",
       "notifications_paused",
-      "weekly_report_paused"
+      "weekly_report_paused",
+      "language"
     ],
     "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
     "_syncId": "1962465b-c65f-4e12-8df8-6cbb28e0885a"
@@ -195,19 +224,90 @@
     "presets": null,
     "fields": [
       "notifications_paused",
-      "weekly_report_paused"
+      "weekly_report_paused",
+      "language"
     ],
     "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
     "_syncId": "1e4d2304-5f03-48bd-b946-3d390547bb85"
   },
   {
-    "collection": "directus_users",
+    "collection": "Contracts",
     "action": "read",
     "permissions": {
       "_and": [
         {
+          "client": {
+            "allowedUsers": {
+              "directus_users_id": {
+                "id": {
+                  "_eq": "$CURRENT_USER"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "id",
+      "status",
+      "version",
+      "client",
+      "file",
+      "signed",
+      "signed_at",
+      "notes",
+      "date_created",
+      "date_updated"
+    ],
+    "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
+    "_syncId": "dd3895f8-cb9d-4fac-8e1b-6332547e8a3b"
+  },
+  {
+    "collection": "directus_files",
+    "action": "read",
+    "permissions": {
+      "_and": [
+        {
+          "folder": {
+            "name": {
+              "_eq": "contracts"
+            }
+          }
+        }
+      ]
+    },
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "*"
+    ],
+    "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
+    "_syncId": "99cd6c3d-2ed3-4eb7-9fc7-b3f2043ee34d"
+  },
+  {
+    "collection": "directus_users",
+    "action": "read",
+    "permissions": {
+      "_or": [
+        {
           "id": {
             "_eq": "$CURRENT_USER"
+          }
+        },
+        {
+          "accessToClients": {
+            "Clients_id": {
+              "allowedUsers": {
+                "directus_users_id": {
+                  "id": {
+                    "_eq": "$CURRENT_USER"
+                  }
+                }
+              }
+            }
           }
         }
       ]
@@ -221,10 +321,55 @@
       "role",
       "policies",
       "id",
-      "accessToClients"
+      "accessToClients",
+      "status"
     ],
     "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
     "_syncId": "f1a05aa0-b343-4c97-af99-9b533a7044c2"
+  },
+  {
+    "collection": "Invoices",
+    "action": "read",
+    "permissions": {
+      "_and": [
+        {
+          "clientPeriod": {
+            "Clients_id": {
+              "allowedUsers": {
+                "directus_users_id": {
+                  "id": {
+                    "_eq": "$CURRENT_USER"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "validation": null,
+    "presets": null,
+    "fields": [
+      "id",
+      "status",
+      "sort",
+      "date_created",
+      "date_updated",
+      "type",
+      "title",
+      "description",
+      "amount",
+      "unitPrice",
+      "quantity",
+      "billedUnits",
+      "weSharePercentage",
+      "periodicity",
+      "bexioOrderId",
+      "bexioInvoiceId",
+      "clientPeriod"
+    ],
+    "policy": "167b9b79-c76c-4365-9d93-0979e8c113dd",
+    "_syncId": "a6f33a1a-b7c5-4a41-976b-1ca881a8f642"
   },
   {
     "collection": "JiraWarnings",

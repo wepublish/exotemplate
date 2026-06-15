@@ -16,8 +16,9 @@ import {
   type EntryGroupComputed
 } from '../shared/billing'
 import { findCurrentClientPeriod } from '../shared/clientPeriods'
+import { resolveClientLocale } from '../shared/i18n/locale'
 import {
-  composeGermanWarningMessage,
+  composeWarningMessage,
   computePendingWarnings,
   isClientPaused,
   postSlackMessage,
@@ -67,7 +68,8 @@ export default defineOperationApi({
           'jira_short_code',
           'clockodo_customer_id',
           'slack_channel_id',
-          'notifications_paused'
+          'notifications_paused',
+          'language'
         ],
         limit: -1
       }),
@@ -175,12 +177,15 @@ async function processClient(args: ProcessClientArgs): Promise<void> {
 
   if (pending.length === 0) return
 
-  const message = composeGermanWarningMessage({
-    clientName: client.name,
-    clientPeriodId: activePeriod.id,
-    warnings: pending,
-    dashboardBaseUrl: args.dashboardBaseUrl
-  })
+  const message = composeWarningMessage(
+    {
+      clientName: client.name,
+      clientPeriodId: activePeriod.id,
+      warnings: pending,
+      dashboardBaseUrl: args.dashboardBaseUrl
+    },
+    resolveClientLocale(client.language)
+  )
 
   const slackResult = await postSlackMessage({
     token: args.slackToken,

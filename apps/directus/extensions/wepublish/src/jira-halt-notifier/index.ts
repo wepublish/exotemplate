@@ -6,10 +6,11 @@ import type {
   Period
 } from '../DirectusTypes'
 import { getJiraIssueAssignee } from '../shared/billing/jira'
+import { resolveClientLocale } from '../shared/i18n/locale'
 import {
   composeGermanHaltRequestedDmMessage,
-  composeGermanHaltRequestedMessage,
-  composeGermanHaltResolvedMessage,
+  composeHaltRequestedMessage,
+  composeHaltResolvedMessage,
   isClientPaused,
   lookupSlackUserIdByEmail,
   postSlackMessage,
@@ -227,10 +228,11 @@ async function notifyHaltTransition(args: NotifyArgs): Promise<void> {
     dashboardBaseUrl: args.dashboardBaseUrl
   }
 
+  const locale = resolveClientLocale(client.language)
   const message: ComposedSlackMessage =
     args.transition === 'requested'
-      ? composeGermanHaltRequestedMessage(payload)
-      : composeGermanHaltResolvedMessage(payload)
+      ? composeHaltRequestedMessage(payload, locale)
+      : composeHaltResolvedMessage(payload, locale)
 
   const result = await postSlackMessage({
     token: args.slackToken,

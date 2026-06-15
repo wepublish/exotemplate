@@ -8,10 +8,11 @@ import type {
 } from '../DirectusTypes'
 import { computeClientPeriodBilling, readBillingEnv } from '../shared/billing'
 import { findCurrentClientPeriod } from '../shared/clientPeriods'
+import { resolveClientLocale } from '../shared/i18n/locale'
 import { postSlackMessage } from '../shared/notifications'
 import {
   composeGermanOverBudgetEscalationMessage,
-  composeGermanWeeklyReportMessage,
+  composeWeeklyReportMessage,
   computeWeeklyReportProgress,
   isOverBudget
 } from '../shared/weekly-report'
@@ -57,7 +58,8 @@ export default defineOperationApi({
         'clockodo_customer_id',
         'slack_channel_id',
         'weekly_report_paused',
-        'billing_mode'
+        'billing_mode',
+        'language'
       ],
       limit: -1
     })
@@ -141,9 +143,10 @@ async function processClient(args: ProcessClientArgs): Promise<void> {
     billingMode: client.billing_mode ?? 'prepaid'
   }
 
-  const projectMessage = composeGermanWeeklyReportMessage(
+  const projectMessage = composeWeeklyReportMessage(
     reportInput,
-    activePeriod.id
+    activePeriod.id,
+    resolveClientLocale(client.language)
   )
 
   const projectResult = await postSlackMessage({

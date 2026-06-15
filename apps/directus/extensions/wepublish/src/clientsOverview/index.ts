@@ -20,6 +20,7 @@ import {
   type SnapshotsServiceLike
 } from '../shared/billing'
 import { billingCacheKey, getBillingCache } from '../shared/cache'
+import { currentContractNeedsSignature } from '../contracts/helpers'
 
 const MissingEnvError = createError('500', 'Missing env variables.')
 
@@ -53,6 +54,8 @@ interface OverviewEntry {
   lastError: string | null
   lastErrorAt: string | null
   pending: boolean
+  /** True when the client has a contract whose current version is not signed. */
+  contractWarning: boolean
 }
 
 export default defineEndpoint((router, context) => {
@@ -135,6 +138,58 @@ export default defineEndpoint((router, context) => {
         if (candidateFrom > incumbentFrom) bestByClient.set(client.id, cp)
       }
 
+      // Which clients have a contract whose current (latest) version is NOT
+      // signed — drives the per-tile "Vertrag nicht unterzeichnet" warning.
+      // Clients with no contract at all are never flagged. One batched query;
+      // guarded so a not-yet-migrated Contracts collection can't 500 the page.
+      const contractWarningClientIds = new Set<string>()
+      if (schema?.collections?.Contracts) {
+        const clientIds = [...bestByClient.keys()]
+        if (clientIds.length > 0) {
+          const contractsService = new services.ItemsService('Contracts', {
+            schema
+          })
+          const rows = (await contractsService.readByQuery({
+            filter: {
+              client: { _in: clientIds },
+              status: { _neq: 'archived' }
+            },
+            fields: ['client', 'version', 'signed', 'status'],
+            limit: -1
+          })) as {
+            client: string | { id: string } | null
+            version: number
+            signed: boolean
+            status: 'published' | 'draft' | 'archived'
+          }[]
+          const byClient = new Map<
+            string,
+            {
+              version: number
+              signed: boolean
+              status: (typeof rows)[number]['status']
+            }[]
+          >()
+          for (const row of rows) {
+            const id =
+              typeof row.client === 'string' ? row.client : row.client?.id
+            if (!id) continue
+            const list = byClient.get(id) ?? []
+            list.push({
+              version: row.version,
+              signed: row.signed,
+              status: row.status
+            })
+            byClient.set(id, list)
+          }
+          for (const [id, list] of byClient) {
+            if (currentContractNeedsSignature(list)) {
+              contractWarningClientIds.add(id)
+            }
+          }
+        }
+      }
+
       const entries: OverviewEntry[] = []
       const pendingClientPeriodIds: number[] = []
 
@@ -177,7 +232,8 @@ export default defineEndpoint((router, context) => {
           computedAt: snap?.computedAt ?? null,
           lastError: snap?.lastError ?? null,
           lastErrorAt: snap?.lastErrorAt ?? null,
-          pending
+          pending,
+          contractWarning: contractWarningClientIds.has(client.id)
         })
       }
 

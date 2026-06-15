@@ -36,6 +36,16 @@
       },
       {
         "type": "endpoint",
+        "name": "recurring-invoice",
+        "source": "src/recurring-invoice/index.ts"
+      },
+      {
+        "type": "endpoint",
+        "name": "bexio-invoice-status",
+        "source": "src/bexio-invoice-status/index.ts"
+      },
+      {
+        "type": "endpoint",
         "name": "client-onboarding",
         "source": "src/client-onboarding/index.ts"
       },
@@ -48,6 +58,16 @@
         "type": "endpoint",
         "name": "clientsOverview",
         "source": "src/clientsOverview/index.ts"
+      },
+      {
+        "type": "endpoint",
+        "name": "contracts",
+        "source": "src/contracts/index.ts"
+      },
+      {
+        "type": "endpoint",
+        "name": "team",
+        "source": "src/team/index.ts"
       },
       {
         "type": "operation",

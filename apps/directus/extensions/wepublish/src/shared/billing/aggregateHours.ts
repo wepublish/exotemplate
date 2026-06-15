@@ -5,6 +5,24 @@ const JIRA_ISSUE_GROUP_ID = '1100301'
 const BILLABLE_PART_WEP = 0.5
 const SECONDS_PER_HOUR = 60 * 60
 
+/**
+ * Relations fetched for a client period when computing available hours.
+ *
+ * Hosting / order-backed `Invoices` are DELIBERATELY excluded: they live in a
+ * separate collection and must NEVER count toward the client's hours. The
+ * aggregation pipeline only ever receives `TopUp[]`. If you add an `invoices`
+ * expansion here you are almost certainly introducing a billing bug — the guard
+ * test in `aggregateHours.test.ts` will fail. (Directus `'*'` does not expand
+ * O2M aliases like `invoices`/`topUps`, so only what is listed here is pulled.)
+ */
+export const AGGREGATED_HOURS_CLIENT_PERIOD_FIELDS = [
+  '*',
+  'topUps.*',
+  'manualWorkEntries.*',
+  'Clients_id.*',
+  'Periods_id.*'
+] as const
+
 export interface EntryGroups {
   groups: EntryGroup[]
 }

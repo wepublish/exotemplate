@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
+  AGGREGATED_HOURS_CLIENT_PERIOD_FIELDS,
   BILLABLE_PART_WEP,
   SECONDS_PER_HOUR,
   computeEntryGroups,
@@ -465,5 +466,38 @@ describe('computeEntryGroups', () => {
     const manual = [manualWorkEntry(null)]
     const result = computeEntryGroups(groups, [], manual)
     expect(result.sums.totalManualWorkHours).toBe(0)
+  })
+})
+
+describe('hosting invoices never affect available hours (regression guard)', () => {
+  it('does not pull the order-backed Invoices collection into the hours fetch', () => {
+    // Hosting / order-backed invoices live in the separate `Invoices`
+    // collection and must NEVER be summed into available hours. The available-
+    // hours endpoint fetches only these relations of a client period.
+    expect(
+      AGGREGATED_HOURS_CLIENT_PERIOD_FIELDS.some((field) =>
+        /invoice/i.test(field)
+      )
+    ).toBe(false)
+    // …and it still pulls the hour-counting top-ups it depends on.
+    expect(AGGREGATED_HOURS_CLIENT_PERIOD_FIELDS).toContain('topUps.*')
+  })
+
+  it('computes top-ups purely from amount/hourlyRate/wepPercentage, ignoring any hosting-style fields', () => {
+    // A row carrying hosting-only fields (unitPrice/billedUnits/type) must not
+    // be treated specially — only amount/hourlyRate/wepPercentage drive hours.
+    const hostingShaped = buildTopUp({
+      amount: 1000,
+      hourlyRate: 100,
+      wepPercentage: 0
+    }) as TopUp & { unitPrice: number; billedUnits: number; type: string }
+    hostingShaped.unitPrice = 390
+    hostingShaped.billedUnits = 7
+    hostingShaped.type = 'hosting'
+
+    const [result] = computeTopUps([hostingShaped])
+    // 1000 / 100 = 10 paid hours, 0% wep → 10 client hours. Extra fields ignored.
+    expect(result.paidHours).toBe(10)
+    expect(result.clientHours).toBe(10)
   })
 })

@@ -13,6 +13,7 @@ import type {
   TopUp
 } from '../DirectusTypes'
 import {
+  AGGREGATED_HOURS_CLIENT_PERIOD_FIELDS,
   computeClientPeriodBilling,
   persistBillingSnapshotSuccess,
   readBillingEnv,
@@ -57,13 +58,7 @@ export default defineEndpoint((router, context) => {
       )
 
       const clientPeriod = await clientPeriodService.readOne(clientPeriodId, {
-        fields: [
-          '*',
-          'topUps.*',
-          'manualWorkEntries.*',
-          'Clients_id.*',
-          'Periods_id.*'
-        ]
+        fields: [...AGGREGATED_HOURS_CLIENT_PERIOD_FIELDS]
       })
 
       const client = clientPeriod.Clients_id as Client | null

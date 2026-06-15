@@ -4,8 +4,10 @@ export interface Schema {
   BillingSnapshots: BillingSnapshot[]
   CaptureIgnoredUsers: CaptureIgnoredUser[]
   Clients: Client[]
+  Contracts: Contract[]
   Clients_Periods: ClientPeriod[]
   Clients_directus_users: ClientDirectusUser[]
+  Invoices: Invoice[]
   JiraWarnings: JiraWarning[]
   ManualWorkEntries: ManualWorkEntry[]
   NotificationThresholds: NotificationThreshold[]
@@ -66,9 +68,33 @@ export interface Client {
   notifications_paused: boolean
   weekly_report_paused: boolean
   billing_mode: BillingMode
+  /** Drives the language of this project's client-facing Slack messages. */
+  language: 'de' | 'fr' | 'en'
   allowedUsers: string[] | ClientDirectusUser[]
   periods: string[] | ClientPeriod[]
   articles: string[] | PeerArticle[]
+  contracts: number[] | Contract[]
+}
+
+export interface Contract {
+  id: number
+  status: 'published' | 'draft' | 'archived'
+  sort: number | null
+  client: string | Client | null
+  /** Per-client version number, starting at 1. The latest is the one "in effect". */
+  version: number
+  /** The uploaded contract PDF (directus_files id). */
+  file: string | null
+  /** Whether this version is the signed contract. */
+  signed: boolean
+  /** When the contract was marked signed / the signed PDF uploaded. */
+  signed_at: string | null
+  /** Optional note describing what changed in this version. */
+  notes: string | null
+  date_created: string | null
+  date_updated: string | null
+  user_created: string | DirectusUser<Schema> | null
+  user_updated: string | DirectusUser<Schema> | null
 }
 
 export interface NotificationThreshold {
@@ -112,6 +138,7 @@ export interface ClientPeriod {
   id: number
   manualWorkEntries: number[] | ManualWorkEntry[]
   topUps: number[] | TopUp[]
+  invoices: number[] | Invoice[]
 }
 
 export interface ClientDirectusUser {
@@ -180,6 +207,34 @@ export interface TopUp {
   user_updated: string | DirectusUser<Schema> | null
   wepPercentage: number | null
   bexioInvoiceId: number | null
+}
+
+/**
+ * Order-backed invoices (e.g. recurring hosting). Deliberately a SEPARATE
+ * collection from `TopUp`: these are NEVER part of the available-hours
+ * calculation — `aggregateHours` only ever receives `TopUp[]`, never `Invoice[]`.
+ * The `type` field discriminates future order-backed invoice kinds.
+ */
+export interface Invoice {
+  id: string
+  status: 'published' | 'draft' | 'archived'
+  sort: number | null
+  date_created: string | null
+  date_updated: string | null
+  user_created: string | DirectusUser<Schema> | null
+  user_updated: string | DirectusUser<Schema> | null
+  clientPeriod: number | ClientPeriod | null
+  type: string
+  title: string | null
+  description: string | null
+  bexioOrderId: number | null
+  bexioInvoiceId: number | null
+  unitPrice: number | null
+  quantity: number | null
+  billedUnits: number | null
+  weSharePercentage: number | null
+  periodicity: string | null
+  amount: number | null
 }
 
 export interface CustomDirectusUser {

@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   buildWorkLogUrl,
   composeGermanHaltRequestedDmMessage,
-  composeGermanHaltRequestedMessage,
-  composeGermanHaltResolvedMessage,
-  composeGermanWarningMessage
+  composeHaltRequestedMessage,
+  composeHaltResolvedMessage,
+  composeWarningMessage
 } from './composeMessage'
 
 describe('buildWorkLogUrl', () => {
@@ -27,9 +27,9 @@ describe('buildWorkLogUrl', () => {
   })
 })
 
-describe('composeGermanWarningMessage', () => {
+describe('composeWarningMessage', () => {
   it('uses singular/plural wording based on warning count', () => {
-    const single = composeGermanWarningMessage({
+    const single = composeWarningMessage({
       clientName: 'Acme',
       clientPeriodId: 1,
       warnings: [
@@ -47,7 +47,7 @@ describe('composeGermanWarningMessage', () => {
     })
     expect(single.text).toContain('1 Jira-Ticket hat')
 
-    const many = composeGermanWarningMessage({
+    const many = composeWarningMessage({
       clientName: 'Acme',
       clientPeriodId: 1,
       warnings: [
@@ -76,7 +76,7 @@ describe('composeGermanWarningMessage', () => {
   })
 
   it('renders one section block per warning plus header/divider/footer', () => {
-    const msg = composeGermanWarningMessage({
+    const msg = composeWarningMessage({
       clientName: 'Acme',
       clientPeriodId: 1,
       warnings: [
@@ -107,7 +107,7 @@ describe('composeGermanWarningMessage', () => {
   })
 
   it('shows the initial threshold with its signed offset relative to the estimate', () => {
-    const msg = composeGermanWarningMessage({
+    const msg = composeWarningMessage({
       clientName: 'Acme',
       clientPeriodId: 1,
       warnings: [
@@ -127,8 +127,8 @@ describe('composeGermanWarningMessage', () => {
     expect(serialised).toContain('Erste Meldung ab 11 h')
   })
 
-  it('formats a negative offset with the proper minus sign', () => {
-    const msg = composeGermanWarningMessage({
+  it('renders estimate, used hours and percent for an under-estimate case', () => {
+    const msg = composeWarningMessage({
       clientName: 'Acme',
       clientPeriodId: 1,
       warnings: [
@@ -145,11 +145,12 @@ describe('composeGermanWarningMessage', () => {
       dashboardBaseUrl: 'https://dash.example.com'
     })
     const serialised = JSON.stringify(msg)
-    expect(serialised).toContain('Schätzung 5 h −1 h')
+    expect(serialised).toContain('Schätzung: 5 h, verbraucht: 4 h (80%)')
+    expect(serialised).toContain('Erste Meldung ab 4 h')
   })
 
   it('announces the next threshold in both the block and fallback text', () => {
-    const msg = composeGermanWarningMessage({
+    const msg = composeWarningMessage({
       clientName: 'Acme',
       clientPeriodId: 1,
       warnings: [
@@ -171,7 +172,7 @@ describe('composeGermanWarningMessage', () => {
   })
 
   it('puts a per-period work-log link into each warning block', () => {
-    const msg = composeGermanWarningMessage({
+    const msg = composeWarningMessage({
       clientName: 'Acme',
       clientPeriodId: 99,
       warnings: [
@@ -194,7 +195,7 @@ describe('composeGermanWarningMessage', () => {
   })
 })
 
-describe('composeGermanHaltRequestedMessage', () => {
+describe('composeHaltRequestedMessage', () => {
   const baseInput = {
     clientName: 'Acme',
     clientPeriodId: 17,
@@ -206,7 +207,7 @@ describe('composeGermanHaltRequestedMessage', () => {
   }
 
   it('tells the channel to stop work and links to the per-period work-log page', () => {
-    const msg = composeGermanHaltRequestedMessage(baseInput)
+    const msg = composeHaltRequestedMessage(baseInput)
     const serialised = JSON.stringify(msg)
     expect(msg.text).toMatch(/stellt die Arbeit/i)
     expect(serialised).toContain('Arbeitsstopp')
@@ -218,7 +219,7 @@ describe('composeGermanHaltRequestedMessage', () => {
   })
 
   it('falls back to email when no name is given', () => {
-    const msg = composeGermanHaltRequestedMessage({
+    const msg = composeHaltRequestedMessage({
       ...baseInput,
       actorName: ''
     })
@@ -226,9 +227,9 @@ describe('composeGermanHaltRequestedMessage', () => {
   })
 })
 
-describe('composeGermanHaltResolvedMessage', () => {
+describe('composeHaltResolvedMessage', () => {
   it('tells the channel they can resume work', () => {
-    const msg = composeGermanHaltResolvedMessage({
+    const msg = composeHaltResolvedMessage({
       clientName: 'Acme',
       clientPeriodId: 17,
       jiraIssueKey: 'ABC-42',
@@ -283,5 +284,64 @@ describe('composeGermanHaltRequestedDmMessage', () => {
     expect(msg.text).toMatch(/ARBEITSSTOPP/)
     expect(msg.text).toContain('ABC-42')
     expect(msg.text).toMatch(/sofort ein/)
+  })
+})
+
+describe('client-facing messages — French and English', () => {
+  const warningInput = {
+    clientName: 'Acme',
+    clientPeriodId: 1,
+    warnings: [
+      {
+        jiraIssueKey: 'ABC-1',
+        estimatedHours: 5,
+        totalHoursUsed: 7,
+        usedPercent: 140,
+        initialThresholdHours: 7,
+        crossedThresholdHours: 7,
+        nextThresholdHours: 9
+      }
+    ],
+    dashboardBaseUrl: 'https://dash.example.com'
+  }
+
+  const haltInput = {
+    clientName: 'Acme',
+    clientPeriodId: 17,
+    jiraIssueKey: 'ABC-42',
+    actorName: 'Renée Client',
+    actorEmail: 'renee@acme.example',
+    occurredAtIso: '2026-04-23T12:30:00.000Z',
+    dashboardBaseUrl: 'https://dash.example.com'
+  }
+
+  it('warning header in French', () => {
+    expect(composeWarningMessage(warningInput, 'fr').text).toContain(
+      '1 ticket Jira a dépassé un seuil'
+    )
+  })
+
+  it('warning header in English', () => {
+    expect(composeWarningMessage(warningInput, 'en').text).toContain(
+      '1 Jira ticket has crossed a threshold'
+    )
+  })
+
+  it('halt requested headline in French', () => {
+    expect(
+      JSON.stringify(composeHaltRequestedMessage(haltInput, 'fr'))
+    ).toContain('Arrêt de travail pour')
+  })
+
+  it('halt resolved headline in English', () => {
+    expect(
+      JSON.stringify(composeHaltResolvedMessage(haltInput, 'en'))
+    ).toContain('Work stop lifted for')
+  })
+
+  it('defaults to German when no locale is passed', () => {
+    expect(composeWarningMessage(warningInput).text).toContain(
+      'einen Schwellenwert überschritten'
+    )
   })
 })

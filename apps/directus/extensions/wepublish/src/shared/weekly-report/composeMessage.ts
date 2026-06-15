@@ -1,6 +1,8 @@
 import type { BillingMode } from '../../DirectusTypes'
+import { createSlackFormatters, type SlackLocale } from '../i18n/locale'
+import { WEEKLY_REPORT_COPY } from '../i18n/weeklyReportCopy'
 import type { ComposedSlackMessage, SlackMessageBlock } from '../notifications'
-import type { BudgetStatus, WeeklyReportProgress } from './progress'
+import type { WeeklyReportProgress } from './progress'
 
 export interface ComposeWeeklyReportInput {
   clientName: string
@@ -16,136 +18,20 @@ export interface ComposeWeeklyReportInput {
   billingMode: BillingMode
 }
 
-const HOURS_FORMATTER = new Intl.NumberFormat('de-CH', {
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 2
-})
-
-const PERCENT_FORMATTER = new Intl.NumberFormat('de-CH', {
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 0
-})
-
-const DATE_FORMATTER = new Intl.DateTimeFormat('de-CH', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric'
-})
-
-function formatHours(hours: number): string {
-  return `${HOURS_FORMATTER.format(hours)} h`
-}
-
-function formatPercent(percent: number): string {
-  return `${PERCENT_FORMATTER.format(percent)} %`
-}
-
-function formatDate(iso: string): string {
-  const date = new Date(iso)
-  if (Number.isNaN(date.getTime())) return iso
-  return DATE_FORMATTER.format(date)
-}
-
 /**
- * Build a deep link into the dashboard, scrolled to the affected client and
- * period. Re-uses the `/` route which is the dashboard entry point.
+ * Build a deep link into the dashboard for the affected billing period. The
+ * frontend carries the selection in the URL **path** (`/:clientPeriodId/…`), so
+ * we link straight to that period's dashboard. With no period we fall back to
+ * the bare root, which redirects to the user's default selection.
  */
 export function buildWeeklyReportDashboardUrl(
   dashboardBaseUrl: string,
-  clientId: string,
   clientPeriodId: number | null
 ): string {
   const base = dashboardBaseUrl.replace(/\/+$/, '')
-  const params = new URLSearchParams({ clientId })
-  if (clientPeriodId != null) {
-    params.set('clientPeriodId', String(clientPeriodId))
-  }
-  return `${base}/?${params.toString()}`
-}
-
-interface StatusCopy {
-  emoji: string
-  headline: string
-  body: string
-}
-
-function statusCopy(
-  status: BudgetStatus,
-  args: {
-    clientName: string
-    deltaPercent: number
-    budgetUsedPercent: number
-    timeElapsedPercent: number
-    totalUsedHours: number
-  }
-): StatusCopy {
-  const {
-    clientName,
-    deltaPercent,
-    budgetUsedPercent,
-    timeElapsedPercent,
-    totalUsedHours
-  } = args
-
-  const usedFmt = formatPercent(budgetUsedPercent)
-  const timeFmt = formatPercent(timeElapsedPercent)
-  const absDeltaFmt = formatPercent(Math.abs(deltaPercent))
-
-  switch (status) {
-    case 'no_budget':
-      return {
-        emoji: ':warning:',
-        headline: `Kein Budget hinterlegt – ${clientName}`,
-        body:
-          `Es wurden bereits ${formatHours(totalUsedHours)} erfasst, aber für diese Periode ist noch ` +
-          'kein Top-Up hinterlegt. Diese Stunden werden separat in Rechnung gestellt, sofern kein Budget nachgetragen wird. ' +
-          'Bitte mit dem Projekt­verantwortlichen klären.'
-      }
-    case 'over_budget':
-      return {
-        emoji: ':rotating_light:',
-        headline: `Budget überschritten – ${clientName}`,
-        body:
-          `Das Budget ist mit ${usedFmt} bereits über 100 % aufgebraucht ` +
-          `(Zeit: ${timeFmt}). Bitte umgehend Rücksprache mit dem Projekt­verantwortlichen nehmen ` +
-          'und das weitere Vorgehen abstimmen.'
-      }
-    case 'close_to_limit':
-      return {
-        emoji: ':warning:',
-        headline: `Budget fast aufgebraucht – ${clientName}`,
-        body:
-          `${usedFmt} des Budgets sind verbraucht, während ${timeFmt} der Zeit ` +
-          'vergangen sind. Bitte plant die letzten Stunden bewusst und meldet euch frühzeitig, ' +
-          'falls eine Aufstockung nötig ist.'
-      }
-    case 'behind_schedule':
-      return {
-        emoji: ':hourglass_flowing_sand:',
-        headline: `Budget verbraucht sich schneller als erwartet – ${clientName}`,
-        body:
-          `${usedFmt} des Budgets sind weg, aber erst ${timeFmt} der Periode sind vorbei ` +
-          `(${absDeltaFmt} schneller als geplant). Schaut, ob ihr im Tempo etwas runter könnt ` +
-          'oder ob das Budget angepasst werden muss.'
-      }
-    case 'ahead_of_schedule':
-      return {
-        emoji: ':white_check_mark:',
-        headline: `Alles im grünen Bereich – ${clientName}`,
-        body:
-          `Erst ${usedFmt} des Budgets sind genutzt, obwohl ${timeFmt} der Periode ` +
-          `vorbei sind (${absDeltaFmt} unter Plan). Aktuell besteht reichlich Spielraum.`
-      }
-    case 'on_track':
-    default:
-      return {
-        emoji: ':chart_with_upwards_trend:',
-        headline: `Budget und Zeit im Gleichlauf – ${clientName}`,
-        body:
-          `${usedFmt} des Budgets sind verbraucht, ${timeFmt} der Zeit sind vergangen. ` +
-          'Alles im erwarteten Rahmen.'
-      }
-  }
+  return clientPeriodId != null
+    ? `${base}/${clientPeriodId}/dashboard`
+    : `${base}/`
 }
 
 /**
@@ -161,32 +47,41 @@ function makeBar(percent: number): string {
   return '█'.repeat(filled) + '░'.repeat(total - filled)
 }
 
-/**
- * Compose the weekly Slack report. Routes by `billingMode`:
- *  - `monthly`: no progress bars — shows the hours that will be billed.
- *  - `prepaid`: existing budget-vs-time layout, with a dedicated layout for
- *    the `no_budget` status (top-ups missing but hours logged).
- */
-export function composeGermanWeeklyReportMessage(
+function periodLabel(
   input: ComposeWeeklyReportInput,
-  clientPeriodId: number | null = null
+  formatDate: (iso: string) => string
+): string {
+  const range = `${formatDate(input.periodFromIso)} – ${formatDate(input.periodToIso)}`
+  return input.periodName ? `${input.periodName} (${range})` : range
+}
+
+/**
+ * Compose the weekly Slack report in the project's language. Routes by
+ * `billingMode`:
+ *  - `monthly`: no progress bars — shows the hours that will be billed.
+ *  - `prepaid`: budget-vs-time layout, with a dedicated layout for the
+ *    `no_budget` status (top-ups missing but hours logged).
+ */
+export function composeWeeklyReportMessage(
+  input: ComposeWeeklyReportInput,
+  clientPeriodId: number | null = null,
+  locale: SlackLocale = 'de'
 ): ComposedSlackMessage {
   if (input.billingMode === 'monthly') {
-    return composeMonthlyWeeklyReportMessage(input, clientPeriodId)
+    return composeMonthlyWeeklyReportMessage(input, clientPeriodId, locale)
   }
-  return composePrepaidWeeklyReportMessage(input, clientPeriodId)
+  return composePrepaidWeeklyReportMessage(input, clientPeriodId, locale)
 }
 
 function composePrepaidWeeklyReportMessage(
   input: ComposeWeeklyReportInput,
-  clientPeriodId: number | null
+  clientPeriodId: number | null,
+  locale: SlackLocale
 ): ComposedSlackMessage {
+  const copy = WEEKLY_REPORT_COPY[locale]
+  const fmt = createSlackFormatters(locale)
   const {
     clientName,
-    clientId,
-    periodName,
-    periodFromIso,
-    periodToIso,
     totalTopUpHours,
     totalUsedHours,
     totalAvailableHours,
@@ -194,28 +89,23 @@ function composePrepaidWeeklyReportMessage(
     dashboardBaseUrl
   } = input
 
-  const url = buildWeeklyReportDashboardUrl(
-    dashboardBaseUrl,
-    clientId,
-    clientPeriodId
-  )
+  const url = buildWeeklyReportDashboardUrl(dashboardBaseUrl, clientPeriodId)
 
-  const copy = statusCopy(progress.status, {
-    clientName,
-    deltaPercent: progress.deltaPercent,
-    budgetUsedPercent: progress.budgetUsedPercent,
-    timeElapsedPercent: progress.timeElapsedPercent,
-    totalUsedHours
+  const statusCopy = copy.status[progress.status]
+  const headline = statusCopy.headline(clientName)
+  const body = statusCopy.body({
+    used: fmt.formatPercent(progress.budgetUsedPercent),
+    time: fmt.formatPercent(progress.timeElapsedPercent),
+    absDelta: fmt.formatPercent(Math.abs(progress.deltaPercent)),
+    hours: fmt.formatHours(totalUsedHours)
   })
 
-  const periodLabel = periodName
-    ? `${periodName} (${formatDate(periodFromIso)} – ${formatDate(periodToIso)})`
-    : `${formatDate(periodFromIso)} – ${formatDate(periodToIso)}`
+  const label = periodLabel(input, fmt.formatDate)
 
   const summary =
-    `${copy.emoji} *${copy.headline}*\n` +
-    `_Periode:_ ${periodLabel}\n` +
-    `_Verbleibende Tage:_ ${progress.daysRemaining} von ${progress.periodDurationDays}`
+    `${statusCopy.emoji} *${headline}*\n` +
+    `_${copy.periodWord}:_ ${label}\n` +
+    `_${copy.daysRemainingLabel}:_ ${progress.daysRemaining} ${copy.daysConnector} ${progress.periodDurationDays}`
 
   // The no_budget case keeps the prepaid frame (it's still a prepaid client)
   // but the budget bar is meaningless — there's nothing to divide by. We
@@ -224,30 +114,26 @@ function composePrepaidWeeklyReportMessage(
 
   const timeBar = makeBar(progress.timeElapsedPercent)
   const comparison = isNoBudget
-    ? `*Verbrauchte Stunden:* ${formatHours(totalUsedHours)} *(werden separat verrechnet)*\n` +
-      `*Top-Up-Budget:* ${formatHours(totalTopUpHours)}\n` +
-      `*Zeit:*    \`${timeBar}\` ${formatPercent(progress.timeElapsedPercent)}`
+    ? `*${copy.usedHoursLabel}:* ${fmt.formatHours(totalUsedHours)} *(${copy.separatelyBilledNote})*\n` +
+      `*${copy.topUpBudgetLabel}:* ${fmt.formatHours(totalTopUpHours)}\n` +
+      `*${copy.timeLabel}:*    \`${timeBar}\` ${fmt.formatPercent(progress.timeElapsedPercent)}`
     : (() => {
         const budgetBar = makeBar(progress.budgetUsedPercent)
         return (
-          `*Budget:* \`${budgetBar}\` ${formatPercent(progress.budgetUsedPercent)} ` +
-          `(${formatHours(totalUsedHours)} / ${formatHours(totalTopUpHours)})\n` +
-          `*Zeit:*    \`${timeBar}\` ${formatPercent(progress.timeElapsedPercent)}\n` +
-          `*Verfügbar:* ${formatHours(totalAvailableHours)}`
+          `*${copy.budgetLabel}:* \`${budgetBar}\` ${fmt.formatPercent(progress.budgetUsedPercent)} ` +
+          `(${fmt.formatHours(totalUsedHours)} / ${fmt.formatHours(totalTopUpHours)})\n` +
+          `*${copy.timeLabel}:*    \`${timeBar}\` ${fmt.formatPercent(progress.timeElapsedPercent)}\n` +
+          `*${copy.availableLabel}:* ${fmt.formatHours(totalAvailableHours)}`
         )
       })()
 
   const blocks: SlackMessageBlock[] = [
     {
       type: 'header',
-      text: {
-        type: 'plain_text',
-        text: 'Wöchentlicher Projektbericht',
-        emoji: false
-      }
+      text: { type: 'plain_text', text: copy.header, emoji: false }
     },
     { type: 'section', text: { type: 'mrkdwn', text: summary } },
-    { type: 'section', text: { type: 'mrkdwn', text: copy.body } },
+    { type: 'section', text: { type: 'mrkdwn', text: body } },
     { type: 'divider' },
     { type: 'section', text: { type: 'mrkdwn', text: comparison } },
     {
@@ -255,29 +141,30 @@ function composePrepaidWeeklyReportMessage(
       elements: [
         {
           type: 'button',
-          text: { type: 'plain_text', text: 'Dashboard öffnen' },
+          text: { type: 'plain_text', text: copy.dashboardButton },
           url
         }
       ]
     },
     {
       type: 'context',
-      elements: [
-        {
-          type: 'mrkdwn',
-          text:
-            'Dieser Bericht wird einmal pro Woche automatisch erstellt. ' +
-            'Im Dashboard kann er pro Projekt stummgeschaltet werden.'
-        }
-      ]
+      elements: [{ type: 'mrkdwn', text: copy.footerNote }]
     }
   ]
 
   const fallbackText = isNoBudget
-    ? `${copy.headline}: ${formatHours(totalUsedHours)} erfasst, kein Top-Up hinterlegt (${periodLabel}).`
-    : `${copy.headline}: ${formatPercent(progress.budgetUsedPercent)} Budget / ` +
-      `${formatPercent(progress.timeElapsedPercent)} Zeit. ` +
-      `Verfügbar: ${formatHours(totalAvailableHours)} (${periodLabel}).`
+    ? copy.fallbackNoBudget({
+        headline,
+        hours: fmt.formatHours(totalUsedHours),
+        periodLabel: label
+      })
+    : copy.fallbackNormal({
+        headline,
+        budgetPercent: fmt.formatPercent(progress.budgetUsedPercent),
+        timePercent: fmt.formatPercent(progress.timeElapsedPercent),
+        available: fmt.formatHours(totalAvailableHours),
+        periodLabel: label
+      })
 
   return { text: fallbackText, blocks }
 }
@@ -290,27 +177,16 @@ function composePrepaidWeeklyReportMessage(
  */
 function composeMonthlyWeeklyReportMessage(
   input: ComposeWeeklyReportInput,
-  clientPeriodId: number | null
+  clientPeriodId: number | null,
+  locale: SlackLocale
 ): ComposedSlackMessage {
-  const {
-    clientName,
-    clientId,
-    periodName,
-    periodFromIso,
-    periodToIso,
-    totalAvailableHours,
-    dashboardBaseUrl
-  } = input
+  const copy = WEEKLY_REPORT_COPY[locale]
+  const fmt = createSlackFormatters(locale)
+  const { clientName, totalAvailableHours, dashboardBaseUrl } = input
 
-  const url = buildWeeklyReportDashboardUrl(
-    dashboardBaseUrl,
-    clientId,
-    clientPeriodId
-  )
+  const url = buildWeeklyReportDashboardUrl(dashboardBaseUrl, clientPeriodId)
 
-  const periodLabel = periodName
-    ? `${periodName} (${formatDate(periodFromIso)} – ${formatDate(periodToIso)})`
-    : `${formatDate(periodFromIso)} – ${formatDate(periodToIso)}`
+  const label = periodLabel(input, fmt.formatDate)
 
   // For monthly clients the dashboard's "Verfügbare Arbeitsstunden" (=
   // totalAvailableHours) goes negative as soon as work outstrips already-
@@ -318,26 +194,23 @@ function composeMonthlyWeeklyReportMessage(
   // amount to bill is the negation, floored at 0 (positive availability
   // means a credit balance: nothing to bill yet).
   const remainingToBillHours = Math.max(0, -totalAvailableHours)
+  const remainingFmt = fmt.formatHours(remainingToBillHours)
 
-  const headline = `:receipt: *Aktueller Abrechnungsstand – ${clientName}*`
+  const headline = copy.monthly.headline(clientName)
   const body =
     remainingToBillHours > 0
-      ? `Aktuell sind *${formatHours(remainingToBillHours)}* offen, die am Periodenende monatlich in Rechnung gestellt werden.`
-      : 'Aktuell sind keine offenen Stunden zu verrechnen.'
+      ? copy.monthly.bodyOpen(remainingFmt)
+      : copy.monthly.bodyNone
 
   const summary =
     `${headline}\n` +
-    `_Periode:_ ${periodLabel}\n` +
-    `_Aktuell zu verrechnen:_ *${formatHours(remainingToBillHours)}*`
+    `_${copy.periodWord}:_ ${label}\n` +
+    `_${copy.monthly.toBillLabel}:_ *${remainingFmt}*`
 
   const blocks: SlackMessageBlock[] = [
     {
       type: 'header',
-      text: {
-        type: 'plain_text',
-        text: 'Wöchentlicher Projektbericht',
-        emoji: false
-      }
+      text: { type: 'plain_text', text: copy.header, emoji: false }
     },
     { type: 'section', text: { type: 'mrkdwn', text: summary } },
     { type: 'section', text: { type: 'mrkdwn', text: body } },
@@ -346,27 +219,22 @@ function composeMonthlyWeeklyReportMessage(
       elements: [
         {
           type: 'button',
-          text: { type: 'plain_text', text: 'Dashboard öffnen' },
+          text: { type: 'plain_text', text: copy.dashboardButton },
           url
         }
       ]
     },
     {
       type: 'context',
-      elements: [
-        {
-          type: 'mrkdwn',
-          text:
-            'Dieser Bericht wird einmal pro Woche automatisch erstellt. ' +
-            'Im Dashboard kann er pro Projekt stummgeschaltet werden.'
-        }
-      ]
+      elements: [{ type: 'mrkdwn', text: copy.footerNote }]
     }
   ]
 
-  const fallbackText =
-    `Abrechnungsstand ${clientName}: ${formatHours(remainingToBillHours)} ` +
-    `werden monatlich verrechnet (${periodLabel}).`
+  const fallbackText = copy.monthly.fallback({
+    clientName,
+    hours: remainingFmt,
+    periodLabel: label
+  })
 
   return { text: fallbackText, blocks }
 }
@@ -378,17 +246,17 @@ export interface ComposeOverBudgetEscalationInput extends ComposeWeeklyReportInp
 /**
  * Variant that targets the controlling channel ("in-finanzen"). Shorter,
  * blunter, and explicit about which client + project manager owns the issue.
+ *
+ * Stays German: this is an internal We.Publish controlling message, not a
+ * client-facing one, so it does not follow the project's language.
  */
 export function composeGermanOverBudgetEscalationMessage(
   input: ComposeOverBudgetEscalationInput,
   clientPeriodId: number | null = null
 ): ComposedSlackMessage {
+  const fmt = createSlackFormatters('de')
   const {
     clientName,
-    clientId,
-    periodName,
-    periodFromIso,
-    periodToIso,
     totalTopUpHours,
     totalUsedHours,
     progress,
@@ -396,24 +264,18 @@ export function composeGermanOverBudgetEscalationMessage(
     slackChannelHint
   } = input
 
-  const url = buildWeeklyReportDashboardUrl(
-    dashboardBaseUrl,
-    clientId,
-    clientPeriodId
-  )
+  const url = buildWeeklyReportDashboardUrl(dashboardBaseUrl, clientPeriodId)
 
-  const periodLabel = periodName
-    ? `${periodName} (${formatDate(periodFromIso)} – ${formatDate(periodToIso)})`
-    : `${formatDate(periodFromIso)} – ${formatDate(periodToIso)}`
+  const label = periodLabel(input, fmt.formatDate)
 
   const headline = `:rotating_light: Budget überschritten: *${clientName}*`
   const detail =
-    `*Periode:* ${periodLabel}\n` +
-    `*Verbraucht:* ${formatHours(totalUsedHours)} / ${formatHours(totalTopUpHours)} ` +
-    `(${formatPercent(progress.budgetUsedPercent)})\n` +
-    `*Zeit vergangen:* ${formatPercent(progress.timeElapsedPercent)}\n` +
+    `*Periode:* ${label}\n` +
+    `*Verbraucht:* ${fmt.formatHours(totalUsedHours)} / ${fmt.formatHours(totalTopUpHours)} ` +
+    `(${fmt.formatPercent(progress.budgetUsedPercent)})\n` +
+    `*Zeit vergangen:* ${fmt.formatPercent(progress.timeElapsedPercent)}\n` +
     (slackChannelHint ? `*Projekt-Channel:* <#${slackChannelHint}>\n` : '') +
-    'Bitte mit dem Projekt­verantwortlichen das weitere Vorgehen klären (Aufstockung, Stop, Nachverhandlung).'
+    'Bitte mit dem Projektverantwortlichen das weitere Vorgehen klären (Aufstockung, Stop, Nachverhandlung).'
 
   const blocks: SlackMessageBlock[] = [
     {
@@ -440,9 +302,9 @@ export function composeGermanOverBudgetEscalationMessage(
   ]
 
   const fallbackText =
-    `Budget überschritten: ${clientName} (${periodLabel}). ` +
-    `${formatHours(totalUsedHours)} / ${formatHours(totalTopUpHours)} ` +
-    `(${formatPercent(progress.budgetUsedPercent)}).`
+    `Budget überschritten: ${clientName} (${label}). ` +
+    `${fmt.formatHours(totalUsedHours)} / ${fmt.formatHours(totalTopUpHours)} ` +
+    `(${fmt.formatPercent(progress.budgetUsedPercent)}).`
 
   return { text: fallbackText, blocks }
 }
