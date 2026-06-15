@@ -113,6 +113,11 @@
         "type": "hook",
         "name": "jira-halt-notifier",
         "source": "src/jira-halt-notifier/index.ts"
+      },
+      {
+        "type": "hook",
+        "name": "mail-defaults",
+        "source": "src/mail-defaults/index.ts"
       }
     ],
     "host": "^10.10.0"
