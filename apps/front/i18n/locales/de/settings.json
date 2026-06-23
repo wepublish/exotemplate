@@ -35,6 +35,29 @@
       "label": "Vertrag",
       "description": "Verträge dieses Kunden ansehen, neue Versionen erstellen und unterschriebene Verträge hochladen.",
       "manage": "Verwalten"
+    },
+    "links": {
+      "label": "Links",
+      "description": "Editor- und Website-Link für das Dashboard anpassen und eigene Schnellzugriff-Links pflegen.",
+      "editorUrl": "Editor-URL",
+      "websiteUrl": "Website-URL",
+      "overrideHelp": "Leer lassen, um die URL automatisch aus der API-URL abzuleiten.",
+      "derivedUnavailable": "Keine API-URL hinterlegt – bitte URL eintragen",
+      "custom": "Eigene Links",
+      "customEmpty": "Noch keine eigenen Links. Füge unten welche hinzu.",
+      "customLabelPlaceholder": "Bezeichnung",
+      "customUrlPlaceholder": "https://…",
+      "customDescriptionPlaceholder": "Kurze Beschreibung (optional)",
+      "addLink": "Link hinzufügen",
+      "removeLink": "Link entfernen",
+      "saved": "Links für {client} gespeichert."
+    },
+    "globalSettings": {
+      "title": "Globale Einstellungen",
+      "subtitle": "Netzwerkweite Einstellungen für alle Kunden. Nur für Administrator:innen.",
+      "weShareLabel": "#we-share Slack-Kanal-ID",
+      "weShareDescription": "Channel-ID des netzwerkweiten #we-share-Kanals (z. B. C0AB12CD3EF). Wird im Dashboard aller Kunden verlinkt.",
+      "saved": "Globale Einstellungen gespeichert."
     }
   }
 }

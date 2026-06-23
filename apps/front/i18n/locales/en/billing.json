@@ -35,7 +35,7 @@
     "topUps": {
       "titleSuffix": "Payments / Top-ups",
       "table": {
-        "date": "Date",
+        "date": "Due date",
         "note": "Note",
         "amount": "Amount",
         "rate": "Rate",
@@ -54,7 +54,7 @@
         "subtitle": "Recurring invoices do not count toward the available working hours.",
         "billedMonths": "{billed} / {total} mo.",
         "table": {
-          "date": "Date",
+          "date": "Due date",
           "title": "Title",
           "months": "Months",
           "unitPrice": "Price / mo.",

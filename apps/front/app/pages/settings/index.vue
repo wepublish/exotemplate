@@ -14,6 +14,39 @@
   const selection = useClientSelection()
   const { selectedClient, clients } = storeToRefs(selection)
 
+  // Global #we-share Slack channel (admin-only edit). Read on mount so the
+  // admin field shows the current value; the value is shared app-wide.
+  const { weShareChannelId, loadSettings, updateWeShareChannelId } =
+    useSettings()
+  const weShareDraft = ref('')
+  const savingWeShare = ref(false)
+  onMounted(() => {
+    loadSettings()
+  })
+  watch(
+    weShareChannelId,
+    (value) => {
+      weShareDraft.value = value ?? ''
+    },
+    { immediate: true }
+  )
+
+  async function onSaveWeShare(): Promise<void> {
+    savingWeShare.value = true
+    try {
+      await updateWeShareChannelId(weShareDraft.value)
+      toast.add({ title: t('settings.globalSettings.saved'), color: 'success' })
+    } catch (err) {
+      toast.add({
+        title: t('common.actionFailed'),
+        description: err instanceof Error ? err.message : undefined,
+        color: 'error'
+      })
+    } finally {
+      savingWeShare.value = false
+    }
+  }
+
   // Single-item list so the per-client card markup (and its non-null `client`)
   // stays identical to the previous multi-client layout.
   const selectedClients = computed<Client[]>(() =>
@@ -181,6 +214,51 @@
           </div>
         </template>
         <AccountPasswordChangeForm />
+      </UPageCard>
+    </div>
+
+    <!-- Global settings (admin-only): the network-wide #we-share Slack channel
+         linked from every client's dashboard quick-links tile. -->
+    <div v-if="userStore.amIAdministrator()" class="col-span-12">
+      <UPageCard>
+        <template #header>
+          <div class="flex items-center gap-3 min-w-0">
+            <UIcon
+              name="lucide:settings-2"
+              class="text-2xl shrink-0 text-muted"
+            />
+            <div class="min-w-0">
+              <p class="font-semibold">
+                {{ t('settings.globalSettings.title') }}
+              </p>
+              <p class="text-xs text-muted">
+                {{ t('settings.globalSettings.subtitle') }}
+              </p>
+            </div>
+          </div>
+        </template>
+        <div class="flex flex-col gap-3">
+          <UFormField
+            :label="t('settings.globalSettings.weShareLabel')"
+            :help="t('settings.globalSettings.weShareDescription')"
+          >
+            <div class="flex items-start gap-2">
+              <UInput
+                v-model="weShareDraft"
+                placeholder="C0AB12CD3EF"
+                class="w-full sm:w-80"
+              />
+              <UButton
+                icon="lucide:save"
+                color="primary"
+                :loading="savingWeShare"
+                @click="onSaveWeShare"
+              >
+                {{ t('common.save') }}
+              </UButton>
+            </div>
+          </UFormField>
+        </div>
       </UPageCard>
     </div>
 
@@ -395,6 +473,9 @@
             </div>
           </div>
         </UPageCard>
+
+        <!-- Links: editor/website overrides + custom quick-access links. -->
+        <SettingsLinksCard :key="client.id" :client="client" />
       </div>
     </template>
   </div>

@@ -35,7 +35,7 @@
     "topUps": {
       "titleSuffix": "Zahlungen / Top-Ups",
       "table": {
-        "date": "Datum",
+        "date": "Zahlbar bis",
         "note": "Notiz",
         "amount": "Betrag",
         "rate": "Satz",
@@ -54,7 +54,7 @@
         "subtitle": "Wiederkehrende Rechnungen zählen nicht zu den verfügbaren Arbeitsstunden.",
         "billedMonths": "{billed} / {total} Mt.",
         "table": {
-          "date": "Datum",
+          "date": "Zahlbar bis",
           "title": "Titel",
           "months": "Monate",
           "unitPrice": "Preis / Mt.",

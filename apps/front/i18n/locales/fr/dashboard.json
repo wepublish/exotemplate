@@ -16,6 +16,23 @@
       "detailsAria": "{title} – afficher les détails",
       "showDetails": "Afficher les détails"
     },
+    "links": {
+      "title": "Accès rapide",
+      "slack": "Canal Slack",
+      "weShare": "#we-share",
+      "editor": "Éditeur",
+      "jira": "Jira",
+      "website": "Site web",
+      "docs": "Documentation",
+      "descriptions": {
+        "slack": "Ta ligne directe avec l'équipe We.Publish. Nous y discutons de tout ce qui concerne ton projet.",
+        "weShare": "L'échange entre tous les médias du réseau We.Publish. Conseils, questions et apprentissage commun.",
+        "editor": "Le système rédactionnel de ton site. C'est ici que tu crées et modifies les articles et contenus.",
+        "jira": "Les tâches, tickets et demandes liés à ton projet – suivis en toute transparence.",
+        "website": "Ton site web publié, tel que le voient tes lectrices et lecteurs.",
+        "docs": "Guides et aide autour de We.Publish. Pour comprendre comment tout fonctionne."
+      }
+    },
     "workLogAlert": {
       "haltedTitle": "{count} ticket est arrêté | {count} tickets sont arrêtés",
       "haltedDescription": "Les tickets concernés ne doivent pas être traités pour l'instant, jusqu'à la levée de l'arrêt.",

@@ -151,6 +151,17 @@
     return { color: badge.color, label: t(badge.labelKey), known: !!status }
   }
 
+  // Due date ("zahlbar bis") from the live Bexio invoice; falls back to the
+  // given creation date until the status (which carries the due date) loads or
+  // when no invoice is linked.
+  function dueDate(
+    invoiceId: number | null | undefined,
+    fallbackFormatted: string
+  ): string {
+    const due = invoiceId ? statuses.value[invoiceId]?.dueDate : undefined
+    return due ? formatDate(due) : fallbackFormatted
+  }
+
   // Admins get the office.bexio.com link (full access, needs a Bexio login);
   // clients get the public, login-free `network_link` (null while draft).
   function invoiceHref(
@@ -353,6 +364,9 @@
 
         <div v-if="!pending && !error" class="mt-6">
           <UTable :data="topUpsForTable" :columns="topUpsColumns">
+            <template #Datum-cell="{ row }">
+              {{ dueDate(row.original.Bexio, row.original.Datum) }}
+            </template>
             <template #Bexio-cell="{ row }">
               <UButton
                 v-if="invoiceHref(row.original.Bexio)"
@@ -422,6 +436,9 @@
 
         <div class="mt-6">
           <UTable :data="hostingForTable" :columns="hostingColumns">
+            <template #Datum-cell="{ row }">
+              {{ dueDate(row.original.Invoice, row.original.Datum) }}
+            </template>
             <template #Invoice-cell="{ row }">
               <UButton
                 v-if="invoiceHref(row.original.Invoice)"

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import type { JiraWarning } from '~~/types/DirectusTypes'
+  import type { ClientLink, JiraWarning } from '~~/types/DirectusTypes'
   import type { EntryGroup } from '../../../types/ClockodoTypes'
   import SummaryCard from './SummaryCard.vue'
 
@@ -19,6 +19,27 @@
     selectedPeriod
   } = storeToRefs(selection)
   const link = useClientPeriodLink()
+
+  // Quick-links tile: the network-wide #we-share channel lives in the global
+  // Settings singleton. Load it once (shared app-wide via useState); the tile
+  // reactively shows the #we-share link as soon as it resolves.
+  const { weShareChannelId, loadSettings } = useSettings()
+  onMounted(() => {
+    loadSettings()
+  })
+
+  // The client's custom quick-links live in the ClientLinks collection; fetch
+  // them for the selected client and refresh when the selection changes.
+  // (aliased: useContracts also exposes a `listForClient`.)
+  const { listForClient: listClientLinks } = useClientLinks()
+  const clientLinks = ref<ClientLink[]>([])
+  watch(
+    selectedClientId,
+    async (id) => {
+      clientLinks.value = id ? await listClientLinks(id) : []
+    },
+    { immediate: true }
+  )
 
   // Fetch all of the user's warnings once. Same source feeds the
   // cross-client halt banner above the cards AND the per-client halt /
@@ -388,6 +409,17 @@
         />
       </div>
     </template>
+
+    <!-- Quick links: full-width tile with shortcuts to Slack, editor, Jira,
+         website, docs and any custom links. Independent of the billing data,
+         so it renders as soon as a client is selected. -->
+    <div v-if="selectedClient" class="col-span-12">
+      <DashboardQuickLinks
+        :client="selectedClient"
+        :we-share-channel-id="weShareChannelId"
+        :custom-links="clientLinks"
+      />
+    </div>
 
     <!-- Network contribution: always full width, expandable. No detail page. -->
     <div

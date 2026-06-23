@@ -35,6 +35,29 @@
       "label": "Contract",
       "description": "View this client's contracts, create new versions and upload signed contracts.",
       "manage": "Manage"
+    },
+    "links": {
+      "label": "Links",
+      "description": "Customize the dashboard's editor and website links and manage your own quick-access links.",
+      "editorUrl": "Editor URL",
+      "websiteUrl": "Website URL",
+      "overrideHelp": "Leave empty to derive the URL automatically from the API URL.",
+      "derivedUnavailable": "No API URL set – please enter a URL",
+      "custom": "Custom links",
+      "customEmpty": "No custom links yet. Add some below.",
+      "customLabelPlaceholder": "Label",
+      "customUrlPlaceholder": "https://…",
+      "customDescriptionPlaceholder": "Short description (optional)",
+      "addLink": "Add link",
+      "removeLink": "Remove link",
+      "saved": "Links saved for {client}."
+    },
+    "globalSettings": {
+      "title": "Global settings",
+      "subtitle": "Network-wide settings for all clients. Administrators only.",
+      "weShareLabel": "#we-share Slack channel ID",
+      "weShareDescription": "Channel ID of the network-wide #we-share channel (e.g. C0AB12CD3EF). It is linked from every client's dashboard.",
+      "saved": "Global settings saved."
     }
   }
 }

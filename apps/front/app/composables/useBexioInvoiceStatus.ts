@@ -13,6 +13,8 @@ export interface BexioInvoiceStatus {
   key: InvoiceStatusKey
   /** Public, login-free customer link (null while draft / not yet shareable). */
   networkLink: string | null
+  /** Due date ("zahlbar bis") — Bexio `is_valid_to`. Null if not set. */
+  dueDate: string | null
 }
 
 export interface BexioLinks {

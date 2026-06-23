@@ -35,6 +35,29 @@
       "label": "Contrat",
       "description": "Consulter les contrats de ce client, créer de nouvelles versions et téléverser les contrats signés.",
       "manage": "Gérer"
+    },
+    "links": {
+      "label": "Liens",
+      "description": "Personnaliser les liens vers l'éditeur et le site web du tableau de bord et gérer tes propres liens d'accès rapide.",
+      "editorUrl": "URL de l'éditeur",
+      "websiteUrl": "URL du site web",
+      "overrideHelp": "Laisser vide pour déduire automatiquement l'URL à partir de l'URL de l'API.",
+      "derivedUnavailable": "Aucune URL d'API enregistrée – saisis une URL",
+      "custom": "Liens personnalisés",
+      "customEmpty": "Aucun lien personnalisé pour l'instant. Ajoutes-en ci-dessous.",
+      "customLabelPlaceholder": "Libellé",
+      "customUrlPlaceholder": "https://…",
+      "customDescriptionPlaceholder": "Courte description (facultatif)",
+      "addLink": "Ajouter un lien",
+      "removeLink": "Supprimer le lien",
+      "saved": "Liens enregistrés pour {client}."
+    },
+    "globalSettings": {
+      "title": "Paramètres globaux",
+      "subtitle": "Paramètres applicables à tout le réseau, pour tous les clients. Réservé aux administrateurs.",
+      "weShareLabel": "ID du canal Slack #we-share",
+      "weShareDescription": "ID du canal #we-share à l'échelle du réseau (p. ex. C0AB12CD3EF). Il est lié depuis le tableau de bord de tous les clients.",
+      "saved": "Paramètres globaux enregistrés."
     }
   }
 }

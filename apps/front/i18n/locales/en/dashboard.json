@@ -16,6 +16,23 @@
       "detailsAria": "{title} – show details",
       "showDetails": "Show details"
     },
+    "links": {
+      "title": "Quick links",
+      "slack": "Slack channel",
+      "weShare": "#we-share",
+      "editor": "Editor",
+      "jira": "Jira",
+      "website": "Website",
+      "docs": "Documentation",
+      "descriptions": {
+        "slack": "Your direct line to the We.Publish team. This is where we discuss everything about your project.",
+        "weShare": "The network-wide exchange across all We.Publish media. Tips, questions and shared learning.",
+        "editor": "The editorial system for your website. Create and edit your articles and content here.",
+        "jira": "Tasks, tickets and requests around your project – transparently tracked.",
+        "website": "Your published website, just as your readers see it.",
+        "docs": "Guides and help for We.Publish. Look up how everything works."
+      }
+    },
     "workLogAlert": {
       "haltedTitle": "{count} ticket is stopped | {count} tickets are stopped",
       "haltedDescription": "The affected tickets must not be worked on until the stop is lifted.",

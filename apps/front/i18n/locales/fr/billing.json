@@ -35,7 +35,7 @@
     "topUps": {
       "titleSuffix": "Paiements / Top-ups",
       "table": {
-        "date": "Date",
+        "date": "Échéance",
         "note": "Note",
         "amount": "Montant",
         "rate": "Tarif",
@@ -54,7 +54,7 @@
         "subtitle": "Les factures récurrentes ne comptent pas dans les heures de travail disponibles.",
         "billedMonths": "{billed} / {total} mois",
         "table": {
-          "date": "Date",
+          "date": "Échéance",
           "title": "Titre",
           "months": "Mois",
           "unitPrice": "Prix / mois",
