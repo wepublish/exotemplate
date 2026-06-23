@@ -15,6 +15,7 @@
   })
   type Schema = z.output<typeof schema>
 
+  const state = reactive({ email: '' })
   const loading = ref(false)
   const submitted = ref(false)
 
@@ -48,10 +49,10 @@
           </p>
         </div>
 
-        <UForm :schema="schema" :state="{ email: '' }" @submit="onSubmit">
+        <UForm :schema="schema" :state="state" @submit="onSubmit">
           <UFormField label="E-Mail" name="email" required>
             <UInput
-              name="email"
+              v-model="state.email"
               type="email"
               placeholder="name@medium.ch"
               autocomplete="email"
