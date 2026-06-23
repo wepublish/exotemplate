@@ -4,6 +4,7 @@ export interface Schema {
   BillingSnapshots: BillingSnapshot[]
   CaptureIgnoredUsers: CaptureIgnoredUser[]
   Clients: Client[]
+  ClientLinks: ClientLink[]
   Contracts: Contract[]
   Clients_Periods: ClientPeriod[]
   Clients_directus_users: ClientDirectusUser[]
@@ -37,6 +38,28 @@ export interface BillingSnapshot {
 
 export interface Settings {
   slack_time_tracking_channel_id: string | null
+  /** Slack channel ID of the network-wide #we-share channel, linked from the dashboard. */
+  slack_we_share_channel_id: string | null
+}
+
+/**
+ * A user-defined quick-access link for a client, shown on the dashboard
+ * quick-links tile. Its own collection (`ClientLinks`), M2O → `Clients`, so the
+ * links are structured rows rather than a JSON blob. Editable by the client
+ * team and admins.
+ */
+export interface ClientLink {
+  id: number
+  status: 'published' | 'draft' | 'archived'
+  sort: number | null
+  client: string | Client | null
+  label: string
+  url: string
+  description: string | null
+  date_created: string | null
+  date_updated: string | null
+  user_created: string | DirectusUser<Schema> | null
+  user_updated: string | DirectusUser<Schema> | null
 }
 
 export interface CaptureIgnoredUser {
@@ -65,6 +88,10 @@ export interface Client {
   slack_channel_id: string | null
   onboarding_current_step: number | null
   onboarding_manual_checklist: string[] | null
+  /** Override for the dashboard editor link; falls back to deriving from `apiUrl`. */
+  editor_url: string | null
+  /** Override for the dashboard website link; falls back to deriving from `apiUrl`. */
+  website_url: string | null
   notifications_paused: boolean
   weekly_report_paused: boolean
   billing_mode: BillingMode
@@ -74,6 +101,8 @@ export interface Client {
   periods: string[] | ClientPeriod[]
   articles: string[] | PeerArticle[]
   contracts: number[] | Contract[]
+  /** User-defined dashboard quick-access links (O2M → `ClientLinks`). */
+  links: number[] | ClientLink[]
 }
 
 export interface Contract {
@@ -232,7 +261,6 @@ export interface Invoice {
   unitPrice: number | null
   quantity: number | null
   billedUnits: number | null
-  weSharePercentage: number | null
   periodicity: string | null
   amount: number | null
 }

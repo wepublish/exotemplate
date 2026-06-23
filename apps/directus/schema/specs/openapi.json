@@ -3,7 +3,7 @@
   "info": {
     "title": "Dynamic API Specification",
     "description": "This is a dynamically generated API specification for all endpoints existing on the current project.",
-    "version": "e6a330ef5072f96af8e911ead575a89091ba391d"
+    "version": "cf34463785df416c669d3db1a11d1eccf52a9312"
   },
   "servers": [
     {
@@ -7902,6 +7902,778 @@
         ]
       }
     },
+    "/items/CaptureIgnoredUsers": {
+      "post": {
+        "summary": "Create an Item",
+        "description": "Create a new CaptureIgnoredUsers item.",
+        "tags": [
+          "Items",
+          "ItemsCaptureIgnoredUsers"
+        ],
+        "operationId": "createItemsCaptureIgnoredUsers",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Meta"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "get": {
+        "summary": "List Items",
+        "description": "List the CaptureIgnoredUsers items.",
+        "tags": [
+          "Items",
+          "ItemsCaptureIgnoredUsers"
+        ],
+        "operationId": "readItemsCaptureIgnoredUsers",
+        "security": [
+          {
+            "Auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/x-metadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update Multiple Items",
+        "description": "Update multiple CaptureIgnoredUsers items at the same time.",
+        "tags": [
+          "Items",
+          "ItemsCaptureIgnoredUsers"
+        ],
+        "operationId": "updateItemsCaptureIgnoredUsers",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Multiple Items",
+        "description": "Delete multiple existing CaptureIgnoredUsers items.",
+        "tags": [
+          "Items",
+          "ItemsCaptureIgnoredUsers"
+        ],
+        "operationId": "deleteItemsCaptureIgnoredUsers",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/items/CaptureIgnoredUsers/{id}": {
+      "get": {
+        "summary": "Retrieve an Item",
+        "description": "Retrieve a single CaptureIgnoredUsers item by unique identifier.",
+        "tags": [
+          "Items",
+          "ItemsCaptureIgnoredUsers"
+        ],
+        "operationId": "readSingleItemsCaptureIgnoredUsers",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Version"
+          },
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update an Item",
+        "description": "Update an existing CaptureIgnoredUsers item.",
+        "tags": [
+          "Items",
+          "ItemsCaptureIgnoredUsers"
+        ],
+        "operationId": "updateSingleItemsCaptureIgnoredUsers",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an Item",
+        "description": "Delete an existing CaptureIgnoredUsers item.",
+        "tags": [
+          "Items",
+          "ItemsCaptureIgnoredUsers"
+        ],
+        "operationId": "deleteSingleItemsCaptureIgnoredUsers",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/items/Settings": {
+      "post": {
+        "summary": "Create an Item",
+        "description": "Create a new Settings item.",
+        "tags": [
+          "Items",
+          "ItemsSettings"
+        ],
+        "operationId": "createItemsSettings",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Meta"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ItemsSettings"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/ItemsSettings"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ItemsSettings"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "get": {
+        "summary": "List Items",
+        "description": "List the Settings items.",
+        "tags": [
+          "Items",
+          "ItemsSettings"
+        ],
+        "operationId": "readItemsSettings",
+        "security": [
+          {
+            "Auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      },
+                      "$ref": "#/components/schemas/ItemsSettings"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/x-metadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update Multiple Items",
+        "description": "Update multiple Settings items at the same time.",
+        "tags": [
+          "Items",
+          "ItemsSettings"
+        ],
+        "operationId": "updateItemsSettings",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ItemsSettings"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/ItemsSettings"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/ItemsSettings"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Multiple Items",
+        "description": "Delete multiple existing Settings items.",
+        "tags": [
+          "Items",
+          "ItemsSettings"
+        ],
+        "operationId": "deleteItemsSettings",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/items/Settings/{id}": {
+      "get": {
+        "summary": "Retrieve an Item",
+        "description": "Retrieve a single Settings item by unique identifier.",
+        "tags": [
+          "Items",
+          "ItemsSettings"
+        ],
+        "operationId": "readSingleItemsSettings",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Version"
+          },
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/ItemsSettings"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update an Item",
+        "description": "Update an existing Settings item.",
+        "tags": [
+          "Items",
+          "ItemsSettings"
+        ],
+        "operationId": "updateSingleItemsSettings",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "$ref": "#/components/schemas/ItemsSettings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/ItemsSettings"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an Item",
+        "description": "Delete an existing Settings item.",
+        "tags": [
+          "Items",
+          "ItemsSettings"
+        ],
+        "operationId": "deleteSingleItemsSettings",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
     "/items/Clients_Periods": {
       "post": {
         "summary": "Create an Item",
@@ -8256,6 +9028,784 @@
           "ItemsClientsPeriods"
         ],
         "operationId": "deleteSingleItemsClientsPeriods",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/items/BillingSnapshots": {
+      "post": {
+        "summary": "Create an Item",
+        "description": "Create a new BillingSnapshots item.",
+        "tags": [
+          "Items",
+          "ItemsBillingSnapshots"
+        ],
+        "operationId": "createItemsBillingSnapshots",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Meta"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ItemsBillingSnapshots"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/ItemsBillingSnapshots"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ItemsBillingSnapshots"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "get": {
+        "summary": "List Items",
+        "description": "List the BillingSnapshots items.",
+        "tags": [
+          "Items",
+          "ItemsBillingSnapshots"
+        ],
+        "operationId": "readItemsBillingSnapshots",
+        "security": [
+          {
+            "Auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "#/components/schemas/ItemsBillingSnapshots"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/x-metadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update Multiple Items",
+        "description": "Update multiple BillingSnapshots items at the same time.",
+        "tags": [
+          "Items",
+          "ItemsBillingSnapshots"
+        ],
+        "operationId": "updateItemsBillingSnapshots",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ItemsBillingSnapshots"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/ItemsBillingSnapshots"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ItemsBillingSnapshots"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Multiple Items",
+        "description": "Delete multiple existing BillingSnapshots items.",
+        "tags": [
+          "Items",
+          "ItemsBillingSnapshots"
+        ],
+        "operationId": "deleteItemsBillingSnapshots",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/items/BillingSnapshots/{id}": {
+      "get": {
+        "summary": "Retrieve an Item",
+        "description": "Retrieve a single BillingSnapshots item by unique identifier.",
+        "tags": [
+          "Items",
+          "ItemsBillingSnapshots"
+        ],
+        "operationId": "readSingleItemsBillingSnapshots",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Version"
+          },
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/ItemsBillingSnapshots"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update an Item",
+        "description": "Update an existing BillingSnapshots item.",
+        "tags": [
+          "Items",
+          "ItemsBillingSnapshots"
+        ],
+        "operationId": "updateSingleItemsBillingSnapshots",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "$ref": "#/components/schemas/ItemsBillingSnapshots"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/ItemsBillingSnapshots"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an Item",
+        "description": "Delete an existing BillingSnapshots item.",
+        "tags": [
+          "Items",
+          "ItemsBillingSnapshots"
+        ],
+        "operationId": "deleteSingleItemsBillingSnapshots",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/items/Clients": {
+      "post": {
+        "summary": "Create an Item",
+        "description": "Create a new Clients item.",
+        "tags": [
+          "Items",
+          "ItemsClients"
+        ],
+        "operationId": "createItemsClients",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Meta"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ItemsClients"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/ItemsClients"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ItemsClients"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "get": {
+        "summary": "List Items",
+        "description": "List the Clients items.",
+        "tags": [
+          "Items",
+          "ItemsClients"
+        ],
+        "operationId": "readItemsClients",
+        "security": [
+          {
+            "Auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "#/components/schemas/ItemsClients"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/x-metadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update Multiple Items",
+        "description": "Update multiple Clients items at the same time.",
+        "tags": [
+          "Items",
+          "ItemsClients"
+        ],
+        "operationId": "updateItemsClients",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ItemsClients"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/ItemsClients"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ItemsClients"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Multiple Items",
+        "description": "Delete multiple existing Clients items.",
+        "tags": [
+          "Items",
+          "ItemsClients"
+        ],
+        "operationId": "deleteItemsClients",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/items/Clients/{id}": {
+      "get": {
+        "summary": "Retrieve an Item",
+        "description": "Retrieve a single Clients item by unique identifier.",
+        "tags": [
+          "Items",
+          "ItemsClients"
+        ],
+        "operationId": "readSingleItemsClients",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Version"
+          },
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/ItemsClients"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update an Item",
+        "description": "Update an existing Clients item.",
+        "tags": [
+          "Items",
+          "ItemsClients"
+        ],
+        "operationId": "updateSingleItemsClients",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "$ref": "#/components/schemas/ItemsClients"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/ItemsClients"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an Item",
+        "description": "Delete an existing Clients item.",
+        "tags": [
+          "Items",
+          "ItemsClients"
+        ],
+        "operationId": "deleteSingleItemsClients",
         "responses": {
           "200": {
             "description": "Successful request"
@@ -9034,6 +10584,784 @@
           "ItemsClientsDirectusUsers"
         ],
         "operationId": "deleteSingleItemsClientsDirectusUsers",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/items/Contracts": {
+      "post": {
+        "summary": "Create an Item",
+        "description": "Create a new Contracts item.",
+        "tags": [
+          "Items",
+          "ItemsContracts"
+        ],
+        "operationId": "createItemsContracts",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Meta"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ItemsContracts"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/ItemsContracts"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ItemsContracts"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "get": {
+        "summary": "List Items",
+        "description": "List the Contracts items.",
+        "tags": [
+          "Items",
+          "ItemsContracts"
+        ],
+        "operationId": "readItemsContracts",
+        "security": [
+          {
+            "Auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "#/components/schemas/ItemsContracts"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/x-metadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update Multiple Items",
+        "description": "Update multiple Contracts items at the same time.",
+        "tags": [
+          "Items",
+          "ItemsContracts"
+        ],
+        "operationId": "updateItemsContracts",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ItemsContracts"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/ItemsContracts"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ItemsContracts"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Multiple Items",
+        "description": "Delete multiple existing Contracts items.",
+        "tags": [
+          "Items",
+          "ItemsContracts"
+        ],
+        "operationId": "deleteItemsContracts",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/items/Contracts/{id}": {
+      "get": {
+        "summary": "Retrieve an Item",
+        "description": "Retrieve a single Contracts item by unique identifier.",
+        "tags": [
+          "Items",
+          "ItemsContracts"
+        ],
+        "operationId": "readSingleItemsContracts",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Version"
+          },
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/ItemsContracts"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update an Item",
+        "description": "Update an existing Contracts item.",
+        "tags": [
+          "Items",
+          "ItemsContracts"
+        ],
+        "operationId": "updateSingleItemsContracts",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "$ref": "#/components/schemas/ItemsContracts"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/ItemsContracts"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an Item",
+        "description": "Delete an existing Contracts item.",
+        "tags": [
+          "Items",
+          "ItemsContracts"
+        ],
+        "operationId": "deleteSingleItemsContracts",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/items/Invoices": {
+      "post": {
+        "summary": "Create an Item",
+        "description": "Create a new Invoices item.",
+        "tags": [
+          "Items",
+          "ItemsInvoices"
+        ],
+        "operationId": "createItemsInvoices",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Meta"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ItemsInvoices"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/ItemsInvoices"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ItemsInvoices"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "get": {
+        "summary": "List Items",
+        "description": "List the Invoices items.",
+        "tags": [
+          "Items",
+          "ItemsInvoices"
+        ],
+        "operationId": "readItemsInvoices",
+        "security": [
+          {
+            "Auth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "#/components/schemas/ItemsInvoices"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/x-metadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update Multiple Items",
+        "description": "Update multiple Invoices items at the same time.",
+        "tags": [
+          "Items",
+          "ItemsInvoices"
+        ],
+        "operationId": "updateItemsInvoices",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Sort"
+          },
+          {
+            "$ref": "#/components/parameters/Filter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ItemsInvoices"
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/ItemsInvoices"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ItemsInvoices"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Multiple Items",
+        "description": "Delete multiple existing Invoices items.",
+        "tags": [
+          "Items",
+          "ItemsInvoices"
+        ],
+        "operationId": "deleteItemsInvoices",
+        "responses": {
+          "200": {
+            "description": "Successful request"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/items/Invoices/{id}": {
+      "get": {
+        "summary": "Retrieve an Item",
+        "description": "Retrieve a single Invoices item by unique identifier.",
+        "tags": [
+          "Items",
+          "ItemsInvoices"
+        ],
+        "operationId": "readSingleItemsInvoices",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "$ref": "#/components/parameters/Version"
+          },
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/ItemsInvoices"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update an Item",
+        "description": "Update an existing Invoices item.",
+        "tags": [
+          "Items",
+          "ItemsInvoices"
+        ],
+        "operationId": "updateSingleItemsInvoices",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Fields"
+          },
+          {
+            "$ref": "#/components/parameters/Meta"
+          },
+          {
+            "name": "id",
+            "description": "Index of the item.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "description": "Incremental index of the item.",
+                  "example": 1
+                },
+                {
+                  "type": "string",
+                  "description": "Unique identifier of the item.",
+                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
+                }
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "$ref": "#/components/schemas/ItemsInvoices"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/ItemsInvoices"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an Item",
+        "description": "Delete an existing Invoices item.",
+        "tags": [
+          "Items",
+          "ItemsInvoices"
+        ],
+        "operationId": "deleteSingleItemsInvoices",
         "responses": {
           "200": {
             "description": "Successful request"
@@ -11014,15 +13342,15 @@
         ]
       }
     },
-    "/items/Contracts": {
+    "/items/ClientLinks": {
       "post": {
         "summary": "Create an Item",
-        "description": "Create a new Contracts item.",
+        "description": "Create a new ClientLinks item.",
         "tags": [
           "Items",
-          "ItemsContracts"
+          "ItemsClientLinks"
         ],
-        "operationId": "createItemsContracts",
+        "operationId": "createItemsClientLinks",
         "parameters": [
           {
             "$ref": "#/components/parameters/Meta"
@@ -11036,11 +13364,11 @@
                   {
                     "type": "array",
                     "items": {
-                      "$ref": "#/components/schemas/ItemsContracts"
+                      "$ref": "#/components/schemas/ItemsClientLinks"
                     }
                   },
                   {
-                    "$ref": "#/components/schemas/ItemsContracts"
+                    "$ref": "#/components/schemas/ItemsClientLinks"
                   }
                 ]
               }
@@ -11058,7 +13386,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/ItemsContracts"
+                        "$ref": "#/components/schemas/ItemsClientLinks"
                       }
                     }
                   }
@@ -11073,12 +13401,12 @@
       },
       "get": {
         "summary": "List Items",
-        "description": "List the Contracts items.",
+        "description": "List the ClientLinks items.",
         "tags": [
           "Items",
-          "ItemsContracts"
+          "ItemsClientLinks"
         ],
-        "operationId": "readItemsContracts",
+        "operationId": "readItemsClientLinks",
         "security": [
           {
             "Auth": []
@@ -11119,7 +13447,7 @@
                       "type": "array",
                       "items": {
                         "type": "object",
-                        "$ref": "#/components/schemas/ItemsContracts"
+                        "$ref": "#/components/schemas/ItemsClientLinks"
                       }
                     },
                     "meta": {
@@ -11137,12 +13465,12 @@
       },
       "patch": {
         "summary": "Update Multiple Items",
-        "description": "Update multiple Contracts items at the same time.",
+        "description": "Update multiple ClientLinks items at the same time.",
         "tags": [
           "Items",
-          "ItemsContracts"
+          "ItemsClientLinks"
         ],
-        "operationId": "updateItemsContracts",
+        "operationId": "updateItemsClientLinks",
         "parameters": [
           {
             "$ref": "#/components/parameters/Fields"
@@ -11174,11 +13502,11 @@
                   {
                     "type": "array",
                     "items": {
-                      "$ref": "#/components/schemas/ItemsContracts"
+                      "$ref": "#/components/schemas/ItemsClientLinks"
                     }
                   },
                   {
-                    "$ref": "#/components/schemas/ItemsContracts"
+                    "$ref": "#/components/schemas/ItemsClientLinks"
                   }
                 ]
               }
@@ -11195,7 +13523,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/ItemsContracts"
+                        "$ref": "#/components/schemas/ItemsClientLinks"
                       }
                     }
                   }
@@ -11207,12 +13535,12 @@
       },
       "delete": {
         "summary": "Delete Multiple Items",
-        "description": "Delete multiple existing Contracts items.",
+        "description": "Delete multiple existing ClientLinks items.",
         "tags": [
           "Items",
-          "ItemsContracts"
+          "ItemsClientLinks"
         ],
-        "operationId": "deleteItemsContracts",
+        "operationId": "deleteItemsClientLinks",
         "responses": {
           "200": {
             "description": "Successful request"
@@ -11224,15 +13552,15 @@
         "parameters": []
       }
     },
-    "/items/Contracts/{id}": {
+    "/items/ClientLinks/{id}": {
       "get": {
         "summary": "Retrieve an Item",
-        "description": "Retrieve a single Contracts item by unique identifier.",
+        "description": "Retrieve a single ClientLinks item by unique identifier.",
         "tags": [
           "Items",
-          "ItemsContracts"
+          "ItemsClientLinks"
         ],
-        "operationId": "readSingleItemsContracts",
+        "operationId": "readSingleItemsClientLinks",
         "parameters": [
           {
             "$ref": "#/components/parameters/Fields"
@@ -11274,7 +13602,7 @@
                   "properties": {
                     "data": {
                       "type": "object",
-                      "$ref": "#/components/schemas/ItemsContracts"
+                      "$ref": "#/components/schemas/ItemsClientLinks"
                     }
                   }
                 }
@@ -11291,12 +13619,12 @@
       },
       "patch": {
         "summary": "Update an Item",
-        "description": "Update an existing Contracts item.",
+        "description": "Update an existing ClientLinks item.",
         "tags": [
           "Items",
-          "ItemsContracts"
+          "ItemsClientLinks"
         ],
-        "operationId": "updateSingleItemsContracts",
+        "operationId": "updateSingleItemsClientLinks",
         "parameters": [
           {
             "$ref": "#/components/parameters/Fields"
@@ -11330,7 +13658,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "$ref": "#/components/schemas/ItemsContracts"
+                "$ref": "#/components/schemas/ItemsClientLinks"
               }
             }
           }
@@ -11345,7 +13673,7 @@
                   "properties": {
                     "data": {
                       "type": "object",
-                      "$ref": "#/components/schemas/ItemsContracts"
+                      "$ref": "#/components/schemas/ItemsClientLinks"
                     }
                   }
                 }
@@ -11362,1951 +13690,12 @@
       },
       "delete": {
         "summary": "Delete an Item",
-        "description": "Delete an existing Contracts item.",
+        "description": "Delete an existing ClientLinks item.",
         "tags": [
           "Items",
-          "ItemsContracts"
+          "ItemsClientLinks"
         ],
-        "operationId": "deleteSingleItemsContracts",
-        "responses": {
-          "200": {
-            "description": "Successful request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "description": "Index of the item.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "type": "integer",
-                  "description": "Incremental index of the item.",
-                  "example": 1
-                },
-                {
-                  "type": "string",
-                  "description": "Unique identifier of the item.",
-                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "/items/CaptureIgnoredUsers": {
-      "post": {
-        "summary": "Create an Item",
-        "description": "Create a new CaptureIgnoredUsers item.",
-        "tags": [
-          "Items",
-          "ItemsCaptureIgnoredUsers"
-        ],
-        "operationId": "createItemsCaptureIgnoredUsers",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Meta"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "oneOf": [
-                  {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
-                    }
-                  },
-                  {
-                    "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        }
-      },
-      "get": {
-        "summary": "List Items",
-        "description": "List the CaptureIgnoredUsers items.",
-        "tags": [
-          "Items",
-          "ItemsCaptureIgnoredUsers"
-        ],
-        "operationId": "readItemsCaptureIgnoredUsers",
-        "security": [
-          {
-            "Auth": []
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Limit"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Offset"
-          },
-          {
-            "$ref": "#/components/parameters/Sort"
-          },
-          {
-            "$ref": "#/components/parameters/Filter"
-          },
-          {
-            "$ref": "#/components/parameters/Search"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
-                      }
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/x-metadata"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        }
-      },
-      "patch": {
-        "summary": "Update Multiple Items",
-        "description": "Update multiple CaptureIgnoredUsers items at the same time.",
-        "tags": [
-          "Items",
-          "ItemsCaptureIgnoredUsers"
-        ],
-        "operationId": "updateItemsCaptureIgnoredUsers",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Limit"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Offset"
-          },
-          {
-            "$ref": "#/components/parameters/Sort"
-          },
-          {
-            "$ref": "#/components/parameters/Filter"
-          },
-          {
-            "$ref": "#/components/parameters/Search"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "oneOf": [
-                  {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
-                    }
-                  },
-                  {
-                    "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete Multiple Items",
-        "description": "Delete multiple existing CaptureIgnoredUsers items.",
-        "tags": [
-          "Items",
-          "ItemsCaptureIgnoredUsers"
-        ],
-        "operationId": "deleteItemsCaptureIgnoredUsers",
-        "responses": {
-          "200": {
-            "description": "Successful request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        },
-        "parameters": []
-      }
-    },
-    "/items/CaptureIgnoredUsers/{id}": {
-      "get": {
-        "summary": "Retrieve an Item",
-        "description": "Retrieve a single CaptureIgnoredUsers item by unique identifier.",
-        "tags": [
-          "Items",
-          "ItemsCaptureIgnoredUsers"
-        ],
-        "operationId": "readSingleItemsCaptureIgnoredUsers",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Version"
-          },
-          {
-            "name": "id",
-            "description": "Index of the item.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "type": "integer",
-                  "description": "Incremental index of the item.",
-                  "example": 1
-                },
-                {
-                  "type": "string",
-                  "description": "Unique identifier of the item.",
-                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
-                }
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        }
-      },
-      "patch": {
-        "summary": "Update an Item",
-        "description": "Update an existing CaptureIgnoredUsers item.",
-        "tags": [
-          "Items",
-          "ItemsCaptureIgnoredUsers"
-        ],
-        "operationId": "updateSingleItemsCaptureIgnoredUsers",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "name": "id",
-            "description": "Index of the item.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "type": "integer",
-                  "description": "Incremental index of the item.",
-                  "example": 1
-                },
-                {
-                  "type": "string",
-                  "description": "Unique identifier of the item.",
-                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
-                }
-              ]
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "$ref": "#/components/schemas/ItemsCaptureIgnoredUsers"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete an Item",
-        "description": "Delete an existing CaptureIgnoredUsers item.",
-        "tags": [
-          "Items",
-          "ItemsCaptureIgnoredUsers"
-        ],
-        "operationId": "deleteSingleItemsCaptureIgnoredUsers",
-        "responses": {
-          "200": {
-            "description": "Successful request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "description": "Index of the item.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "type": "integer",
-                  "description": "Incremental index of the item.",
-                  "example": 1
-                },
-                {
-                  "type": "string",
-                  "description": "Unique identifier of the item.",
-                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "/items/Settings": {
-      "post": {
-        "summary": "Create an Item",
-        "description": "Create a new Settings item.",
-        "tags": [
-          "Items",
-          "ItemsSettings"
-        ],
-        "operationId": "createItemsSettings",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Meta"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "oneOf": [
-                  {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/ItemsSettings"
-                    }
-                  },
-                  {
-                    "$ref": "#/components/schemas/ItemsSettings"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/ItemsSettings"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        }
-      },
-      "get": {
-        "summary": "List Items",
-        "description": "List the Settings items.",
-        "tags": [
-          "Items",
-          "ItemsSettings"
-        ],
-        "operationId": "readItemsSettings",
-        "security": [
-          {
-            "Auth": []
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Limit"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Offset"
-          },
-          {
-            "$ref": "#/components/parameters/Sort"
-          },
-          {
-            "$ref": "#/components/parameters/Filter"
-          },
-          {
-            "$ref": "#/components/parameters/Search"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object"
-                      },
-                      "$ref": "#/components/schemas/ItemsSettings"
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/x-metadata"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        }
-      },
-      "patch": {
-        "summary": "Update Multiple Items",
-        "description": "Update multiple Settings items at the same time.",
-        "tags": [
-          "Items",
-          "ItemsSettings"
-        ],
-        "operationId": "updateItemsSettings",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Limit"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Offset"
-          },
-          {
-            "$ref": "#/components/parameters/Sort"
-          },
-          {
-            "$ref": "#/components/parameters/Filter"
-          },
-          {
-            "$ref": "#/components/parameters/Search"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "oneOf": [
-                  {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/ItemsSettings"
-                    }
-                  },
-                  {
-                    "$ref": "#/components/schemas/ItemsSettings"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "data": {
-                      "$ref": "#/components/schemas/ItemsSettings"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete Multiple Items",
-        "description": "Delete multiple existing Settings items.",
-        "tags": [
-          "Items",
-          "ItemsSettings"
-        ],
-        "operationId": "deleteItemsSettings",
-        "responses": {
-          "200": {
-            "description": "Successful request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        },
-        "parameters": []
-      }
-    },
-    "/items/Settings/{id}": {
-      "get": {
-        "summary": "Retrieve an Item",
-        "description": "Retrieve a single Settings item by unique identifier.",
-        "tags": [
-          "Items",
-          "ItemsSettings"
-        ],
-        "operationId": "readSingleItemsSettings",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Version"
-          },
-          {
-            "name": "id",
-            "description": "Index of the item.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "type": "integer",
-                  "description": "Incremental index of the item.",
-                  "example": 1
-                },
-                {
-                  "type": "string",
-                  "description": "Unique identifier of the item.",
-                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
-                }
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "$ref": "#/components/schemas/ItemsSettings"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        }
-      },
-      "patch": {
-        "summary": "Update an Item",
-        "description": "Update an existing Settings item.",
-        "tags": [
-          "Items",
-          "ItemsSettings"
-        ],
-        "operationId": "updateSingleItemsSettings",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "name": "id",
-            "description": "Index of the item.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "type": "integer",
-                  "description": "Incremental index of the item.",
-                  "example": 1
-                },
-                {
-                  "type": "string",
-                  "description": "Unique identifier of the item.",
-                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
-                }
-              ]
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "$ref": "#/components/schemas/ItemsSettings"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "$ref": "#/components/schemas/ItemsSettings"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete an Item",
-        "description": "Delete an existing Settings item.",
-        "tags": [
-          "Items",
-          "ItemsSettings"
-        ],
-        "operationId": "deleteSingleItemsSettings",
-        "responses": {
-          "200": {
-            "description": "Successful request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "description": "Index of the item.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "type": "integer",
-                  "description": "Incremental index of the item.",
-                  "example": 1
-                },
-                {
-                  "type": "string",
-                  "description": "Unique identifier of the item.",
-                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "/items/BillingSnapshots": {
-      "post": {
-        "summary": "Create an Item",
-        "description": "Create a new BillingSnapshots item.",
-        "tags": [
-          "Items",
-          "ItemsBillingSnapshots"
-        ],
-        "operationId": "createItemsBillingSnapshots",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Meta"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "oneOf": [
-                  {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/ItemsBillingSnapshots"
-                    }
-                  },
-                  {
-                    "$ref": "#/components/schemas/ItemsBillingSnapshots"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/ItemsBillingSnapshots"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        }
-      },
-      "get": {
-        "summary": "List Items",
-        "description": "List the BillingSnapshots items.",
-        "tags": [
-          "Items",
-          "ItemsBillingSnapshots"
-        ],
-        "operationId": "readItemsBillingSnapshots",
-        "security": [
-          {
-            "Auth": []
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Limit"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Offset"
-          },
-          {
-            "$ref": "#/components/parameters/Sort"
-          },
-          {
-            "$ref": "#/components/parameters/Filter"
-          },
-          {
-            "$ref": "#/components/parameters/Search"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "$ref": "#/components/schemas/ItemsBillingSnapshots"
-                      }
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/x-metadata"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        }
-      },
-      "patch": {
-        "summary": "Update Multiple Items",
-        "description": "Update multiple BillingSnapshots items at the same time.",
-        "tags": [
-          "Items",
-          "ItemsBillingSnapshots"
-        ],
-        "operationId": "updateItemsBillingSnapshots",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Limit"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Offset"
-          },
-          {
-            "$ref": "#/components/parameters/Sort"
-          },
-          {
-            "$ref": "#/components/parameters/Filter"
-          },
-          {
-            "$ref": "#/components/parameters/Search"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "oneOf": [
-                  {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/ItemsBillingSnapshots"
-                    }
-                  },
-                  {
-                    "$ref": "#/components/schemas/ItemsBillingSnapshots"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/ItemsBillingSnapshots"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete Multiple Items",
-        "description": "Delete multiple existing BillingSnapshots items.",
-        "tags": [
-          "Items",
-          "ItemsBillingSnapshots"
-        ],
-        "operationId": "deleteItemsBillingSnapshots",
-        "responses": {
-          "200": {
-            "description": "Successful request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        },
-        "parameters": []
-      }
-    },
-    "/items/BillingSnapshots/{id}": {
-      "get": {
-        "summary": "Retrieve an Item",
-        "description": "Retrieve a single BillingSnapshots item by unique identifier.",
-        "tags": [
-          "Items",
-          "ItemsBillingSnapshots"
-        ],
-        "operationId": "readSingleItemsBillingSnapshots",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Version"
-          },
-          {
-            "name": "id",
-            "description": "Index of the item.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "type": "integer",
-                  "description": "Incremental index of the item.",
-                  "example": 1
-                },
-                {
-                  "type": "string",
-                  "description": "Unique identifier of the item.",
-                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
-                }
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "$ref": "#/components/schemas/ItemsBillingSnapshots"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        }
-      },
-      "patch": {
-        "summary": "Update an Item",
-        "description": "Update an existing BillingSnapshots item.",
-        "tags": [
-          "Items",
-          "ItemsBillingSnapshots"
-        ],
-        "operationId": "updateSingleItemsBillingSnapshots",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "name": "id",
-            "description": "Index of the item.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "type": "integer",
-                  "description": "Incremental index of the item.",
-                  "example": 1
-                },
-                {
-                  "type": "string",
-                  "description": "Unique identifier of the item.",
-                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
-                }
-              ]
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "$ref": "#/components/schemas/ItemsBillingSnapshots"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "$ref": "#/components/schemas/ItemsBillingSnapshots"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete an Item",
-        "description": "Delete an existing BillingSnapshots item.",
-        "tags": [
-          "Items",
-          "ItemsBillingSnapshots"
-        ],
-        "operationId": "deleteSingleItemsBillingSnapshots",
-        "responses": {
-          "200": {
-            "description": "Successful request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "description": "Index of the item.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "type": "integer",
-                  "description": "Incremental index of the item.",
-                  "example": 1
-                },
-                {
-                  "type": "string",
-                  "description": "Unique identifier of the item.",
-                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "/items/Clients": {
-      "post": {
-        "summary": "Create an Item",
-        "description": "Create a new Clients item.",
-        "tags": [
-          "Items",
-          "ItemsClients"
-        ],
-        "operationId": "createItemsClients",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Meta"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "oneOf": [
-                  {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/ItemsClients"
-                    }
-                  },
-                  {
-                    "$ref": "#/components/schemas/ItemsClients"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/ItemsClients"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        }
-      },
-      "get": {
-        "summary": "List Items",
-        "description": "List the Clients items.",
-        "tags": [
-          "Items",
-          "ItemsClients"
-        ],
-        "operationId": "readItemsClients",
-        "security": [
-          {
-            "Auth": []
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Limit"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Offset"
-          },
-          {
-            "$ref": "#/components/parameters/Sort"
-          },
-          {
-            "$ref": "#/components/parameters/Filter"
-          },
-          {
-            "$ref": "#/components/parameters/Search"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "$ref": "#/components/schemas/ItemsClients"
-                      }
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/x-metadata"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        }
-      },
-      "patch": {
-        "summary": "Update Multiple Items",
-        "description": "Update multiple Clients items at the same time.",
-        "tags": [
-          "Items",
-          "ItemsClients"
-        ],
-        "operationId": "updateItemsClients",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Limit"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Offset"
-          },
-          {
-            "$ref": "#/components/parameters/Sort"
-          },
-          {
-            "$ref": "#/components/parameters/Filter"
-          },
-          {
-            "$ref": "#/components/parameters/Search"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "oneOf": [
-                  {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/ItemsClients"
-                    }
-                  },
-                  {
-                    "$ref": "#/components/schemas/ItemsClients"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/ItemsClients"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete Multiple Items",
-        "description": "Delete multiple existing Clients items.",
-        "tags": [
-          "Items",
-          "ItemsClients"
-        ],
-        "operationId": "deleteItemsClients",
-        "responses": {
-          "200": {
-            "description": "Successful request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        },
-        "parameters": []
-      }
-    },
-    "/items/Clients/{id}": {
-      "get": {
-        "summary": "Retrieve an Item",
-        "description": "Retrieve a single Clients item by unique identifier.",
-        "tags": [
-          "Items",
-          "ItemsClients"
-        ],
-        "operationId": "readSingleItemsClients",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Version"
-          },
-          {
-            "name": "id",
-            "description": "Index of the item.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "type": "integer",
-                  "description": "Incremental index of the item.",
-                  "example": 1
-                },
-                {
-                  "type": "string",
-                  "description": "Unique identifier of the item.",
-                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
-                }
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "$ref": "#/components/schemas/ItemsClients"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        }
-      },
-      "patch": {
-        "summary": "Update an Item",
-        "description": "Update an existing Clients item.",
-        "tags": [
-          "Items",
-          "ItemsClients"
-        ],
-        "operationId": "updateSingleItemsClients",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "name": "id",
-            "description": "Index of the item.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "type": "integer",
-                  "description": "Incremental index of the item.",
-                  "example": 1
-                },
-                {
-                  "type": "string",
-                  "description": "Unique identifier of the item.",
-                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
-                }
-              ]
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "$ref": "#/components/schemas/ItemsClients"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "$ref": "#/components/schemas/ItemsClients"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete an Item",
-        "description": "Delete an existing Clients item.",
-        "tags": [
-          "Items",
-          "ItemsClients"
-        ],
-        "operationId": "deleteSingleItemsClients",
-        "responses": {
-          "200": {
-            "description": "Successful request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "description": "Index of the item.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "type": "integer",
-                  "description": "Incremental index of the item.",
-                  "example": 1
-                },
-                {
-                  "type": "string",
-                  "description": "Unique identifier of the item.",
-                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "/items/Invoices": {
-      "post": {
-        "summary": "Create an Item",
-        "description": "Create a new Invoices item.",
-        "tags": [
-          "Items",
-          "ItemsInvoices"
-        ],
-        "operationId": "createItemsInvoices",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Meta"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "oneOf": [
-                  {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/ItemsInvoices"
-                    }
-                  },
-                  {
-                    "$ref": "#/components/schemas/ItemsInvoices"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/ItemsInvoices"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        }
-      },
-      "get": {
-        "summary": "List Items",
-        "description": "List the Invoices items.",
-        "tags": [
-          "Items",
-          "ItemsInvoices"
-        ],
-        "operationId": "readItemsInvoices",
-        "security": [
-          {
-            "Auth": []
-          }
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Limit"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Offset"
-          },
-          {
-            "$ref": "#/components/parameters/Sort"
-          },
-          {
-            "$ref": "#/components/parameters/Filter"
-          },
-          {
-            "$ref": "#/components/parameters/Search"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "$ref": "#/components/schemas/ItemsInvoices"
-                      }
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/x-metadata"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        }
-      },
-      "patch": {
-        "summary": "Update Multiple Items",
-        "description": "Update multiple Invoices items at the same time.",
-        "tags": [
-          "Items",
-          "ItemsInvoices"
-        ],
-        "operationId": "updateItemsInvoices",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Limit"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Offset"
-          },
-          {
-            "$ref": "#/components/parameters/Sort"
-          },
-          {
-            "$ref": "#/components/parameters/Filter"
-          },
-          {
-            "$ref": "#/components/parameters/Search"
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "oneOf": [
-                  {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/ItemsInvoices"
-                    }
-                  },
-                  {
-                    "$ref": "#/components/schemas/ItemsInvoices"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/ItemsInvoices"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete Multiple Items",
-        "description": "Delete multiple existing Invoices items.",
-        "tags": [
-          "Items",
-          "ItemsInvoices"
-        ],
-        "operationId": "deleteItemsInvoices",
-        "responses": {
-          "200": {
-            "description": "Successful request"
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          }
-        },
-        "parameters": []
-      }
-    },
-    "/items/Invoices/{id}": {
-      "get": {
-        "summary": "Retrieve an Item",
-        "description": "Retrieve a single Invoices item by unique identifier.",
-        "tags": [
-          "Items",
-          "ItemsInvoices"
-        ],
-        "operationId": "readSingleItemsInvoices",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "$ref": "#/components/parameters/Version"
-          },
-          {
-            "name": "id",
-            "description": "Index of the item.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "type": "integer",
-                  "description": "Incremental index of the item.",
-                  "example": 1
-                },
-                {
-                  "type": "string",
-                  "description": "Unique identifier of the item.",
-                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
-                }
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "$ref": "#/components/schemas/ItemsInvoices"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        }
-      },
-      "patch": {
-        "summary": "Update an Item",
-        "description": "Update an existing Invoices item.",
-        "tags": [
-          "Items",
-          "ItemsInvoices"
-        ],
-        "operationId": "updateSingleItemsInvoices",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/Fields"
-          },
-          {
-            "$ref": "#/components/parameters/Meta"
-          },
-          {
-            "name": "id",
-            "description": "Index of the item.",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "oneOf": [
-                {
-                  "type": "integer",
-                  "description": "Incremental index of the item.",
-                  "example": 1
-                },
-                {
-                  "type": "string",
-                  "description": "Unique identifier of the item.",
-                  "example": "8cbb43fe-4cdf-4991-8352-c461779cec02"
-                }
-              ]
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "$ref": "#/components/schemas/ItemsInvoices"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "$ref": "#/components/schemas/ItemsInvoices"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete an Item",
-        "description": "Delete an existing Invoices item.",
-        "tags": [
-          "Items",
-          "ItemsInvoices"
-        ],
-        "operationId": "deleteSingleItemsInvoices",
+        "operationId": "deleteSingleItemsClientLinks",
         "responses": {
           "200": {
             "description": "Successful request"
@@ -13471,8 +13860,27 @@
       "x-collection": "directus_sync_id_map"
     },
     {
+      "name": "ItemsCaptureIgnoredUsers",
+      "x-collection": "CaptureIgnoredUsers",
+      "description": "Clockodo-User-IDs, die in der Übersicht Zeiterfassung ignoriert werden — keine Slack-Erinnerung und in der UI als ignoriert markiert. Wird über die BI-Oberfläche gepflegt; nur für Administratoren sichtbar."
+    },
+    {
+      "name": "ItemsSettings",
+      "x-collection": "Settings",
+      "description": "Globale Einstellungen für die BI-Oberfläche (z.B. Slack-Channel für die tägliche Stunden-Erinnerung). Nur für Administratoren sichtbar."
+    },
+    {
       "name": "ItemsClientsPeriods",
       "x-collection": "Clients_Periods"
+    },
+    {
+      "name": "ItemsBillingSnapshots",
+      "x-collection": "BillingSnapshots",
+      "description": "System-gepflegt: pro Clients_Periods eine Zeile mit den aktuellen Budget-Sums. Wird vom billing-snapshot-refresh-Flow alle 30 min und beim Aufruf von /aggregatedHours aktualisiert. Speist die /overview-Kacheln, damit dort keine externen API-Aufrufe nötig sind."
+    },
+    {
+      "name": "ItemsClients",
+      "x-collection": "Clients"
     },
     {
       "name": "ItemsPeriods",
@@ -13481,6 +13889,16 @@
     {
       "name": "ItemsClientsDirectusUsers",
       "x-collection": "Clients_directus_users"
+    },
+    {
+      "name": "ItemsContracts",
+      "x-collection": "Contracts",
+      "description": "Client contracts: generated PDF + signed PDF, versioned per client."
+    },
+    {
+      "name": "ItemsInvoices",
+      "x-collection": "Invoices",
+      "description": "Order-backed invoices (e.g. recurring hosting). NOT part of the available-hours calculation — see the TopUps collection for hour-counting payments."
     },
     {
       "name": "ItemsJiraWarnings",
@@ -13505,33 +13923,9 @@
       "x-collection": "TopUps"
     },
     {
-      "name": "ItemsContracts",
-      "x-collection": "Contracts",
-      "description": "Client contracts: generated PDF + signed PDF, versioned per client."
-    },
-    {
-      "name": "ItemsCaptureIgnoredUsers",
-      "x-collection": "CaptureIgnoredUsers",
-      "description": "Clockodo-User-IDs, die in der Übersicht Zeiterfassung ignoriert werden — keine Slack-Erinnerung und in der UI als ignoriert markiert. Wird über die BI-Oberfläche gepflegt; nur für Administratoren sichtbar."
-    },
-    {
-      "name": "ItemsSettings",
-      "x-collection": "Settings",
-      "description": "Globale Einstellungen für die BI-Oberfläche (z.B. Slack-Channel für die tägliche Stunden-Erinnerung). Nur für Administratoren sichtbar."
-    },
-    {
-      "name": "ItemsBillingSnapshots",
-      "x-collection": "BillingSnapshots",
-      "description": "System-gepflegt: pro Clients_Periods eine Zeile mit den aktuellen Budget-Sums. Wird vom billing-snapshot-refresh-Flow alle 30 min und beim Aufruf von /aggregatedHours aktualisiert. Speist die /overview-Kacheln, damit dort keine externen API-Aufrufe nötig sind."
-    },
-    {
-      "name": "ItemsClients",
-      "x-collection": "Clients"
-    },
-    {
-      "name": "ItemsInvoices",
-      "x-collection": "Invoices",
-      "description": "Order-backed invoices (e.g. recurring hosting). NOT part of the available-hours calculation — see the TopUps collection for hour-counting payments."
+      "name": "ItemsClientLinks",
+      "x-collection": "ClientLinks",
+      "description": "Custom quick-access links per client, shown on the dashboard quick-links tile. Editable by the client team and admins."
     }
   ],
   "components": {
@@ -15526,6 +15920,65 @@
           "local_id"
         ]
       },
+      "ItemsCaptureIgnoredUsers": {
+        "type": "object",
+        "properties": {
+          "date_created": {
+            "nullable": true,
+            "type": "string",
+            "format": "timestamp"
+          },
+          "id": {
+            "nullable": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "nullable": true,
+            "description": "Optionaler Grund, warum diese Person ignoriert wird (z.B. \"Externer Auftrag\", \"Geschäftsleitung erfasst separat\").",
+            "type": "string"
+          },
+          "user_created": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          "users_id": {
+            "nullable": false,
+            "description": "Clockodo-Benutzer-ID. Diese Person wird in der Übersicht Zeiterfassung ignoriert.",
+            "type": "integer"
+          }
+        },
+        "x-collection": "CaptureIgnoredUsers",
+        "required": [
+          "id",
+          "users_id"
+        ]
+      },
+      "ItemsSettings": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "nullable": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          "slack_time_tracking_channel_id": {
+            "nullable": true,
+            "description": "Slack-Channel-ID für die tägliche Stunden-Erinnerung (z.B. C0AB12CD3EF). Leer lassen, um die Erinnerung zu deaktivieren.",
+            "type": "string"
+          },
+          "slack_we_share_channel_id": {
+            "nullable": true,
+            "description": "Slack-Channel-ID des netzwerkweiten #we-share-Kanals (z.B. C0AB12CD3EF). Wird im Dashboard als Schnellzugriff verlinkt. Leer lassen, um den Link auszublenden.",
+            "type": "string"
+          }
+        },
+        "x-collection": "Settings",
+        "required": [
+          "id"
+        ]
+      },
       "ItemsClientsPeriods": {
         "type": "object",
         "properties": {
@@ -15557,7 +16010,7 @@
             "nullable": false,
             "type": "integer"
           },
-          "topUps": {
+          "invoices": {
             "nullable": true,
             "type": "array",
             "items": {
@@ -15567,7 +16020,7 @@
                   "format": "uuid"
                 },
                 {
-                  "$ref": "#/components/schemas/ItemsTopUps"
+                  "$ref": "#/components/schemas/ItemsInvoices"
                 }
               ]
             }
@@ -15587,7 +16040,7 @@
               ]
             }
           },
-          "invoices": {
+          "topUps": {
             "nullable": true,
             "type": "array",
             "items": {
@@ -15597,13 +16050,292 @@
                   "format": "uuid"
                 },
                 {
-                  "$ref": "#/components/schemas/ItemsInvoices"
+                  "$ref": "#/components/schemas/ItemsTopUps"
                 }
               ]
             }
           }
         },
         "x-collection": "Clients_Periods"
+      },
+      "ItemsBillingSnapshots": {
+        "type": "object",
+        "properties": {
+          "billableHours": {
+            "nullable": false,
+            "description": "Spiegelt sums.billableHours.",
+            "type": "number"
+          },
+          "clientPeriodId": {
+            "nullable": false,
+            "description": "Referenz auf Clients_Periods. Pro Periode hält der Refresh-Job genau einen Snapshot aktuell (Upsert per Lookup).",
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "$ref": "#/components/schemas/ItemsClientsPeriods"
+              }
+            ]
+          },
+          "computedAt": {
+            "nullable": true,
+            "description": "Zeitpunkt der letzten erfolgreichen Aktualisierung.",
+            "type": "string",
+            "format": "timestamp"
+          },
+          "date_created": {
+            "nullable": true,
+            "type": "string",
+            "format": "timestamp"
+          },
+          "date_updated": {
+            "nullable": true,
+            "type": "string",
+            "format": "timestamp"
+          },
+          "id": {
+            "nullable": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          "lastError": {
+            "nullable": true,
+            "description": "Fehlermeldung der letzten fehlgeschlagenen Aktualisierung. Wird gelöscht, sobald ein neuer erfolgreicher Snapshot vorliegt.",
+            "type": "string"
+          },
+          "lastErrorAt": {
+            "nullable": true,
+            "description": "Zeitpunkt der letzten fehlgeschlagenen Aktualisierung.",
+            "type": "string",
+            "format": "timestamp"
+          },
+          "totalAvailableHours": {
+            "nullable": false,
+            "description": "Spiegelt sums.totalAvailableHours.",
+            "type": "number"
+          },
+          "totalManualWorkHours": {
+            "nullable": false,
+            "description": "Spiegelt sums.totalManualWorkHours.",
+            "type": "number"
+          },
+          "totalTopUps": {
+            "nullable": false,
+            "description": "Spiegelt sums.totalTopUps.",
+            "type": "number"
+          },
+          "totalUsedHours": {
+            "nullable": false,
+            "description": "Spiegelt sums.totalUsedHours.",
+            "type": "number"
+          },
+          "totalUsedPercentage": {
+            "nullable": false,
+            "description": "Spiegelt sums.totalUsedPercentage. Wird auf der Übersicht als Default-Sortierkriterium genutzt.",
+            "type": "integer"
+          }
+        },
+        "x-collection": "BillingSnapshots",
+        "required": [
+          "clientPeriodId",
+          "id"
+        ]
+      },
+      "ItemsClients": {
+        "type": "object",
+        "properties": {
+          "apiUrl": {
+            "nullable": true,
+            "type": "string"
+          },
+          "bexio_contact_id": {
+            "nullable": true,
+            "description": "Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.",
+            "type": "integer"
+          },
+          "billing_mode": {
+            "nullable": false,
+            "description": "Abrechnungsmodell des Kunden. Prepaid = günstigerer Stundensatz, im Voraus bezahlte Top-Ups. Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach Aufwand.",
+            "type": "string"
+          },
+          "clockodo_customer_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "date_created": {
+            "nullable": true,
+            "type": "string",
+            "format": "timestamp"
+          },
+          "date_updated": {
+            "nullable": true,
+            "type": "string",
+            "format": "timestamp"
+          },
+          "editor_url": {
+            "nullable": true,
+            "description": "Override für den Editor-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (editor.<medium>.wepublish.cloud).",
+            "type": "string"
+          },
+          "id": {
+            "nullable": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          "jira_short_code": {
+            "nullable": true,
+            "description": "The project shortcode in Jira. Eg. HAS or BA",
+            "type": "string"
+          },
+          "language": {
+            "nullable": false,
+            "description": "Sprache der kundenseitigen Slack-Meldungen (Wochenbericht, Jira-Warnungen, Arbeitsstopp).",
+            "type": "string"
+          },
+          "name": {
+            "nullable": false,
+            "type": "string"
+          },
+          "notifications_paused": {
+            "nullable": false,
+            "description": "Wenn aktiv, werden sämtliche Slack-Warnungen für diesen Kunden unterdrückt, bis der Schalter wieder deaktiviert wird.",
+            "type": "boolean"
+          },
+          "onboarding_current_step": {
+            "nullable": true,
+            "description": "Index of the last active onboarding step (0-based). Used to track progress for manual/email steps that have no service ID.",
+            "type": "integer"
+          },
+          "onboarding_manual_checklist": {
+            "nullable": true,
+            "description": "IDs of completed manual-onboarding checklist items. Persisted so the checklist state survives a page reload."
+          },
+          "slack_channel_id": {
+            "nullable": true,
+            "description": "Slack channel ID created during client onboarding",
+            "type": "string"
+          },
+          "sort": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "status": {
+            "nullable": false,
+            "type": "string"
+          },
+          "user_created": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "$ref": "#/components/schemas/Users"
+              }
+            ]
+          },
+          "user_updated": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "$ref": "#/components/schemas/Users"
+              }
+            ]
+          },
+          "website_url": {
+            "nullable": true,
+            "description": "Override für den Website-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (<medium>.wepublish.cloud).",
+            "type": "string"
+          },
+          "weekly_report_paused": {
+            "nullable": false,
+            "description": "Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.",
+            "type": "boolean"
+          },
+          "allowedUsers": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
+                }
+              ]
+            }
+          },
+          "articles": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "$ref": "#/components/schemas/ItemsPeerArticles"
+                }
+              ]
+            }
+          },
+          "contracts": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "$ref": "#/components/schemas/ItemsContracts"
+                }
+              ]
+            }
+          },
+          "periods": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "$ref": "#/components/schemas/ItemsClientsPeriods"
+                }
+              ]
+            }
+          },
+          "links": {
+            "nullable": true,
+            "description": "Custom quick-access links shown on the dashboard quick-links tile.",
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "$ref": "#/components/schemas/ItemsClientLinks"
+                }
+              ]
+            }
+          }
+        },
+        "x-collection": "Clients",
+        "required": [
+          "id",
+          "name"
+        ]
       },
       "ItemsPeriods": {
         "type": "object",
@@ -15710,6 +16442,219 @@
           }
         },
         "x-collection": "Clients_directus_users"
+      },
+      "ItemsContracts": {
+        "type": "object",
+        "properties": {
+          "client": {
+            "nullable": true,
+            "description": "The client this contract belongs to.",
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "$ref": "#/components/schemas/ItemsClients"
+              }
+            ]
+          },
+          "date_created": {
+            "nullable": true,
+            "type": "string",
+            "format": "timestamp"
+          },
+          "date_updated": {
+            "nullable": true,
+            "type": "string",
+            "format": "timestamp"
+          },
+          "file": {
+            "nullable": true,
+            "description": "The contract PDF (the uploaded, ideally signed, document).",
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "$ref": "#/components/schemas/Files"
+              }
+            ]
+          },
+          "id": {
+            "nullable": false,
+            "type": "integer"
+          },
+          "notes": {
+            "nullable": true,
+            "description": "Optional note describing what changed in this version.",
+            "type": "string"
+          },
+          "signed": {
+            "nullable": false,
+            "description": "Whether this version is the signed contract. Drives the dashboard warning.",
+            "type": "boolean"
+          },
+          "signed_at": {
+            "nullable": true,
+            "description": "When the signed PDF was uploaded.",
+            "type": "string",
+            "format": "timestamp"
+          },
+          "sort": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "status": {
+            "nullable": false,
+            "type": "string"
+          },
+          "user_created": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "$ref": "#/components/schemas/Users"
+              }
+            ]
+          },
+          "user_updated": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "$ref": "#/components/schemas/Users"
+              }
+            ]
+          },
+          "version": {
+            "nullable": false,
+            "description": "Per-client version number, starting at 1.",
+            "type": "integer"
+          }
+        },
+        "x-collection": "Contracts"
+      },
+      "ItemsInvoices": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "nullable": true,
+            "description": "Invoice gross total (for display)",
+            "type": "number"
+          },
+          "bexioInvoiceId": {
+            "nullable": true,
+            "description": "Connected invoice (kb_invoice) from Bexio",
+            "type": "integer"
+          },
+          "bexioOrderId": {
+            "nullable": true,
+            "description": "Connected recurring order (Auftrag / kb_order) from Bexio",
+            "type": "integer"
+          },
+          "billedUnits": {
+            "nullable": true,
+            "description": "Units billed in the first invoice (e.g. 7 of 12)",
+            "type": "integer"
+          },
+          "clientPeriod": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "$ref": "#/components/schemas/ItemsClientsPeriods"
+              }
+            ]
+          },
+          "date_created": {
+            "nullable": true,
+            "type": "string",
+            "format": "timestamp"
+          },
+          "date_updated": {
+            "nullable": true,
+            "type": "string",
+            "format": "timestamp"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": false,
+            "type": "string",
+            "format": "uuid"
+          },
+          "periodicity": {
+            "nullable": true,
+            "type": "string"
+          },
+          "quantity": {
+            "nullable": true,
+            "description": "Units in the recurring order (e.g. 12 months)",
+            "type": "integer"
+          },
+          "sort": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "status": {
+            "nullable": false,
+            "type": "string"
+          },
+          "title": {
+            "nullable": true,
+            "type": "string"
+          },
+          "type": {
+            "nullable": false,
+            "description": "Invoice type discriminator (e.g. \"hosting\"). Future order-backed invoice types reuse this collection.",
+            "type": "string"
+          },
+          "unitPrice": {
+            "nullable": true,
+            "description": "Price per unit (e.g. CHF / month)",
+            "type": "number"
+          },
+          "user_created": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "$ref": "#/components/schemas/Users"
+              }
+            ]
+          },
+          "user_updated": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "$ref": "#/components/schemas/Users"
+              }
+            ]
+          }
+        },
+        "x-collection": "Invoices",
+        "required": [
+          "id"
+        ]
       },
       "ItemsJiraWarnings": {
         "type": "object",
@@ -16205,58 +17150,12 @@
           "id"
         ]
       },
-      "ItemsContracts": {
+      "ItemsClientLinks": {
         "type": "object",
         "properties": {
-          "id": {
-            "nullable": false,
-            "type": "integer"
-          },
-          "status": {
-            "nullable": false,
-            "type": "string"
-          },
-          "sort": {
-            "nullable": true,
-            "type": "integer"
-          },
-          "user_created": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "$ref": "#/components/schemas/Users"
-              }
-            ]
-          },
-          "date_created": {
-            "nullable": true,
-            "type": "string",
-            "format": "timestamp"
-          },
-          "user_updated": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "$ref": "#/components/schemas/Users"
-              }
-            ]
-          },
-          "date_updated": {
-            "nullable": true,
-            "type": "string",
-            "format": "timestamp"
-          },
           "client": {
             "nullable": true,
-            "description": "The client this contract belongs to.",
+            "description": "The client this link belongs to.",
             "oneOf": [
               {
                 "type": "string",
@@ -16267,123 +17166,6 @@
               }
             ]
           },
-          "version": {
-            "nullable": false,
-            "description": "Per-client version number, starting at 1.",
-            "type": "integer"
-          },
-          "signed_at": {
-            "nullable": true,
-            "description": "When the signed PDF was uploaded.",
-            "type": "string",
-            "format": "timestamp"
-          },
-          "notes": {
-            "nullable": true,
-            "description": "Optional note describing what changed in this version.",
-            "type": "string"
-          },
-          "file": {
-            "nullable": true,
-            "description": "The contract PDF (the uploaded, ideally signed, document).",
-            "oneOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "$ref": "#/components/schemas/Files"
-              }
-            ]
-          },
-          "signed": {
-            "nullable": false,
-            "description": "Whether this version is the signed contract. Drives the dashboard warning.",
-            "type": "boolean"
-          }
-        },
-        "x-collection": "Contracts"
-      },
-      "ItemsCaptureIgnoredUsers": {
-        "type": "object",
-        "properties": {
-          "date_created": {
-            "nullable": true,
-            "type": "string",
-            "format": "timestamp"
-          },
-          "id": {
-            "nullable": false,
-            "type": "string",
-            "format": "uuid"
-          },
-          "reason": {
-            "nullable": true,
-            "description": "Optionaler Grund, warum diese Person ignoriert wird (z.B. \"Externer Auftrag\", \"Geschäftsleitung erfasst separat\").",
-            "type": "string"
-          },
-          "user_created": {
-            "nullable": true,
-            "type": "string",
-            "format": "uuid"
-          },
-          "users_id": {
-            "nullable": false,
-            "description": "Clockodo-Benutzer-ID. Diese Person wird in der Übersicht Zeiterfassung ignoriert.",
-            "type": "integer"
-          }
-        },
-        "x-collection": "CaptureIgnoredUsers",
-        "required": [
-          "id",
-          "users_id"
-        ]
-      },
-      "ItemsSettings": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "nullable": false,
-            "type": "string",
-            "format": "uuid"
-          },
-          "slack_time_tracking_channel_id": {
-            "nullable": true,
-            "description": "Slack-Channel-ID für die tägliche Stunden-Erinnerung (z.B. C0AB12CD3EF). Leer lassen, um die Erinnerung zu deaktivieren.",
-            "type": "string"
-          }
-        },
-        "x-collection": "Settings",
-        "required": [
-          "id"
-        ]
-      },
-      "ItemsBillingSnapshots": {
-        "type": "object",
-        "properties": {
-          "billableHours": {
-            "nullable": false,
-            "description": "Spiegelt sums.billableHours.",
-            "type": "number"
-          },
-          "clientPeriodId": {
-            "nullable": false,
-            "description": "Referenz auf Clients_Periods. Pro Periode hält der Refresh-Job genau einen Snapshot aktuell (Upsert per Lookup).",
-            "oneOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "$ref": "#/components/schemas/ItemsClientsPeriods"
-              }
-            ]
-          },
-          "computedAt": {
-            "nullable": true,
-            "description": "Zeitpunkt der letzten erfolgreichen Aktualisierung.",
-            "type": "string",
-            "format": "timestamp"
-          },
           "date_created": {
             "nullable": true,
             "type": "string",
@@ -16393,341 +17175,49 @@
             "nullable": true,
             "type": "string",
             "format": "timestamp"
-          },
-          "id": {
-            "nullable": false,
-            "type": "string",
-            "format": "uuid"
-          },
-          "lastError": {
-            "nullable": true,
-            "description": "Fehlermeldung der letzten fehlgeschlagenen Aktualisierung. Wird gelöscht, sobald ein neuer erfolgreicher Snapshot vorliegt.",
-            "type": "string"
-          },
-          "lastErrorAt": {
-            "nullable": true,
-            "description": "Zeitpunkt der letzten fehlgeschlagenen Aktualisierung.",
-            "type": "string",
-            "format": "timestamp"
-          },
-          "totalAvailableHours": {
-            "nullable": false,
-            "description": "Spiegelt sums.totalAvailableHours.",
-            "type": "number"
-          },
-          "totalManualWorkHours": {
-            "nullable": false,
-            "description": "Spiegelt sums.totalManualWorkHours.",
-            "type": "number"
-          },
-          "totalTopUps": {
-            "nullable": false,
-            "description": "Spiegelt sums.totalTopUps.",
-            "type": "number"
-          },
-          "totalUsedHours": {
-            "nullable": false,
-            "description": "Spiegelt sums.totalUsedHours.",
-            "type": "number"
-          },
-          "totalUsedPercentage": {
-            "nullable": false,
-            "description": "Spiegelt sums.totalUsedPercentage. Wird auf der Übersicht als Default-Sortierkriterium genutzt.",
-            "type": "integer"
-          }
-        },
-        "x-collection": "BillingSnapshots",
-        "required": [
-          "clientPeriodId",
-          "id"
-        ]
-      },
-      "ItemsClients": {
-        "type": "object",
-        "properties": {
-          "apiUrl": {
-            "nullable": true,
-            "type": "string"
-          },
-          "bexio_contact_id": {
-            "nullable": true,
-            "description": "Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.",
-            "type": "integer"
-          },
-          "clockodo_customer_id": {
-            "nullable": true,
-            "type": "string"
-          },
-          "date_created": {
-            "nullable": true,
-            "type": "string",
-            "format": "timestamp"
-          },
-          "date_updated": {
-            "nullable": true,
-            "type": "string",
-            "format": "timestamp"
-          },
-          "id": {
-            "nullable": false,
-            "type": "string",
-            "format": "uuid"
-          },
-          "jira_short_code": {
-            "nullable": true,
-            "description": "The project shortcode in Jira. Eg. HAS or BA",
-            "type": "string"
-          },
-          "name": {
-            "nullable": false,
-            "type": "string"
-          },
-          "notifications_paused": {
-            "nullable": false,
-            "description": "Wenn aktiv, werden sämtliche Slack-Warnungen für diesen Kunden unterdrückt, bis der Schalter wieder deaktiviert wird.",
-            "type": "boolean"
-          },
-          "onboarding_current_step": {
-            "nullable": true,
-            "description": "Index of the last active onboarding step (0-based). Used to track progress for manual/email steps that have no service ID.",
-            "type": "integer"
-          },
-          "onboarding_manual_checklist": {
-            "nullable": true,
-            "description": "IDs of completed manual-onboarding checklist items. Persisted so the checklist state survives a page reload."
-          },
-          "slack_channel_id": {
-            "nullable": true,
-            "description": "Slack channel ID created during client onboarding",
-            "type": "string"
-          },
-          "sort": {
-            "nullable": true,
-            "type": "integer"
-          },
-          "status": {
-            "nullable": false,
-            "type": "string"
-          },
-          "user_created": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "$ref": "#/components/schemas/Users"
-              }
-            ]
-          },
-          "user_updated": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "$ref": "#/components/schemas/Users"
-              }
-            ]
-          },
-          "weekly_report_paused": {
-            "nullable": false,
-            "description": "Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.",
-            "type": "boolean"
-          },
-          "billing_mode": {
-            "nullable": false,
-            "description": "Abrechnungsmodell des Kunden. Prepaid = günstigerer Stundensatz, im Voraus bezahlte Top-Ups. Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach Aufwand.",
-            "type": "string"
-          },
-          "language": {
-            "nullable": false,
-            "description": "Sprache der kundenseitigen Slack-Meldungen (Wochenbericht, Jira-Warnungen, Arbeitsstopp).",
-            "type": "string"
-          },
-          "periods": {
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "$ref": "#/components/schemas/ItemsClientsPeriods"
-                }
-              ]
-            }
-          },
-          "articles": {
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                {
-                  "$ref": "#/components/schemas/ItemsPeerArticles"
-                }
-              ]
-            }
-          },
-          "allowedUsers": {
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "$ref": "#/components/schemas/ItemsClientsDirectusUsers"
-                }
-              ]
-            }
-          },
-          "contracts": {
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "$ref": "#/components/schemas/ItemsContracts"
-                }
-              ]
-            }
-          }
-        },
-        "x-collection": "Clients",
-        "required": [
-          "id",
-          "name"
-        ]
-      },
-      "ItemsInvoices": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "nullable": false,
-            "type": "string",
-            "format": "uuid"
-          },
-          "status": {
-            "nullable": false,
-            "type": "string"
-          },
-          "date_created": {
-            "nullable": true,
-            "type": "string",
-            "format": "timestamp"
-          },
-          "sort": {
-            "nullable": true,
-            "type": "integer"
-          },
-          "user_created": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "$ref": "#/components/schemas/Users"
-              }
-            ]
-          },
-          "user_updated": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "$ref": "#/components/schemas/Users"
-              }
-            ]
-          },
-          "date_updated": {
-            "nullable": true,
-            "type": "string",
-            "format": "timestamp"
-          },
-          "type": {
-            "nullable": false,
-            "description": "Invoice type discriminator (e.g. \"hosting\"). Future order-backed invoice types reuse this collection.",
-            "type": "string"
-          },
-          "title": {
-            "nullable": true,
-            "type": "string"
           },
           "description": {
             "nullable": true,
+            "description": "Optional short description shown under the link on the dashboard tile.",
             "type": "string"
           },
-          "bexioOrderId": {
-            "nullable": true,
-            "description": "Connected recurring order (Auftrag / kb_order) from Bexio",
+          "id": {
+            "nullable": false,
             "type": "integer"
           },
-          "bexioInvoiceId": {
-            "nullable": true,
-            "description": "Connected invoice (kb_invoice) from Bexio",
-            "type": "integer"
-          },
-          "unitPrice": {
-            "nullable": true,
-            "description": "Price per unit (e.g. CHF / month)",
-            "type": "number"
-          },
-          "quantity": {
-            "nullable": true,
-            "description": "Units in the recurring order (e.g. 12 months)",
-            "type": "integer"
-          },
-          "billedUnits": {
-            "nullable": true,
-            "description": "Units billed in the first invoice (e.g. 7 of 12)",
-            "type": "integer"
-          },
-          "weSharePercentage": {
-            "nullable": true,
-            "type": "integer"
-          },
-          "periodicity": {
-            "nullable": true,
+          "label": {
+            "nullable": false,
+            "description": "Display label of the link shown on the dashboard tile.",
             "type": "string"
           },
-          "amount": {
+          "sort": {
             "nullable": true,
-            "description": "Invoice gross total (for display)",
-            "type": "number"
+            "type": "integer"
           },
-          "clientPeriod": {
+          "status": {
+            "nullable": false,
+            "type": "string"
+          },
+          "url": {
+            "nullable": false,
+            "description": "Target URL the link opens (in a new tab).",
+            "type": "string"
+          },
+          "user_created": {
             "nullable": true,
-            "oneOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "$ref": "#/components/schemas/ItemsClientsPeriods"
-              }
-            ]
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_updated": {
+            "nullable": true,
+            "type": "string",
+            "format": "uuid"
           }
         },
-        "x-collection": "Invoices",
+        "x-collection": "ClientLinks",
         "required": [
-          "id"
+          "label",
+          "url"
         ]
       }
     },

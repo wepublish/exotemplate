@@ -264,20 +264,21 @@ type Subscription {
   directus_versions_mutated(event: EventEnum): directus_versions_mutated
   directus_comments_mutated(event: EventEnum): directus_comments_mutated
   directus_sync_id_map_mutated(event: EventEnum): directus_sync_id_map_mutated
+  CaptureIgnoredUsers_mutated(event: EventEnum): CaptureIgnoredUsers_mutated
+  Settings_mutated(event: EventEnum): Settings_mutated
   Clients_Periods_mutated(event: EventEnum): Clients_Periods_mutated
+  BillingSnapshots_mutated(event: EventEnum): BillingSnapshots_mutated
+  Clients_mutated(event: EventEnum): Clients_mutated
   Periods_mutated(event: EventEnum): Periods_mutated
   Clients_directus_users_mutated(event: EventEnum): Clients_directus_users_mutated
+  Contracts_mutated(event: EventEnum): Contracts_mutated
+  Invoices_mutated(event: EventEnum): Invoices_mutated
   JiraWarnings_mutated(event: EventEnum): JiraWarnings_mutated
   ManualWorkEntries_mutated(event: EventEnum): ManualWorkEntries_mutated
   NotificationThresholds_mutated(event: EventEnum): NotificationThresholds_mutated
   PeerArticles_mutated(event: EventEnum): PeerArticles_mutated
   TopUps_mutated(event: EventEnum): TopUps_mutated
-  Contracts_mutated(event: EventEnum): Contracts_mutated
-  CaptureIgnoredUsers_mutated(event: EventEnum): CaptureIgnoredUsers_mutated
-  Settings_mutated(event: EventEnum): Settings_mutated
-  BillingSnapshots_mutated(event: EventEnum): BillingSnapshots_mutated
-  Clients_mutated(event: EventEnum): Clients_mutated
-  Invoices_mutated(event: EventEnum): Invoices_mutated
+  ClientLinks_mutated(event: EventEnum): ClientLinks_mutated
 }
 
 """The `Boolean` scalar type represents `true` or `false`."""
@@ -418,6 +419,34 @@ type CaptureIgnoredUsers_mutated {
   data: CaptureIgnoredUsers
 }
 
+type ClientLinks {
+  client(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients
+  date_created: Date
+  date_created_func: datetime_functions
+  date_updated: Date
+  date_updated_func: datetime_functions
+
+  """Optional short description shown under the link on the dashboard tile."""
+  description: String
+  id: ID!
+
+  """Display label of the link shown on the dashboard tile."""
+  label: String!
+  sort: Int
+  status: String
+
+  """Target URL the link opens (in a new tab)."""
+  url: String!
+  user_created: ID
+  user_updated: ID
+}
+
+type ClientLinks_mutated {
+  key: ID!
+  event: EventEnum
+  data: ClientLinks
+}
+
 type Clients {
   apiUrl: String
 
@@ -425,15 +454,30 @@ type Clients {
   Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
   """
   bexio_contact_id: Int
+
+  """
+  Abrechnungsmodell des Kunden. Prepaid = günstigerer Stundensatz, im Voraus bezahlte Top-Ups. Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach Aufwand.
+  """
+  billing_mode: String
   clockodo_customer_id: String
   date_created: Date
   date_created_func: datetime_functions
   date_updated: Date
   date_updated_func: datetime_functions
+
+  """
+  Override für den Editor-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (editor.<medium>.wepublish.cloud).
+  """
+  editor_url: String
   id: ID!
 
   """The project shortcode in Jira. Eg. HAS or BA"""
   jira_short_code: String
+
+  """
+  Sprache der kundenseitigen Slack-Meldungen (Wochenbericht, Jira-Warnungen, Arbeitsstopp).
+  """
+  language: String
   name: String!
 
   """
@@ -460,27 +504,24 @@ type Clients {
   user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
 
   """
+  Override für den Website-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (<medium>.wepublish.cloud).
+  """
+  website_url: String
+
+  """
   Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.
   """
   weekly_report_paused: Boolean!
-
-  """
-  Abrechnungsmodell des Kunden. Prepaid = günstigerer Stundensatz, im Voraus bezahlte Top-Ups. Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach Aufwand.
-  """
-  billing_mode: String
-
-  """
-  Sprache der kundenseitigen Slack-Meldungen (Wochenbericht, Jira-Warnungen, Arbeitsstopp).
-  """
-  language: String
-  periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods]
-  periods_func: count_functions
-  articles(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [PeerArticles]
-  articles_func: count_functions
   allowedUsers(filter: Clients_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_directus_users]
   allowedUsers_func: count_functions
+  articles(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [PeerArticles]
+  articles_func: count_functions
   contracts(filter: Contracts_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Contracts]
   contracts_func: count_functions
+  periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods]
+  periods_func: count_functions
+  links(filter: ClientLinks_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [ClientLinks]
+  links_func: count_functions
   jiraWarnings(filter: JiraWarnings_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [JiraWarnings]
 }
 
@@ -506,12 +547,12 @@ type Clients_Periods {
   Clients_id(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients
   Periods_id(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Periods
   id: ID!
-  topUps(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [TopUps]
-  topUps_func: count_functions
-  manualWorkEntries(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [ManualWorkEntries]
-  manualWorkEntries_func: count_functions
   invoices(filter: Invoices_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Invoices]
   invoices_func: count_functions
+  manualWorkEntries(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [ManualWorkEntries]
+  manualWorkEntries_func: count_functions
+  topUps(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [TopUps]
+  topUps_func: count_functions
 }
 
 type Clients_Periods_mutated {
@@ -521,32 +562,32 @@ type Clients_Periods_mutated {
 }
 
 type Contracts {
-  id: ID!
-  status: String
-  sort: Int
-  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  client(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients
   date_created: Date
   date_created_func: datetime_functions
-  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   date_updated: Date
   date_updated_func: datetime_functions
-  client(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients
-
-  """Per-client version number, starting at 1."""
-  version: Int
-
-  """When the signed PDF was uploaded."""
-  signed_at: Date
-  signed_at_func: datetime_functions
+  file(filter: directus_files_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_files
+  id: ID!
 
   """Optional note describing what changed in this version."""
   notes: String
-  file(filter: directus_files_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_files
 
   """
   Whether this version is the signed contract. Drives the dashboard warning.
   """
   signed: Boolean!
+
+  """When the signed PDF was uploaded."""
+  signed_at: Date
+  signed_at_func: datetime_functions
+  sort: Int
+  status: String
+  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+
+  """Per-client version number, starting at 1."""
+  version: Int
 }
 
 type Contracts_mutated {
@@ -1853,43 +1894,41 @@ type directus_webhooks_mutated {
 }
 
 type Invoices {
-  id: ID!
-  status: String
+  """Invoice gross total (for display)"""
+  amount: Float
+
+  """Connected invoice (kb_invoice) from Bexio"""
+  bexioInvoiceId: Int
+
+  """Connected recurring order (Auftrag / kb_order) from Bexio"""
+  bexioOrderId: Int
+
+  """Units billed in the first invoice (e.g. 7 of 12)"""
+  billedUnits: Int
+  clientPeriod(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients_Periods
   date_created: Date
   date_created_func: datetime_functions
-  sort: Int
-  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
-  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   date_updated: Date
   date_updated_func: datetime_functions
+  description: String
+  id: ID!
+  periodicity: String
+
+  """Units in the recurring order (e.g. 12 months)"""
+  quantity: Int
+  sort: Int
+  status: String
+  title: String
 
   """
   Invoice type discriminator (e.g. "hosting"). Future order-backed invoice types reuse this collection.
   """
   type: String
-  title: String
-  description: String
-
-  """Connected recurring order (Auftrag / kb_order) from Bexio"""
-  bexioOrderId: Int
-
-  """Connected invoice (kb_invoice) from Bexio"""
-  bexioInvoiceId: Int
 
   """Price per unit (e.g. CHF / month)"""
   unitPrice: Float
-
-  """Units in the recurring order (e.g. 12 months)"""
-  quantity: Int
-
-  """Units billed in the first invoice (e.g. 7 of 12)"""
-  billedUnits: Int
-  weSharePercentage: Int
-  periodicity: String
-
-  """Invoice gross total (for display)"""
-  amount: Float
-  clientPeriod(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients_Periods
+  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
 }
 
 type Invoices_mutated {
@@ -2098,6 +2137,11 @@ type Settings {
   Slack-Channel-ID für die tägliche Stunden-Erinnerung (z.B. C0AB12CD3EF). Leer lassen, um die Erinnerung zu deaktivieren.
   """
   slack_time_tracking_channel_id: String
+
+  """
+  Slack-Channel-ID des netzwerkweiten #we-share-Kanals (z.B. C0AB12CD3EF). Wird im Dashboard als Schnellzugriff verlinkt. Leer lassen, um den Link auszublenden.
+  """
+  slack_we_share_channel_id: String
 }
 
 type Settings_mutated {
@@ -2275,6 +2319,45 @@ input boolean_filter_operators {
   _nnull: Boolean
 }
 
+input ClientLinks_filter {
+  client: Clients_filter
+  date_created: date_filter_operators
+  date_created_func: datetime_function_filter_operators
+  date_updated: date_filter_operators
+  date_updated_func: datetime_function_filter_operators
+  description: string_filter_operators
+  id: number_filter_operators
+  label: string_filter_operators
+  sort: number_filter_operators
+  status: string_filter_operators
+  url: string_filter_operators
+  user_created: id_filter_operators
+  user_updated: id_filter_operators
+  _and: [ClientLinks_filter]
+  _or: [ClientLinks_filter]
+}
+
+""""""
+input ClientLinks_quantifier_filter {
+  client: Clients_filter
+  date_created: date_filter_operators
+  date_created_func: datetime_function_filter_operators
+  date_updated: date_filter_operators
+  date_updated_func: datetime_function_filter_operators
+  description: string_filter_operators
+  id: number_filter_operators
+  label: string_filter_operators
+  sort: number_filter_operators
+  status: string_filter_operators
+  url: string_filter_operators
+  user_created: id_filter_operators
+  user_updated: id_filter_operators
+  _and: [ClientLinks_filter]
+  _or: [ClientLinks_filter]
+  _some: ClientLinks_filter
+  _none: ClientLinks_filter
+}
+
 input Clients_directus_users_filter {
   Clients_id: Clients_filter
   directus_users_id: directus_users_filter
@@ -2297,13 +2380,16 @@ input Clients_directus_users_quantifier_filter {
 input Clients_filter {
   apiUrl: string_filter_operators
   bexio_contact_id: number_filter_operators
+  billing_mode: string_filter_operators
   clockodo_customer_id: string_filter_operators
   date_created: date_filter_operators
   date_created_func: datetime_function_filter_operators
   date_updated: date_filter_operators
   date_updated_func: datetime_function_filter_operators
+  editor_url: string_filter_operators
   id: id_filter_operators
   jira_short_code: string_filter_operators
+  language: string_filter_operators
   name: string_filter_operators
   notifications_paused: boolean_filter_operators
   onboarding_current_step: number_filter_operators
@@ -2314,17 +2400,18 @@ input Clients_filter {
   status: string_filter_operators
   user_created: directus_users_filter
   user_updated: directus_users_filter
+  website_url: string_filter_operators
   weekly_report_paused: boolean_filter_operators
-  billing_mode: string_filter_operators
-  language: string_filter_operators
-  periods: Clients_Periods_quantifier_filter
-  periods_func: count_function_filter_operators
-  articles: PeerArticles_quantifier_filter
-  articles_func: count_function_filter_operators
   allowedUsers: Clients_directus_users_quantifier_filter
   allowedUsers_func: count_function_filter_operators
+  articles: PeerArticles_quantifier_filter
+  articles_func: count_function_filter_operators
   contracts: Contracts_quantifier_filter
   contracts_func: count_function_filter_operators
+  periods: Clients_Periods_quantifier_filter
+  periods_func: count_function_filter_operators
+  links: ClientLinks_quantifier_filter
+  links_func: count_function_filter_operators
   _and: [Clients_filter]
   _or: [Clients_filter]
   jiraWarnings: JiraWarnings_quantifier_filter
@@ -2334,12 +2421,12 @@ input Clients_Periods_filter {
   Clients_id: Clients_filter
   Periods_id: Periods_filter
   id: number_filter_operators
-  topUps: TopUps_quantifier_filter
-  topUps_func: count_function_filter_operators
-  manualWorkEntries: ManualWorkEntries_quantifier_filter
-  manualWorkEntries_func: count_function_filter_operators
   invoices: Invoices_quantifier_filter
   invoices_func: count_function_filter_operators
+  manualWorkEntries: ManualWorkEntries_quantifier_filter
+  manualWorkEntries_func: count_function_filter_operators
+  topUps: TopUps_quantifier_filter
+  topUps_func: count_function_filter_operators
   _and: [Clients_Periods_filter]
   _or: [Clients_Periods_filter]
 }
@@ -2349,12 +2436,12 @@ input Clients_Periods_quantifier_filter {
   Clients_id: Clients_filter
   Periods_id: Periods_filter
   id: number_filter_operators
-  topUps: TopUps_quantifier_filter
-  topUps_func: count_function_filter_operators
-  manualWorkEntries: ManualWorkEntries_quantifier_filter
-  manualWorkEntries_func: count_function_filter_operators
   invoices: Invoices_quantifier_filter
   invoices_func: count_function_filter_operators
+  manualWorkEntries: ManualWorkEntries_quantifier_filter
+  manualWorkEntries_func: count_function_filter_operators
+  topUps: TopUps_quantifier_filter
+  topUps_func: count_function_filter_operators
   _and: [Clients_Periods_filter]
   _or: [Clients_Periods_filter]
   _some: Clients_Periods_filter
@@ -2362,44 +2449,44 @@ input Clients_Periods_quantifier_filter {
 }
 
 input Contracts_filter {
-  id: number_filter_operators
-  status: string_filter_operators
-  sort: number_filter_operators
-  user_created: directus_users_filter
+  client: Clients_filter
   date_created: date_filter_operators
   date_created_func: datetime_function_filter_operators
-  user_updated: directus_users_filter
   date_updated: date_filter_operators
   date_updated_func: datetime_function_filter_operators
-  client: Clients_filter
-  version: number_filter_operators
+  file: directus_files_filter
+  id: number_filter_operators
+  notes: string_filter_operators
+  signed: boolean_filter_operators
   signed_at: date_filter_operators
   signed_at_func: datetime_function_filter_operators
-  notes: string_filter_operators
-  file: directus_files_filter
-  signed: boolean_filter_operators
+  sort: number_filter_operators
+  status: string_filter_operators
+  user_created: directus_users_filter
+  user_updated: directus_users_filter
+  version: number_filter_operators
   _and: [Contracts_filter]
   _or: [Contracts_filter]
 }
 
 """"""
 input Contracts_quantifier_filter {
-  id: number_filter_operators
-  status: string_filter_operators
-  sort: number_filter_operators
-  user_created: directus_users_filter
+  client: Clients_filter
   date_created: date_filter_operators
   date_created_func: datetime_function_filter_operators
-  user_updated: directus_users_filter
   date_updated: date_filter_operators
   date_updated_func: datetime_function_filter_operators
-  client: Clients_filter
-  version: number_filter_operators
+  file: directus_files_filter
+  id: number_filter_operators
+  notes: string_filter_operators
+  signed: boolean_filter_operators
   signed_at: date_filter_operators
   signed_at_func: datetime_function_filter_operators
-  notes: string_filter_operators
-  file: directus_files_filter
-  signed: boolean_filter_operators
+  sort: number_filter_operators
+  status: string_filter_operators
+  user_created: directus_users_filter
+  user_updated: directus_users_filter
+  version: number_filter_operators
   _and: [Contracts_filter]
   _or: [Contracts_filter]
   _some: Contracts_filter
@@ -2408,6 +2495,26 @@ input Contracts_quantifier_filter {
 
 input count_function_filter_operators {
   count: number_filter_operators
+}
+
+input create_ClientLinks_input {
+  client: create_Clients_input
+  date_created: Date
+  date_updated: Date
+
+  """Optional short description shown under the link on the dashboard tile."""
+  description: String
+  id: ID
+
+  """Display label of the link shown on the dashboard tile."""
+  label: String!
+  sort: Int
+  status: String
+
+  """Target URL the link opens (in a new tab)."""
+  url: String!
+  user_created: ID
+  user_updated: ID
 }
 
 input create_Clients_directus_users_input {
@@ -2423,13 +2530,28 @@ input create_Clients_input {
   Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
   """
   bexio_contact_id: Int
+
+  """
+  Abrechnungsmodell des Kunden. Prepaid = günstigerer Stundensatz, im Voraus bezahlte Top-Ups. Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach Aufwand.
+  """
+  billing_mode: String
   clockodo_customer_id: String
   date_created: Date
   date_updated: Date
+
+  """
+  Override für den Editor-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (editor.<medium>.wepublish.cloud).
+  """
+  editor_url: String
   id: ID
 
   """The project shortcode in Jira. Eg. HAS or BA"""
   jira_short_code: String
+
+  """
+  Sprache der kundenseitigen Slack-Meldungen (Wochenbericht, Jira-Warnungen, Arbeitsstopp).
+  """
+  language: String
   name: String!
 
   """
@@ -2455,23 +2577,19 @@ input create_Clients_input {
   user_updated: create_directus_users_input
 
   """
+  Override für den Website-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (<medium>.wepublish.cloud).
+  """
+  website_url: String
+
+  """
   Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.
   """
   weekly_report_paused: Boolean!
-
-  """
-  Abrechnungsmodell des Kunden. Prepaid = günstigerer Stundensatz, im Voraus bezahlte Top-Ups. Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach Aufwand.
-  """
-  billing_mode: String
-
-  """
-  Sprache der kundenseitigen Slack-Meldungen (Wochenbericht, Jira-Warnungen, Arbeitsstopp).
-  """
-  language: String
-  periods: [create_Clients_Periods_input]
-  articles: [create_PeerArticles_input]
   allowedUsers: [create_Clients_directus_users_input]
+  articles: [create_PeerArticles_input]
   contracts: [create_Contracts_input]
+  periods: [create_Clients_Periods_input]
+  links: [create_ClientLinks_input]
   jiraWarnings: [create_JiraWarnings_input]
 }
 
@@ -2479,35 +2597,35 @@ input create_Clients_Periods_input {
   Clients_id: create_Clients_input
   Periods_id: create_Periods_input
   id: ID
-  topUps: [create_TopUps_input]
-  manualWorkEntries: [create_ManualWorkEntries_input]
   invoices: [create_Invoices_input]
+  manualWorkEntries: [create_ManualWorkEntries_input]
+  topUps: [create_TopUps_input]
 }
 
 input create_Contracts_input {
-  id: ID
-  status: String
-  sort: Int
-  user_created: create_directus_users_input
-  date_created: Date
-  user_updated: create_directus_users_input
-  date_updated: Date
   client: create_Clients_input
-
-  """Per-client version number, starting at 1."""
-  version: Int
-
-  """When the signed PDF was uploaded."""
-  signed_at: Date
+  date_created: Date
+  date_updated: Date
+  file: create_directus_files_input
+  id: ID
 
   """Optional note describing what changed in this version."""
   notes: String
-  file: create_directus_files_input
 
   """
   Whether this version is the signed contract. Drives the dashboard warning.
   """
   signed: Boolean!
+
+  """When the signed PDF was uploaded."""
+  signed_at: Date
+  sort: Int
+  status: String
+  user_created: create_directus_users_input
+  user_updated: create_directus_users_input
+
+  """Per-client version number, starting at 1."""
+  version: Int
 }
 
 input create_directus_access_input {
@@ -2781,41 +2899,39 @@ input create_directus_webhooks_input {
 }
 
 input create_Invoices_input {
-  id: ID
-  status: String
+  """Invoice gross total (for display)"""
+  amount: Float
+
+  """Connected invoice (kb_invoice) from Bexio"""
+  bexioInvoiceId: Int
+
+  """Connected recurring order (Auftrag / kb_order) from Bexio"""
+  bexioOrderId: Int
+
+  """Units billed in the first invoice (e.g. 7 of 12)"""
+  billedUnits: Int
+  clientPeriod: create_Clients_Periods_input
   date_created: Date
-  sort: Int
-  user_created: create_directus_users_input
-  user_updated: create_directus_users_input
   date_updated: Date
+  description: String
+  id: ID
+  periodicity: String
+
+  """Units in the recurring order (e.g. 12 months)"""
+  quantity: Int
+  sort: Int
+  status: String
+  title: String
 
   """
   Invoice type discriminator (e.g. "hosting"). Future order-backed invoice types reuse this collection.
   """
   type: String
-  title: String
-  description: String
-
-  """Connected recurring order (Auftrag / kb_order) from Bexio"""
-  bexioOrderId: Int
-
-  """Connected invoice (kb_invoice) from Bexio"""
-  bexioInvoiceId: Int
 
   """Price per unit (e.g. CHF / month)"""
   unitPrice: Float
-
-  """Units in the recurring order (e.g. 12 months)"""
-  quantity: Int
-
-  """Units billed in the first invoice (e.g. 7 of 12)"""
-  billedUnits: Int
-  weSharePercentage: Int
-  periodicity: String
-
-  """Invoice gross total (for display)"""
-  amount: Float
-  clientPeriod: create_Clients_Periods_input
+  user_created: create_directus_users_input
+  user_updated: create_directus_users_input
 }
 
 input create_JiraWarnings_input {
@@ -3520,54 +3636,52 @@ input id_filter_operators {
 }
 
 input Invoices_filter {
-  id: id_filter_operators
-  status: string_filter_operators
+  amount: number_filter_operators
+  bexioInvoiceId: number_filter_operators
+  bexioOrderId: number_filter_operators
+  billedUnits: number_filter_operators
+  clientPeriod: Clients_Periods_filter
   date_created: date_filter_operators
   date_created_func: datetime_function_filter_operators
-  sort: number_filter_operators
-  user_created: directus_users_filter
-  user_updated: directus_users_filter
   date_updated: date_filter_operators
   date_updated_func: datetime_function_filter_operators
-  type: string_filter_operators
-  title: string_filter_operators
   description: string_filter_operators
-  bexioOrderId: number_filter_operators
-  bexioInvoiceId: number_filter_operators
-  unitPrice: number_filter_operators
-  quantity: number_filter_operators
-  billedUnits: number_filter_operators
-  weSharePercentage: number_filter_operators
+  id: id_filter_operators
   periodicity: string_filter_operators
-  amount: number_filter_operators
-  clientPeriod: Clients_Periods_filter
+  quantity: number_filter_operators
+  sort: number_filter_operators
+  status: string_filter_operators
+  title: string_filter_operators
+  type: string_filter_operators
+  unitPrice: number_filter_operators
+  user_created: directus_users_filter
+  user_updated: directus_users_filter
   _and: [Invoices_filter]
   _or: [Invoices_filter]
 }
 
 """"""
 input Invoices_quantifier_filter {
-  id: id_filter_operators
-  status: string_filter_operators
+  amount: number_filter_operators
+  bexioInvoiceId: number_filter_operators
+  bexioOrderId: number_filter_operators
+  billedUnits: number_filter_operators
+  clientPeriod: Clients_Periods_filter
   date_created: date_filter_operators
   date_created_func: datetime_function_filter_operators
-  sort: number_filter_operators
-  user_created: directus_users_filter
-  user_updated: directus_users_filter
   date_updated: date_filter_operators
   date_updated_func: datetime_function_filter_operators
-  type: string_filter_operators
-  title: string_filter_operators
   description: string_filter_operators
-  bexioOrderId: number_filter_operators
-  bexioInvoiceId: number_filter_operators
-  unitPrice: number_filter_operators
-  quantity: number_filter_operators
-  billedUnits: number_filter_operators
-  weSharePercentage: number_filter_operators
+  id: id_filter_operators
   periodicity: string_filter_operators
-  amount: number_filter_operators
-  clientPeriod: Clients_Periods_filter
+  quantity: number_filter_operators
+  sort: number_filter_operators
+  status: string_filter_operators
+  title: string_filter_operators
+  type: string_filter_operators
+  unitPrice: number_filter_operators
+  user_created: directus_users_filter
+  user_updated: directus_users_filter
   _and: [Invoices_filter]
   _or: [Invoices_filter]
   _some: Invoices_filter
@@ -3826,6 +3940,26 @@ input TopUps_quantifier_filter {
   _none: TopUps_filter
 }
 
+input update_ClientLinks_input {
+  client: update_Clients_input
+  date_created: Date
+  date_updated: Date
+
+  """Optional short description shown under the link on the dashboard tile."""
+  description: String
+  id: ID
+
+  """Display label of the link shown on the dashboard tile."""
+  label: String
+  sort: Int
+  status: String
+
+  """Target URL the link opens (in a new tab)."""
+  url: String
+  user_created: ID
+  user_updated: ID
+}
+
 input update_Clients_directus_users_input {
   Clients_id: update_Clients_input
   directus_users_id: update_directus_users_input
@@ -3839,13 +3973,28 @@ input update_Clients_input {
   Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
   """
   bexio_contact_id: Int
+
+  """
+  Abrechnungsmodell des Kunden. Prepaid = günstigerer Stundensatz, im Voraus bezahlte Top-Ups. Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach Aufwand.
+  """
+  billing_mode: String
   clockodo_customer_id: String
   date_created: Date
   date_updated: Date
+
+  """
+  Override für den Editor-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (editor.<medium>.wepublish.cloud).
+  """
+  editor_url: String
   id: ID
 
   """The project shortcode in Jira. Eg. HAS or BA"""
   jira_short_code: String
+
+  """
+  Sprache der kundenseitigen Slack-Meldungen (Wochenbericht, Jira-Warnungen, Arbeitsstopp).
+  """
+  language: String
   name: String
 
   """
@@ -3871,23 +4020,19 @@ input update_Clients_input {
   user_updated: update_directus_users_input
 
   """
+  Override für den Website-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (<medium>.wepublish.cloud).
+  """
+  website_url: String
+
+  """
   Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.
   """
   weekly_report_paused: Boolean
-
-  """
-  Abrechnungsmodell des Kunden. Prepaid = günstigerer Stundensatz, im Voraus bezahlte Top-Ups. Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach Aufwand.
-  """
-  billing_mode: String
-
-  """
-  Sprache der kundenseitigen Slack-Meldungen (Wochenbericht, Jira-Warnungen, Arbeitsstopp).
-  """
-  language: String
-  periods: [update_Clients_Periods_input]
-  articles: [update_PeerArticles_input]
   allowedUsers: [update_Clients_directus_users_input]
+  articles: [update_PeerArticles_input]
   contracts: [update_Contracts_input]
+  periods: [update_Clients_Periods_input]
+  links: [update_ClientLinks_input]
   jiraWarnings: [update_JiraWarnings_input]
 }
 
@@ -3895,35 +4040,35 @@ input update_Clients_Periods_input {
   Clients_id: update_Clients_input
   Periods_id: update_Periods_input
   id: ID
-  topUps: [update_TopUps_input]
-  manualWorkEntries: [update_ManualWorkEntries_input]
   invoices: [update_Invoices_input]
+  manualWorkEntries: [update_ManualWorkEntries_input]
+  topUps: [update_TopUps_input]
 }
 
 input update_Contracts_input {
-  id: ID
-  status: String
-  sort: Int
-  user_created: update_directus_users_input
-  date_created: Date
-  user_updated: update_directus_users_input
-  date_updated: Date
   client: update_Clients_input
-
-  """Per-client version number, starting at 1."""
-  version: Int
-
-  """When the signed PDF was uploaded."""
-  signed_at: Date
+  date_created: Date
+  date_updated: Date
+  file: update_directus_files_input
+  id: ID
 
   """Optional note describing what changed in this version."""
   notes: String
-  file: update_directus_files_input
 
   """
   Whether this version is the signed contract. Drives the dashboard warning.
   """
   signed: Boolean
+
+  """When the signed PDF was uploaded."""
+  signed_at: Date
+  sort: Int
+  status: String
+  user_created: update_directus_users_input
+  user_updated: update_directus_users_input
+
+  """Per-client version number, starting at 1."""
+  version: Int
 }
 
 input update_directus_access_input {
@@ -4271,41 +4416,39 @@ input update_directus_webhooks_input {
 }
 
 input update_Invoices_input {
-  id: ID
-  status: String
+  """Invoice gross total (for display)"""
+  amount: Float
+
+  """Connected invoice (kb_invoice) from Bexio"""
+  bexioInvoiceId: Int
+
+  """Connected recurring order (Auftrag / kb_order) from Bexio"""
+  bexioOrderId: Int
+
+  """Units billed in the first invoice (e.g. 7 of 12)"""
+  billedUnits: Int
+  clientPeriod: update_Clients_Periods_input
   date_created: Date
-  sort: Int
-  user_created: update_directus_users_input
-  user_updated: update_directus_users_input
   date_updated: Date
+  description: String
+  id: ID
+  periodicity: String
+
+  """Units in the recurring order (e.g. 12 months)"""
+  quantity: Int
+  sort: Int
+  status: String
+  title: String
 
   """
   Invoice type discriminator (e.g. "hosting"). Future order-backed invoice types reuse this collection.
   """
   type: String
-  title: String
-  description: String
-
-  """Connected recurring order (Auftrag / kb_order) from Bexio"""
-  bexioOrderId: Int
-
-  """Connected invoice (kb_invoice) from Bexio"""
-  bexioInvoiceId: Int
 
   """Price per unit (e.g. CHF / month)"""
   unitPrice: Float
-
-  """Units in the recurring order (e.g. 12 months)"""
-  quantity: Int
-
-  """Units billed in the first invoice (e.g. 7 of 12)"""
-  billedUnits: Int
-  weSharePercentage: Int
-  periodicity: String
-
-  """Invoice gross total (for display)"""
-  amount: Float
-  clientPeriod: update_Clients_Periods_input
+  user_created: update_directus_users_input
+  user_updated: update_directus_users_input
 }
 
 input update_JiraWarnings_input {

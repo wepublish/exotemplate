@@ -59,7 +59,6 @@ export default defineEndpoint((router, { env, services, getSchema }) => {
         unitPrice,
         quantity,
         billedUnits,
-        weSharePercentage,
         periodicity,
         billingDate,
         orderDate
@@ -167,10 +166,6 @@ export default defineEndpoint((router, { env, services, getSchema }) => {
         unitPrice: Number(unitPrice),
         quantity: Number(quantity),
         billedUnits: Number(billedUnits),
-        weSharePercentage:
-          weSharePercentage === undefined || weSharePercentage === null
-            ? null
-            : Number(weSharePercentage),
         periodicity: (periodicity as string) || 'yearly',
         amount: invoice.total_gross ? Number(invoice.total_gross) : null
       })

@@ -46,6 +46,8 @@ export interface BexioInvoiceStatus {
    * be null (e.g. while the invoice is still a draft).
    */
   networkLink: string | null
+  /** Due date ("zahlbar bis") — Bexio `is_valid_to`. Null if not set. */
+  dueDate: string | null
 }
 
 export async function getInvoiceStatus(
@@ -55,13 +57,15 @@ export async function getInvoiceStatus(
   const invoice = await bexioRequest<{
     kb_item_status_id?: number
     network_link?: string | null
+    is_valid_to?: string | null
   }>(token, 'GET', `/2.0/kb_invoice/${id}`)
   const statusId = invoice.kb_item_status_id ?? null
   return {
     id,
     statusId,
     key: mapBexioInvoiceStatus(statusId),
-    networkLink: invoice.network_link ?? null
+    networkLink: invoice.network_link ?? null,
+    dueDate: invoice.is_valid_to ?? null
   }
 }
 

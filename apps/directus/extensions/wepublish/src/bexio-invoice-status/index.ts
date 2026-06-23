@@ -67,7 +67,13 @@ export default defineEndpoint((router, { env }) => {
                 getInvoiceStatus(bexioToken, id)
               )
             } catch {
-              return { id, statusId: null, key: 'unknown', networkLink: null }
+              return {
+                id,
+                statusId: null,
+                key: 'unknown',
+                networkLink: null,
+                dueDate: null
+              }
             }
           })
         ),
