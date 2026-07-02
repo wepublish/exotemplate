@@ -101,6 +101,24 @@
           to: link('/onboarding')
         }
       ])
+
+      // External admin tools — their own group so the nav renders a gap that
+      // sets them apart from the internal pages. Open in a new tab; not
+      // client-scoped, so they use absolute URLs (no `link()` prefix).
+      groups.push([
+        {
+          label: t('nav.infraGateway'),
+          icon: 'lucide:shield-check',
+          to: 'https://gateway.wepublish.cloud/',
+          target: '_blank'
+        },
+        {
+          label: t('nav.redirectService'),
+          icon: 'lucide:signpost',
+          to: 'https://redirect.wepublish.cloud/login',
+          target: '_blank'
+        }
+      ])
     }
 
     return groups

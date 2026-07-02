@@ -7,6 +7,8 @@
     "timeTrackingOverview": "Übersicht Zeiterfassung",
     "monitoring": "Verfügbarkeit",
     "infrastructure": "Infrastruktur",
+    "infraGateway": "Infrastruktur-Gateway",
+    "redirectService": "Redirect Service",
     "onboarding": "Onboarding",
     "toDashboard": "Zum Dashboard",
     "logout": "Abmelden",
