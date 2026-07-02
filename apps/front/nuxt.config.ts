@@ -28,6 +28,17 @@ const LOCALE_FILES = (locale: string): string[] =>
 export default defineNuxtConfig({
   modules: ['@nuxt/ui', '@pinia/nuxt', '@nuxtjs/i18n'],
 
+  // Branded favicon: SVG for modern browsers, .ico as the legacy fallback
+  // (both live in public/ and share the green "1" mark).
+  app: {
+    head: {
+      link: [
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      ]
+    }
+  },
+
   // The selected client/billing period lives in the URL **path** on every app
   // route as a `/:clientPeriodId/…` prefix — the same "always in the URL"
   // pattern a locale prefix uses, so the selection is never lost when moving
