@@ -114,6 +114,12 @@ export const useUserStore = defineStore('useUserStore', () => {
     return (user.value?.role as DirectusRole)?.name === 'Administrator'
   }
 
+  // Externally-provisioned (SSO/GitHub) accounts authenticate via the identity
+  // provider, not a password — so password change must be hidden for them.
+  const isExternalUser = computed<boolean>(
+    () => !!user.value?.external_identifier
+  )
+
   /**
    * Patch a single client in the in-memory list. Used by the settings page to
    * reflect a saved change (billing mode, notification pause, language, …)
@@ -136,6 +142,7 @@ export const useUserStore = defineStore('useUserStore', () => {
     clients,
     loadUserData,
     amIAdministrator,
+    isExternalUser,
     patchClient
   }
 })

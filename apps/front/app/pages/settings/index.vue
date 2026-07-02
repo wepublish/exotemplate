@@ -255,7 +255,16 @@
             </div>
           </div>
         </template>
-        <AccountPasswordChangeForm />
+        <!-- SSO/GitHub users authenticate via the identity provider and have no
+             usable password, so hide the change form for them. -->
+        <UAlert
+          v-if="userStore.isExternalUser"
+          color="info"
+          variant="soft"
+          icon="lucide:github"
+          :title="t('settings.account.ssoManaged')"
+        />
+        <AccountPasswordChangeForm v-else />
       </UPageCard>
     </div>
 

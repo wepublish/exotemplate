@@ -1,5 +1,8 @@
 {
   "settings": {
+    "account": {
+      "ssoManaged": "Du bist über GitHub angemeldet. Dein Passwort wird extern verwaltet und kann hier nicht geändert werden."
+    },
     "title": "Einstellungen",
     "subtitle": "Steuere pro Kunde, welche Slack-Benachrichtigungen verschickt werden. Die Schalter wirken sofort — solange ein Schalter ausgeschaltet ist, gehen für diesen Kunden keine entsprechenden Slack-Meldungen mehr raus.",
     "noClients": "Dir ist aktuell kein Kunde zugewiesen.",

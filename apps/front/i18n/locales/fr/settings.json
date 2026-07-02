@@ -1,5 +1,8 @@
 {
   "settings": {
+    "account": {
+      "ssoManaged": "Tu es connecté via GitHub. Ton mot de passe est géré en externe et ne peut pas être modifié ici."
+    },
     "title": "Paramètres",
     "subtitle": "Définis par client les notifications Slack envoyées. Les interrupteurs sont immédiats — tant qu'un interrupteur est désactivé, aucune notification Slack correspondante n'est envoyée pour ce client.",
     "noClients": "Aucun client ne t'est attribué pour le moment.",

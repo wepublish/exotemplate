@@ -1,5 +1,8 @@
 {
   "settings": {
+    "account": {
+      "ssoManaged": "You are signed in via GitHub. Your password is managed externally and can't be changed here."
+    },
     "title": "Settings",
     "subtitle": "Control per client which Slack notifications are sent. The switches take effect immediately — while a switch is off, no corresponding Slack messages go out for that client.",
     "noClients": "You currently have no client assigned.",

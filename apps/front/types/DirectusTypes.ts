@@ -286,6 +286,11 @@ export interface CustomDirectusUser {
    * locale tag (`de-DE`) — resolve via `useAppLocale().resolveLocale()`.
    */
   language: string | null
+  /**
+   * Set for externally-provisioned accounts (e.g. GitHub staff login →
+   * `github:<id>`). Present ⇒ the user authenticates via SSO, not a password.
+   */
+  external_identifier: string | null
 }
 
 export interface DirectusSyncIdMap {
