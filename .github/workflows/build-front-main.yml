@@ -4,6 +4,9 @@ name: Publish frontend main image
 # apps/front/** changes on main.
 
 on:
+  # Manual trigger — rebuilds one-front:main on demand (e.g. after a history
+  # rewrite where the path filter didn't see the frontend changes).
+  workflow_dispatch:
   push:
     branches:
       - main

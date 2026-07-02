@@ -4,6 +4,8 @@ name: Publish backend main image
 # apps/directus/** changes on main.
 
 on:
+  # Manual trigger — rebuilds one-backend:main on demand.
+  workflow_dispatch:
   push:
     branches:
       - main
