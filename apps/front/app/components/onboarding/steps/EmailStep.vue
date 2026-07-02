@@ -94,8 +94,8 @@
 
   function buildEditorUrl() {
     return data.infraMediumName
-      ? `https://editor.${data.infraMediumName}.wepublish.cloud`
-      : 'https://editor.<medium>.wepublish.cloud'
+      ? `https://editor-${data.infraMediumName}.wepublish.cloud`
+      : 'https://editor-<medium>.wepublish.cloud'
   }
 
   // ── Subject + body generation (in the new client user's language) ──────────

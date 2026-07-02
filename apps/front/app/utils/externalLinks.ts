@@ -44,8 +44,8 @@ export const WEPUBLISH_DOCS_URL = 'https://docs.wepublish.ch/'
 /**
  * Parse a We.Publish API host into its `api` separator and the rest of the host.
  * The infrastructure stores the API host in two shapes — both seen in prod:
- *   - `api.<medium>.wepublish.cloud`  (dot, the onboarding tool's output)
- *   - `api-<medium>.wepublish.cloud`  (hyphen, older/existing media e.g. bajour)
+ *   - `api-<medium>.wepublish.cloud`  (hyphen, the canonical/current form)
+ *   - `api.<medium>.wepublish.cloud`  (dot, legacy media predating the hyphen form)
  * Strips the scheme and any path (`/v1`) first. Returns `{ separator, rest }`
  * where `rest` is `<medium>.wepublish.cloud`, so the editor/website URLs can be
  * derived while **preserving the same separator** as the API host. Null when the

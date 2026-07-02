@@ -30,8 +30,10 @@ export function useInfrastructureProvisioning() {
   const executionError = ref<string | null>(null)
   const pollStatus = ref<string | null>(null)
 
+  // Production service domains are hyphen-joined: editor-<medium>, api-<medium>,
+  // media-<medium>.wepublish.cloud; the website is the bare <medium>.wepublish.cloud.
   const editorUrl = computed(
-    () => `editor.${data.infraMediumName || '...'}.wepublish.cloud`
+    () => `editor-${data.infraMediumName || '...'}.wepublish.cloud`
   )
   const websiteUrl = computed(() =>
     data.infraCustomHostnames.length
@@ -39,7 +41,7 @@ export function useInfrastructureProvisioning() {
       : `${data.infraMediumName || '...'}.wepublish.cloud`
   )
   const apiUrl = computed(
-    () => `https://api.${data.infraMediumName}.wepublish.cloud`
+    () => `https://api-${data.infraMediumName}.wepublish.cloud`
   )
 
   // Valid Kubernetes / DNS name as used in the Helm manifests and domains:
