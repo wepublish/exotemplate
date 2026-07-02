@@ -1,0 +1,26 @@
+{
+  "reviewBuilds": {
+    "title": "Builds de review",
+    "subtitle": "Environnements de review actifs (pull requests ouvertes) par média.",
+    "cardTitle": "Builds de review",
+    "empty": "Aucun build de review actif.",
+    "mediaCount": "{count} média avec builds de review | {count} médias avec builds de review",
+    "loadError": "Impossible de charger les builds de review.",
+    "slot": "Slot {slot}",
+    "state": {
+      "open": "Ouverte",
+      "closed": "Fermée"
+    },
+    "branch": "Branche",
+    "preview": {
+      "editor": "Éditeur",
+      "website": "Site web"
+    },
+    "dbSync": {
+      "label": "Synchro base de données",
+      "syncedBy": "Synchronisé {time} par {user}",
+      "never": "Aucune synchro de production",
+      "viewRun": "Voir le workflow"
+    }
+  }
+}
