@@ -91,6 +91,11 @@
           to: link('/monitoring')
         },
         {
+          label: t('nav.infrastructure'),
+          icon: 'lucide:server-cog',
+          to: link('/infrastructure')
+        },
+        {
           label: t('nav.onboarding'),
           icon: 'lucide:user-plus',
           to: link('/onboarding')

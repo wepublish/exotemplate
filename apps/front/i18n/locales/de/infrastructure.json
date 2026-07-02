@@ -1,0 +1,59 @@
+{
+  "infrastructure": {
+    "title": "Infrastruktur-Konfiguration",
+    "subtitle": "Wie die Anwendungen der Medien konfiguriert und ausgerollt sind.",
+    "mediumLabel": "Medium",
+    "fetchedAt": "Stand: {time}",
+    "loadError": "Konfiguration konnte nicht geladen werden.",
+    "empty": "Keine Konfiguration gefunden.",
+    "noEnvironment": "Für diese Umgebung ist keine Konfiguration vorhanden.",
+    "rawButton": "Raw-Konfiguration",
+    "cards": {
+      "urls": "URLs",
+      "versions": "Ausgerollte Versionen",
+      "resources": "Ressourcen",
+      "integrations": "Integrationen"
+    },
+    "urls": {
+      "api": "API",
+      "editor": "Editor",
+      "website": "Website",
+      "mediaServer": "Media-Server"
+    },
+    "components": {
+      "api": "API",
+      "editor": "Editor",
+      "website": "Website",
+      "media": "Media",
+      "migration": "Migration"
+    },
+    "versions": {
+      "released": "Ausgerollt",
+      "build": "Build",
+      "chartVersion": "Helm-Chart-Version",
+      "unknown": "Unbekannt"
+    },
+    "resources": {
+      "component": "Komponente",
+      "cpu": "CPU",
+      "memory": "Speicher",
+      "requests": "Requests",
+      "limits": "Limits"
+    },
+    "integrations": {
+      "mail": "E-Mail",
+      "payments": "Zahlungen",
+      "challenge": "Bot-Schutz",
+      "tracking": "Tracking",
+      "ai": "KI",
+      "mediaServer": "Media-Server",
+      "none": "Keine"
+    },
+    "raw": {
+      "title": "Raw-Konfiguration – {medium}",
+      "copy": "Kopieren",
+      "copied": "Kopiert",
+      "back": "Zurück zur Konfiguration"
+    }
+  }
+}

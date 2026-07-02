@@ -1,0 +1,59 @@
+{
+  "infrastructure": {
+    "title": "Configuration de l'infrastructure",
+    "subtitle": "Comment les applications des médias sont configurées et déployées.",
+    "mediumLabel": "Média",
+    "fetchedAt": "État : {time}",
+    "loadError": "Impossible de charger la configuration.",
+    "empty": "Aucune configuration trouvée.",
+    "noEnvironment": "Aucune configuration pour cet environnement.",
+    "rawButton": "Configuration brute",
+    "cards": {
+      "urls": "URLs",
+      "versions": "Versions déployées",
+      "resources": "Ressources",
+      "integrations": "Intégrations"
+    },
+    "urls": {
+      "api": "API",
+      "editor": "Éditeur",
+      "website": "Site web",
+      "mediaServer": "Serveur média"
+    },
+    "components": {
+      "api": "API",
+      "editor": "Éditeur",
+      "website": "Site web",
+      "media": "Média",
+      "migration": "Migration"
+    },
+    "versions": {
+      "released": "Déployé",
+      "build": "Build",
+      "chartVersion": "Version du chart Helm",
+      "unknown": "Inconnu"
+    },
+    "resources": {
+      "component": "Composant",
+      "cpu": "CPU",
+      "memory": "Mémoire",
+      "requests": "Requests",
+      "limits": "Limits"
+    },
+    "integrations": {
+      "mail": "E-mail",
+      "payments": "Paiements",
+      "challenge": "Protection anti-bot",
+      "tracking": "Tracking",
+      "ai": "IA",
+      "mediaServer": "Serveur média",
+      "none": "Aucune"
+    },
+    "raw": {
+      "title": "Configuration brute – {medium}",
+      "copy": "Copier",
+      "copied": "Copié",
+      "back": "Retour à la configuration"
+    }
+  }
+}
