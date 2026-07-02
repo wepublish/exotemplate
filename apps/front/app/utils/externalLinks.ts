@@ -60,8 +60,10 @@ function parseApiHost(
     .replace(/^https?:\/\//i, '')
     .split('/')[0]
   const match = host?.match(/^api([.-])(.+\.wepublish\.cloud)$/i)
-  if (!match) return null
-  return { separator: match[1], rest: match[2] }
+  const separator = match?.[1]
+  const rest = match?.[2]
+  if (!separator || !rest) return null
+  return { separator, rest }
 }
 
 /**
