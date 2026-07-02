@@ -1,0 +1,108 @@
+{
+  "dashboard": {
+    "noClientAccess": {
+      "title": "Aucun accès client",
+      "description": "Aucun client ne t'est attribué pour le moment. Dès qu'un client te sera attribué, tes indicateurs apparaîtront ici."
+    },
+    "loadError": "Une erreur s'est produite lors de la récupération des données.",
+    "cards": {
+      "topUps": "Paiements / Top-ups",
+      "availableHours": "Heures de travail disponibles",
+      "toBill": "À facturer actuellement",
+      "workLog": "Journal de travail",
+      "manualCorrections": "Corrections manuelles"
+    },
+    "summaryCard": {
+      "detailsAria": "{title} – afficher les détails",
+      "showDetails": "Afficher les détails"
+    },
+    "links": {
+      "title": "Accès rapide",
+      "slack": "Canal Slack",
+      "weShare": "#we-share",
+      "editor": "Éditeur",
+      "jira": "Jira",
+      "website": "Site web",
+      "docs": "Documentation",
+      "descriptions": {
+        "slack": "Ta ligne directe avec l'équipe We.Publish. Nous y discutons de tout ce qui concerne ton projet.",
+        "weShare": "L'échange entre tous les médias du réseau We.Publish. Conseils, questions et apprentissage commun.",
+        "editor": "Le système rédactionnel de ton site. C'est ici que tu crées et modifies les articles et contenus.",
+        "jira": "Les tâches, tickets et demandes liés à ton projet – suivis en toute transparence.",
+        "website": "Ton site web publié, tel que le voient tes lectrices et lecteurs.",
+        "docs": "Guides et aide autour de We.Publish. Pour comprendre comment tout fonctionne."
+      }
+    },
+    "workLogAlert": {
+      "haltedTitle": "{count} ticket est arrêté | {count} tickets sont arrêtés",
+      "haltedDescription": "Les tickets concernés ne doivent pas être traités pour l'instant, jusqu'à la levée de l'arrêt.",
+      "openWarningsTitle": "{count} alerte ouverte | {count} alertes ouvertes",
+      "openWarningsDescription": "Pour certains tickets, l'estimation Jira est épuisée ou dépassée.",
+      "resolvedTitle": "{count} alerte résolue | {count} alertes résolues",
+      "resolvedDescription": "Les tickets Jira correspondants sont marqués comme Done ou Cancelled — aucune action requise."
+    },
+    "weeklyStatus": {
+      "over_budget": {
+        "headline": "Budget dépassé",
+        "body": "{used} du budget consommé. Merci de prendre contact avec le responsable de projet."
+      },
+      "no_budget": {
+        "headline": "Aucun budget enregistré",
+        "body": "{hours} déjà saisies, mais aucun top-up enregistré. Ces heures seront facturées séparément si aucun budget n'est ajouté."
+      },
+      "close_to_limit": {
+        "headline": "Budget presque épuisé",
+        "body": "{used} du budget consommé, {time} du temps écoulé. Planifier consciemment les dernières heures."
+      },
+      "behind_schedule": {
+        "headline": "Le budget se consomme plus vite que le temps",
+        "body": "{used} du budget consommé, mais seulement {time} du temps écoulé ({delta} plus vite que prévu)."
+      },
+      "ahead_of_schedule": {
+        "headline": "Plus de budget restant que prévu",
+        "body": "Seulement {used} du budget consommé, {time} du temps écoulé ({delta} en dessous du plan). Marge confortable."
+      },
+      "on_track": {
+        "headline": "Budget et temps alignés",
+        "body": "{used} de budget, {time} de temps. Tout est dans les attentes."
+      }
+    },
+    "cache": {
+      "live": "Données en direct",
+      "fromCache": "Depuis le cache (il y a {age})",
+      "unit": {
+        "seconds": "{n} s",
+        "minutes": "{n} min",
+        "hours": "{n} h",
+        "hoursMinutes": "{h} h {m} min"
+      },
+      "expiresNow": "expire maintenant",
+      "expiresIn": "expire dans {duration}",
+      "refreshTooltip": {
+        "noCache": "Recharger les données depuis Jira et Clockodo",
+        "live": "Vider le cache et recharger — les données sont déjà en direct (cache {expires}). À cliquer uniquement si quelque chose a changé depuis dans Jira ou Clockodo.",
+        "cached": "Vider le cache et récupérer des données fraîches depuis Jira & Clockodo. (Cache créé il y a {age}, {expires}.)"
+      },
+      "infoAria": "Comment fonctionne le cache ?",
+      "infoTitle": "Comment fonctionne la mise en cache ?",
+      "infoIntro": "Jira et Clockodo limitent les requêtes (\"429 Too Many Requests\"). Pour que le tableau de bord reste rapide et stable pour tout le monde, les heures agrégées par projet et par période sont mises en cache sur le serveur pendant une heure.",
+      "infoLiveLabel": "Données en direct",
+      "infoLiveText": "récupérées à l'instant directement depuis Jira & Clockodo.",
+      "infoCacheLabel": "Depuis le cache",
+      "infoCacheText": "copie enregistrée, pouvant avoir jusqu'à une heure.",
+      "infoOutro": "Clique sur l'icône d'actualisation pour vider le cache de la période sélectionnée et réinterroger Jira & Clockodo. Les autres projets ou périodes ne sont pas affectés.",
+      "reload": "Recharger",
+      "reloadAria": "Recharger les données",
+      "refreshSuccessTitle": "Données rechargées",
+      "refreshSuccessWithMeta": "Récupérées fraîches depuis Jira & Clockodo — cache {expires}.",
+      "refreshSuccessWithoutMeta": "Les données Jira et Clockodo ont été rechargées.",
+      "refreshErrorTitle": "Échec de l'actualisation",
+      "unknownError": "Erreur inconnue"
+    },
+    "contractWarning": {
+      "title": "Contrat non signé",
+      "description": "Aucun contrat signé n'est enregistré pour ce client. Veuillez téléverser le contrat signé.",
+      "action": "Gérer le contrat"
+    }
+  }
+}

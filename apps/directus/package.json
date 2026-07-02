@@ -21,11 +21,7 @@
     "setup": "cp .env.example .env && npm install && npm run schema:seed",
     "db:start": "docker-compose up",
     "db:reset": "docker-compose down",
-    "prepare": "husky",
     "lint": "prettier . --write --ignore-unknown"
-  },
-  "lint-staged": {
-    "**/*": "prettier --write --ignore-unknown"
   },
   "keywords": [],
   "author": "",
@@ -38,8 +34,6 @@
     "directus-sync": "^3.4.1"
   },
   "devDependencies": {
-    "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
     "prettier": "3.8.1"
   }
 }

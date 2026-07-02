@@ -1,0 +1,162 @@
+{
+  "billing": {
+    "backToDashboard": "Zurück zum Dashboard",
+    "fallbackProjectName": "Projekt",
+    "loadError": "Beim Abrufen der Daten ist ein Fehler aufgetreten.",
+    "billingMode": {
+      "label": "Abrechnungsmodell:",
+      "prepaidDescriptionShort": "Im Voraus bezahlte Top-Ups (niedrigerer Stundensatz).",
+      "monthlyDescriptionShort": "Monatliche Abrechnung nach Aufwand (höherer Stundensatz).",
+      "prepaidDescription": "Niedrigerer Stundensatz, im Voraus bezahlte Top-Ups.",
+      "monthlyDescription": "Höherer Stundensatz, monatliche Abrechnung nach Aufwand.",
+      "updateSuccessTitle": "Abrechnungsmodell für {name} aktualisiert.",
+      "updateErrorTitle": "Speichern fehlgeschlagen."
+    },
+    "availableHours": {
+      "titleSuffix": "Verfügbare Arbeitsstunden",
+      "toBillTitleSuffix": "Aktuell zu verrechnen",
+      "budgetUsed": "Budget verbraucht",
+      "budgetUsedDetail": "({used} h / {total} h)",
+      "consumedHours": "Verbrauchte Stunden",
+      "billedSeparately": "(werden separat verrechnet)",
+      "timeElapsed": "Zeit vergangen",
+      "timeElapsedDetail": "({elapsed} / {total} Tagen)",
+      "calculationToBill": "Berechnung Aktuell zu verrechnen",
+      "calculationAvailableBudget": "Berechnung Verfügbares Budget",
+      "rowTopUps": "Zahlungen / Top-Ups",
+      "rowWorkLog": "Arbeitsprotokoll",
+      "rowManualCorrections": "Manuelle Korrekturen",
+      "rowBalance": "Saldo",
+      "rowAvailable": "Verfügbar",
+      "budgetVsTime": "Budget vs. Zeit",
+      "difference": "Differenz",
+      "remainingDays": "Verbleibende Tage"
+    },
+    "topUps": {
+      "titleSuffix": "Zahlungen / Top-Ups",
+      "table": {
+        "date": "Zahlbar bis",
+        "note": "Notiz",
+        "amount": "Betrag",
+        "rate": "Satz",
+        "total": "Total",
+        "wePublish": "WePublish",
+        "medium": "Medium",
+        "bexio": "Bexio",
+        "status": "Status"
+      },
+      "rateUnit": "{rate} chf / h",
+      "invoiceNumber": "Nr. {number}",
+      "pdfError": "Dokument konnte nicht geöffnet werden.",
+      "emptyNote": " - ",
+      "hosting": {
+        "tileTitle": "Hosting / Wiederkehrende Rechnungen",
+        "subtitle": "Wiederkehrende Rechnungen zählen nicht zu den verfügbaren Arbeitsstunden.",
+        "billedMonths": "{billed} / {total} Mt.",
+        "table": {
+          "date": "Zahlbar bis",
+          "title": "Titel",
+          "months": "Monate",
+          "unitPrice": "Preis / Mt.",
+          "total": "Total",
+          "invoice": "Rechnung",
+          "order": "Auftrag",
+          "status": "Status"
+        }
+      }
+    },
+    "invoiceStatus": {
+      "draft": "Entwurf",
+      "pending": "Offen",
+      "paid": "Bezahlt",
+      "partial": "Teilbezahlt",
+      "canceled": "Storniert",
+      "unpaid": "Unbezahlt",
+      "unknown": "Unbekannt"
+    },
+    "manualCorrections": {
+      "title": "Manuelle Korrekturen",
+      "table": {
+        "date": "Datum",
+        "title": "Titel",
+        "description": "Beschreibung",
+        "hours": "Stunden"
+      }
+    },
+    "generateBexioInvoice": "Bexio-Rechnung generieren",
+    "createInvoice": {
+      "pageTitle": "Bexio-Rechnung erstellen",
+      "intro": "Hier kannst Du automatisch eine Bexio-Rechnung erstellen.",
+      "introTopUpLink": "Eine Zahlung / Top-Up wird im One-Dashboard automatisch hinzugefügt und mit der Bexio-Rechnung verknüpft.",
+      "introCooperativeFee": "Zu deinen Stunden wird automatisch der We.Publish-Genossenschaftsbeitrag hinzugerechnet.",
+      "hostingIntro": "Erstellt einen wiederkehrenden Bexio-Auftrag (jährlich) und eine erste Rechnung über die verbleibenden Monate.",
+      "tabs": {
+        "postPaid": "Post-Paid (Stundenbasiert)",
+        "prePaid": "Pre-Paid (Betragsbasiert)",
+        "hosting": "Hosting (Wiederkehrend)"
+      },
+      "fields": {
+        "year": "Jahr",
+        "quarter": "Quartal",
+        "billingDate": "Rechnungsdatum",
+        "title": "Rechnungstitel",
+        "amount": "Pauschaler Rechnungsbetrag (CHF)",
+        "hours": "Anzahl Stunden",
+        "hourlyRate": "Stundensatz (chf)",
+        "wepPercentage": "We.Share Prozente",
+        "note": "Beschreibung Position",
+        "unitPrice": "Preis pro Monat (CHF)",
+        "quantity": "Anzahl Monate (Auftrag)",
+        "billedUnits": "Zu verrechnende Monate"
+      },
+      "validation": {
+        "title": "Rechnungstitel eingeben",
+        "hours": "Anzahl Stunden eingeben",
+        "hourlyRate": "Stundensatz eingeben",
+        "wepPercentage": "Prozent für We.Share eingeben",
+        "note": "Bemerkung eingeben",
+        "unitPrice": "Preis pro Monat eingeben",
+        "billedUnits": "Anzahl zu verrechnende Monate eingeben"
+      },
+      "pickDate": "Datum wählen",
+      "submit": "Rechnung erstellen",
+      "preview": {
+        "title": "Vorschau Rechnung",
+        "hoursToBill": "Stunden abzurechnen:",
+        "cooperativeShare": "Genossenschaftsanteil We.Publish",
+        "totalHours": "Total Stunden",
+        "totalWithoutVat": "Total ohne MwSt.",
+        "vat": "MwSt.",
+        "totalWithVat": "Total mit MwSt.",
+        "unitPriceLine": "Preis pro Monat",
+        "quantityLine": "Anzahl Monate",
+        "hostingAnnualTotal": "Auftrag Total / Jahr (netto)",
+        "monthsToBill": "Zu verrechnende Monate",
+        "periodicityYearly": "Jährlich",
+        "orderSectionTitle": "Wiederkehrender Auftrag",
+        "orderSectionSubtitle": "Wird in Bexio jährlich automatisch wiederholt (kb_order).",
+        "invoiceSectionTitle": "Erste Rechnung",
+        "invoiceSectionSubtitle": "Deckt nur die verbleibenden Monate ab (kb_invoice).",
+        "orderToInvoiceHint": "Aus dem Auftrag wird die erste Rechnung erstellt"
+      },
+      "deviationTitle": "Angepasster Rechnungsbetrag",
+      "deviationDescription": "Der Rechnungsbetrag wurde aufgrund von Rundungsregeln automatisch angepasst.",
+      "successTitle": "Rechnung erfolgreich erstellt!",
+      "successCardTitle": "Das hat geklappt!",
+      "successCardDescription": "Eine Rechnung wurde auf Bexio erstellt und automatisch mit dem One-Dashboard verknüpft.",
+      "hostingSuccessDescription": "Ein wiederkehrender Auftrag und eine erste Rechnung wurden auf Bexio erstellt und mit dem One-Dashboard verknüpft.",
+      "openBexioInvoice": "Bexio Rechnung öffnen",
+      "openBexioOrder": "Bexio Auftrag öffnen",
+      "openDirectusTopUp": "Directus Top-Up öffnen",
+      "defaults": {
+        "quarterPlaceholder": "[QUARTAL]",
+        "prePaidTitle": "We.Develop Prepaid {quarter}. Quartal {year}",
+        "prePaidNote": "We.Develop in Prepaid gemäss vertraglicher Vereinbarung. {quarter}. Quartal {year}. Abrechnungsdetails siehe Dashboard We.Publish ONE",
+        "postPaidTitle": "Abrechnung per {date}",
+        "postPaidNote": "Abrechnung erbrachter Leistungen durch das We.Publish-Team per {date}. Profitiere von einem vergünstigten Tarif indem du vorauszahlst. Melde Dich bei deiner Ansprechperson von We.Publish. Das detaillierte Arbeitsprotokoll findest Du hier: https://one.wepublish.cloud",
+        "hostingTitle": "We.Care (Hosting / Betrieb) & We.Share",
+        "hostingNote": "We.Care (Hosting / Betrieb) & We.Share. Gemäss vertraglicher Vereinbarung."
+      }
+    }
+  }
+}

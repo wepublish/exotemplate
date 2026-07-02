@@ -1,0 +1,162 @@
+{
+  "billing": {
+    "backToDashboard": "Back to dashboard",
+    "fallbackProjectName": "Project",
+    "loadError": "An error occurred while fetching the data.",
+    "billingMode": {
+      "label": "Billing mode:",
+      "prepaidDescriptionShort": "Top-ups paid in advance (lower hourly rate).",
+      "monthlyDescriptionShort": "Monthly billing by effort (higher hourly rate).",
+      "prepaidDescription": "Lower hourly rate, top-ups paid in advance.",
+      "monthlyDescription": "Higher hourly rate, monthly billing by effort.",
+      "updateSuccessTitle": "Billing mode updated for {name}.",
+      "updateErrorTitle": "Saving failed."
+    },
+    "availableHours": {
+      "titleSuffix": "Available working hours",
+      "toBillTitleSuffix": "Currently to bill",
+      "budgetUsed": "Budget used",
+      "budgetUsedDetail": "({used} h / {total} h)",
+      "consumedHours": "Hours used",
+      "billedSeparately": "(will be billed separately)",
+      "timeElapsed": "Time elapsed",
+      "timeElapsedDetail": "({elapsed} / {total} days)",
+      "calculationToBill": "Calculation Currently to bill",
+      "calculationAvailableBudget": "Calculation Available budget",
+      "rowTopUps": "Payments / Top-ups",
+      "rowWorkLog": "Work log",
+      "rowManualCorrections": "Manual corrections",
+      "rowBalance": "Balance",
+      "rowAvailable": "Available",
+      "budgetVsTime": "Budget vs. time",
+      "difference": "Difference",
+      "remainingDays": "Remaining days"
+    },
+    "topUps": {
+      "titleSuffix": "Payments / Top-ups",
+      "table": {
+        "date": "Due date",
+        "note": "Note",
+        "amount": "Amount",
+        "rate": "Rate",
+        "total": "Total",
+        "wePublish": "WePublish",
+        "medium": "Medium",
+        "bexio": "Bexio",
+        "status": "Status"
+      },
+      "rateUnit": "{rate} chf / h",
+      "invoiceNumber": "No. {number}",
+      "pdfError": "Could not open the document.",
+      "emptyNote": " - ",
+      "hosting": {
+        "tileTitle": "Hosting / Recurring invoices",
+        "subtitle": "Recurring invoices do not count toward the available working hours.",
+        "billedMonths": "{billed} / {total} mo.",
+        "table": {
+          "date": "Due date",
+          "title": "Title",
+          "months": "Months",
+          "unitPrice": "Price / mo.",
+          "total": "Total",
+          "invoice": "Invoice",
+          "order": "Order",
+          "status": "Status"
+        }
+      }
+    },
+    "invoiceStatus": {
+      "draft": "Draft",
+      "pending": "Open",
+      "paid": "Paid",
+      "partial": "Partially paid",
+      "canceled": "Canceled",
+      "unpaid": "Unpaid",
+      "unknown": "Unknown"
+    },
+    "manualCorrections": {
+      "title": "Manual corrections",
+      "table": {
+        "date": "Date",
+        "title": "Title",
+        "description": "Description",
+        "hours": "Hours"
+      }
+    },
+    "generateBexioInvoice": "Generate Bexio invoice",
+    "createInvoice": {
+      "pageTitle": "Create Bexio invoice",
+      "intro": "Here you can automatically create a Bexio invoice.",
+      "introTopUpLink": "A payment / top-up is automatically added in the One dashboard and linked to the Bexio invoice.",
+      "introCooperativeFee": "The We.Publish cooperative contribution is automatically added to your hours.",
+      "hostingIntro": "Creates a recurring (yearly) Bexio order and a first invoice for the remaining months.",
+      "tabs": {
+        "postPaid": "Post-paid (hours-based)",
+        "prePaid": "Pre-paid (amount-based)",
+        "hosting": "Hosting (recurring)"
+      },
+      "fields": {
+        "year": "Year",
+        "quarter": "Quarter",
+        "billingDate": "Invoice date",
+        "title": "Invoice title",
+        "amount": "Flat invoice amount (CHF)",
+        "hours": "Number of hours",
+        "hourlyRate": "Hourly rate (chf)",
+        "wepPercentage": "We.Share percentage",
+        "note": "Position description",
+        "unitPrice": "Price per month (CHF)",
+        "quantity": "Number of months (order)",
+        "billedUnits": "Months to bill"
+      },
+      "validation": {
+        "title": "Enter the invoice title",
+        "hours": "Enter the number of hours",
+        "hourlyRate": "Enter the hourly rate",
+        "wepPercentage": "Enter the percentage for We.Share",
+        "note": "Enter a note",
+        "unitPrice": "Enter the price per month",
+        "billedUnits": "Enter the number of months to bill"
+      },
+      "pickDate": "Choose date",
+      "submit": "Create invoice",
+      "preview": {
+        "title": "Invoice preview",
+        "hoursToBill": "Hours to bill:",
+        "cooperativeShare": "Cooperative share We.Publish",
+        "totalHours": "Total hours",
+        "totalWithoutVat": "Total excl. VAT",
+        "vat": "VAT",
+        "totalWithVat": "Total incl. VAT",
+        "unitPriceLine": "Price per month",
+        "quantityLine": "Number of months",
+        "hostingAnnualTotal": "Order total / year (net)",
+        "monthsToBill": "Months to bill",
+        "periodicityYearly": "Yearly",
+        "orderSectionTitle": "Recurring order",
+        "orderSectionSubtitle": "Repeated automatically every year in Bexio (kb_order).",
+        "invoiceSectionTitle": "First invoice",
+        "invoiceSectionSubtitle": "Covers only the remaining months (kb_invoice).",
+        "orderToInvoiceHint": "The first invoice is generated from the order"
+      },
+      "deviationTitle": "Adjusted invoice amount",
+      "deviationDescription": "The invoice amount was adjusted automatically due to rounding rules.",
+      "successTitle": "Invoice created successfully!",
+      "successCardTitle": "That worked!",
+      "successCardDescription": "An invoice was created in Bexio and automatically linked to the One dashboard.",
+      "hostingSuccessDescription": "A recurring order and a first invoice were created in Bexio and linked to the One dashboard.",
+      "openBexioInvoice": "Open Bexio invoice",
+      "openBexioOrder": "Open Bexio order",
+      "openDirectusTopUp": "Open Directus top-up",
+      "defaults": {
+        "quarterPlaceholder": "[QUARTER]",
+        "prePaidTitle": "We.Develop Prepaid Q{quarter} {year}",
+        "prePaidNote": "We.Develop in prepaid as per contractual agreement. Q{quarter} {year}. For billing details see the We.Publish ONE dashboard",
+        "postPaidTitle": "Billing as of {date}",
+        "postPaidNote": "Billing of services provided by the We.Publish team as of {date}. Benefit from a reduced rate by paying in advance. Get in touch with your We.Publish contact. You can find the detailed work log here: https://one.wepublish.cloud",
+        "hostingTitle": "We.Care (Hosting / Betrieb) & We.Share",
+        "hostingNote": "We.Care (Hosting / Betrieb) & We.Share. Gemäss vertraglicher Vereinbarung."
+      }
+    }
+  }
+}

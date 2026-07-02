@@ -1,0 +1,63 @@
+{
+  "settings": {
+    "title": "Einstellungen",
+    "subtitle": "Steuere pro Kunde, welche Slack-Benachrichtigungen verschickt werden. Die Schalter wirken sofort — solange ein Schalter ausgeschaltet ist, gehen für diesen Kunden keine entsprechenden Slack-Meldungen mehr raus.",
+    "noClients": "Dir ist aktuell kein Kunde zugewiesen.",
+    "forClient": "Einstellungen für {client}",
+    "notifications": {
+      "title": "Benachrichtigungen"
+    },
+    "billingMode": {
+      "label": "Abrechnungsmodell",
+      "description": "Prepaid = niedrigerer Stundensatz, im Voraus bezahlte Top-Ups. Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach Aufwand. Nur Administrator:innen können dieses Modell ändern.",
+      "updated": "Abrechnungsmodell für {client} aktualisiert."
+    },
+    "jiraWarnings": {
+      "label": "Jira-Schwellenwarnungen",
+      "description": "Wenn ein Jira-Ticket eine konfigurierte Schwelle überschreitet, geht eine Slack-Meldung an den Kanal des Kunden. Wird hier ausgeschaltet, bleibt der Kanal für diese Warnungen still.",
+      "howThresholds": "Wie funktionieren Schwellenwerte?",
+      "muted": "Jira-Schwellenwarnungen für {client} stummgeschaltet.",
+      "enabled": "Jira-Schwellenwarnungen für {client} aktiviert."
+    },
+    "weeklyReport": {
+      "label": "Wochenbericht",
+      "description": "Wöchentliche Zusammenfassung pro Kunden-Slack-Kanal. Ausschalten unterdrückt die nächste und alle weiteren Wochenberichte für diesen Kunden, bis der Schalter wieder aktiviert wird.",
+      "muted": "Wochenbericht für {client} stummgeschaltet.",
+      "enabled": "Wochenbericht für {client} aktiviert."
+    },
+    "language": {
+      "label": "Projektsprache",
+      "description": "Sprache der kundenseitigen Slack-Meldungen (Wochenbericht, Jira-Warnungen, Arbeitsstopp) für diesen Kunden.",
+      "updated": "Sprache aktualisiert.",
+      "clientUpdated": "Projektsprache für {client} aktualisiert."
+    },
+    "contract": {
+      "label": "Vertrag",
+      "description": "Verträge dieses Kunden ansehen, neue Versionen erstellen und unterschriebene Verträge hochladen.",
+      "manage": "Verwalten"
+    },
+    "links": {
+      "label": "Links",
+      "description": "Editor- und Website-Link für das Dashboard anpassen und eigene Schnellzugriff-Links pflegen.",
+      "editorUrl": "Editor-URL",
+      "websiteUrl": "Website-URL",
+      "overrideHelp": "Leer lassen, um die URL automatisch aus der API-URL abzuleiten.",
+      "derivedUnavailable": "Keine API-URL hinterlegt – bitte URL eintragen",
+      "custom": "Eigene Links",
+      "customEmpty": "Noch keine eigenen Links. Füge unten welche hinzu.",
+      "customLabelPlaceholder": "Bezeichnung",
+      "customUrlPlaceholder": "https://…",
+      "customDescriptionPlaceholder": "Kurze Beschreibung (optional)",
+      "addLink": "Link hinzufügen",
+      "removeLink": "Link entfernen",
+      "saved": "Links für {client} gespeichert."
+    },
+    "globalSettings": {
+      "title": "Globale Einstellungen",
+      "subtitle": "Netzwerkweite Einstellungen für alle Kunden. Nur für Administrator:innen.",
+      "weShareLabel": "#we-share Slack-Kanal-ID",
+      "weShareDescription": "Channel-ID des netzwerkweiten #we-share-Kanals (z. B. C0AB12CD3EF). Wird im Dashboard aller Kunden verlinkt.",
+      "saved": "Globale Einstellungen gespeichert."
+    }
+  }
+}

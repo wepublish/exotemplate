@@ -1,0 +1,38 @@
+name: Publish production images
+
+# A v* tag releases BOTH apps in lockstep: builds the backend and frontend
+# production images together.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  date_sha_tag:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.image_tag.outputs.tag }}
+    steps:
+      - id: image_tag
+        run: echo "tag=$(date +%s)-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+
+  publish_backend:
+    needs: date_sha_tag
+    uses: ./.github/workflows/publish-docker-image.yml
+    with:
+      context: apps/directus
+      tags: |
+        ghcr.io/wepublish/one-backend:production-${{ needs.date_sha_tag.outputs.tag }}
+        ghcr.io/wepublish/one-backend:production
+    secrets: inherit
+
+  publish_front:
+    needs: date_sha_tag
+    uses: ./.github/workflows/publish-docker-image.yml
+    with:
+      context: apps/front
+      tags: |
+        ghcr.io/wepublish/one-front:production-${{ needs.date_sha_tag.outputs.tag }}
+        ghcr.io/wepublish/one-front:production
+    secrets: inherit

@@ -301,7 +301,7 @@ STORAGE_LOCAL_ROOT=./uploads
 
 ## Frontend Integration
 
-The frontend ([one-front](../one-front/)) connects to this backend at port 8055:
+The frontend ([one-front](../front/)) connects to this backend at port 8055:
 
 - Uses the **Directus SDK** for all standard collection CRUD and authentication.
 - Calls custom endpoints `/aggregatedHours`, `/invoice-with-topup`, `/recurring-invoice`, `/bexio-invoice-status`, and `/team`.

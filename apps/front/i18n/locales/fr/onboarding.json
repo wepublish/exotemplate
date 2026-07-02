@@ -1,0 +1,386 @@
+{
+  "onboarding": {
+    "index": {
+      "accessSubtitle": "Autorisations insuffisantes",
+      "backToDashboard": "Retour au tableau de bord",
+      "title": "Onboarding des clients",
+      "subtitle": "Configurer un nouveau client étape par étape dans tous les systèmes.",
+      "adminBadge": "Admin",
+      "startNew": {
+        "title": "Démarrer un nouvel onboarding",
+        "description": "Configurer un nouveau client de A à Z dans tous les systèmes.",
+        "button": "Démarrer un nouvel onboarding"
+      },
+      "clients": {
+        "title": "Clients",
+        "description": "Consulter, poursuivre ou démarrer chaque client. La progression est déterminée à partir des identifiants enregistrés dans les services respectifs.",
+        "searchPlaceholder": "Rechercher un client…",
+        "noneFound": "Aucun client trouvé."
+      },
+      "status": {
+        "completed": "Terminé",
+        "stepProgress": "{completed}/{total} — {current}",
+        "stepFallback": "Étape {n}"
+      },
+      "action": {
+        "view": "Consulter",
+        "continue": "Poursuivre",
+        "start": "Démarrer"
+      }
+    },
+    "detail": {
+      "notFoundTitle": "Client introuvable",
+      "notFoundDescription": "Le client demandé n'existe pas (plus).",
+      "backToOverview": "Retour à la vue d'ensemble",
+      "newOnboarding": "Nouvel onboarding"
+    },
+    "stepper": {
+      "progress": "Progression",
+      "completedBanner": {
+        "title": "Onboarding terminé",
+        "description": "Toutes les étapes ont été réalisées avec succès. Tu peux continuer à sélectionner chaque étape pour consulter les informations enregistrées."
+      },
+      "stepHeading": "Étape {step} : {title}",
+      "errorBadge": "Erreur",
+      "completeStep": "Terminer l'étape",
+      "finishOnboarding": "Terminer l'onboarding"
+    },
+    "steps": {
+      "directus": {
+        "title": "ONE",
+        "description": "Créer un nouveau client et des utilisateurs dans l'instance Directus.",
+        "intro": "Créer une nouvelle fiche client et un ou plusieurs comptes utilisateurs dans Directus.",
+        "completedTitle": "Client créé avec succès",
+        "completedDescription": "ID client Directus :",
+        "clientName": "Nom du client",
+        "clientNamePlaceholder": "p. ex. Muster SA",
+        "role": "Rôle utilisateur",
+        "rolePlaceholder": "Sélectionner un rôle (optionnel)",
+        "roleUuidPlaceholder": "UUID du rôle (chargement impossible)",
+        "users": "Utilisateurs ({count})",
+        "addUser": "Ajouter un utilisateur",
+        "userN": "Utilisateur {n}",
+        "firstName": "Prénom",
+        "firstNamePlaceholder": "Max",
+        "lastName": "Nom",
+        "lastNamePlaceholder": "Mustermann",
+        "email": "E-mail",
+        "emailPlaceholder": "max{'@'}muster-ag.ch",
+        "password": "Mot de passe",
+        "errorTitle": "Erreur lors de la création",
+        "execute": "Créer dans Directus",
+        "nameRequired": "Veuillez saisir un nom de client.",
+        "successToast": "Client et utilisateurs créés avec succès !"
+      },
+      "jira": {
+        "title": "Jira",
+        "description": "Configurer un nouveau projet Jira pour le média.",
+        "intro": "Créer un nouveau projet Jira avec le schéma de workflow « Default Media Workflow » et configurer le tableau.",
+        "directusRequired": "L'étape 1 (Directus) doit d'abord être terminée afin que la fiche client puisse être mise à jour après la création du projet.",
+        "completedTitle": "Projet Jira créé avec succès",
+        "completedKey": "Clé du projet :",
+        "completedId": "— ID : {id}",
+        "projectName": "Nom du projet",
+        "projectNamePlaceholder": "p. ex. Muster SA",
+        "projectKey": "Abréviation du projet (clé)",
+        "projectKeyPlaceholder": "p. ex. MUSTERAG",
+        "projectKeyHint": "Max. 10 caractères, uniquement des majuscules et des chiffres",
+        "lead": "Responsable du projet (lead)",
+        "leadHint": "L'ID de compte Jira est défini automatiquement",
+        "leadManualHint": "{error} — saisir l'ID de compte manuellement :",
+        "leadIdPlaceholder": "p. ex. 5b10a2844c20165700ede21g",
+        "userSearchPlaceholder": "Rechercher un utilisateur Jira…",
+        "accountId": "ID de compte : {id}",
+        "descriptionLabel": "Description (optionnelle)",
+        "descriptionPlaceholder": "Brève description du projet...",
+        "errorTitle": "Erreur lors de la création",
+        "execute": "Créer le projet Jira",
+        "openProject": "Ouvrir le projet dans Jira",
+        "fieldProjectName": "Nom du projet",
+        "fieldProjectKey": "Abréviation du projet",
+        "invite": {
+          "heading": "Inviter des utilisateurs",
+          "memberCount": "{count} membre(s)",
+          "teamTitle": "Membres de l'équipe (accès administrateur)",
+          "teamDescription": "Sélectionner des utilisateurs Jira existants — ils obtiennent un accès administrateur complet au projet.",
+          "teamPlaceholder": "Sélectionner les membres de l'équipe…",
+          "addAdmins": "Ajouter des administrateurs",
+          "customerTitle": "E-mails clients (rôle client)",
+          "customerDescription": "Clients externes : si aucun compte Jira n'existe encore, une invitation est envoyée par e-mail.",
+          "customerEmailPlaceholder": "client{'@'}exemple.ch",
+          "add": "Ajouter",
+          "inviteCustomers": "Inviter des clients",
+          "currentMembers": "Membres actuels du projet",
+          "noMembers": "Aucun membre trouvé."
+        },
+        "validation": {
+          "nameAndKeyRequired": "Le nom et l'abréviation du projet sont requis.",
+          "leadRequired": "Veuillez sélectionner un responsable de projet.",
+          "invalidEmail": "Adresse e-mail invalide",
+          "teamRequired": "Veuillez sélectionner au moins un utilisateur de l'équipe.",
+          "customerEmailRequired": "Veuillez saisir au moins un e-mail client."
+        },
+        "toast": {
+          "usersLoadFailed": "Impossible de charger les utilisateurs Jira.",
+          "created": "Projet Jira créé avec succès !",
+          "adminsAdded": "{count} utilisateurs ajoutés à \"{roleName}\"",
+          "inviteFailed": "Échec de l'invitation",
+          "customersAdded": "{count} clients ajoutés à \"{roleName}\"",
+          "customersInvited": "{count} nouveaux invités",
+          "customersPartial": "{added} réussis, {failed} erreurs"
+        }
+      },
+      "slack": {
+        "title": "Slack",
+        "description": "Créer un canal Slack dédié pour le client.",
+        "intro": "Créer un canal Slack dédié pour le client.",
+        "completedTitle": "Canal Slack créé avec succès",
+        "completedId": "ID :",
+        "channelName": "Nom du canal",
+        "channelNamePlaceholder": "wep-muster-ag",
+        "channelNameHint": "Minuscules, chiffres, tirets — normalisé automatiquement",
+        "descriptionLabel": "Description (optionnelle)",
+        "descriptionPlaceholder": "Canal de communication client",
+        "execute": "Créer le canal Slack",
+        "openChannel": "Ouvrir le canal dans Slack",
+        "adminOnly": "Seuls les administrateurs peuvent exécuter cette étape.",
+        "channelRequired": "Veuillez saisir un nom de canal.",
+        "successToast": "#{channel} créé avec succès !"
+      },
+      "bexio": {
+        "title": "Bexio",
+        "description": "Enregistrer le nouveau client dans Bexio comme contact / client.",
+        "intro": "Enregistrer le nouveau client dans Bexio comme contact d'entreprise. L'ID de contact Bexio est enregistré automatiquement sur la fiche client et est nécessaire à la facturation ultérieure.",
+        "directusRequired": "L'étape 1 (Directus) doit d'abord être terminée afin que la fiche client puisse être mise à jour après la création.",
+        "completedTitle": "Contact Bexio créé avec succès",
+        "completedDescription": "ID de contact :",
+        "savedOnClient": "— a été enregistré sur la fiche client.",
+        "company": "Nom de l'entreprise",
+        "companyPlaceholder": "Muster SA",
+        "email": "E-mail",
+        "emailHint": "Enregistré comme adresse e-mail principale du contact",
+        "emailPlaceholder": "info{'@'}muster.ch",
+        "street": "Rue",
+        "streetPlaceholder": "Musterstrasse",
+        "streetNumber": "N°",
+        "zip": "NPA",
+        "city": "Localité",
+        "cityPlaceholder": "Zurich",
+        "fieldStreet": "Rue",
+        "fieldZipCity": "NPA / Localité",
+        "errorTitle": "Erreur lors de la création",
+        "execute": "Créer le contact Bexio",
+        "openContact": "Ouvrir le contact dans Bexio",
+        "allFieldsRequired": "Tous les champs (nom de l'entreprise, e-mail, rue, n°, NPA, localité) sont requis.",
+        "directusFirst": "L'étape 1 (Directus) doit d'abord être terminée.",
+        "successToast": "Contact Bexio créé avec succès !"
+      },
+      "clockodo": {
+        "title": "Clockodo",
+        "description": "Connecter le client Bexio à Clockodo.",
+        "intro": "Connecter le client Bexio à Clockodo afin que les heures soient correctement saisies et facturées. L'intégration Bexio de Clockodo synchronise automatiquement les contacts Bexio comme clients Clockodo.",
+        "bexioRequired": "L'étape 4 (Bexio) doit d'abord être terminée avant de pouvoir effectuer la synchronisation Clockodo.",
+        "completedTitle": "Client Clockodo connecté avec succès",
+        "completedDescription": "ID client Clockodo :",
+        "savedOnClient": "— a été enregistré sur la fiche client.",
+        "bexioContactId": "ID de contact Bexio",
+        "bexioContactIdHint": "Depuis l'étape « Créer le client Bexio »",
+        "bexioContactIdPlaceholder": "Depuis l'étape « Bexio »",
+        "clientName": "Nom du client",
+        "clientNameHint": "Utilisé pour la recherche dans Clockodo",
+        "errorTitle": "Erreur lors de la synchronisation",
+        "syncAndLink": "Rechercher et connecter dans Clockodo",
+        "orManual": "ou saisir manuellement",
+        "clockodoId": "ID client Clockodo",
+        "clockodoIdHint": "Si la recherche automatique échoue",
+        "clockodoIdPlaceholder": "p. ex. 67890",
+        "saveManual": "Enregistrer manuellement",
+        "openCustomer": "Ouvrir le client dans Clockodo",
+        "syncedToast": "Client Clockodo trouvé et connecté !",
+        "savedToast": "ID Clockodo enregistré.",
+        "saveErrorTitle": "Erreur lors de l'enregistrement"
+      },
+      "infrastructure": {
+        "title": "Infrastructure",
+        "description": "Mettre en place l'environnement éditeur et site web pour le client."
+      },
+      "manualTasks": {
+        "title": "Étapes manuelles",
+        "description": "Traiter les tâches manuelles selon la liste de contrôle.",
+        "intro": "Les tâches suivantes doivent être effectuées manuellement. Coche chaque tâche dès qu'elle est terminée. Le guide lié décrit chaque étape en détail.",
+        "doneCount": "{completed}/{total} terminées",
+        "docs": "Guide",
+        "allDone": "Toutes les tâches manuelles sont terminées. Tu peux terminer l'étape.",
+        "tasks": {
+          "jiraBoardSetup": {
+            "title": "Configurer le tableau Jira",
+            "description": "Ajouter des colonnes personnalisées au tableau Jira et les associer aux états de tâche correspondants."
+          },
+          "slackInvites": {
+            "title": "Invitations Slack",
+            "description": "Inviter les utilisateurs dans le canal Slack dédié et dans #we-share."
+          }
+        }
+      },
+      "invoicing": {
+        "title": "Facture",
+        "description": "Créer les premières factures pour l'hébergement et l'onboarding.",
+        "intro": "Crée la première facture pour l'hébergement (à partir du début du développement) ainsi que la facture unique d'onboarding. Coche chaque facture dès qu'elle est créée dans Bexio.",
+        "doneCount": "{completed}/{total} terminé",
+        "allDone": "Les deux factures sont créées. Tu peux terminer cette étape.",
+        "createInvoice": "Créer la facture",
+        "created": "Créée",
+        "period": {
+          "label": "Période de facturation",
+          "hint": "Choisis la période sur laquelle facturer.",
+          "none": "Aucune période de facturation pour ce client pour l'instant.",
+          "addLabel": "Ajouter une période",
+          "addPlaceholder": "Choisir une définition de période…",
+          "add": "Ajouter",
+          "added": "Période de facturation ajoutée.",
+          "addError": "Impossible d'ajouter la période.",
+          "noDefinitions": "Aucune définition de période disponible. Crée d'abord une période dans Directus."
+        },
+        "tasks": {
+          "hostingInvoice": {
+            "title": "Créer la facture d'hébergement",
+            "description": "Facture d'hébergement récurrente à partir du début du développement. Dans « Créer une facture Bexio », onglet « Hébergement »."
+          },
+          "onboardingInvoice": {
+            "title": "Créer la facture d'onboarding",
+            "description": "Facture unique pour l'onboarding."
+          }
+        }
+      },
+      "email": {
+        "title": "E-mail",
+        "description": "Envoyer un e-mail de récapitulatif avec tous les identifiants.",
+        "intro": "Le texte ci-dessous est pré-rédigé à partir des étapes précédentes. Adapte-le si nécessaire, puis copie-le et envoie-le depuis ton client de messagerie.",
+        "recipient": "Destinataire",
+        "subject": "Objet",
+        "body": "Texte de l'e-mail",
+        "regenerate": "Régénérer",
+        "copyText": "Copier le texte",
+        "notImplemented": "L'envoi automatique d'e-mail n'est pas implémenté. Copie le texte et envoie-le depuis ton client de messagerie à {recipient}.",
+        "recipientFallback": "(destinataire)",
+        "regeneratedToast": "Texte régénéré",
+        "copiedToast": "{label} copié",
+        "copyFailedTitle": "Échec de la copie",
+        "copyFailedDescription": "Veuillez sélectionner et copier manuellement.",
+        "label": {
+          "recipient": "Destinataire",
+          "subject": "Objet",
+          "body": "Texte de l'e-mail"
+        },
+        "welcome": {
+          "subject": "Bienvenue chez We.Publish – tes liens les plus importants",
+          "greeting": "Salut {name}",
+          "fallbackName": "à tous",
+          "intro": "ravis de t'avoir à bord chez We.Publish ! Pour que tu puisses démarrer tout de suite, voici les quatre plateformes avec lesquelles nous travaillons – chacune avec un rôle clair, pour que tu saches toujours où trouver quoi :",
+          "oneTitle": "ONE – des finances transparentes",
+          "activate": "Activer le compte & définir le mot de passe : {url}",
+          "login": "Se connecter : {url}",
+          "oneText": "Ici tu vois à tout moment combien d'heures nous avons travaillées pour toi, ce qui figure sur ton solde, ton contrat et toutes les factures. Une transparence totale sur les coûts.",
+          "jiraTitle": "Jira – gestion de projet & avancement du travail",
+          "jiraText": "Ton tableau de projet : ici nous suivons toutes les tâches, bugs et fonctionnalités. Tu peux à tout moment consulter ce sur quoi nous travaillons, commenter les tickets ou créer de nouvelles demandes.",
+          "slackTitle": "Slack – communication quotidienne",
+          "sharedChannel": "Notre canal commun : #{channel}",
+          "slackText": "Pour un contact direct : questions, échanges et discussions directes avec l'équipe – plus rapide et plus personnel que l'e-mail.",
+          "editorTitle": "Editor – gérer le site web & le CRM",
+          "editorText": "Ton cockpit rédactionnel : gérer les articles, pages et contenus de ton site web ainsi que les abonné·e·s et le CRM.",
+          "summary": "En résumé : ONE pour les finances, Jira pour le travail de projet, Slack pour la communication et l'Editor pour tes contenus. Ainsi tout reste à sa place.",
+          "activateOutro": "Via le lien ci-dessus (ONE), tu actives ton compte et définis ton mot de passe. Tu peux ensuite inviter d'autres membres de l'équipe à tout moment – connecte-toi à ONE et ouvre la section « Team ».",
+          "meeting": "Dans les prochains jours, nous te contacterons pour fixer un rendez-vous en personne – afin de faire connaissance tranquillement et de discuter ensemble des prochaines étapes.",
+          "closing": "À bientôt et meilleures salutations\nTon équipe We.Publish"
+        }
+      },
+      "contract": {
+        "title": "Contrat",
+        "description": "Téléverser le contrat signé en PDF.",
+        "intro": "Téléversez le contrat signé de ce client au format PDF. Vous pourrez ajouter de nouvelles versions plus tard dans les paramètres.",
+        "directusRequired": "Veuillez d'abord terminer l'étape Directus pour que le client existe.",
+        "fileLabel": "Contrat (PDF)",
+        "fileHint": "Fichiers PDF uniquement.",
+        "signedLabel": "Ceci est la version signée par les deux parties",
+        "fileRequired": "Veuillez sélectionner un fichier.",
+        "mustBePdf": "Veuillez téléverser un fichier PDF.",
+        "upload": "Téléverser",
+        "successToast": "Contrat téléversé.",
+        "errorTitle": "Impossible de téléverser le contrat",
+        "completedTitle": "Contrat téléversé",
+        "completedDescription": "Le contrat a été enregistré. Vous pouvez ajouter de nouvelles versions dans les paramètres.",
+        "fileTooLarge": "Le fichier est trop volumineux (max. 10 Mo)."
+      }
+    },
+    "infrastructure": {
+      "checkingPending": "Vérification des PR d'onboarding existantes...",
+      "cancelPrs": "Annuler les PR",
+      "form": {
+        "intro": "Crée automatiquement des pull requests sur les dépôts {configRepo} et {websiteRepo} afin de mettre en place la configuration Terraform et l'application site web pour le nouveau média.",
+        "mediumName": "Nom du média",
+        "mediumNamePlaceholder": "muster_ag",
+        "mediumNameHint": "Identifiant Terraform : minuscules, chiffres, traits de soulignement",
+        "editor": "Editor :",
+        "website": "Site web :",
+        "websiteEnabled": "Activer le site web",
+        "websiteEnabledDescription": "Créer l'application site web pour le média",
+        "staging": "Environnement de staging",
+        "stagingDescription": "Mettre en place un environnement de staging supplémentaire",
+        "customHostnames": "Noms d'hôte personnalisés (optionnels)",
+        "hostnamePlaceholder": "www.muster-ag.ch",
+        "add": "Ajouter",
+        "errorTitle": "Erreur",
+        "execute": "Créer l'infrastructure"
+      },
+      "polling": {
+        "title": "Création de l'infrastructure en cours",
+        "description": "Les pull requests sont en cours de création sur GitHub. Cela peut prendre un moment...",
+        "creating": "Création de l'infrastructure...",
+        "creatingProgress": "Création de l'infrastructure... ({current}/{total})"
+      },
+      "summary": {
+        "title": "PR d'infrastructure créées avec succès",
+        "description": "Les pull requests ont été ouvertes sur les deux dépôts et attendent une relecture.",
+        "configPr": "PR de configuration",
+        "websitePr": "PR du site web",
+        "viewPr": "Voir la PR #{number}",
+        "editorUrl": "URL Editor",
+        "websiteUrl": "URL du site web",
+        "apiUrl": "URL de l'API",
+        "staging": "Staging",
+        "stagingYes": "Oui",
+        "stagingNo": "Non",
+        "mediumName": "Nom du média"
+      },
+      "reviewer": {
+        "title": "Notifier les relecteurs via Slack",
+        "description": "Envoie un message direct dans Slack aux destinataires listés ci-dessous. Le texte du message peut être adapté avant l'envoi.",
+        "recipients": "Destinataires",
+        "addEmailPlaceholder": "ajouter un autre e-mail",
+        "add": "Ajouter",
+        "message": "Message",
+        "regenerate": "Régénérer",
+        "send": "Envoyer le message",
+        "emptyError": "Les destinataires et le message ne peuvent pas être vides.",
+        "invalidEmail": "Adresse e-mail invalide",
+        "sentToast": "Message envoyé à {count} relecteurs.",
+        "partialToast": "{sent} envoyés, {failed} échoués",
+        "template": {
+          "fallbackName": "nouveau média",
+          "body": "Salut Elias et Lukas\n\nmerci de relire les pull requests ouvertes pour le nouveau média « {name} » et de les fusionner :\n• {configPr}\n• {websitePr}\n\nUne fois les fusions effectuées, un petit retour s'il vous plaît, afin que l'onboarding puisse se poursuivre.\n\nMerci !"
+        }
+      },
+      "provisioning": {
+        "adminOnly": "Seuls les administrateurs peuvent exécuter cette étape.",
+        "invalidMediumName": "Nom de média invalide. Seuls les minuscules, chiffres et traits de soulignement sont autorisés (doit commencer par une lettre).",
+        "errorTitle": "Erreur",
+        "prSuccessToast": "PR d'infrastructure créées avec succès !",
+        "prCreationFailed": "Échec de la création des PR",
+        "statusCheckFailed": "Échec de la requête de statut",
+        "timeout": "Délai dépassé lors de la création de l'infrastructure",
+        "cancelledToast": "PR d'infrastructure annulées",
+        "cancelFailed": "Échec de l'annulation"
+      }
+    }
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "billing": {
+    "backToDashboard": "Retour au tableau de bord",
+    "fallbackProjectName": "Projet",
+    "loadError": "Une erreur s'est produite lors de la récupération des données.",
+    "billingMode": {
+      "label": "Modèle de facturation :",
+      "prepaidDescriptionShort": "Top-ups payés à l'avance (tarif horaire plus bas).",
+      "monthlyDescriptionShort": "Facturation mensuelle selon les dépenses (tarif horaire plus élevé).",
+      "prepaidDescription": "Tarif horaire plus bas, top-ups payés à l'avance.",
+      "monthlyDescription": "Tarif horaire plus élevé, facturation mensuelle selon les dépenses.",
+      "updateSuccessTitle": "Modèle de facturation mis à jour pour {name}.",
+      "updateErrorTitle": "Échec de l'enregistrement."
+    },
+    "availableHours": {
+      "titleSuffix": "Heures de travail disponibles",
+      "toBillTitleSuffix": "À facturer actuellement",
+      "budgetUsed": "Budget consommé",
+      "budgetUsedDetail": "({used} h / {total} h)",
+      "consumedHours": "Heures consommées",
+      "billedSeparately": "(seront facturées séparément)",
+      "timeElapsed": "Temps écoulé",
+      "timeElapsedDetail": "({elapsed} / {total} jours)",
+      "calculationToBill": "Calcul À facturer actuellement",
+      "calculationAvailableBudget": "Calcul Budget disponible",
+      "rowTopUps": "Paiements / Top-ups",
+      "rowWorkLog": "Journal de travail",
+      "rowManualCorrections": "Corrections manuelles",
+      "rowBalance": "Solde",
+      "rowAvailable": "Disponible",
+      "budgetVsTime": "Budget vs. temps",
+      "difference": "Différence",
+      "remainingDays": "Jours restants"
+    },
+    "topUps": {
+      "titleSuffix": "Paiements / Top-ups",
+      "table": {
+        "date": "Échéance",
+        "note": "Note",
+        "amount": "Montant",
+        "rate": "Tarif",
+        "total": "Total",
+        "wePublish": "WePublish",
+        "medium": "Média",
+        "bexio": "Bexio",
+        "status": "Statut"
+      },
+      "rateUnit": "{rate} chf / h",
+      "invoiceNumber": "N° {number}",
+      "pdfError": "Impossible d'ouvrir le document.",
+      "emptyNote": " - ",
+      "hosting": {
+        "tileTitle": "Hébergement / Factures récurrentes",
+        "subtitle": "Les factures récurrentes ne comptent pas dans les heures de travail disponibles.",
+        "billedMonths": "{billed} / {total} mois",
+        "table": {
+          "date": "Échéance",
+          "title": "Titre",
+          "months": "Mois",
+          "unitPrice": "Prix / mois",
+          "total": "Total",
+          "invoice": "Facture",
+          "order": "Commande",
+          "status": "Statut"
+        }
+      }
+    },
+    "invoiceStatus": {
+      "draft": "Brouillon",
+      "pending": "Ouverte",
+      "paid": "Payée",
+      "partial": "Partiellement payée",
+      "canceled": "Annulée",
+      "unpaid": "Impayée",
+      "unknown": "Inconnu"
+    },
+    "manualCorrections": {
+      "title": "Corrections manuelles",
+      "table": {
+        "date": "Date",
+        "title": "Titre",
+        "description": "Description",
+        "hours": "Heures"
+      }
+    },
+    "generateBexioInvoice": "Générer une facture Bexio",
+    "createInvoice": {
+      "pageTitle": "Créer une facture Bexio",
+      "intro": "Ici, tu peux générer automatiquement une facture Bexio.",
+      "introTopUpLink": "Un paiement / top-up est automatiquement ajouté dans le tableau de bord One et lié à la facture Bexio.",
+      "introCooperativeFee": "La contribution coopérative We.Publish est automatiquement ajoutée à tes heures.",
+      "hostingIntro": "Crée une commande Bexio récurrente (annuelle) et une première facture pour les mois restants.",
+      "tabs": {
+        "postPaid": "Post-payé (basé sur les heures)",
+        "prePaid": "Prépayé (basé sur le montant)",
+        "hosting": "Hébergement (récurrent)"
+      },
+      "fields": {
+        "year": "Année",
+        "quarter": "Trimestre",
+        "billingDate": "Date de facturation",
+        "title": "Titre de la facture",
+        "amount": "Montant forfaitaire de la facture (CHF)",
+        "hours": "Nombre d'heures",
+        "hourlyRate": "Tarif horaire (chf)",
+        "wepPercentage": "Pourcentage We.Share",
+        "note": "Description de la position",
+        "unitPrice": "Prix par mois (CHF)",
+        "quantity": "Nombre de mois (commande)",
+        "billedUnits": "Mois à facturer"
+      },
+      "validation": {
+        "title": "Saisir le titre de la facture",
+        "hours": "Saisir le nombre d'heures",
+        "hourlyRate": "Saisir le tarif horaire",
+        "wepPercentage": "Saisir le pourcentage pour We.Share",
+        "note": "Saisir une remarque",
+        "unitPrice": "Saisir le prix par mois",
+        "billedUnits": "Saisir le nombre de mois à facturer"
+      },
+      "pickDate": "Choisir une date",
+      "submit": "Créer la facture",
+      "preview": {
+        "title": "Aperçu de la facture",
+        "hoursToBill": "Heures à facturer :",
+        "cooperativeShare": "Part coopérative We.Publish",
+        "totalHours": "Total des heures",
+        "totalWithoutVat": "Total hors TVA",
+        "vat": "TVA",
+        "totalWithVat": "Total avec TVA",
+        "unitPriceLine": "Prix par mois",
+        "quantityLine": "Nombre de mois",
+        "hostingAnnualTotal": "Total commande / an (net)",
+        "monthsToBill": "Mois à facturer",
+        "periodicityYearly": "Annuel",
+        "orderSectionTitle": "Commande récurrente",
+        "orderSectionSubtitle": "Répétée automatiquement chaque année dans Bexio (kb_order).",
+        "invoiceSectionTitle": "Première facture",
+        "invoiceSectionSubtitle": "Ne couvre que les mois restants (kb_invoice).",
+        "orderToInvoiceHint": "La première facture est générée à partir de la commande"
+      },
+      "deviationTitle": "Montant de la facture ajusté",
+      "deviationDescription": "Le montant de la facture a été ajusté automatiquement en raison des règles d'arrondi.",
+      "successTitle": "Facture créée avec succès !",
+      "successCardTitle": "Ça a marché !",
+      "successCardDescription": "Une facture a été créée sur Bexio et automatiquement liée au tableau de bord One.",
+      "hostingSuccessDescription": "Une commande récurrente et une première facture ont été créées sur Bexio et liées au tableau de bord One.",
+      "openBexioInvoice": "Ouvrir la facture Bexio",
+      "openBexioOrder": "Ouvrir la commande Bexio",
+      "openDirectusTopUp": "Ouvrir le top-up Directus",
+      "defaults": {
+        "quarterPlaceholder": "[TRIMESTRE]",
+        "prePaidTitle": "We.Develop Prepaid {quarter}e trimestre {year}",
+        "prePaidNote": "We.Develop en prépayé selon l'accord contractuel. {quarter}e trimestre {year}. Détails de facturation : voir le tableau de bord We.Publish ONE",
+        "postPaidTitle": "Facturation au {date}",
+        "postPaidNote": "Facturation des prestations fournies par l'équipe We.Publish au {date}. Profite d'un tarif réduit en payant à l'avance. Contacte ta personne de référence chez We.Publish. Tu trouveras le journal de travail détaillé ici : https://one.wepublish.cloud",
+        "hostingTitle": "We.Care (Hosting / Betrieb) & We.Share",
+        "hostingNote": "We.Care (Hosting / Betrieb) & We.Share. Gemäss vertraglicher Vereinbarung."
+      }
+    }
+  }
+}

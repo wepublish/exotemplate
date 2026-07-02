@@ -1,0 +1,108 @@
+{
+  "dashboard": {
+    "noClientAccess": {
+      "title": "No client access",
+      "description": "You currently have no client assigned. Once a client is assigned to you, your metrics will appear here."
+    },
+    "loadError": "An error occurred while fetching the data.",
+    "cards": {
+      "topUps": "Payments / Top-ups",
+      "availableHours": "Available working hours",
+      "toBill": "Currently to bill",
+      "workLog": "Work log",
+      "manualCorrections": "Manual corrections"
+    },
+    "summaryCard": {
+      "detailsAria": "{title} – show details",
+      "showDetails": "Show details"
+    },
+    "links": {
+      "title": "Quick links",
+      "slack": "Slack channel",
+      "weShare": "#we-share",
+      "editor": "Editor",
+      "jira": "Jira",
+      "website": "Website",
+      "docs": "Documentation",
+      "descriptions": {
+        "slack": "Your direct line to the We.Publish team. This is where we discuss everything about your project.",
+        "weShare": "The network-wide exchange across all We.Publish media. Tips, questions and shared learning.",
+        "editor": "The editorial system for your website. Create and edit your articles and content here.",
+        "jira": "Tasks, tickets and requests around your project – transparently tracked.",
+        "website": "Your published website, just as your readers see it.",
+        "docs": "Guides and help for We.Publish. Look up how everything works."
+      }
+    },
+    "workLogAlert": {
+      "haltedTitle": "{count} ticket is stopped | {count} tickets are stopped",
+      "haltedDescription": "The affected tickets must not be worked on until the stop is lifted.",
+      "openWarningsTitle": "{count} open warning | {count} open warnings",
+      "openWarningsDescription": "For some tickets the Jira estimate is used up or exceeded.",
+      "resolvedTitle": "{count} warning resolved | {count} warnings resolved",
+      "resolvedDescription": "The related Jira tickets are marked as Done or Cancelled — no action needed."
+    },
+    "weeklyStatus": {
+      "over_budget": {
+        "headline": "Budget exceeded",
+        "body": "{used} of the budget used. Please consult the project lead."
+      },
+      "no_budget": {
+        "headline": "No budget recorded",
+        "body": "{hours} already logged, but no top-up recorded. These hours will be billed separately unless a budget is added."
+      },
+      "close_to_limit": {
+        "headline": "Budget almost used up",
+        "body": "{used} of the budget used, {time} of the time elapsed. Plan the remaining hours carefully."
+      },
+      "behind_schedule": {
+        "headline": "Budget is being used up faster than time",
+        "body": "{used} of the budget used, but only {time} of the time elapsed ({delta} faster than planned)."
+      },
+      "ahead_of_schedule": {
+        "headline": "More budget left than expected",
+        "body": "Only {used} of the budget used, {time} of the time elapsed ({delta} under plan). Plenty of headroom."
+      },
+      "on_track": {
+        "headline": "Budget and time in sync",
+        "body": "{used} budget, {time} time. All within expectations."
+      }
+    },
+    "cache": {
+      "live": "Live data",
+      "fromCache": "From cache ({age} ago)",
+      "unit": {
+        "seconds": "{n} sec",
+        "minutes": "{n} min",
+        "hours": "{n} hr",
+        "hoursMinutes": "{h} hr {m} min"
+      },
+      "expiresNow": "expiring now",
+      "expiresIn": "expires in {duration}",
+      "refreshTooltip": {
+        "noCache": "Reload data from Jira and Clockodo",
+        "live": "Clear cache and reload — the data is already live (cache {expires}). Only click if something has changed in Jira or Clockodo since.",
+        "cached": "Clear cache and fetch fresh data from Jira & Clockodo. (Cache created {age} ago, {expires}.)"
+      },
+      "infoAria": "How does the cache work?",
+      "infoTitle": "How does caching work?",
+      "infoIntro": "Jira and Clockodo rate-limit requests (\"429 Too Many Requests\"). To keep the dashboard fast and stable for everyone, the aggregated hours per project and period are cached on the server for one hour.",
+      "infoLiveLabel": "Live data",
+      "infoLiveText": "just fetched directly from Jira & Clockodo.",
+      "infoCacheLabel": "From cache",
+      "infoCacheText": "stored copy, may be up to an hour old.",
+      "infoOutro": "Click the refresh icon to clear the cache for the currently selected period and re-query Jira & Clockodo. Other projects or periods are unaffected.",
+      "reload": "Reload",
+      "reloadAria": "Reload data",
+      "refreshSuccessTitle": "Data reloaded",
+      "refreshSuccessWithMeta": "Freshly fetched from Jira & Clockodo — cache {expires}.",
+      "refreshSuccessWithoutMeta": "Jira and Clockodo data has been reloaded.",
+      "refreshErrorTitle": "Refresh failed",
+      "unknownError": "Unknown error"
+    },
+    "contractWarning": {
+      "title": "Contract not signed",
+      "description": "No signed contract is on file for this client. Please upload the signed contract.",
+      "action": "Manage contract"
+    }
+  }
+}

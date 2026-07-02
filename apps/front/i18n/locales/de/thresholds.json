@@ -1,0 +1,30 @@
+{
+  "thresholds": {
+    "pageTitle": "Wann wird ein Jira-Ticket gemeldet?",
+    "intro": "Wir vergleichen die geleistete Arbeitszeit eines Jira-Tickets (alle bisher gebuchten Stunden inklusive der letzten 12 Monate vor der laufenden Abrechnungsperiode) mit der Aufwandsschätzung im Jira-Ticket. Sobald die verbrauchte Zeit eine Schwelle erreicht, meldet sich der Bot im Slack-Channel.",
+    "firstNotificationHeading": "Erste Meldung = Schätzung + Toleranz",
+    "firstNotificationBody": "Die erste Meldung erfolgt, sobald die Schätzung eines Jira-Tickets zuzüglich oder abzüglich der Toleranz erreicht wird. Die <em>Toleranz</em> kommt aus der Tabelle unten und kann positiv (Meldung nach Erreichen der Schätzung) oder negativ (Meldung schon vor Erreichen) sein. Danach folgt jeweils eine weitere Meldung im <em>wiederkehrenden Abstand</em>, ohne Obergrenze.",
+    "table": {
+      "range": "Bereich (Schätzung)",
+      "tolerance": "Toleranz",
+      "recurring": "Wiederkehrend",
+      "example": "Beispiel"
+    },
+    "cellFrom": "ab {hours}",
+    "cellTolerance": "Schätzung {offset}",
+    "cellRecurring": "alle {hours}",
+    "exampleLine": "Schätzung {min} → {points}, …",
+    "offsetZero": "±0 h",
+    "readingExamplesHeading": "Lesebeispiele",
+    "readingExamples": {
+      "item1": "Toleranz <strong>+2 h</strong>, Wiederkehrend <strong>4 h</strong>: Ticket mit Schätzung <strong>5 h</strong> → erste Meldung bei <strong>7 h</strong>, dann 11 h, 15 h …",
+      "item2": "Gleicher Bereich, Ticket mit Schätzung <strong>9 h</strong> → erste Meldung bei <strong>11 h</strong>, dann 15 h, 19 h … (kein „zu früh\" mehr).",
+      "item3": "Toleranz <strong>−1 h</strong>: Wir warnen bewusst kurz <em>bevor</em> die Schätzung aufgebraucht ist – nützlich bei grösseren Tickets."
+    },
+    "afterNotificationHeading": "Was passiert nach einer Meldung?",
+    "afterNotification": {
+      "halt": "<strong>Arbeit stoppen:</strong> markiert das Ticket als blockiert. Das Team erhält in Slack die Anweisung, sofort die Arbeit einzustellen, und die zugewiesene Person bekommt zusätzlich eine persönliche Direktnachricht.",
+      "silence": "<strong>Stummschalten:</strong> unterdrückt zukünftige Meldungen für dieses Ticket dauerhaft, bis die Stummschaltung explizit aufgehoben wird."
+    }
+  }
+}

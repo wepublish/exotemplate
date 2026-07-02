@@ -1,0 +1,9 @@
+# Root tooling deps (each app has its own nested .gitignore for its deps + build artefacts)
+node_modules/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/settings.json

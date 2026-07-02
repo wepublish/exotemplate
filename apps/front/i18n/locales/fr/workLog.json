@@ -1,0 +1,78 @@
+{
+  "workLog": {
+    "title": "Journal de travail",
+    "backToDashboard": "Retour au tableau de bord",
+    "haltedAlert": {
+      "title": "{count} ticket est arrêté | {count} tickets sont arrêtés",
+      "description": "Les tickets marqués en rouge ne doivent pas être traités pour l'instant, jusqu'à ce que l'arrêt soit levé directement sur le ticket."
+    },
+    "columns": {
+      "work": "Travail",
+      "billabilityDetails": "Détails de facturabilité",
+      "billableTime": "Temps facturable",
+      "details": "Détails"
+    },
+    "row": {
+      "haltActive": "Arrêt de travail actif",
+      "warnings": "{count} alerte | {count} alertes",
+      "resolved": "{count} résolu | {count} résolus"
+    },
+    "haltTitle": "Arrêt de travail pour {key}",
+    "billability": {
+      "jiraEstimate": "Estimation Jira",
+      "deliveredBeforePeriod": "Effectué avant la période de facturation",
+      "availableJiraHours": "Heures Jira disponibles",
+      "deliveredInPeriod": "Effectué pendant la période de facturation",
+      "fullyBillable": "Dont entièrement facturable",
+      "halfBillable": "Dont facturable à moitié",
+      "halfNonBillable": "Dont non facturable à moitié",
+      "totalBillable": "Total facturable"
+    },
+    "showDetails": "Afficher les détails",
+    "learnMore": "En savoir plus",
+    "status": {
+      "resolved": "Résolu",
+      "halt": "Arrêt de travail",
+      "silenced": "Mis en sourdine",
+      "warning": "Alerte"
+    },
+    "thresholdInfo": {
+      "lastReportedAt": "Dernier signalement à {hours}",
+      "nextReportAt": "Prochain signalement à {hours}"
+    },
+    "halt": {
+      "stopped": "Arrêté",
+      "stoppedBy": "par {name}",
+      "lifted": "Arrêt levé",
+      "liftedBy": "par {name}"
+    },
+    "silenced": {
+      "label": "Mis en sourdine",
+      "by": "par {name}"
+    },
+    "actions": {
+      "stopWork": "Arrêter le travail",
+      "resolveHalt": "Lever l'arrêt",
+      "silence": "Mettre en sourdine",
+      "unsilence": "Lever la mise en sourdine"
+    },
+    "confirmDialog": {
+      "title": "Arrêter le travail sur le ticket ?",
+      "intro": "Tu es sur le point de demander un arrêt de travail pour {key}.",
+      "whatHappens": "<strong>Ce qui se passe maintenant :</strong> un message d'arrêt avec ton nom apparaît dans le canal Slack de ton projet. L'équipe est invitée à cesser immédiatement de travailler sur ce ticket.",
+      "untilWhen": "<strong>Jusqu'à quand cela s'applique :</strong> l'arrêt reste actif tant que tu ne le lèves pas dans le tableau de bord. Ce n'est qu'à ce moment que le travail peut reprendre.",
+      "hint": "Utilise cette fonction si tu veux te concerter avant que des heures supplémentaires ne soient facturées. Pour les tickets qui ne t'intéressent tout simplement plus, utilise plutôt « Mettre en sourdine ».",
+      "confirm": "Arrêter le travail et informer le canal"
+    },
+    "toast": {
+      "requestHaltSuccess": "Arrêt de travail demandé pour {key}. Le canal a été informé.",
+      "requestHaltError": "Impossible de demander l'arrêt.",
+      "resolveHaltSuccess": "Arrêt de travail levé pour {key}. Le travail peut reprendre.",
+      "resolveHaltError": "Impossible de lever l'arrêt.",
+      "silenceSuccess": "{key} mis en sourdine définitivement. Aucun autre message Slack ne sera envoyé.",
+      "silenceError": "Échec de la mise en sourdine.",
+      "unsilenceSuccess": "Mise en sourdine levée pour {key}. Les messages Slack sont de nouveau actifs.",
+      "unsilenceError": "Échec de la levée."
+    }
+  }
+}

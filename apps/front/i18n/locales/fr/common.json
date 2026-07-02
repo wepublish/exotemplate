@@ -1,0 +1,26 @@
+{
+  "common": {
+    "loading": "Chargement …",
+    "retry": "Réessayer",
+    "refresh": "Actualiser",
+    "back": "Retour",
+    "open": "Ouvrir",
+    "close": "Fermer",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "search": "Rechercher",
+    "on": "Activé",
+    "off": "Désactivé",
+    "billingMode": {
+      "prepaid": "Prépayé (top-ups)",
+      "monthly": "Facturation mensuelle"
+    },
+    "unexpectedError": "Une erreur inattendue s'est produite",
+    "actionFailed": "L'action a échoué.",
+    "notLoggedIn": "Non connecté.",
+    "accessDenied": {
+      "title": "Accès refusé",
+      "body": "Cette page est réservée aux administrateurs."
+    }
+  }
+}

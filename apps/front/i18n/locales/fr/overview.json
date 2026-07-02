@@ -1,0 +1,45 @@
+{
+  "overview": {
+    "title": "Aperçu des projets",
+    "projectCount": "{count} projet | {count} projets",
+    "overdueCount": "{count} en retard",
+    "lastUpdated": "dernière actualisation {relative}",
+    "searchPlaceholder": "Rechercher un projet ou une période…",
+    "sort": {
+      "budgetDesc": "En retard d'abord",
+      "budgetAsc": "Le moins consommé d'abord",
+      "clientName": "Nom (A–Z)",
+      "daysRemainingAsc": "Jours restants (les plus courts d'abord)",
+      "periodFromDesc": "Début de période (les plus récents d'abord)"
+    },
+    "schemaMissing": {
+      "title": "Table BillingSnapshots manquante",
+      "description": "Veuillez exécuter npm run schema:load dans le backend pour créer la nouvelle table."
+    },
+    "loadError": "Impossible de charger l'aperçu",
+    "empty": {
+      "title": "Aucun projet trouvé",
+      "description": "Soit aucune période active n'existe pour chaque client, soit la recherche ne donne aucun résultat."
+    },
+    "refreshSuccess": "Actualisé",
+    "refreshError": "Échec de l'actualisation",
+    "tile": {
+      "detailsAria": "{name} – afficher les détails",
+      "refreshAria": "Actualiser",
+      "computing": "calcul en cours…",
+      "toBill": "À facturer actuellement",
+      "timeElapsed": "Temps écoulé",
+      "budgetUsed": "Budget consommé",
+      "hoursOfTopUps": "{used} h / {total} h",
+      "daysOfTotal": "{elapsed} / {total} jours",
+      "updateFailed": "Échec de l'actualisation",
+      "updatedRelative": "Actualisé {relative}",
+      "open": "Ouvrir",
+      "justUpdated": "à l'instant",
+      "minutesAgo": "il y a {n} min",
+      "hoursAgo": "il y a {n} h",
+      "daysAgo": "il y a {n} jour | il y a {n} jours",
+      "noSignedContract": "Aucun contrat signé"
+    }
+  }
+}

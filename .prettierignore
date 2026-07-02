@@ -1,0 +1,10 @@
+# Vendored / generated — never reformat
+**/node_modules
+apps/directus/schema
+apps/directus/extensions/*/dist
+apps/directus/uploads
+apps/front/.output
+apps/front/.nuxt
+apps/front/.data
+apps/front/.nitro
+package-lock.json

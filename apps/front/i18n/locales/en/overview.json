@@ -1,0 +1,45 @@
+{
+  "overview": {
+    "title": "Project overview",
+    "projectCount": "{count} project | {count} projects",
+    "overdueCount": "{count} overdue",
+    "lastUpdated": "last updated {relative}",
+    "searchPlaceholder": "Search by project or period…",
+    "sort": {
+      "budgetDesc": "Overdue first",
+      "budgetAsc": "Least used first",
+      "clientName": "Name (A–Z)",
+      "daysRemainingAsc": "Remaining days (shortest first)",
+      "periodFromDesc": "Period start (most recent first)"
+    },
+    "schemaMissing": {
+      "title": "BillingSnapshots table missing",
+      "description": "Please run npm run schema:load in the backend to create the new table."
+    },
+    "loadError": "Could not load the overview",
+    "empty": {
+      "title": "No projects found",
+      "description": "Either no active period exists for each client, or the search returns no matches."
+    },
+    "refreshSuccess": "Updated",
+    "refreshError": "Update failed",
+    "tile": {
+      "detailsAria": "{name} – show details",
+      "refreshAria": "Refresh",
+      "computing": "computing…",
+      "toBill": "Currently to bill",
+      "timeElapsed": "Time elapsed",
+      "budgetUsed": "Budget used",
+      "hoursOfTopUps": "{used} h / {total} h",
+      "daysOfTotal": "{elapsed} / {total} days",
+      "updateFailed": "Update failed",
+      "updatedRelative": "Updated {relative}",
+      "open": "Open",
+      "justUpdated": "just updated",
+      "minutesAgo": "{n} min ago",
+      "hoursAgo": "{n} hr ago",
+      "daysAgo": "{n} day ago | {n} days ago",
+      "noSignedContract": "No signed contract"
+    }
+  }
+}

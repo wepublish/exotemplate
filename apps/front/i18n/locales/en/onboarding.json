@@ -1,0 +1,386 @@
+{
+  "onboarding": {
+    "index": {
+      "accessSubtitle": "Insufficient permissions",
+      "backToDashboard": "Back to dashboard",
+      "title": "Client onboarding",
+      "subtitle": "Set up a new client step by step across all systems.",
+      "adminBadge": "Admin",
+      "startNew": {
+        "title": "Start new onboarding",
+        "description": "Set up a new client from scratch across all systems.",
+        "button": "Start new onboarding"
+      },
+      "clients": {
+        "title": "Clients",
+        "description": "View, continue or start each client. Progress is determined from the IDs stored in the respective services.",
+        "searchPlaceholder": "Search client…",
+        "noneFound": "No clients found."
+      },
+      "status": {
+        "completed": "Completed",
+        "stepProgress": "{completed}/{total} — {current}",
+        "stepFallback": "Step {n}"
+      },
+      "action": {
+        "view": "View",
+        "continue": "Continue",
+        "start": "Start"
+      }
+    },
+    "detail": {
+      "notFoundTitle": "Client not found",
+      "notFoundDescription": "The requested client no longer exists.",
+      "backToOverview": "Back to overview",
+      "newOnboarding": "New onboarding"
+    },
+    "stepper": {
+      "progress": "Progress",
+      "completedBanner": {
+        "title": "Onboarding completed",
+        "description": "All steps were completed successfully. You can still select any step to review the stored information."
+      },
+      "stepHeading": "Step {step}: {title}",
+      "errorBadge": "Error",
+      "completeStep": "Complete step",
+      "finishOnboarding": "Finish onboarding"
+    },
+    "steps": {
+      "directus": {
+        "title": "ONE",
+        "description": "Create a new client and users in the Directus instance.",
+        "intro": "Create a new client record and one or more user accounts in Directus.",
+        "completedTitle": "Client created successfully",
+        "completedDescription": "Directus client ID:",
+        "clientName": "Client name",
+        "clientNamePlaceholder": "e.g. Muster AG",
+        "role": "User role",
+        "rolePlaceholder": "Select a role (optional)",
+        "roleUuidPlaceholder": "Role UUID (could not be loaded)",
+        "users": "Users ({count})",
+        "addUser": "Add user",
+        "userN": "User {n}",
+        "firstName": "First name",
+        "firstNamePlaceholder": "Max",
+        "lastName": "Last name",
+        "lastNamePlaceholder": "Mustermann",
+        "email": "Email",
+        "emailPlaceholder": "max{'@'}muster-ag.ch",
+        "password": "Password",
+        "errorTitle": "Error while creating",
+        "execute": "Create in Directus",
+        "nameRequired": "Please enter a client name.",
+        "successToast": "Client and users created successfully!"
+      },
+      "jira": {
+        "title": "Jira",
+        "description": "Set up a new Jira project for the medium.",
+        "intro": "Create a new Jira project with the «Default Media Workflow» workflow scheme and configure the board.",
+        "directusRequired": "Step 1 (Directus) must be completed first so the client record can be updated after the project is created.",
+        "completedTitle": "Jira project created successfully",
+        "completedKey": "Project key:",
+        "completedId": "— ID: {id}",
+        "projectName": "Project name",
+        "projectNamePlaceholder": "e.g. Muster AG",
+        "projectKey": "Project key",
+        "projectKeyPlaceholder": "e.g. MUSTERAG",
+        "projectKeyHint": "Max. 10 characters, uppercase letters and numbers only",
+        "lead": "Project lead",
+        "leadHint": "Jira account ID is set automatically",
+        "leadManualHint": "{error} — enter account ID manually:",
+        "leadIdPlaceholder": "e.g. 5b10a2844c20165700ede21g",
+        "userSearchPlaceholder": "Search Jira user…",
+        "accountId": "Account ID: {id}",
+        "descriptionLabel": "Description (optional)",
+        "descriptionPlaceholder": "Short description of the project...",
+        "errorTitle": "Error while creating",
+        "execute": "Create Jira project",
+        "openProject": "Open project in Jira",
+        "fieldProjectName": "Project name",
+        "fieldProjectKey": "Project key",
+        "invite": {
+          "heading": "Invite users",
+          "memberCount": "{count} member(s)",
+          "teamTitle": "Team members (administrator access)",
+          "teamDescription": "Select existing Jira users — they get full admin access to the project.",
+          "teamPlaceholder": "Select team members…",
+          "addAdmins": "Add administrators",
+          "customerTitle": "Customer emails (customer role)",
+          "customerDescription": "External customers: if no Jira account exists yet, an invitation is sent by email.",
+          "customerEmailPlaceholder": "customer{'@'}example.ch",
+          "add": "Add",
+          "inviteCustomers": "Invite customers",
+          "currentMembers": "Current project members",
+          "noMembers": "No members found."
+        },
+        "validation": {
+          "nameAndKeyRequired": "Project name and project key are required.",
+          "leadRequired": "Please select a project lead.",
+          "invalidEmail": "Invalid email address",
+          "teamRequired": "Please select at least one team user.",
+          "customerEmailRequired": "Please enter at least one customer email."
+        },
+        "toast": {
+          "usersLoadFailed": "Could not load Jira users.",
+          "created": "Jira project created successfully!",
+          "adminsAdded": "{count} users added to \"{roleName}\"",
+          "inviteFailed": "Invitation failed",
+          "customersAdded": "{count} customers added to \"{roleName}\"",
+          "customersInvited": "{count} newly invited",
+          "customersPartial": "{added} successful, {failed} errors"
+        }
+      },
+      "slack": {
+        "title": "Slack",
+        "description": "Create a dedicated Slack channel for the client.",
+        "intro": "Create a dedicated Slack channel for the client.",
+        "completedTitle": "Slack channel created successfully",
+        "completedId": "ID:",
+        "channelName": "Channel name",
+        "channelNamePlaceholder": "wep-muster-ag",
+        "channelNameHint": "Lowercase, numbers, hyphens — normalized automatically",
+        "descriptionLabel": "Description (optional)",
+        "descriptionPlaceholder": "Client communication channel",
+        "execute": "Create Slack channel",
+        "openChannel": "Open channel in Slack",
+        "adminOnly": "Only administrators can perform this step.",
+        "channelRequired": "Please enter a channel name.",
+        "successToast": "#{channel} created successfully!"
+      },
+      "bexio": {
+        "title": "Bexio",
+        "description": "Register the new client in Bexio as a contact / customer.",
+        "intro": "Register the new client in Bexio as a company contact. The Bexio contact ID is saved automatically on the client record and is needed for later invoicing.",
+        "directusRequired": "Step 1 (Directus) must be completed first so the client record can be updated after creation.",
+        "completedTitle": "Bexio contact created successfully",
+        "completedDescription": "Contact ID:",
+        "savedOnClient": "— was saved on the client record.",
+        "company": "Company name",
+        "companyPlaceholder": "Muster AG",
+        "email": "Email",
+        "emailHint": "Stored as the contact's primary email address",
+        "emailPlaceholder": "info{'@'}muster.ch",
+        "street": "Street",
+        "streetPlaceholder": "Musterstrasse",
+        "streetNumber": "No.",
+        "zip": "ZIP",
+        "city": "City",
+        "cityPlaceholder": "Zürich",
+        "fieldStreet": "Street",
+        "fieldZipCity": "ZIP / City",
+        "errorTitle": "Error while creating",
+        "execute": "Create Bexio contact",
+        "openContact": "Open contact in Bexio",
+        "allFieldsRequired": "All fields (company name, email, street, no., ZIP, city) are required.",
+        "directusFirst": "Step 1 (Directus) must be completed first.",
+        "successToast": "Bexio contact created successfully!"
+      },
+      "clockodo": {
+        "title": "Clockodo",
+        "description": "Connect the Bexio customer to Clockodo.",
+        "intro": "Connect the Bexio customer to Clockodo so hours can be tracked and billed correctly. The Clockodo Bexio integration automatically syncs Bexio contacts as Clockodo customers.",
+        "bexioRequired": "Step 4 (Bexio) must be completed first before the Clockodo sync can be performed.",
+        "completedTitle": "Clockodo customer connected successfully",
+        "completedDescription": "Clockodo customer ID:",
+        "savedOnClient": "— was saved on the client record.",
+        "bexioContactId": "Bexio contact ID",
+        "bexioContactIdHint": "From the «Create Bexio customer» step",
+        "bexioContactIdPlaceholder": "From the «Bexio» step",
+        "clientName": "Client name",
+        "clientNameHint": "Used to search in Clockodo",
+        "errorTitle": "Error during sync",
+        "syncAndLink": "Search and connect in Clockodo",
+        "orManual": "or enter manually",
+        "clockodoId": "Clockodo customer ID",
+        "clockodoIdHint": "If the automatic search fails",
+        "clockodoIdPlaceholder": "e.g. 67890",
+        "saveManual": "Save manually",
+        "openCustomer": "Open customer in Clockodo",
+        "syncedToast": "Clockodo customer found and connected!",
+        "savedToast": "Clockodo ID saved.",
+        "saveErrorTitle": "Error while saving"
+      },
+      "infrastructure": {
+        "title": "Infrastructure",
+        "description": "Set up the editor and website environment for the client."
+      },
+      "manualTasks": {
+        "title": "Manual steps",
+        "description": "Work through the manual tasks per the checklist.",
+        "intro": "The following tasks must be done manually. Tick off each task once it's complete. The linked guide describes each step in detail.",
+        "doneCount": "{completed}/{total} done",
+        "docs": "Guide",
+        "allDone": "All manual tasks are done. You can finish the step.",
+        "tasks": {
+          "jiraBoardSetup": {
+            "title": "Set up Jira board",
+            "description": "Add custom columns to the Jira board and assign them to the corresponding task states."
+          },
+          "slackInvites": {
+            "title": "Slack invitations",
+            "description": "Invite users to the dedicated Slack channel and #we-share."
+          }
+        }
+      },
+      "invoicing": {
+        "title": "Invoice",
+        "description": "Create the first invoices for hosting and onboarding.",
+        "intro": "Create the first invoice for hosting (from the start of development) and the one-off onboarding invoice. Check each one off once it has been created in Bexio.",
+        "doneCount": "{completed}/{total} done",
+        "allDone": "Both invoices have been created. You can complete this step.",
+        "createInvoice": "Create invoice",
+        "created": "Created",
+        "period": {
+          "label": "Billing period",
+          "hint": "Choose the period to bill against.",
+          "none": "No billing period for this client yet.",
+          "addLabel": "Add period",
+          "addPlaceholder": "Choose a period definition…",
+          "add": "Add",
+          "added": "Billing period added.",
+          "addError": "Could not add the period.",
+          "noDefinitions": "No period definitions available. Create a period in Directus first."
+        },
+        "tasks": {
+          "hostingInvoice": {
+            "title": "Create hosting invoice",
+            "description": "Recurring hosting invoice from the start of development. In \"Create Bexio invoice\", \"Hosting\" tab."
+          },
+          "onboardingInvoice": {
+            "title": "Create onboarding invoice",
+            "description": "One-off invoice for the onboarding."
+          }
+        }
+      },
+      "email": {
+        "title": "Email",
+        "description": "Send a summary email with all credentials.",
+        "intro": "The text below is pre-filled from the previous steps. Adjust it if needed, then copy it and send it from your mail client.",
+        "recipient": "Recipient",
+        "subject": "Subject",
+        "body": "Email text",
+        "regenerate": "Regenerate",
+        "copyText": "Copy text",
+        "notImplemented": "Automatic email sending is not implemented. Copy the text and send it from your mail client to {recipient}.",
+        "recipientFallback": "(recipient)",
+        "regeneratedToast": "Text regenerated",
+        "copiedToast": "{label} copied",
+        "copyFailedTitle": "Copy failed",
+        "copyFailedDescription": "Please select and copy manually.",
+        "label": {
+          "recipient": "Recipient",
+          "subject": "Subject",
+          "body": "Email text"
+        },
+        "welcome": {
+          "subject": "Welcome to We.Publish – your most important links",
+          "greeting": "Hi {name}",
+          "fallbackName": "everyone",
+          "intro": "great to have you on board at We.Publish! So you can get started right away, here are the four platforms we work with – each with a clear purpose, so you always know where to find what:",
+          "oneTitle": "ONE – transparent finances",
+          "activate": "Activate account & set password: {url}",
+          "login": "Log in: {url}",
+          "oneText": "Here you can see at any time how many hours we've worked for you, what's on your balance, your contract and all invoices. Full transparency over the costs.",
+          "jiraTitle": "Jira – project management & work progress",
+          "jiraText": "Your project board: here we track all tasks, bugs and features. You can check at any time what we're working on, comment on tickets or submit new requests.",
+          "slackTitle": "Slack – daily communication",
+          "sharedChannel": "Our shared channel: #{channel}",
+          "slackText": "For quick contact: questions, coordination and direct exchange with the team – faster and more personal than email.",
+          "editorTitle": "Editor – manage website & CRM",
+          "editorText": "Your editorial cockpit: maintain articles, pages and content of your website as well as manage subscribers and CRM.",
+          "summary": "In short: ONE for finances, Jira for project work, Slack for communication and the Editor for your content. That way everything stays in its place.",
+          "activateOutro": "Via the link above (ONE) you activate your account and set your password. You can then invite further team members at any time – log in to ONE and open the “Team” section.",
+          "meeting": "In the next few days we'll get in touch with you to arrange a date for an in-person meeting – so we can get to know each other in peace and discuss the next steps together.",
+          "closing": "See you soon and best regards\nYour We.Publish team"
+        }
+      },
+      "contract": {
+        "title": "Contract",
+        "description": "Upload the signed contract as a PDF.",
+        "intro": "Upload this client's signed contract as a PDF file. You can add newer versions later in the settings.",
+        "directusRequired": "Please complete the Directus step first so the client exists.",
+        "fileLabel": "Contract (PDF)",
+        "fileHint": "PDF files only.",
+        "signedLabel": "This is the version signed by both parties",
+        "fileRequired": "Please select a file.",
+        "mustBePdf": "Please upload a PDF file.",
+        "upload": "Upload",
+        "successToast": "Contract uploaded.",
+        "errorTitle": "Could not upload the contract",
+        "completedTitle": "Contract uploaded",
+        "completedDescription": "The contract was saved. You can add newer versions in the settings.",
+        "fileTooLarge": "The file is too large (max. 10 MB)."
+      }
+    },
+    "infrastructure": {
+      "checkingPending": "Checking existing onboarding PRs...",
+      "cancelPrs": "Cancel PRs",
+      "form": {
+        "intro": "Automatically creates pull requests on the {configRepo} and {websiteRepo} repositories to set up the Terraform configuration and website app for the new medium.",
+        "mediumName": "Medium name",
+        "mediumNamePlaceholder": "muster_ag",
+        "mediumNameHint": "Terraform identifier: lowercase, digits, underscores",
+        "editor": "Editor:",
+        "website": "Website:",
+        "websiteEnabled": "Enable website",
+        "websiteEnabledDescription": "Create the website app for the medium",
+        "staging": "Staging environment",
+        "stagingDescription": "Set up an additional staging environment",
+        "customHostnames": "Custom hostnames (optional)",
+        "hostnamePlaceholder": "www.muster-ag.ch",
+        "add": "Add",
+        "errorTitle": "Error",
+        "execute": "Create infrastructure"
+      },
+      "polling": {
+        "title": "Creating infrastructure",
+        "description": "Pull requests are being created on GitHub. This may take a moment...",
+        "creating": "Creating infrastructure...",
+        "creatingProgress": "Creating infrastructure... ({current}/{total})"
+      },
+      "summary": {
+        "title": "Infrastructure PRs created successfully",
+        "description": "Pull requests were opened on both repositories and are awaiting review.",
+        "configPr": "Configuration PR",
+        "websitePr": "Website PR",
+        "viewPr": "View PR #{number}",
+        "editorUrl": "Editor URL",
+        "websiteUrl": "Website URL",
+        "apiUrl": "API URL",
+        "staging": "Staging",
+        "stagingYes": "Yes",
+        "stagingNo": "No",
+        "mediumName": "Medium name"
+      },
+      "reviewer": {
+        "title": "Notify reviewers via Slack",
+        "description": "Sends a direct message in Slack to the recipients listed below. The message text can be adjusted before sending.",
+        "recipients": "Recipients",
+        "addEmailPlaceholder": "add another email",
+        "add": "Add",
+        "message": "Message",
+        "regenerate": "Regenerate",
+        "send": "Send message",
+        "emptyError": "Recipients and message must not be empty.",
+        "invalidEmail": "Invalid email address",
+        "sentToast": "Message sent to {count} reviewers.",
+        "partialToast": "{sent} sent, {failed} failed",
+        "template": {
+          "fallbackName": "new medium",
+          "body": "Hoi Elias and Lukas\n\nplease review the open pull requests for the new medium «{name}» and merge them:\n• {configPr}\n• {websitePr}\n\nOnce the merges are through, a quick reply please, so the onboarding can be continued.\n\nThanks!"
+        }
+      },
+      "provisioning": {
+        "adminOnly": "Only administrators can perform this step.",
+        "invalidMediumName": "Invalid medium name. Only lowercase letters, digits and underscores allowed (must start with a letter).",
+        "errorTitle": "Error",
+        "prSuccessToast": "Infrastructure PRs created successfully!",
+        "prCreationFailed": "PR creation failed",
+        "statusCheckFailed": "Status check failed",
+        "timeout": "Timeout while creating infrastructure",
+        "cancelledToast": "Infrastructure PRs cancelled",
+        "cancelFailed": "Cancellation failed"
+      }
+    }
+  }
+}

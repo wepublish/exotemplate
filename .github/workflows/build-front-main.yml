@@ -1,0 +1,30 @@
+name: Publish frontend main image
+
+# Path-filtered: only rebuilds the Nuxt frontend image when something under
+# apps/front/** changes on main.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/front/**'
+
+jobs:
+  date_sha_tag:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.image_tag.outputs.tag }}
+    steps:
+      - id: image_tag
+        run: echo "tag=$(date +%s)-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+
+  publish_main_docker:
+    needs: date_sha_tag
+    uses: ./.github/workflows/publish-docker-image.yml
+    with:
+      context: apps/front
+      tags: |
+        ghcr.io/wepublish/one-front:main-${{ needs.date_sha_tag.outputs.tag }}
+        ghcr.io/wepublish/one-front:main
+    secrets: inherit
