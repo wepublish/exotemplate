@@ -17,19 +17,28 @@ export interface GithubAuthConfig {
   successRedirect: string
 }
 
-/** Split a comma-separated team list into trimmed, non-empty slugs. */
-export function parseTeams(raw: string | null | undefined): string[] {
-  return (raw ?? '')
-    .split(',')
+/**
+ * Normalize the team config into trimmed, non-empty slugs. Accepts a
+ * comma-separated string OR a string[] — Directus casts comma-containing env
+ * values to arrays, so both shapes reach us.
+ */
+export function parseTeams(
+  raw: string | string[] | null | undefined
+): string[] {
+  const items = Array.isArray(raw) ? raw : [raw ?? '']
+  return items
+    .flatMap((x) => String(x).split(','))
     .map((t) => t.trim())
     .filter((t) => t.length > 0)
 }
 
+// GITHUB_OAUTH_TEAM is handled separately: Directus auto-casts a comma-separated
+// env value to an array, so it may arrive as string OR string[] — it can't be
+// in this strict "must be a string" list.
 const REQUIRED = [
   'GITHUB_OAUTH_CLIENT_ID',
   'GITHUB_OAUTH_CLIENT_SECRET',
   'GITHUB_OAUTH_ORG',
-  'GITHUB_OAUTH_TEAM',
   'GITHUB_OAUTH_CALLBACK_URL',
   'FRONTEND_DASHBOARD_URL'
 ] as const

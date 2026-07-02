@@ -38,6 +38,14 @@ describe('readGithubAuthConfig', () => {
     expect(cfg?.teams).toEqual(['staff', 'admins', 'developers'])
   })
 
+  it('accepts an array for teams (Directus casts comma values to arrays)', () => {
+    const cfg = readGithubAuthConfig({
+      ...fullEnv,
+      GITHUB_OAUTH_TEAM: ['administration-access', 'infrastructure']
+    })
+    expect(cfg?.teams).toEqual(['administration-access', 'infrastructure'])
+  })
+
   it('returns null when any required var is missing', () => {
     for (const key of Object.keys(fullEnv)) {
       const partial: Record<string, any> = { ...fullEnv }
