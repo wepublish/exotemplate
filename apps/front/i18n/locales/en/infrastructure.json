@@ -7,6 +7,8 @@
     "loadError": "Could not load the configuration.",
     "empty": "No configuration found.",
     "noEnvironment": "No configuration for this environment.",
+    "noMedium": "No medium name is set for this project. It can be added in the settings.",
+    "mediumNotFound": "No configuration found for “{medium}”.",
     "rawButton": "Raw configuration",
     "cards": {
       "urls": "URLs",

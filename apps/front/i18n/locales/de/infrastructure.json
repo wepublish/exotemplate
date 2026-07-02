@@ -7,6 +7,8 @@
     "loadError": "Konfiguration konnte nicht geladen werden.",
     "empty": "Keine Konfiguration gefunden.",
     "noEnvironment": "Für diese Umgebung ist keine Konfiguration vorhanden.",
+    "noMedium": "Für dieses Projekt ist kein Medium-Name hinterlegt. Er kann in den Einstellungen ergänzt werden.",
+    "mediumNotFound": "Für „{medium}“ wurde keine Konfiguration gefunden.",
     "rawButton": "Raw-Konfiguration",
     "cards": {
       "urls": "URLs",

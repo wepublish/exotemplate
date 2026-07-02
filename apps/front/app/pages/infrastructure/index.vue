@@ -24,35 +24,17 @@
     () => config?.fetchedAt.value ?? null
   )
 
-  // Default the medium to the currently-selected client's medium_name when it's
-  // among the configured media, otherwise the first medium.
+  // Driven by the global project selector (top-left) — no separate medium
+  // picker. The selected client's medium_name maps to its infra config.
   const selection = useClientSelection()
   const { selectedClient } = storeToRefs(selection)
 
-  const selectedMedium = ref<string>('')
-  watch(
-    [mediumNames, selectedClient],
-    () => {
-      if (
-        selectedMedium.value &&
-        mediumNames.value.includes(selectedMedium.value)
-      ) {
-        return
-      }
-      const preferred = selectedClient.value?.medium_name ?? ''
-      selectedMedium.value = mediumNames.value.includes(preferred)
-        ? preferred
-        : (mediumNames.value[0] ?? '')
-    },
-    { immediate: true }
+  const selectedMedium = computed<string>(
+    () => selectedClient.value?.medium_name ?? ''
   )
 
-  const mediumOptions = computed(() =>
-    mediumNames.value.map((m) => ({ value: m, label: m }))
-  )
-
-  const currentMedium = computed<InfraMediumConfig | undefined>(
-    () => media.value[selectedMedium.value]
+  const currentMedium = computed<InfraMediumConfig | undefined>(() =>
+    selectedMedium.value ? media.value[selectedMedium.value] : undefined
   )
 
   const availableEnvs = computed<InfraEnvironmentKey[]>(() => {
@@ -104,7 +86,17 @@
     <template v-else>
       <div class="flex flex-wrap items-end justify-between gap-4 mb-4">
         <div>
-          <h1 class="text-2xl font-bold">{{ t('infrastructure.title') }}</h1>
+          <div class="flex items-center gap-2">
+            <h1 class="text-2xl font-bold">{{ t('infrastructure.title') }}</h1>
+            <UBadge
+              v-if="selectedMedium"
+              color="neutral"
+              variant="subtle"
+              size="sm"
+            >
+              {{ selectedMedium }}
+            </UBadge>
+          </div>
           <p class="text-muted text-sm">{{ t('infrastructure.subtitle') }}</p>
           <p v-if="fetchedAt" class="text-xs text-muted mt-0.5">
             {{
@@ -112,25 +104,15 @@
             }}
           </p>
         </div>
-        <div class="flex items-end gap-2">
-          <USelectMenu
-            v-model="selectedMedium"
-            :items="mediumOptions"
-            value-key="value"
-            label-key="label"
-            :search-input="{ placeholder: t('infrastructure.mediumLabel') }"
-            class="w-56"
-          />
-          <UButton
-            v-if="selectedMedium"
-            :to="link(`/infrastructure/raw?medium=${selectedMedium}`)"
-            icon="lucide:code"
-            variant="outline"
-            color="neutral"
-          >
-            {{ t('infrastructure.rawButton') }}
-          </UButton>
-        </div>
+        <UButton
+          v-if="selectedMedium && currentMedium"
+          :to="link(`/infrastructure/raw?medium=${selectedMedium}`)"
+          icon="lucide:code"
+          variant="outline"
+          color="neutral"
+        >
+          {{ t('infrastructure.rawButton') }}
+        </UButton>
       </div>
 
       <USkeleton v-if="pending" class="h-64" />
@@ -150,6 +132,24 @@
         variant="soft"
         icon="lucide:info"
         :title="t('infrastructure.empty')"
+      />
+
+      <!-- Selected project has no medium_name mapped. -->
+      <UAlert
+        v-else-if="!selectedMedium"
+        color="info"
+        variant="soft"
+        icon="lucide:info"
+        :title="t('infrastructure.noMedium')"
+      />
+
+      <!-- medium_name set but the configurator has no config for it. -->
+      <UAlert
+        v-else-if="!currentMedium"
+        color="info"
+        variant="soft"
+        icon="lucide:info"
+        :title="t('infrastructure.mediumNotFound', { medium: selectedMedium })"
       />
 
       <template v-else>

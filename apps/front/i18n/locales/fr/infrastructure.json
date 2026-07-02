@@ -7,6 +7,8 @@
     "loadError": "Impossible de charger la configuration.",
     "empty": "Aucune configuration trouvée.",
     "noEnvironment": "Aucune configuration pour cet environnement.",
+    "noMedium": "Aucun nom de média n'est défini pour ce projet. Il peut être ajouté dans les paramètres.",
+    "mediumNotFound": "Aucune configuration trouvée pour « {medium} ».",
     "rawButton": "Configuration brute",
     "cards": {
       "urls": "URLs",
