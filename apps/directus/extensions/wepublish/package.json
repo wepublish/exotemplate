@@ -75,6 +75,11 @@
         "source": "src/monitoring/index.ts"
       },
       {
+        "type": "endpoint",
+        "name": "staff-auth",
+        "source": "src/staff-auth/index.ts"
+      },
+      {
         "type": "operation",
         "name": "billing-snapshot-refresh",
         "source": {
