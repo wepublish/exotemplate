@@ -150,11 +150,14 @@ export default defineEndpoint((router, context) => {
       // 4) Provision / resolve the Directus admin user, then issue a session.
       const { services, getSchema } = context
       const schema = await getSchema()
+      // Directus 11 moved admin_access onto Access Policies, so directus_roles
+      // no longer has that field — match the role by name instead (the same
+      // "Administrator" convention the frontend's amIAdministrator() uses).
       const rolesService = new services.ItemsService('directus_roles', {
         schema
       })
       const adminRoles = await rolesService.readByQuery({
-        filter: { admin_access: { _eq: true } },
+        filter: { name: { _eq: 'Administrator' } },
         fields: ['id'],
         limit: 1
       })
