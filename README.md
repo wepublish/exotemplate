@@ -94,7 +94,7 @@ cd apps/front && npm run dev
 Then open:
 
 - **Frontend (dashboard):** http://localhost:3000
-- **Backend (Directus admin):** http://localhost:8055 — login `admin@seccom.ch` / `admin`
+- **Backend (Directus admin):** http://localhost:8055 — login `admin@wepublish.ch` / `admin123`
 
 ---
 

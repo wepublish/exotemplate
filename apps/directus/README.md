@@ -16,7 +16,7 @@ Backend serving We.Publish Inside Front-End. The Project is based on Directus he
 
 URL: http://localhost:8055  
 Username: admin@wepublish.ch
-Password: admin
+Password: admin123
 
 ## Seeding
 

@@ -313,7 +313,7 @@ The frontend ([one-front](../front/)) connects to this backend at port 8055:
 - **Two roles**: `Administrator` (admin/app access) and `Client` (`app_access: false` — no Directus admin app, but can authenticate against the API, which is all one-front needs). Onboarded media users and self-service teammates are always **Client** role.
 - Row-level access (Client role): a Client-role user sees a client only if a `Clients_directus_users` junction row links them — enforced by the Client policy's `allowedUsers == $CURRENT_USER` read filter on `Clients`. **Administrators are not junction-scoped**: `admin_access: true` bypasses the row filter, so any Administrator-role user automatically sees/manages every client without being added to any `allowedUsers`. The frontend relies on exactly this (it lists clients via `readItems('Clients')` and lets permissions scope the result), so to give a new person access to all clients, give them a user with the **Administrator** role — no junction wiring needed. The frontend never writes users/junctions directly for other people — it goes through the `/team` endpoint, which authorizes the caller then performs the privileged writes with a system service.
 - Password recovery and invites use Directus' native flows: `/auth/password/request` + `/auth/password/reset` (forgot password), `/users/invite` + `/users/invite/accept` (onboarding & teammate invites), `updateMe` (logged-in change). No custom token logic.
-- Admin credentials for local dev: `admin@seccom.ch` / `admin` (see README).
+- Admin credentials for local dev: `admin@wepublish.ch` / `admin123` (see README).
 
 ### Email templates
 

@@ -122,7 +122,7 @@ Print a short, scannable summary:
 - ✅ what was installed (both apps)
 - ⚠️ which `.env` values still need filling in — name the variables (`CLOCKODO_USER`, `CLOCKODO_API_KEY`, `JIRA_HOST`, `JIRA_EMAIL`, `JIRA_API_TOKEN`, `BEXIO_API_KEY`) and point at the README's "Get the missing secrets" section
 - ▶️ how to start next: ask Claude "start the local dev environment", or open three terminals (extensions watcher → backend → frontend)
-- 🔑 the local admin login: `admin@seccom.ch` / `admin` at http://localhost:8055
+- 🔑 the local admin login: `admin@wepublish.ch` / `admin123` at http://localhost:8055
 
 ### Guardrails for setup
 
