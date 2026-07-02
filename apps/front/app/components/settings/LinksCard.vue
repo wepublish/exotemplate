@@ -1,11 +1,11 @@
 <script lang="ts" setup>
   /**
-   * Per-client "Links" settings card: editor/website override URLs (empty =
-   * derived from apiUrl) and the custom quick-access links from the `ClientLinks`
-   * collection. Editable by both client and admin users. The persisted rows are
-   * loaded on mount; on save the editor/website overrides are written to the
-   * client and the link drafts are reconciled (create/update/delete) against the
-   * loaded rows. The parent keys this card by client id, so it remounts when the
+   * Per-client "Links" settings card: the custom quick-access links from the
+   * `ClientLinks` collection. Editable by both client and admin users. The
+   * editor/website dashboard links are sourced from the infrastructure config
+   * (no manual override here). The persisted rows are loaded on mount; on save
+   * the link drafts are reconciled (create/update/delete) against the loaded
+   * rows. The parent keys this card by client id, so it remounts when the
    * selected client changes.
    */
   import type { Client, ClientLink } from '~~/types/DirectusTypes'
@@ -15,7 +15,7 @@
 
   const { t } = useI18n()
   const toast = useToast()
-  const { listForClient, saveOverrides, persistCustomLinks } = useClientLinks()
+  const { listForClient, persistCustomLinks } = useClientLinks()
 
   // Normalize `description` to a string so the UInput v-model always binds a
   // string (the stored value may be null), and keep the row id for the diff.
@@ -28,8 +28,6 @@
     }))
   }
 
-  const editorUrl = ref(props.client.editor_url ?? '')
-  const websiteUrl = ref(props.client.website_url ?? '')
   const original = ref<ClientLink[]>([])
   const customLinks = ref<ClientLinkDraft[]>([])
   const loading = ref(true)
@@ -47,20 +45,6 @@
     }
   })
 
-  // Derived values shown as placeholders so users see what the link resolves to
-  // when they leave the override empty. Falls back to a generic hint when apiUrl
-  // can't produce one.
-  const editorPlaceholder = computed(
-    () =>
-      composeEditorUrl(props.client.apiUrl, null) ??
-      t('settings.links.derivedUnavailable')
-  )
-  const websitePlaceholder = computed(
-    () =>
-      composeWebsiteUrl(props.client.apiUrl, null) ??
-      t('settings.links.derivedUnavailable')
-  )
-
   function addLink(): void {
     customLinks.value.push({ label: '', url: '', description: '' })
   }
@@ -72,10 +56,6 @@
   async function save(): Promise<void> {
     saving.value = true
     try {
-      await saveOverrides(props.client.id, {
-        editorUrl: editorUrl.value,
-        websiteUrl: websiteUrl.value
-      })
       // Reconcile drafts with the persisted rows; re-seed from the fresh list
       // (drops blank rows, picks up new ids).
       original.value = await persistCustomLinks(
@@ -111,28 +91,6 @@
 
     <div class="flex flex-col gap-4">
       <p class="text-sm text-muted">{{ t('settings.links.description') }}</p>
-
-      <UFormField
-        :label="t('settings.links.editorUrl')"
-        :help="t('settings.links.overrideHelp')"
-      >
-        <UInput
-          v-model="editorUrl"
-          :placeholder="editorPlaceholder"
-          class="w-full"
-        />
-      </UFormField>
-
-      <UFormField
-        :label="t('settings.links.websiteUrl')"
-        :help="t('settings.links.overrideHelp')"
-      >
-        <UInput
-          v-model="websiteUrl"
-          :placeholder="websitePlaceholder"
-          class="w-full"
-        />
-      </UFormField>
 
       <div class="flex flex-col gap-2">
         <p class="font-medium text-sm">{{ t('settings.links.custom') }}</p>

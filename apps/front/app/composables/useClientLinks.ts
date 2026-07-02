@@ -1,19 +1,16 @@
 import { createItem, deleteItem, readItems, updateItem } from '@directus/sdk'
-import type { Client, ClientLink } from '~~/types/DirectusTypes'
+import type { ClientLink } from '~~/types/DirectusTypes'
 import { diffClientLinks, type ClientLinkDraft } from '~/utils/clientLinks'
 
 /**
- * Reads/writes a client's dashboard links. The editor/website overrides live on
- * the `Clients` row; the custom links are structured rows in the dedicated
- * `ClientLinks` collection (M2O → `Clients`). All writes go through the Directus
- * SDK, governed by the Client policy (clients may CRUD links for clients they
- * belong to; admins via admin_access). Mirrors the override edits into the
- * in-memory client list via `userStore.patchClient` — same pattern as
- * `useJiraWarnings`.
+ * Reads/writes a client's custom dashboard quick-links (the `ClientLinks`
+ * collection, M2O → `Clients`). Editor/website links come from the infra config,
+ * not a per-client override. All writes go through the Directus SDK, governed by
+ * the Client policy (clients may CRUD links for clients they belong to; admins
+ * via admin_access).
  */
 export function useClientLinks() {
   const { directus } = useDirectus()
-  const userStore = useUserStore()
 
   async function listForClient(clientId: string): Promise<ClientLink[]> {
     if (!clientId) return []
@@ -24,21 +21,6 @@ export function useClientLinks() {
         limit: -1
       })
     )
-  }
-
-  async function saveOverrides(
-    clientId: string,
-    overrides: { editorUrl: string | null; websiteUrl: string | null }
-  ): Promise<void> {
-    const editor_url = overrides.editorUrl?.trim() || null
-    const website_url = overrides.websiteUrl?.trim() || null
-    await directus.request(
-      updateItem('Clients', clientId, {
-        editor_url,
-        website_url
-      } as Partial<Client>)
-    )
-    userStore.patchClient(clientId, { editor_url, website_url })
   }
 
   /**
@@ -73,5 +55,5 @@ export function useClientLinks() {
     return listForClient(clientId)
   }
 
-  return { listForClient, saveOverrides, persistCustomLinks }
+  return { listForClient, persistCustomLinks }
 }

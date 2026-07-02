@@ -80,6 +80,11 @@
         "source": "src/staff-auth/index.ts"
       },
       {
+        "type": "endpoint",
+        "name": "resource-planning",
+        "source": "src/resource-planning/index.ts"
+      },
+      {
         "type": "operation",
         "name": "billing-snapshot-refresh",
         "source": {

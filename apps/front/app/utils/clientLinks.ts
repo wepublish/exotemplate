@@ -89,10 +89,10 @@ export function buildDashboardLinks(
   }
 
   // Editor + Website belong together, so keep them adjacent, ahead of Jira.
-  // Priority: explicit per-client override → infra config → apiUrl-derived.
+  // Priority: infra config → apiUrl-derived (no manual per-client override).
   // Normalize to an absolute URL so a scheme-less value never renders relative.
   const editor = ensureExternalUrl(
-    client.editor_url || infraUrls?.editor || composeEditorUrl(client.apiUrl)
+    infraUrls?.editor || composeEditorUrl(client.apiUrl)
   )
   if (editor) {
     links.push({
@@ -105,7 +105,7 @@ export function buildDashboardLinks(
   }
 
   const website = ensureExternalUrl(
-    client.website_url || infraUrls?.website || composeWebsiteUrl(client.apiUrl)
+    infraUrls?.website || composeWebsiteUrl(client.apiUrl)
   )
   if (website) {
     links.push({

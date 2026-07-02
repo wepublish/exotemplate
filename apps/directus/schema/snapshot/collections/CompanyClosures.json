@@ -1,0 +1,28 @@
+{
+  "collection": "CompanyClosures",
+  "meta": {
+    "accountability": "all",
+    "archive_app_filter": true,
+    "archive_field": null,
+    "archive_value": null,
+    "collapse": "open",
+    "collection": "CompanyClosures",
+    "color": null,
+    "display_template": null,
+    "group": null,
+    "hidden": false,
+    "icon": "beach_access",
+    "item_duplication_fields": null,
+    "note": "Company-wide closures (Betriebsferien) — nobody works these dates.",
+    "preview_url": null,
+    "singleton": false,
+    "sort": null,
+    "sort_field": null,
+    "translations": null,
+    "unarchive_value": null,
+    "versioning": false
+  },
+  "schema": {
+    "name": "CompanyClosures"
+  }
+}

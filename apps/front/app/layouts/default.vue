@@ -101,6 +101,11 @@
           to: link('/review-builds')
         },
         {
+          label: t('nav.resourcePlanning'),
+          icon: 'lucide:calendar-range',
+          to: link('/resource-planning')
+        },
+        {
           label: t('nav.onboarding'),
           icon: 'lucide:user-plus',
           to: link('/onboarding')

@@ -17,67 +17,67 @@ type Query {
   permissions_me: permissions_me_type
   roles_me: [directus_roles]
   policies_me_globals: policy_me_globals_type
-  folders(filter: directus_folders_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_folders!]!
-  folders_by_id(id: ID!, version: String): directus_folders
-  folders_aggregated(groupBy: [String], filter: directus_folders_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_folders_aggregated!]!
-  users(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_users!]!
-  users_by_id(id: ID!, version: String): directus_users
-  users_aggregated(groupBy: [String], filter: directus_users_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_users_aggregated!]!
-  activity(filter: directus_activity_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_activity!]!
-  activity_by_id(id: ID!, version: String): directus_activity
-  activity_aggregated(groupBy: [String], filter: directus_activity_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_activity_aggregated!]!
-  presets(filter: directus_presets_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_presets!]!
-  presets_by_id(id: ID!, version: String): directus_presets
-  presets_aggregated(groupBy: [String], filter: directus_presets_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_presets_aggregated!]!
-  files(filter: directus_files_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_files!]!
-  files_by_id(id: ID!, version: String): directus_files
-  files_aggregated(groupBy: [String], filter: directus_files_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_files_aggregated!]!
-  roles(filter: directus_roles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_roles!]!
-  roles_by_id(id: ID!, version: String): directus_roles
-  roles_aggregated(groupBy: [String], filter: directus_roles_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_roles_aggregated!]!
-  permissions(filter: directus_permissions_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_permissions!]!
-  permissions_by_id(id: ID!, version: String): directus_permissions
-  permissions_aggregated(groupBy: [String], filter: directus_permissions_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_permissions_aggregated!]!
-  webhooks(filter: directus_webhooks_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_webhooks!]!
-  webhooks_by_id(id: ID!, version: String): directus_webhooks
-  webhooks_aggregated(groupBy: [String], filter: directus_webhooks_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_webhooks_aggregated!]!
-  panels(filter: directus_panels_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_panels!]!
-  panels_by_id(id: ID!, version: String): directus_panels
-  panels_aggregated(groupBy: [String], filter: directus_panels_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_panels_aggregated!]!
-  dashboards(filter: directus_dashboards_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_dashboards!]!
-  dashboards_by_id(id: ID!, version: String): directus_dashboards
-  dashboards_aggregated(groupBy: [String], filter: directus_dashboards_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_dashboards_aggregated!]!
-  revisions(filter: directus_revisions_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_revisions!]!
-  revisions_by_id(id: ID!, version: String): directus_revisions
-  revisions_aggregated(groupBy: [String], filter: directus_revisions_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_revisions_aggregated!]!
-  settings(version: String): directus_settings
-  notifications(filter: directus_notifications_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_notifications!]!
-  notifications_by_id(id: ID!, version: String): directus_notifications
-  notifications_aggregated(groupBy: [String], filter: directus_notifications_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_notifications_aggregated!]!
-  shares(filter: directus_shares_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_shares!]!
-  shares_by_id(id: ID!, version: String): directus_shares
-  shares_aggregated(groupBy: [String], filter: directus_shares_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_shares_aggregated!]!
-  flows(filter: directus_flows_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_flows!]!
-  flows_by_id(id: ID!, version: String): directus_flows
-  flows_aggregated(groupBy: [String], filter: directus_flows_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_flows_aggregated!]!
-  operations(filter: directus_operations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_operations!]!
-  operations_by_id(id: ID!, version: String): directus_operations
-  operations_aggregated(groupBy: [String], filter: directus_operations_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_operations_aggregated!]!
-  translations(filter: directus_translations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_translations!]!
-  translations_by_id(id: ID!, version: String): directus_translations
-  translations_aggregated(groupBy: [String], filter: directus_translations_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_translations_aggregated!]!
-  policies(filter: directus_policies_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_policies!]!
-  policies_by_id(id: ID!, version: String): directus_policies
-  policies_aggregated(groupBy: [String], filter: directus_policies_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_policies_aggregated!]!
   access(filter: directus_access_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_access!]!
   access_by_id(id: ID!, version: String): directus_access
   access_aggregated(groupBy: [String], filter: directus_access_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_access_aggregated!]!
-  versions(filter: directus_versions_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_versions!]!
-  versions_by_id(id: ID!, version: String): directus_versions
-  versions_aggregated(groupBy: [String], filter: directus_versions_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_versions_aggregated!]!
   comments(filter: directus_comments_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_comments!]!
   comments_by_id(id: ID!, version: String): directus_comments
   comments_aggregated(groupBy: [String], filter: directus_comments_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_comments_aggregated!]!
+  dashboards(filter: directus_dashboards_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_dashboards!]!
+  dashboards_by_id(id: ID!, version: String): directus_dashboards
+  dashboards_aggregated(groupBy: [String], filter: directus_dashboards_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_dashboards_aggregated!]!
+  activity(filter: directus_activity_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_activity!]!
+  activity_by_id(id: ID!, version: String): directus_activity
+  activity_aggregated(groupBy: [String], filter: directus_activity_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_activity_aggregated!]!
+  folders(filter: directus_folders_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_folders!]!
+  folders_by_id(id: ID!, version: String): directus_folders
+  folders_aggregated(groupBy: [String], filter: directus_folders_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_folders_aggregated!]!
+  notifications(filter: directus_notifications_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_notifications!]!
+  notifications_by_id(id: ID!, version: String): directus_notifications
+  notifications_aggregated(groupBy: [String], filter: directus_notifications_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_notifications_aggregated!]!
+  flows(filter: directus_flows_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_flows!]!
+  flows_by_id(id: ID!, version: String): directus_flows
+  flows_aggregated(groupBy: [String], filter: directus_flows_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_flows_aggregated!]!
+  panels(filter: directus_panels_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_panels!]!
+  panels_by_id(id: ID!, version: String): directus_panels
+  panels_aggregated(groupBy: [String], filter: directus_panels_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_panels_aggregated!]!
+  permissions(filter: directus_permissions_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_permissions!]!
+  permissions_by_id(id: ID!, version: String): directus_permissions
+  permissions_aggregated(groupBy: [String], filter: directus_permissions_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_permissions_aggregated!]!
+  presets(filter: directus_presets_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_presets!]!
+  presets_by_id(id: ID!, version: String): directus_presets
+  presets_aggregated(groupBy: [String], filter: directus_presets_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_presets_aggregated!]!
+  roles(filter: directus_roles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_roles!]!
+  roles_by_id(id: ID!, version: String): directus_roles
+  roles_aggregated(groupBy: [String], filter: directus_roles_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_roles_aggregated!]!
+  revisions(filter: directus_revisions_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_revisions!]!
+  revisions_by_id(id: ID!, version: String): directus_revisions
+  revisions_aggregated(groupBy: [String], filter: directus_revisions_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_revisions_aggregated!]!
+  operations(filter: directus_operations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_operations!]!
+  operations_by_id(id: ID!, version: String): directus_operations
+  operations_aggregated(groupBy: [String], filter: directus_operations_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_operations_aggregated!]!
+  settings(version: String): directus_settings
+  policies(filter: directus_policies_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_policies!]!
+  policies_by_id(id: ID!, version: String): directus_policies
+  policies_aggregated(groupBy: [String], filter: directus_policies_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_policies_aggregated!]!
+  translations(filter: directus_translations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_translations!]!
+  translations_by_id(id: ID!, version: String): directus_translations
+  translations_aggregated(groupBy: [String], filter: directus_translations_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_translations_aggregated!]!
+  shares(filter: directus_shares_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_shares!]!
+  shares_by_id(id: ID!, version: String): directus_shares
+  shares_aggregated(groupBy: [String], filter: directus_shares_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_shares_aggregated!]!
+  users(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_users!]!
+  users_by_id(id: ID!, version: String): directus_users
+  users_aggregated(groupBy: [String], filter: directus_users_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_users_aggregated!]!
+  webhooks(filter: directus_webhooks_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_webhooks!]!
+  webhooks_by_id(id: ID!, version: String): directus_webhooks
+  webhooks_aggregated(groupBy: [String], filter: directus_webhooks_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_webhooks_aggregated!]!
+  files(filter: directus_files_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_files!]!
+  files_by_id(id: ID!, version: String): directus_files
+  files_aggregated(groupBy: [String], filter: directus_files_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_files_aggregated!]!
+  versions(filter: directus_versions_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_versions!]!
+  versions_by_id(id: ID!, version: String): directus_versions
+  versions_aggregated(groupBy: [String], filter: directus_versions_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [directus_versions_aggregated!]!
 }
 
 type Mutation {
@@ -112,173 +112,181 @@ type Mutation {
   update_users_me(data: update_directus_users_input): directus_users
   import_file(url: String!, data: create_directus_files_input): directus_files
   users_invite(email: String!, role: String!, invite_url: String): Boolean
-  create_folders_items(filter: directus_folders_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_folders_input!]): [directus_folders!]!
-  create_folders_item(data: create_directus_folders_input!): directus_folders
-  create_users_items(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_users_input!]): [directus_users!]!
-  create_users_item(data: create_directus_users_input!): directus_users
-  create_presets_items(filter: directus_presets_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_presets_input!]): [directus_presets!]!
-  create_presets_item(data: create_directus_presets_input!): directus_presets
-  create_files_items(filter: directus_files_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_files_input!]): [directus_files!]!
-  create_files_item(data: create_directus_files_input!): directus_files
-  create_roles_items(filter: directus_roles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_roles_input!]): [directus_roles!]!
-  create_roles_item(data: create_directus_roles_input!): directus_roles
-  create_permissions_items(filter: directus_permissions_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_permissions_input!]): [directus_permissions!]!
-  create_permissions_item(data: create_directus_permissions_input!): directus_permissions
-  create_webhooks_items(filter: directus_webhooks_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_webhooks_input!]): [directus_webhooks!]!
-  create_webhooks_item(data: create_directus_webhooks_input!): directus_webhooks
-  create_panels_items(filter: directus_panels_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_panels_input!]): [directus_panels!]!
-  create_panels_item(data: create_directus_panels_input!): directus_panels
-  create_dashboards_items(filter: directus_dashboards_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_dashboards_input!]): [directus_dashboards!]!
-  create_dashboards_item(data: create_directus_dashboards_input!): directus_dashboards
-  create_notifications_items(filter: directus_notifications_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_notifications_input!]): [directus_notifications!]!
-  create_notifications_item(data: create_directus_notifications_input!): directus_notifications
-  create_shares_items(filter: directus_shares_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_shares_input!]): [directus_shares!]!
-  create_shares_item(data: create_directus_shares_input!): directus_shares
-  create_flows_items(filter: directus_flows_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_flows_input!]): [directus_flows!]!
-  create_flows_item(data: create_directus_flows_input!): directus_flows
-  create_operations_items(filter: directus_operations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_operations_input!]): [directus_operations!]!
-  create_operations_item(data: create_directus_operations_input!): directus_operations
-  create_translations_items(filter: directus_translations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_translations_input!]): [directus_translations!]!
-  create_translations_item(data: create_directus_translations_input!): directus_translations
-  create_policies_items(filter: directus_policies_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_policies_input!]): [directus_policies!]!
-  create_policies_item(data: create_directus_policies_input!): directus_policies
   create_access_items(filter: directus_access_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_access_input!]): [directus_access!]!
   create_access_item(data: create_directus_access_input!): directus_access
-  create_versions_items(filter: directus_versions_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_versions_input!]): [directus_versions!]!
-  create_versions_item(data: create_directus_versions_input!): directus_versions
   create_comments_items(filter: directus_comments_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_comments_input!]): [directus_comments!]!
   create_comments_item(data: create_directus_comments_input!): directus_comments
-  update_folders_items(filter: directus_folders_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_folders_input!): [directus_folders!]!
-  update_folders_batch(filter: directus_folders_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_folders_input!]): [directus_folders!]!
-  update_folders_item(id: ID!, data: update_directus_folders_input!): directus_folders
-  update_users_items(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_users_input!): [directus_users!]!
-  update_users_batch(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_users_input!]): [directus_users!]!
-  update_users_item(id: ID!, data: update_directus_users_input!): directus_users
-  update_presets_items(filter: directus_presets_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_presets_input!): [directus_presets!]!
-  update_presets_batch(filter: directus_presets_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_presets_input!]): [directus_presets!]!
-  update_presets_item(id: ID!, data: update_directus_presets_input!): directus_presets
-  update_files_items(filter: directus_files_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_files_input!): [directus_files!]!
-  update_files_batch(filter: directus_files_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_files_input!]): [directus_files!]!
-  update_files_item(id: ID!, data: update_directus_files_input!): directus_files
-  update_roles_items(filter: directus_roles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_roles_input!): [directus_roles!]!
-  update_roles_batch(filter: directus_roles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_roles_input!]): [directus_roles!]!
-  update_roles_item(id: ID!, data: update_directus_roles_input!): directus_roles
-  update_permissions_items(filter: directus_permissions_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_permissions_input!): [directus_permissions!]!
-  update_permissions_batch(filter: directus_permissions_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_permissions_input!]): [directus_permissions!]!
-  update_permissions_item(id: ID!, data: update_directus_permissions_input!): directus_permissions
-  update_webhooks_items(filter: directus_webhooks_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_webhooks_input!): [directus_webhooks!]!
-  update_webhooks_batch(filter: directus_webhooks_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_webhooks_input!]): [directus_webhooks!]!
-  update_webhooks_item(id: ID!, data: update_directus_webhooks_input!): directus_webhooks
-  update_panels_items(filter: directus_panels_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_panels_input!): [directus_panels!]!
-  update_panels_batch(filter: directus_panels_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_panels_input!]): [directus_panels!]!
-  update_panels_item(id: ID!, data: update_directus_panels_input!): directus_panels
-  update_dashboards_items(filter: directus_dashboards_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_dashboards_input!): [directus_dashboards!]!
-  update_dashboards_batch(filter: directus_dashboards_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_dashboards_input!]): [directus_dashboards!]!
-  update_dashboards_item(id: ID!, data: update_directus_dashboards_input!): directus_dashboards
-  update_settings(data: update_directus_settings_input!): directus_settings
-  update_notifications_items(filter: directus_notifications_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_notifications_input!): [directus_notifications!]!
-  update_notifications_batch(filter: directus_notifications_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_notifications_input!]): [directus_notifications!]!
-  update_notifications_item(id: ID!, data: update_directus_notifications_input!): directus_notifications
-  update_shares_items(filter: directus_shares_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_shares_input!): [directus_shares!]!
-  update_shares_batch(filter: directus_shares_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_shares_input!]): [directus_shares!]!
-  update_shares_item(id: ID!, data: update_directus_shares_input!): directus_shares
-  update_flows_items(filter: directus_flows_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_flows_input!): [directus_flows!]!
-  update_flows_batch(filter: directus_flows_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_flows_input!]): [directus_flows!]!
-  update_flows_item(id: ID!, data: update_directus_flows_input!): directus_flows
-  update_operations_items(filter: directus_operations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_operations_input!): [directus_operations!]!
-  update_operations_batch(filter: directus_operations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_operations_input!]): [directus_operations!]!
-  update_operations_item(id: ID!, data: update_directus_operations_input!): directus_operations
-  update_translations_items(filter: directus_translations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_translations_input!): [directus_translations!]!
-  update_translations_batch(filter: directus_translations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_translations_input!]): [directus_translations!]!
-  update_translations_item(id: ID!, data: update_directus_translations_input!): directus_translations
-  update_policies_items(filter: directus_policies_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_policies_input!): [directus_policies!]!
-  update_policies_batch(filter: directus_policies_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_policies_input!]): [directus_policies!]!
-  update_policies_item(id: ID!, data: update_directus_policies_input!): directus_policies
+  create_dashboards_items(filter: directus_dashboards_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_dashboards_input!]): [directus_dashboards!]!
+  create_dashboards_item(data: create_directus_dashboards_input!): directus_dashboards
+  create_folders_items(filter: directus_folders_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_folders_input!]): [directus_folders!]!
+  create_folders_item(data: create_directus_folders_input!): directus_folders
+  create_notifications_items(filter: directus_notifications_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_notifications_input!]): [directus_notifications!]!
+  create_notifications_item(data: create_directus_notifications_input!): directus_notifications
+  create_flows_items(filter: directus_flows_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_flows_input!]): [directus_flows!]!
+  create_flows_item(data: create_directus_flows_input!): directus_flows
+  create_panels_items(filter: directus_panels_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_panels_input!]): [directus_panels!]!
+  create_panels_item(data: create_directus_panels_input!): directus_panels
+  create_permissions_items(filter: directus_permissions_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_permissions_input!]): [directus_permissions!]!
+  create_permissions_item(data: create_directus_permissions_input!): directus_permissions
+  create_presets_items(filter: directus_presets_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_presets_input!]): [directus_presets!]!
+  create_presets_item(data: create_directus_presets_input!): directus_presets
+  create_roles_items(filter: directus_roles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_roles_input!]): [directus_roles!]!
+  create_roles_item(data: create_directus_roles_input!): directus_roles
+  create_operations_items(filter: directus_operations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_operations_input!]): [directus_operations!]!
+  create_operations_item(data: create_directus_operations_input!): directus_operations
+  create_policies_items(filter: directus_policies_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_policies_input!]): [directus_policies!]!
+  create_policies_item(data: create_directus_policies_input!): directus_policies
+  create_translations_items(filter: directus_translations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_translations_input!]): [directus_translations!]!
+  create_translations_item(data: create_directus_translations_input!): directus_translations
+  create_shares_items(filter: directus_shares_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_shares_input!]): [directus_shares!]!
+  create_shares_item(data: create_directus_shares_input!): directus_shares
+  create_users_items(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_users_input!]): [directus_users!]!
+  create_users_item(data: create_directus_users_input!): directus_users
+  create_webhooks_items(filter: directus_webhooks_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_webhooks_input!]): [directus_webhooks!]!
+  create_webhooks_item(data: create_directus_webhooks_input!): directus_webhooks
+  create_files_items(filter: directus_files_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_files_input!]): [directus_files!]!
+  create_files_item(data: create_directus_files_input!): directus_files
+  create_versions_items(filter: directus_versions_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_directus_versions_input!]): [directus_versions!]!
+  create_versions_item(data: create_directus_versions_input!): directus_versions
   update_access_items(filter: directus_access_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_access_input!): [directus_access!]!
   update_access_batch(filter: directus_access_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_access_input!]): [directus_access!]!
   update_access_item(id: ID!, data: update_directus_access_input!): directus_access
-  update_versions_items(filter: directus_versions_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_versions_input!): [directus_versions!]!
-  update_versions_batch(filter: directus_versions_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_versions_input!]): [directus_versions!]!
-  update_versions_item(id: ID!, data: update_directus_versions_input!): directus_versions
   update_comments_items(filter: directus_comments_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_comments_input!): [directus_comments!]!
   update_comments_batch(filter: directus_comments_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_comments_input!]): [directus_comments!]!
   update_comments_item(id: ID!, data: update_directus_comments_input!): directus_comments
-  delete_folders_items(ids: [ID]!): delete_many
-  delete_folders_item(id: ID!): delete_one
-  delete_users_items(ids: [ID]!): delete_many
-  delete_users_item(id: ID!): delete_one
-  delete_presets_items(ids: [ID]!): delete_many
-  delete_presets_item(id: ID!): delete_one
-  delete_files_items(ids: [ID]!): delete_many
-  delete_files_item(id: ID!): delete_one
-  delete_roles_items(ids: [ID]!): delete_many
-  delete_roles_item(id: ID!): delete_one
-  delete_permissions_items(ids: [ID]!): delete_many
-  delete_permissions_item(id: ID!): delete_one
-  delete_webhooks_items(ids: [ID]!): delete_many
-  delete_webhooks_item(id: ID!): delete_one
-  delete_panels_items(ids: [ID]!): delete_many
-  delete_panels_item(id: ID!): delete_one
-  delete_dashboards_items(ids: [ID]!): delete_many
-  delete_dashboards_item(id: ID!): delete_one
-  delete_notifications_items(ids: [ID]!): delete_many
-  delete_notifications_item(id: ID!): delete_one
-  delete_shares_items(ids: [ID]!): delete_many
-  delete_shares_item(id: ID!): delete_one
-  delete_flows_items(ids: [ID]!): delete_many
-  delete_flows_item(id: ID!): delete_one
-  delete_operations_items(ids: [ID]!): delete_many
-  delete_operations_item(id: ID!): delete_one
-  delete_translations_items(ids: [ID]!): delete_many
-  delete_translations_item(id: ID!): delete_one
-  delete_policies_items(ids: [ID]!): delete_many
-  delete_policies_item(id: ID!): delete_one
+  update_dashboards_items(filter: directus_dashboards_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_dashboards_input!): [directus_dashboards!]!
+  update_dashboards_batch(filter: directus_dashboards_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_dashboards_input!]): [directus_dashboards!]!
+  update_dashboards_item(id: ID!, data: update_directus_dashboards_input!): directus_dashboards
+  update_folders_items(filter: directus_folders_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_folders_input!): [directus_folders!]!
+  update_folders_batch(filter: directus_folders_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_folders_input!]): [directus_folders!]!
+  update_folders_item(id: ID!, data: update_directus_folders_input!): directus_folders
+  update_notifications_items(filter: directus_notifications_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_notifications_input!): [directus_notifications!]!
+  update_notifications_batch(filter: directus_notifications_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_notifications_input!]): [directus_notifications!]!
+  update_notifications_item(id: ID!, data: update_directus_notifications_input!): directus_notifications
+  update_flows_items(filter: directus_flows_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_flows_input!): [directus_flows!]!
+  update_flows_batch(filter: directus_flows_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_flows_input!]): [directus_flows!]!
+  update_flows_item(id: ID!, data: update_directus_flows_input!): directus_flows
+  update_panels_items(filter: directus_panels_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_panels_input!): [directus_panels!]!
+  update_panels_batch(filter: directus_panels_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_panels_input!]): [directus_panels!]!
+  update_panels_item(id: ID!, data: update_directus_panels_input!): directus_panels
+  update_permissions_items(filter: directus_permissions_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_permissions_input!): [directus_permissions!]!
+  update_permissions_batch(filter: directus_permissions_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_permissions_input!]): [directus_permissions!]!
+  update_permissions_item(id: ID!, data: update_directus_permissions_input!): directus_permissions
+  update_presets_items(filter: directus_presets_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_presets_input!): [directus_presets!]!
+  update_presets_batch(filter: directus_presets_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_presets_input!]): [directus_presets!]!
+  update_presets_item(id: ID!, data: update_directus_presets_input!): directus_presets
+  update_roles_items(filter: directus_roles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_roles_input!): [directus_roles!]!
+  update_roles_batch(filter: directus_roles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_roles_input!]): [directus_roles!]!
+  update_roles_item(id: ID!, data: update_directus_roles_input!): directus_roles
+  update_operations_items(filter: directus_operations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_operations_input!): [directus_operations!]!
+  update_operations_batch(filter: directus_operations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_operations_input!]): [directus_operations!]!
+  update_operations_item(id: ID!, data: update_directus_operations_input!): directus_operations
+  update_settings(data: update_directus_settings_input!): directus_settings
+  update_policies_items(filter: directus_policies_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_policies_input!): [directus_policies!]!
+  update_policies_batch(filter: directus_policies_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_policies_input!]): [directus_policies!]!
+  update_policies_item(id: ID!, data: update_directus_policies_input!): directus_policies
+  update_translations_items(filter: directus_translations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_translations_input!): [directus_translations!]!
+  update_translations_batch(filter: directus_translations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_translations_input!]): [directus_translations!]!
+  update_translations_item(id: ID!, data: update_directus_translations_input!): directus_translations
+  update_shares_items(filter: directus_shares_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_shares_input!): [directus_shares!]!
+  update_shares_batch(filter: directus_shares_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_shares_input!]): [directus_shares!]!
+  update_shares_item(id: ID!, data: update_directus_shares_input!): directus_shares
+  update_users_items(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_users_input!): [directus_users!]!
+  update_users_batch(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_users_input!]): [directus_users!]!
+  update_users_item(id: ID!, data: update_directus_users_input!): directus_users
+  update_webhooks_items(filter: directus_webhooks_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_webhooks_input!): [directus_webhooks!]!
+  update_webhooks_batch(filter: directus_webhooks_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_webhooks_input!]): [directus_webhooks!]!
+  update_webhooks_item(id: ID!, data: update_directus_webhooks_input!): directus_webhooks
+  update_files_items(filter: directus_files_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_files_input!): [directus_files!]!
+  update_files_batch(filter: directus_files_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_files_input!]): [directus_files!]!
+  update_files_item(id: ID!, data: update_directus_files_input!): directus_files
+  update_versions_items(filter: directus_versions_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_versions_input!): [directus_versions!]!
+  update_versions_batch(filter: directus_versions_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_versions_input!]): [directus_versions!]!
+  update_versions_item(id: ID!, data: update_directus_versions_input!): directus_versions
   delete_access_items(ids: [ID]!): delete_many
   delete_access_item(id: ID!): delete_one
-  delete_versions_items(ids: [ID]!): delete_many
-  delete_versions_item(id: ID!): delete_one
   delete_comments_items(ids: [ID]!): delete_many
   delete_comments_item(id: ID!): delete_one
+  delete_dashboards_items(ids: [ID]!): delete_many
+  delete_dashboards_item(id: ID!): delete_one
+  delete_folders_items(ids: [ID]!): delete_many
+  delete_folders_item(id: ID!): delete_one
+  delete_notifications_items(ids: [ID]!): delete_many
+  delete_notifications_item(id: ID!): delete_one
+  delete_flows_items(ids: [ID]!): delete_many
+  delete_flows_item(id: ID!): delete_one
+  delete_panels_items(ids: [ID]!): delete_many
+  delete_panels_item(id: ID!): delete_one
+  delete_permissions_items(ids: [ID]!): delete_many
+  delete_permissions_item(id: ID!): delete_one
+  delete_presets_items(ids: [ID]!): delete_many
+  delete_presets_item(id: ID!): delete_one
+  delete_roles_items(ids: [ID]!): delete_many
+  delete_roles_item(id: ID!): delete_one
+  delete_operations_items(ids: [ID]!): delete_many
+  delete_operations_item(id: ID!): delete_one
+  delete_policies_items(ids: [ID]!): delete_many
+  delete_policies_item(id: ID!): delete_one
+  delete_translations_items(ids: [ID]!): delete_many
+  delete_translations_item(id: ID!): delete_one
+  delete_shares_items(ids: [ID]!): delete_many
+  delete_shares_item(id: ID!): delete_one
+  delete_users_items(ids: [ID]!): delete_many
+  delete_users_item(id: ID!): delete_one
+  delete_webhooks_items(ids: [ID]!): delete_many
+  delete_webhooks_item(id: ID!): delete_one
+  delete_files_items(ids: [ID]!): delete_many
+  delete_files_item(id: ID!): delete_one
+  delete_versions_items(ids: [ID]!): delete_many
+  delete_versions_item(id: ID!): delete_one
 }
 
 type Subscription {
-  directus_folders_mutated(event: EventEnum): directus_folders_mutated
-  directus_users_mutated(event: EventEnum): directus_users_mutated
-  directus_activity_mutated(event: EventEnum): directus_activity_mutated
-  directus_presets_mutated(event: EventEnum): directus_presets_mutated
-  directus_files_mutated(event: EventEnum): directus_files_mutated
-  directus_roles_mutated(event: EventEnum): directus_roles_mutated
-  directus_permissions_mutated(event: EventEnum): directus_permissions_mutated
-  directus_webhooks_mutated(event: EventEnum): directus_webhooks_mutated
-  directus_panels_mutated(event: EventEnum): directus_panels_mutated
-  directus_dashboards_mutated(event: EventEnum): directus_dashboards_mutated
-  directus_revisions_mutated(event: EventEnum): directus_revisions_mutated
-  directus_settings_mutated(event: EventEnum): directus_settings_mutated
-  directus_notifications_mutated(event: EventEnum): directus_notifications_mutated
-  directus_shares_mutated(event: EventEnum): directus_shares_mutated
-  directus_flows_mutated(event: EventEnum): directus_flows_mutated
-  directus_operations_mutated(event: EventEnum): directus_operations_mutated
-  directus_translations_mutated(event: EventEnum): directus_translations_mutated
-  directus_policies_mutated(event: EventEnum): directus_policies_mutated
-  directus_access_mutated(event: EventEnum): directus_access_mutated
-  directus_versions_mutated(event: EventEnum): directus_versions_mutated
-  directus_comments_mutated(event: EventEnum): directus_comments_mutated
-  directus_sync_id_map_mutated(event: EventEnum): directus_sync_id_map_mutated
-  CaptureIgnoredUsers_mutated(event: EventEnum): CaptureIgnoredUsers_mutated
   Clients_mutated(event: EventEnum): Clients_mutated
+  CaptureIgnoredUsers_mutated(event: EventEnum): CaptureIgnoredUsers_mutated
+  Clients_directus_users_mutated(event: EventEnum): Clients_directus_users_mutated
+  Periods_mutated(event: EventEnum): Periods_mutated
+  directus_access_mutated(event: EventEnum): directus_access_mutated
+  JiraWarnings_mutated(event: EventEnum): JiraWarnings_mutated
+  NotificationThresholds_mutated(event: EventEnum): NotificationThresholds_mutated
+  TopUps_mutated(event: EventEnum): TopUps_mutated
+  Contracts_mutated(event: EventEnum): Contracts_mutated
   Settings_mutated(event: EventEnum): Settings_mutated
   Clients_Periods_mutated(event: EventEnum): Clients_Periods_mutated
-  BillingSnapshots_mutated(event: EventEnum): BillingSnapshots_mutated
   ClientLinks_mutated(event: EventEnum): ClientLinks_mutated
-  Periods_mutated(event: EventEnum): Periods_mutated
-  Clients_directus_users_mutated(event: EventEnum): Clients_directus_users_mutated
-  Contracts_mutated(event: EventEnum): Contracts_mutated
   Invoices_mutated(event: EventEnum): Invoices_mutated
-  JiraWarnings_mutated(event: EventEnum): JiraWarnings_mutated
   ManualWorkEntries_mutated(event: EventEnum): ManualWorkEntries_mutated
-  NotificationThresholds_mutated(event: EventEnum): NotificationThresholds_mutated
   PeerArticles_mutated(event: EventEnum): PeerArticles_mutated
-  TopUps_mutated(event: EventEnum): TopUps_mutated
+  directus_comments_mutated(event: EventEnum): directus_comments_mutated
+  directus_dashboards_mutated(event: EventEnum): directus_dashboards_mutated
+  directus_activity_mutated(event: EventEnum): directus_activity_mutated
+  directus_folders_mutated(event: EventEnum): directus_folders_mutated
+  directus_notifications_mutated(event: EventEnum): directus_notifications_mutated
+  directus_flows_mutated(event: EventEnum): directus_flows_mutated
+  directus_panels_mutated(event: EventEnum): directus_panels_mutated
+  directus_permissions_mutated(event: EventEnum): directus_permissions_mutated
+  directus_presets_mutated(event: EventEnum): directus_presets_mutated
+  directus_roles_mutated(event: EventEnum): directus_roles_mutated
+  directus_revisions_mutated(event: EventEnum): directus_revisions_mutated
+  directus_operations_mutated(event: EventEnum): directus_operations_mutated
+  directus_settings_mutated(event: EventEnum): directus_settings_mutated
+  directus_policies_mutated(event: EventEnum): directus_policies_mutated
+  directus_sync_id_map_mutated(event: EventEnum): directus_sync_id_map_mutated
+  directus_translations_mutated(event: EventEnum): directus_translations_mutated
+  directus_shares_mutated(event: EventEnum): directus_shares_mutated
+  directus_users_mutated(event: EventEnum): directus_users_mutated
+  directus_webhooks_mutated(event: EventEnum): directus_webhooks_mutated
+  BillingSnapshots_mutated(event: EventEnum): BillingSnapshots_mutated
+  directus_files_mutated(event: EventEnum): directus_files_mutated
+  directus_versions_mutated(event: EventEnum): directus_versions_mutated
+  ResourcePlanExclusions_mutated(event: EventEnum): ResourcePlanExclusions_mutated
+  IntensivePhases_mutated(event: EventEnum): IntensivePhases_mutated
+  ResourcePlanEmployees_mutated(event: EventEnum): ResourcePlanEmployees_mutated
+  ProjectBudgets_mutated(event: EventEnum): ProjectBudgets_mutated
+  ResourcePlanDefaultLoads_mutated(event: EventEnum): ResourcePlanDefaultLoads_mutated
+  CompanyClosures_mutated(event: EventEnum): CompanyClosures_mutated
+  IntensivePhaseAssignees_mutated(event: EventEnum): IntensivePhaseAssignees_mutated
+  MinLoadAssignees_mutated(event: EventEnum): MinLoadAssignees_mutated
 }
 
 """The `Boolean` scalar type represents `true` or `false`."""
@@ -448,42 +456,26 @@ type ClientLinks_mutated {
 }
 
 type Clients {
-  apiUrl: String
-
-  """
-  Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
-  """
-  bexio_contact_id: Int
-
-  """
-  Abrechnungsmodell des Kunden. Prepaid = günstigerer Stundensatz, im Voraus bezahlte Top-Ups. Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach Aufwand.
-  """
-  billing_mode: String
   clockodo_customer_id: String
   date_created: Date
   date_created_func: datetime_functions
   date_updated: Date
   date_updated_func: datetime_functions
-
-  """
-  Override für den Editor-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (editor.<medium>.wepublish.cloud).
-  """
-  editor_url: String
   id: ID!
 
   """The project shortcode in Jira. Eg. HAS or BA"""
   jira_short_code: String
-
-  """
-  Sprache der kundenseitigen Slack-Meldungen (Wochenbericht, Jira-Warnungen, Arbeitsstopp).
-  """
-  language: String
   name: String!
+  sort: Int
+  status: String
+  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
 
   """
-  Wenn aktiv, werden sämtliche Slack-Warnungen für diesen Kunden unterdrückt, bis der Schalter wieder deaktiviert wird.
+  Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
   """
-  notifications_paused: Boolean!
+  bexio_contact_id: Int
+  apiUrl: String
 
   """
   Index of the last active onboarding step (0-based). Used to track progress for manual/email steps that have no service ID.
@@ -498,20 +490,36 @@ type Clients {
 
   """Slack channel ID created during client onboarding"""
   slack_channel_id: String
-  sort: Int
-  status: String
-  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
-  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
 
   """
-  Override für den Website-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (<medium>.wepublish.cloud).
+  Wenn aktiv, werden sämtliche Slack-Warnungen für diesen Kunden unterdrückt, bis der Schalter wieder deaktiviert wird.
   """
-  website_url: String
+  notifications_paused: Boolean!
 
   """
   Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.
   """
   weekly_report_paused: Boolean!
+
+  """
+  Abrechnungsmodell des Kunden. Prepaid = günstigerer Stundensatz, im Voraus bezahlte Top-Ups. Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach Aufwand.
+  """
+  billing_mode: String
+
+  """
+  Sprache der kundenseitigen Slack-Meldungen (Wochenbericht, Jira-Warnungen, Arbeitsstopp).
+  """
+  language: String
+
+  """
+  Override für den Editor-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (editor.<medium>.wepublish.cloud).
+  """
+  editor_url: String
+
+  """
+  Override für den Website-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (<medium>.wepublish.cloud).
+  """
+  website_url: String
 
   """
   Terraform-Bezeichner: Kleinbuchstaben, Ziffern, Unterstriche. Entspricht dem Medium-Namen aus dem Onboarding; verknüpft diesen Client mit seinem Uptime-Monitor.
@@ -521,12 +529,12 @@ type Clients {
   allowedUsers_func: count_functions
   articles(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [PeerArticles]
   articles_func: count_functions
+  periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods]
+  periods_func: count_functions
   contracts(filter: Contracts_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Contracts]
   contracts_func: count_functions
   links(filter: ClientLinks_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [ClientLinks]
   links_func: count_functions
-  periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods]
-  periods_func: count_functions
   jiraWarnings(filter: JiraWarnings_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [JiraWarnings]
 }
 
@@ -552,18 +560,33 @@ type Clients_Periods {
   Clients_id(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients
   Periods_id(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Periods
   id: ID!
-  invoices(filter: Invoices_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Invoices]
-  invoices_func: count_functions
-  manualWorkEntries(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [ManualWorkEntries]
-  manualWorkEntries_func: count_functions
   topUps(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [TopUps]
   topUps_func: count_functions
+  manualWorkEntries(filter: ManualWorkEntries_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [ManualWorkEntries]
+  manualWorkEntries_func: count_functions
+  invoices(filter: Invoices_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Invoices]
+  invoices_func: count_functions
 }
 
 type Clients_Periods_mutated {
   key: ID!
   event: EventEnum
   data: Clients_Periods
+}
+
+type CompanyClosures {
+  id: ID!
+  name: String
+  from: Date
+  from_func: date_functions
+  to: Date
+  to_func: date_functions
+}
+
+type CompanyClosures_mutated {
+  key: ID!
+  event: EventEnum
+  data: CompanyClosures
 }
 
 type Contracts {
@@ -1898,6 +1921,44 @@ type directus_webhooks_mutated {
   data: directus_webhooks
 }
 
+type IntensivePhaseAssignees {
+  id: ID!
+  phase(filter: IntensivePhases_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): IntensivePhases
+  clockodo_user_id: String
+  share: Float
+}
+
+type IntensivePhaseAssignees_mutated {
+  key: ID!
+  event: EventEnum
+  data: IntensivePhaseAssignees
+}
+
+type IntensivePhases {
+  """
+  Optional: Clockodo users_id. Gesetzt = persönliche Intensivphase (mindert die Kapazität dieser Person), leer = projektweite Phase.
+  """
+  clockodo_user_id: String
+  from: Date
+  from_func: date_functions
+
+  """Aufwand der Phase in Stunden"""
+  hours: Float
+  id: ID!
+  name: String
+  project_budget(filter: ProjectBudgets_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): ProjectBudgets
+  to: Date
+  to_func: date_functions
+  assignees(filter: IntensivePhaseAssignees_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [IntensivePhaseAssignees]
+  assignees_func: count_functions
+}
+
+type IntensivePhases_mutated {
+  key: ID!
+  event: EventEnum
+  data: IntensivePhases
+}
+
 type Invoices {
   """Invoice gross total (for display)"""
   amount: Float
@@ -2019,17 +2080,25 @@ type ManualWorkEntries_mutated {
   data: ManualWorkEntries
 }
 
+type MinLoadAssignees {
+  id: ID!
+  project_budget(filter: ProjectBudgets_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): ProjectBudgets
+  clockodo_user_id: String
+  share: Float
+}
+
+type MinLoadAssignees_mutated {
+  key: ID!
+  event: EventEnum
+  data: MinLoadAssignees
+}
+
 type NotificationThresholds {
   date_created: Date
   date_created_func: datetime_functions
   date_updated: Date
   date_updated_func: datetime_functions
   id: ID!
-
-  """
-  Toleranz gegenüber der Jira-Schätzung in Stunden (vorzeichenbehaftet). Beispiel: +2 = erste Meldung 2 h nach Erreichen der Schätzung. -1 = erste Meldung 1 h vor Erreichen der Schätzung.
-  """
-  initial_threshold_offset_hours: Float!
 
   """
   Schätzwert-Untergrenze (inklusiv). Ein Ticket nutzt diesen Eintrag, wenn seine Schätzung mindestens diesem Wert entspricht und kein Eintrag mit grösserem Wert zutrifft.
@@ -2044,6 +2113,11 @@ type NotificationThresholds {
   status: String
   user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+
+  """
+  Toleranz gegenüber der Jira-Schätzung in Stunden (vorzeichenbehaftet). Beispiel: +2 = erste Meldung 2 h nach Erreichen der Schätzung. -1 = erste Meldung 1 h vor Erreichen der Schätzung.
+  """
+  initial_threshold_offset_hours: Float!
 }
 
 type NotificationThresholds_mutated {
@@ -2108,6 +2182,83 @@ type policy_me_globals_type {
   admin_access: Boolean
 }
 
+type ProjectBudgets {
+  """Jahresbudget in Stunden"""
+  annual_budget_hours: Float
+  client(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients
+  id: ID!
+
+  """Kalenderjahr"""
+  year: Int
+
+  """Minimum weekly load (lower border) for this project."""
+  min_weekly_hours: Float
+
+  """
+  If set, the minimum weekly load is a direct assignment to this Clockodo user.
+  """
+  min_weekly_clockodo_user_id: String
+  phases(filter: IntensivePhases_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [IntensivePhases]
+  phases_func: count_functions
+  min_assignees(filter: MinLoadAssignees_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [MinLoadAssignees]
+  min_assignees_func: count_functions
+}
+
+type ProjectBudgets_mutated {
+  key: ID!
+  event: EventEnum
+  data: ProjectBudgets
+}
+
+type ResourcePlanDefaultLoads {
+  id: ID!
+  clockodo_user_id: String
+  name: String
+  weekly_hours: Float
+}
+
+type ResourcePlanDefaultLoads_mutated {
+  key: ID!
+  event: EventEnum
+  data: ResourcePlanDefaultLoads
+}
+
+type ResourcePlanEmployees {
+  """Clockodo users_id"""
+  clockodo_user_id: String
+
+  """Von der Team-Gesamtkapazität ausschließen."""
+  excluded: Boolean
+  id: ID!
+
+  """Wochenbudget für andere Arbeiten"""
+  other_work_budget_hours: Float
+
+  """Share of capacity spent on client-project work (%)."""
+  project_hours_percentage: Float
+}
+
+type ResourcePlanEmployees_mutated {
+  key: ID!
+  event: EventEnum
+  data: ResourcePlanEmployees
+}
+
+type ResourcePlanExclusions {
+  clockodo_user_id: String
+  excluded: Boolean
+  id: ID!
+
+  """Clockodo service/customer key"""
+  position_key: String
+}
+
+type ResourcePlanExclusions_mutated {
+  key: ID!
+  event: EventEnum
+  data: ResourcePlanExclusions
+}
+
 type server_info {
   project: server_info_project
   rateLimit: Boolean
@@ -2157,9 +2308,6 @@ type Settings_mutated {
 
 type TopUps {
   amount: Float
-
-  """Connected invoice from Bexio"""
-  bexioInvoiceId: Int
   clientPeriod(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): Clients_Periods
   date_created: Date
   date_created_func: datetime_functions
@@ -2173,6 +2321,9 @@ type TopUps {
   user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
   wepPercentage: Int
+
+  """Connected invoice from Bexio"""
+  bexioInvoiceId: Int
 }
 
 type TopUps_mutated {
@@ -2383,41 +2534,41 @@ input Clients_directus_users_quantifier_filter {
 }
 
 input Clients_filter {
-  apiUrl: string_filter_operators
-  bexio_contact_id: number_filter_operators
-  billing_mode: string_filter_operators
   clockodo_customer_id: string_filter_operators
   date_created: date_filter_operators
   date_created_func: datetime_function_filter_operators
   date_updated: date_filter_operators
   date_updated_func: datetime_function_filter_operators
-  editor_url: string_filter_operators
   id: id_filter_operators
   jira_short_code: string_filter_operators
-  language: string_filter_operators
   name: string_filter_operators
-  notifications_paused: boolean_filter_operators
-  onboarding_current_step: number_filter_operators
-  onboarding_manual_checklist: string_filter_operators
-  onboarding_manual_checklist_func: count_function_filter_operators
-  slack_channel_id: string_filter_operators
   sort: number_filter_operators
   status: string_filter_operators
   user_created: directus_users_filter
   user_updated: directus_users_filter
-  website_url: string_filter_operators
+  bexio_contact_id: number_filter_operators
+  apiUrl: string_filter_operators
+  onboarding_current_step: number_filter_operators
+  onboarding_manual_checklist: string_filter_operators
+  onboarding_manual_checklist_func: count_function_filter_operators
+  slack_channel_id: string_filter_operators
+  notifications_paused: boolean_filter_operators
   weekly_report_paused: boolean_filter_operators
+  billing_mode: string_filter_operators
+  language: string_filter_operators
+  editor_url: string_filter_operators
+  website_url: string_filter_operators
   medium_name: string_filter_operators
   allowedUsers: Clients_directus_users_quantifier_filter
   allowedUsers_func: count_function_filter_operators
   articles: PeerArticles_quantifier_filter
   articles_func: count_function_filter_operators
+  periods: Clients_Periods_quantifier_filter
+  periods_func: count_function_filter_operators
   contracts: Contracts_quantifier_filter
   contracts_func: count_function_filter_operators
   links: ClientLinks_quantifier_filter
   links_func: count_function_filter_operators
-  periods: Clients_Periods_quantifier_filter
-  periods_func: count_function_filter_operators
   _and: [Clients_filter]
   _or: [Clients_filter]
   jiraWarnings: JiraWarnings_quantifier_filter
@@ -2427,12 +2578,12 @@ input Clients_Periods_filter {
   Clients_id: Clients_filter
   Periods_id: Periods_filter
   id: number_filter_operators
-  invoices: Invoices_quantifier_filter
-  invoices_func: count_function_filter_operators
-  manualWorkEntries: ManualWorkEntries_quantifier_filter
-  manualWorkEntries_func: count_function_filter_operators
   topUps: TopUps_quantifier_filter
   topUps_func: count_function_filter_operators
+  manualWorkEntries: ManualWorkEntries_quantifier_filter
+  manualWorkEntries_func: count_function_filter_operators
+  invoices: Invoices_quantifier_filter
+  invoices_func: count_function_filter_operators
   _and: [Clients_Periods_filter]
   _or: [Clients_Periods_filter]
 }
@@ -2442,12 +2593,12 @@ input Clients_Periods_quantifier_filter {
   Clients_id: Clients_filter
   Periods_id: Periods_filter
   id: number_filter_operators
-  invoices: Invoices_quantifier_filter
-  invoices_func: count_function_filter_operators
-  manualWorkEntries: ManualWorkEntries_quantifier_filter
-  manualWorkEntries_func: count_function_filter_operators
   topUps: TopUps_quantifier_filter
   topUps_func: count_function_filter_operators
+  manualWorkEntries: ManualWorkEntries_quantifier_filter
+  manualWorkEntries_func: count_function_filter_operators
+  invoices: Invoices_quantifier_filter
+  invoices_func: count_function_filter_operators
   _and: [Clients_Periods_filter]
   _or: [Clients_Periods_filter]
   _some: Clients_Periods_filter
@@ -2530,40 +2681,24 @@ input create_Clients_directus_users_input {
 }
 
 input create_Clients_input {
-  apiUrl: String
+  clockodo_customer_id: String
+  date_created: Date
+  date_updated: Date
+  id: ID
+
+  """The project shortcode in Jira. Eg. HAS or BA"""
+  jira_short_code: String
+  name: String!
+  sort: Int
+  status: String
+  user_created: create_directus_users_input
+  user_updated: create_directus_users_input
 
   """
   Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
   """
   bexio_contact_id: Int
-
-  """
-  Abrechnungsmodell des Kunden. Prepaid = günstigerer Stundensatz, im Voraus bezahlte Top-Ups. Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach Aufwand.
-  """
-  billing_mode: String
-  clockodo_customer_id: String
-  date_created: Date
-  date_updated: Date
-
-  """
-  Override für den Editor-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (editor.<medium>.wepublish.cloud).
-  """
-  editor_url: String
-  id: ID
-
-  """The project shortcode in Jira. Eg. HAS or BA"""
-  jira_short_code: String
-
-  """
-  Sprache der kundenseitigen Slack-Meldungen (Wochenbericht, Jira-Warnungen, Arbeitsstopp).
-  """
-  language: String
-  name: String!
-
-  """
-  Wenn aktiv, werden sämtliche Slack-Warnungen für diesen Kunden unterdrückt, bis der Schalter wieder deaktiviert wird.
-  """
-  notifications_paused: Boolean!
+  apiUrl: String
 
   """
   Index of the last active onboarding step (0-based). Used to track progress for manual/email steps that have no service ID.
@@ -2577,15 +2712,11 @@ input create_Clients_input {
 
   """Slack channel ID created during client onboarding"""
   slack_channel_id: String
-  sort: Int
-  status: String
-  user_created: create_directus_users_input
-  user_updated: create_directus_users_input
 
   """
-  Override für den Website-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (<medium>.wepublish.cloud).
+  Wenn aktiv, werden sämtliche Slack-Warnungen für diesen Kunden unterdrückt, bis der Schalter wieder deaktiviert wird.
   """
-  website_url: String
+  notifications_paused: Boolean!
 
   """
   Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.
@@ -2593,14 +2724,34 @@ input create_Clients_input {
   weekly_report_paused: Boolean!
 
   """
+  Abrechnungsmodell des Kunden. Prepaid = günstigerer Stundensatz, im Voraus bezahlte Top-Ups. Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach Aufwand.
+  """
+  billing_mode: String
+
+  """
+  Sprache der kundenseitigen Slack-Meldungen (Wochenbericht, Jira-Warnungen, Arbeitsstopp).
+  """
+  language: String
+
+  """
+  Override für den Editor-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (editor.<medium>.wepublish.cloud).
+  """
+  editor_url: String
+
+  """
+  Override für den Website-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (<medium>.wepublish.cloud).
+  """
+  website_url: String
+
+  """
   Terraform-Bezeichner: Kleinbuchstaben, Ziffern, Unterstriche. Entspricht dem Medium-Namen aus dem Onboarding; verknüpft diesen Client mit seinem Uptime-Monitor.
   """
   medium_name: String
   allowedUsers: [create_Clients_directus_users_input]
   articles: [create_PeerArticles_input]
+  periods: [create_Clients_Periods_input]
   contracts: [create_Contracts_input]
   links: [create_ClientLinks_input]
-  periods: [create_Clients_Periods_input]
   jiraWarnings: [create_JiraWarnings_input]
 }
 
@@ -2608,9 +2759,9 @@ input create_Clients_Periods_input {
   Clients_id: create_Clients_input
   Periods_id: create_Periods_input
   id: ID
-  invoices: [create_Invoices_input]
-  manualWorkEntries: [create_ManualWorkEntries_input]
   topUps: [create_TopUps_input]
+  manualWorkEntries: [create_ManualWorkEntries_input]
+  invoices: [create_Invoices_input]
 }
 
 input create_Contracts_input {
@@ -3035,9 +3186,6 @@ input create_Periods_input {
 
 input create_TopUps_input {
   amount: Float
-
-  """Connected invoice from Bexio"""
-  bexioInvoiceId: Int
   clientPeriod: create_Clients_Periods_input
   date_created: Date
   date_updated: Date
@@ -3049,6 +3197,9 @@ input create_TopUps_input {
   user_created: create_directus_users_input
   user_updated: create_directus_users_input
   wepPercentage: Int
+
+  """Connected invoice from Bexio"""
+  bexioInvoiceId: Int
 }
 
 input date_filter_operators {
@@ -3646,6 +3797,62 @@ input id_filter_operators {
   _nempty: Boolean
 }
 
+input IntensivePhaseAssignees_filter {
+  id: number_filter_operators
+  phase: IntensivePhases_filter
+  clockodo_user_id: string_filter_operators
+  share: number_filter_operators
+  _and: [IntensivePhaseAssignees_filter]
+  _or: [IntensivePhaseAssignees_filter]
+}
+
+""""""
+input IntensivePhaseAssignees_quantifier_filter {
+  id: number_filter_operators
+  phase: IntensivePhases_filter
+  clockodo_user_id: string_filter_operators
+  share: number_filter_operators
+  _and: [IntensivePhaseAssignees_filter]
+  _or: [IntensivePhaseAssignees_filter]
+  _some: IntensivePhaseAssignees_filter
+  _none: IntensivePhaseAssignees_filter
+}
+
+input IntensivePhases_filter {
+  clockodo_user_id: string_filter_operators
+  from: date_filter_operators
+  from_func: date_function_filter_operators
+  hours: number_filter_operators
+  id: number_filter_operators
+  name: string_filter_operators
+  project_budget: ProjectBudgets_filter
+  to: date_filter_operators
+  to_func: date_function_filter_operators
+  assignees: IntensivePhaseAssignees_quantifier_filter
+  assignees_func: count_function_filter_operators
+  _and: [IntensivePhases_filter]
+  _or: [IntensivePhases_filter]
+}
+
+""""""
+input IntensivePhases_quantifier_filter {
+  clockodo_user_id: string_filter_operators
+  from: date_filter_operators
+  from_func: date_function_filter_operators
+  hours: number_filter_operators
+  id: number_filter_operators
+  name: string_filter_operators
+  project_budget: ProjectBudgets_filter
+  to: date_filter_operators
+  to_func: date_function_filter_operators
+  assignees: IntensivePhaseAssignees_quantifier_filter
+  assignees_func: count_function_filter_operators
+  _and: [IntensivePhases_filter]
+  _or: [IntensivePhases_filter]
+  _some: IntensivePhases_filter
+  _none: IntensivePhases_filter
+}
+
 input Invoices_filter {
   amount: number_filter_operators
   bexioInvoiceId: number_filter_operators
@@ -3803,6 +4010,27 @@ input ManualWorkEntries_quantifier_filter {
   _none: ManualWorkEntries_filter
 }
 
+input MinLoadAssignees_filter {
+  id: number_filter_operators
+  project_budget: ProjectBudgets_filter
+  clockodo_user_id: string_filter_operators
+  share: number_filter_operators
+  _and: [MinLoadAssignees_filter]
+  _or: [MinLoadAssignees_filter]
+}
+
+""""""
+input MinLoadAssignees_quantifier_filter {
+  id: number_filter_operators
+  project_budget: ProjectBudgets_filter
+  clockodo_user_id: string_filter_operators
+  share: number_filter_operators
+  _and: [MinLoadAssignees_filter]
+  _or: [MinLoadAssignees_filter]
+  _some: MinLoadAssignees_filter
+  _none: MinLoadAssignees_filter
+}
+
 input number_filter_operators {
   _eq: GraphQLStringOrFloat
   _neq: GraphQLStringOrFloat
@@ -3886,6 +4114,21 @@ input Periods_filter {
   _or: [Periods_filter]
 }
 
+input ProjectBudgets_filter {
+  annual_budget_hours: number_filter_operators
+  client: Clients_filter
+  id: number_filter_operators
+  year: number_filter_operators
+  min_weekly_hours: number_filter_operators
+  min_weekly_clockodo_user_id: string_filter_operators
+  phases: IntensivePhases_quantifier_filter
+  phases_func: count_function_filter_operators
+  min_assignees: MinLoadAssignees_quantifier_filter
+  min_assignees_func: count_function_filter_operators
+  _and: [ProjectBudgets_filter]
+  _or: [ProjectBudgets_filter]
+}
+
 input string_filter_operators {
   _eq: String
   _neq: String
@@ -3910,7 +4153,6 @@ input string_filter_operators {
 
 input TopUps_filter {
   amount: number_filter_operators
-  bexioInvoiceId: number_filter_operators
   clientPeriod: Clients_Periods_filter
   date_created: date_filter_operators
   date_created_func: datetime_function_filter_operators
@@ -3924,6 +4166,7 @@ input TopUps_filter {
   user_created: directus_users_filter
   user_updated: directus_users_filter
   wepPercentage: number_filter_operators
+  bexioInvoiceId: number_filter_operators
   _and: [TopUps_filter]
   _or: [TopUps_filter]
 }
@@ -3931,7 +4174,6 @@ input TopUps_filter {
 """"""
 input TopUps_quantifier_filter {
   amount: number_filter_operators
-  bexioInvoiceId: number_filter_operators
   clientPeriod: Clients_Periods_filter
   date_created: date_filter_operators
   date_created_func: datetime_function_filter_operators
@@ -3945,6 +4187,7 @@ input TopUps_quantifier_filter {
   user_created: directus_users_filter
   user_updated: directus_users_filter
   wepPercentage: number_filter_operators
+  bexioInvoiceId: number_filter_operators
   _and: [TopUps_filter]
   _or: [TopUps_filter]
   _some: TopUps_filter
@@ -3978,40 +4221,24 @@ input update_Clients_directus_users_input {
 }
 
 input update_Clients_input {
-  apiUrl: String
+  clockodo_customer_id: String
+  date_created: Date
+  date_updated: Date
+  id: ID
+
+  """The project shortcode in Jira. Eg. HAS or BA"""
+  jira_short_code: String
+  name: String
+  sort: Int
+  status: String
+  user_created: update_directus_users_input
+  user_updated: update_directus_users_input
 
   """
   Finde die Bexio-Kontakt-Nummer unter https://office.bexio.com/index.php/kontakt/list?sortBy=name:asc&filter=all  bearbeite den gewünschten Kontakt und kopiere die Nummer.
   """
   bexio_contact_id: Int
-
-  """
-  Abrechnungsmodell des Kunden. Prepaid = günstigerer Stundensatz, im Voraus bezahlte Top-Ups. Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach Aufwand.
-  """
-  billing_mode: String
-  clockodo_customer_id: String
-  date_created: Date
-  date_updated: Date
-
-  """
-  Override für den Editor-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (editor.<medium>.wepublish.cloud).
-  """
-  editor_url: String
-  id: ID
-
-  """The project shortcode in Jira. Eg. HAS or BA"""
-  jira_short_code: String
-
-  """
-  Sprache der kundenseitigen Slack-Meldungen (Wochenbericht, Jira-Warnungen, Arbeitsstopp).
-  """
-  language: String
-  name: String
-
-  """
-  Wenn aktiv, werden sämtliche Slack-Warnungen für diesen Kunden unterdrückt, bis der Schalter wieder deaktiviert wird.
-  """
-  notifications_paused: Boolean
+  apiUrl: String
 
   """
   Index of the last active onboarding step (0-based). Used to track progress for manual/email steps that have no service ID.
@@ -4025,15 +4252,11 @@ input update_Clients_input {
 
   """Slack channel ID created during client onboarding"""
   slack_channel_id: String
-  sort: Int
-  status: String
-  user_created: update_directus_users_input
-  user_updated: update_directus_users_input
 
   """
-  Override für den Website-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (<medium>.wepublish.cloud).
+  Wenn aktiv, werden sämtliche Slack-Warnungen für diesen Kunden unterdrückt, bis der Schalter wieder deaktiviert wird.
   """
-  website_url: String
+  notifications_paused: Boolean
 
   """
   Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.
@@ -4041,14 +4264,34 @@ input update_Clients_input {
   weekly_report_paused: Boolean
 
   """
+  Abrechnungsmodell des Kunden. Prepaid = günstigerer Stundensatz, im Voraus bezahlte Top-Ups. Monatsrechnung = höherer Stundensatz, monatliche Abrechnung nach Aufwand.
+  """
+  billing_mode: String
+
+  """
+  Sprache der kundenseitigen Slack-Meldungen (Wochenbericht, Jira-Warnungen, Arbeitsstopp).
+  """
+  language: String
+
+  """
+  Override für den Editor-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (editor.<medium>.wepublish.cloud).
+  """
+  editor_url: String
+
+  """
+  Override für den Website-Link im Dashboard. Leer lassen, um die URL aus apiUrl abzuleiten (<medium>.wepublish.cloud).
+  """
+  website_url: String
+
+  """
   Terraform-Bezeichner: Kleinbuchstaben, Ziffern, Unterstriche. Entspricht dem Medium-Namen aus dem Onboarding; verknüpft diesen Client mit seinem Uptime-Monitor.
   """
   medium_name: String
   allowedUsers: [update_Clients_directus_users_input]
   articles: [update_PeerArticles_input]
+  periods: [update_Clients_Periods_input]
   contracts: [update_Contracts_input]
   links: [update_ClientLinks_input]
-  periods: [update_Clients_Periods_input]
   jiraWarnings: [update_JiraWarnings_input]
 }
 
@@ -4056,9 +4299,9 @@ input update_Clients_Periods_input {
   Clients_id: update_Clients_input
   Periods_id: update_Periods_input
   id: ID
-  invoices: [update_Invoices_input]
-  manualWorkEntries: [update_ManualWorkEntries_input]
   topUps: [update_TopUps_input]
+  manualWorkEntries: [update_ManualWorkEntries_input]
+  invoices: [update_Invoices_input]
 }
 
 input update_Contracts_input {
@@ -4557,9 +4800,6 @@ input update_Periods_input {
 
 input update_TopUps_input {
   amount: Float
-
-  """Connected invoice from Bexio"""
-  bexioInvoiceId: Int
   clientPeriod: update_Clients_Periods_input
   date_created: Date
   date_updated: Date
@@ -4571,6 +4811,9 @@ input update_TopUps_input {
   user_created: update_directus_users_input
   user_updated: update_directus_users_input
   wepPercentage: Int
+
+  """Connected invoice from Bexio"""
+  bexioInvoiceId: Int
 }
 
 input write_directus_collections_input {

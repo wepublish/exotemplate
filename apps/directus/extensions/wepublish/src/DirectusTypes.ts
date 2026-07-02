@@ -14,10 +14,57 @@ export interface Schema {
   NotificationThresholds: NotificationThreshold[]
   PeerArticles: PeerArticle[]
   Periods: Period[]
+  ProjectBudgets: ProjectBudget[]
+  IntensivePhases: IntensivePhase[]
+  ResourcePlanEmployees: ResourcePlanEmployee[]
   Settings: Settings
   TopUps: TopUp[]
   directus_users: CustomDirectusUser
   directus_sync_id_map: DirectusSyncIdMap[]
+}
+
+/**
+ * Annual project load budget for the resource-planning assistant. One row per
+ * (client, year); its intensive phases (O2M `phases`) redistribute the annual
+ * hours into specific weeks and/or onto a specific person.
+ */
+export interface ProjectBudget {
+  id: number
+  client: string | Client | null
+  year: number
+  annual_budget_hours: number
+  /** Minimum weekly load (lower border) for this project. */
+  min_weekly_hours: number
+  /** If set, the minimum weekly load is a direct assignment to this Clockodo user. */
+  min_weekly_clockodo_user_id: string | null
+  phases?: IntensivePhase[]
+}
+
+/**
+ * A concentrated block of work inside a ProjectBudget. `clockodo_user_id` set →
+ * a capacity commitment for that person (reduces their available hours in those
+ * weeks); unset → it shapes the project's demand curve.
+ */
+export interface IntensivePhase {
+  id: number
+  project_budget: number | ProjectBudget | null
+  name: string | null
+  from: string
+  to: string
+  hours: number
+  clockodo_user_id: string | null
+}
+
+/**
+ * Per-employee resource-planning settings keyed by Clockodo user id: weekly
+ * "other work" budget (subtracted from capacity) + an `excluded` flag that
+ * toggles the person out of the team total.
+ */
+export interface ResourcePlanEmployee {
+  id: number
+  clockodo_user_id: string
+  other_work_budget_hours: number
+  excluded: boolean
 }
 
 export interface BillingSnapshot {

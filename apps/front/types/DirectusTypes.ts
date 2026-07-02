@@ -14,6 +14,13 @@ export interface Schema {
   NotificationThresholds: NotificationThreshold[]
   PeerArticles: PeerArticle[]
   Periods: Period[]
+  ProjectBudgets: ProjectBudget[]
+  IntensivePhases: IntensivePhase[]
+  ResourcePlanEmployees: ResourcePlanEmployee[]
+  ResourcePlanDefaultLoads: ResourcePlanDefaultLoad[]
+  IntensivePhaseAssignees: PlanAssignee[]
+  MinLoadAssignees: PlanAssignee[]
+  CompanyClosures: CompanyClosure[]
   Settings: Settings
   TopUps: TopUp[]
   directus_users: CustomDirectusUser
@@ -34,6 +41,84 @@ export interface BillingSnapshot {
   lastErrorAt: string | null
   date_created: string | null
   date_updated: string | null
+}
+
+/**
+ * An annual project load budget used by the resource-planning assistant. One
+ * row per (client, year); its intensive phases (O2M `phases`) redistribute the
+ * annual hours into specific weeks and/or onto a specific person.
+ */
+export interface ProjectBudget {
+  id: number
+  client: string | Client | null
+  year: number
+  annual_budget_hours: number
+  /** Minimum weekly load (lower border) for this project. */
+  min_weekly_hours: number
+  /** If set, the minimum weekly load is a direct assignment to this Clockodo user. */
+  min_weekly_clockodo_user_id: string | null
+  phases?: IntensivePhase[]
+  min_assignees?: PlanAssignee[]
+}
+
+/**
+ * A concentrated block of work inside a ProjectBudget. `clockodo_user_id` set →
+ * the phase is a capacity commitment for that person (reduces their available
+ * hours in those weeks); unset → it shapes the project's demand curve.
+ */
+/** A weighted per-person share of a phase or minimum load. */
+export interface PlanAssignee {
+  id: number
+  clockodo_user_id: string
+  share: number
+}
+
+export interface IntensivePhase {
+  id: number
+  project_budget: number | ProjectBudget | null
+  name: string | null
+  from: string
+  to: string
+  hours: number
+  clockodo_user_id: string | null
+  assignees?: PlanAssignee[]
+}
+
+/**
+ * Per-employee resource-planning settings, keyed by Clockodo user id. Carries
+ * the weekly "other work" budget subtracted from capacity and an `excluded`
+ * flag that toggles the person out of the team total.
+ */
+export interface ResourcePlanEmployee {
+  id: number
+  clockodo_user_id: string
+  other_work_budget_hours: number
+  excluded: boolean
+  /** Share of capacity spent on client-project work (0–100, default 100). */
+  project_hours_percentage: number
+}
+
+/**
+ * A company-wide closure (Betriebsferien): a date range where nobody works.
+ * Weeks fully covered get zero capacity; planned load redistributes to open
+ * weeks.
+ */
+export interface CompanyClosure {
+  id: number
+  name: string | null
+  from: string
+  to: string
+}
+
+/**
+ * A per-person recurring weekly load for an internal/standing task (reserves
+ * capacity). Keyed by Clockodo user id; a person can have several.
+ */
+export interface ResourcePlanDefaultLoad {
+  id: number
+  clockodo_user_id: string
+  name: string | null
+  weekly_hours: number
 }
 
 export interface Settings {
