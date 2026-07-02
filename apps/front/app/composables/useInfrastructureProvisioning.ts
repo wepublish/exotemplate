@@ -42,8 +42,12 @@ export function useInfrastructureProvisioning() {
     () => `https://api.${data.infraMediumName}.wepublish.cloud`
   )
 
+  // Valid Kubernetes / DNS name as used in the Helm manifests and domains:
+  // lowercase letters, digits and hyphens; must start with a letter (a leading
+  // digit isn't allowed in a domain label) and end alphanumeric; no underscores.
+  // Hyphens are only ever entered by hand, never auto-generated.
   const mediumNameValid = computed(() =>
-    /^[a-z][a-z0-9_]*$/.test(data.infraMediumName)
+    /^[a-z]([a-z0-9-]*[a-z0-9])?$/.test(data.infraMediumName)
   )
 
   async function execute() {

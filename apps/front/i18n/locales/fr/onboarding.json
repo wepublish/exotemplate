@@ -318,8 +318,8 @@
       "form": {
         "intro": "Crée automatiquement des pull requests sur les dépôts {configRepo} et {websiteRepo} afin de mettre en place la configuration Terraform et l'application site web pour le nouveau média.",
         "mediumName": "Nom du média",
-        "mediumNamePlaceholder": "muster_ag",
-        "mediumNameHint": "Identifiant Terraform : minuscules, chiffres, traits de soulignement",
+        "mediumNamePlaceholder": "musterag",
+        "mediumNameHint": "Identifiant Terraform : minuscules, chiffres, traits d'union",
         "editor": "Editor :",
         "website": "Site web :",
         "websiteEnabled": "Activer le site web",
@@ -372,7 +372,7 @@
       },
       "provisioning": {
         "adminOnly": "Seuls les administrateurs peuvent exécuter cette étape.",
-        "invalidMediumName": "Nom de média invalide. Seuls les minuscules, chiffres et traits de soulignement sont autorisés (doit commencer par une lettre).",
+        "invalidMediumName": "Nom de média invalide. Seuls les minuscules, chiffres et traits d'union sont autorisés (doit commencer par une lettre).",
         "errorTitle": "Erreur",
         "prSuccessToast": "PR d'infrastructure créées avec succès !",
         "prCreationFailed": "Échec de la création des PR",

@@ -28,13 +28,19 @@
     })
   )
 
-  const clientSlug = computed(() =>
-    data.clientName
+  // Auto-derived default: lowercase letters and digits only, no separators
+  // (matches the backend `slugifyMediumName`). Hyphens are valid in the field
+  // but only ever added by hand — we never insert them here.
+  const clientSlug = computed(() => {
+    const base = data.clientName
       .toLowerCase()
-      .replace(/[^a-z0-9]/g, '_')
-      .replace(/_+/g, '_')
-      .replace(/^_|_$/g, '')
-  )
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '') // strip diacritics (ü → u)
+      .replace(/[^a-z0-9]+/g, '') // drop everything that isn't a letter or digit
+    if (base === '') return ''
+    // A domain label can't start with a digit → prefix a letter when it does.
+    return /^[a-z]/.test(base) ? base : `m${base}`
+  })
 
   watch(
     clientSlug,
@@ -46,12 +52,14 @@
     { immediate: true }
   )
 
+  // Manual edits: keep lowercase letters, digits and any hyphens the user types
+  // (Kubernetes / Terraform compatible); silently drop anything else — so a
+  // space or underscore just disappears rather than becoming a separator.
   function normalizeMediumName(value: string) {
     data.infraMediumName = value
       .toLowerCase()
-      .replace(/[^a-z0-9_]/g, '_')
-      .replace(/_+/g, '_')
-      .replace(/^[^a-z]+/, '')
+      .replace(/[^a-z0-9-]/g, '') // drop everything except letters, digits, hyphens
+      .replace(/^[^a-z]+/, '') // must start with a letter
   }
 
   const newHostname = ref('')

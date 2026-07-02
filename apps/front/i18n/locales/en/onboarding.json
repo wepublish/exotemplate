@@ -318,8 +318,8 @@
       "form": {
         "intro": "Automatically creates pull requests on the {configRepo} and {websiteRepo} repositories to set up the Terraform configuration and website app for the new medium.",
         "mediumName": "Medium name",
-        "mediumNamePlaceholder": "muster_ag",
-        "mediumNameHint": "Terraform identifier: lowercase, digits, underscores",
+        "mediumNamePlaceholder": "musterag",
+        "mediumNameHint": "Terraform identifier: lowercase, digits, hyphens",
         "editor": "Editor:",
         "website": "Website:",
         "websiteEnabled": "Enable website",
@@ -372,7 +372,7 @@
       },
       "provisioning": {
         "adminOnly": "Only administrators can perform this step.",
-        "invalidMediumName": "Invalid medium name. Only lowercase letters, digits and underscores allowed (must start with a letter).",
+        "invalidMediumName": "Invalid medium name. Only lowercase letters, digits and hyphens allowed (must start with a letter).",
         "errorTitle": "Error",
         "prSuccessToast": "Infrastructure PRs created successfully!",
         "prCreationFailed": "PR creation failed",

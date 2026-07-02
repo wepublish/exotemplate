@@ -37,7 +37,7 @@
     "mediumName": {
       "label": "Medium-Name",
       "description": "Terraform-Bezeichner, der diesen Kunden mit seinem Uptime-Monitor verknüpft. Wird beim Onboarding gesetzt.",
-      "hint": "Terraform-Bezeichner: Kleinbuchstaben, Ziffern, Unterstriche.",
+      "hint": "Terraform-Bezeichner: Kleinbuchstaben, Ziffern, Bindestriche.",
       "warning": {
         "title": "Nur ändern, wenn du sicher bist",
         "body": "Der Wert muss exakt dem Medium-Namen in der Infrastruktur entsprechen. Ein falscher Wert zeigt die Verfügbarkeit eines anderen Mediums an oder gar keine. Leer lassen deaktiviert das Monitoring für diesen Kunden."

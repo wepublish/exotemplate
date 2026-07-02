@@ -6,20 +6,24 @@ describe('slugifyMediumName', () => {
     expect(slugifyMediumName('bajour')).toBe('bajour')
   })
 
-  it('lowercases and replaces spaces with underscores', () => {
-    expect(slugifyMediumName('One Test')).toBe('one_test')
+  it('lowercases and merges words with no separator', () => {
+    expect(slugifyMediumName('One Test')).toBe('onetest')
   })
 
-  it('drops punctuation and collapses separators', () => {
-    expect(slugifyMediumName('Bajour!!  News')).toBe('bajour_news')
-    expect(slugifyMediumName('St. Galler')).toBe('st_galler')
+  it('drops punctuation and whitespace entirely (no separator)', () => {
+    expect(slugifyMediumName('Bajour!!  News')).toBe('bajournews')
+    expect(slugifyMediumName('St. Galler')).toBe('stgaller')
   })
 
-  it('trims leading and trailing separators', () => {
+  it('strips diacritics', () => {
+    expect(slugifyMediumName('Zürich')).toBe('zurich')
+  })
+
+  it('trims surrounding whitespace', () => {
     expect(slugifyMediumName('  Foo  ')).toBe('foo')
   })
 
-  it('prefixes a leading digit so it starts with a letter', () => {
+  it('prefixes a leading digit so it starts with a letter (domain-safe)', () => {
     expect(slugifyMediumName('3sat')).toBe('m3sat')
   })
 

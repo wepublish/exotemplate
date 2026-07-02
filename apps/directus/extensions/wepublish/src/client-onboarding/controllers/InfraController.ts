@@ -13,8 +13,10 @@ const INFRA_ENV_KEYS = [
   'INFRA_CONFIGURATOR_API_KEY'
 ] as const
 
-// Terraform identifier: ^[a-z][a-z0-9_]*$
-const MEDIUM_NAME_PATTERN = /^[a-z][a-z0-9_]*$/
+// Valid Kubernetes / DNS name as used in the Helm manifests and domains:
+// lowercase letters, digits and hyphens; must start with a letter (a leading
+// digit isn't allowed in a domain label) and end alphanumeric; no underscores.
+const MEDIUM_NAME_PATTERN = /^[a-z]([a-z0-9-]*[a-z0-9])?$/
 
 export class InfraController extends BaseController {
   register(router: any): void {
@@ -61,7 +63,7 @@ export class InfraController extends BaseController {
       return next(
         new InvalidPayloadError({
           reason:
-            'medium_name must be a valid Terraform identifier (lowercase letters, digits, underscores; must start with a letter)'
+            'medium_name must be a valid Kubernetes / DNS name (lowercase letters, digits, hyphens; must start with a letter)'
         })
       )
     }

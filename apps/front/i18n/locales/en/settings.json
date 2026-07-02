@@ -37,7 +37,7 @@
     "mediumName": {
       "label": "Medium name",
       "description": "Terraform identifier that maps this client to its uptime monitor. Set during onboarding.",
-      "hint": "Terraform identifier: lowercase letters, digits, underscores.",
+      "hint": "Terraform identifier: lowercase letters, digits, hyphens.",
       "warning": {
         "title": "Only change this if you're sure",
         "body": "The value must exactly match the medium name in the infrastructure. A wrong value shows another medium's availability, or none. Leaving it empty disables monitoring for this client."

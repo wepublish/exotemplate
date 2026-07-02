@@ -318,8 +318,8 @@
       "form": {
         "intro": "Erstellt automatisch Pull Requests auf den Repositories {configRepo} und {websiteRepo}, um die Terraform-Konfiguration und Website-App für das neue Medium einzurichten.",
         "mediumName": "Medium-Name",
-        "mediumNamePlaceholder": "muster_ag",
-        "mediumNameHint": "Terraform-Bezeichner: Kleinbuchstaben, Ziffern, Unterstriche",
+        "mediumNamePlaceholder": "musterag",
+        "mediumNameHint": "Terraform-Bezeichner: Kleinbuchstaben, Ziffern, Bindestriche",
         "editor": "Editor:",
         "website": "Website:",
         "websiteEnabled": "Website aktivieren",
@@ -372,7 +372,7 @@
       },
       "provisioning": {
         "adminOnly": "Nur Administratoren können diesen Schritt ausführen.",
-        "invalidMediumName": "Ungültiger Medium-Name. Nur Kleinbuchstaben, Ziffern und Unterstriche erlaubt (muss mit Buchstabe beginnen).",
+        "invalidMediumName": "Ungültiger Medium-Name. Nur Kleinbuchstaben, Ziffern und Bindestriche erlaubt (muss mit Buchstabe beginnen).",
         "errorTitle": "Fehler",
         "prSuccessToast": "Infrastruktur-PRs erfolgreich erstellt!",
         "prCreationFailed": "PR-Erstellung fehlgeschlagen",
