@@ -1,0 +1,33 @@
+{
+  "monitoring": {
+    "card": {
+      "title": "Availability",
+      "loadError": "Could not load availability data.",
+      "checkedAt": "Last checked: {time}",
+      "notConfigured": {
+        "title": "No monitoring configured",
+        "description": "No medium name is set for this project. An administrator can add it in the project settings."
+      },
+      "notMonitored": {
+        "title": "No monitor found",
+        "description": "The infrastructure currently returns no availability data for “{mediumName}”."
+      }
+    },
+    "environment": {
+      "production": "Production",
+      "staging": "Staging"
+    },
+    "status": {
+      "healthy": "Available",
+      "unhealthy": "Degraded",
+      "unreachable": "Unreachable",
+      "unknown": "Unknown"
+    },
+    "overview": {
+      "title": "Availability (all media)",
+      "mediaCount": "{count} medium | {count} media",
+      "searchPlaceholder": "Search for a medium…",
+      "empty": "No media found."
+    }
+  }
+}

@@ -86,6 +86,11 @@
           to: link('/time-tracking')
         },
         {
+          label: t('nav.monitoring'),
+          icon: 'lucide:radio-tower',
+          to: link('/monitoring')
+        },
+        {
           label: t('nav.onboarding'),
           icon: 'lucide:user-plus',
           to: link('/onboarding')

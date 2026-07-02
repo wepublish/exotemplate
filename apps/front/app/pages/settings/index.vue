@@ -5,8 +5,13 @@
   const toast = useToast()
   const { t } = useI18n()
   const link = useClientPeriodLink()
-  const { setPause, setWeeklyReportPause, setBillingMode, setClientLanguage } =
-    useJiraWarnings()
+  const {
+    setPause,
+    setWeeklyReportPause,
+    setBillingMode,
+    setClientLanguage,
+    setMediumName
+  } = useJiraWarnings()
 
   // Settings are per-client. The client to configure is the one in the URL
   // (`/:clientPeriodId/settings`); we render just that one (plus the user-global
@@ -150,6 +155,43 @@
         toast.add({
           title: t('settings.billingMode.updated', { client: client.name }),
           description: billingModeLabel(mode),
+          color: 'success'
+        })
+      } catch (err) {
+        toast.add({
+          title: t('common.actionFailed'),
+          description: err instanceof Error ? err.message : undefined,
+          color: 'error'
+        })
+      }
+    })
+  }
+
+  // Draft per client for the admin-only Medium-Name field (saved explicitly via
+  // a button, unlike the toggles/selects which persist on change).
+  const mediumNameDrafts = ref<Record<string, string>>({})
+  watch(
+    selectedClients,
+    (list) => {
+      for (const c of list) {
+        if (!(c.id in mediumNameDrafts.value)) {
+          mediumNameDrafts.value[c.id] = c.medium_name ?? ''
+        }
+      }
+    },
+    { immediate: true }
+  )
+
+  async function onSaveMediumName(client: Client): Promise<void> {
+    const value = (mediumNameDrafts.value[client.id] ?? '').trim()
+    await withPending(client.id, async () => {
+      try {
+        await setMediumName(client.id, value)
+        userStore.patchClient(client.id, {
+          medium_name: value === '' ? null : value
+        })
+        toast.add({
+          title: t('settings.mediumName.saved', { client: client.name }),
           color: 'success'
         })
       } catch (err) {
@@ -471,6 +513,52 @@
                 "
               />
             </div>
+          </div>
+        </UPageCard>
+
+        <!-- Medium-Name (admin-only): the Terraform identifier that maps this
+             client to its uptime monitor. Guarded with a warning because a
+             wrong value silently shows the wrong (or no) monitor. -->
+        <UPageCard v-if="userStore.amIAdministrator()">
+          <template #header>
+            <div class="flex items-center gap-3 min-w-0">
+              <UIcon
+                name="lucide:radio-tower"
+                class="text-2xl shrink-0 text-muted"
+              />
+              <p class="font-semibold truncate">
+                {{ t('settings.mediumName.label') }}
+              </p>
+            </div>
+          </template>
+          <div class="flex flex-col gap-3">
+            <p class="text-sm text-muted">
+              {{ t('settings.mediumName.description') }}
+            </p>
+            <UAlert
+              color="warning"
+              variant="soft"
+              icon="lucide:triangle-alert"
+              :title="t('settings.mediumName.warning.title')"
+              :description="t('settings.mediumName.warning.body')"
+            />
+            <UFormField :help="t('settings.mediumName.hint')">
+              <div class="flex items-start gap-2">
+                <UInput
+                  v-model="mediumNameDrafts[client.id]"
+                  placeholder="z. B. bajour"
+                  class="w-full sm:w-60"
+                />
+                <UButton
+                  icon="lucide:save"
+                  color="primary"
+                  :loading="pendingClientIds.has(client.id)"
+                  @click="onSaveMediumName(client)"
+                >
+                  {{ t('common.save') }}
+                </UButton>
+              </div>
+            </UFormField>
           </div>
         </UPageCard>
 

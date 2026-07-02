@@ -1,0 +1,33 @@
+{
+  "monitoring": {
+    "card": {
+      "title": "Verfügbarkeit",
+      "loadError": "Verfügbarkeitsdaten konnten nicht geladen werden.",
+      "checkedAt": "Zuletzt geprüft: {time}",
+      "notConfigured": {
+        "title": "Kein Monitoring konfiguriert",
+        "description": "Für dieses Projekt ist kein Medium-Name hinterlegt. Ein Administrator kann ihn in den Projekteinstellungen ergänzen."
+      },
+      "notMonitored": {
+        "title": "Kein Monitor gefunden",
+        "description": "Für „{mediumName}“ liefert die Infrastruktur derzeit keine Verfügbarkeitsdaten."
+      }
+    },
+    "environment": {
+      "production": "Produktion",
+      "staging": "Staging"
+    },
+    "status": {
+      "healthy": "Verfügbar",
+      "unhealthy": "Beeinträchtigt",
+      "unreachable": "Nicht erreichbar",
+      "unknown": "Unbekannt"
+    },
+    "overview": {
+      "title": "Verfügbarkeit (alle Medien)",
+      "mediaCount": "{count} Medium | {count} Medien",
+      "searchPlaceholder": "Nach Medium suchen…",
+      "empty": "Keine Medien gefunden."
+    }
+  }
+}

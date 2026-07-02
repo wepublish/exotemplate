@@ -151,6 +151,23 @@ export function useJiraWarnings() {
     )
   }
 
+  /**
+   * Set the client's Terraform medium identifier ("Medium-Name"). Admin-only —
+   * it maps the client to its monitor in the infrastructure-configurator, so it
+   * must match the real Terraform id exactly. Empty string clears it.
+   */
+  async function setMediumName(
+    clientId: string,
+    mediumName: string
+  ): Promise<void> {
+    const trimmed = mediumName.trim()
+    await directus.request(
+      updateItem('Clients', clientId, {
+        medium_name: trimmed === '' ? null : trimmed
+      } as Partial<Client>)
+    )
+  }
+
   return {
     listForClients,
     isHalted,
@@ -163,6 +180,7 @@ export function useJiraWarnings() {
     setPause,
     setWeeklyReportPause,
     setBillingMode,
-    setClientLanguage
+    setClientLanguage,
+    setMediumName
   }
 }

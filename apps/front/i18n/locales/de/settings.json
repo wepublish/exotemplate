@@ -31,6 +31,16 @@
       "updated": "Sprache aktualisiert.",
       "clientUpdated": "Projektsprache für {client} aktualisiert."
     },
+    "mediumName": {
+      "label": "Medium-Name",
+      "description": "Terraform-Bezeichner, der diesen Kunden mit seinem Uptime-Monitor verknüpft. Wird beim Onboarding gesetzt.",
+      "hint": "Terraform-Bezeichner: Kleinbuchstaben, Ziffern, Unterstriche.",
+      "warning": {
+        "title": "Nur ändern, wenn du sicher bist",
+        "body": "Der Wert muss exakt dem Medium-Namen in der Infrastruktur entsprechen. Ein falscher Wert zeigt die Verfügbarkeit eines anderen Mediums an oder gar keine. Leer lassen deaktiviert das Monitoring für diesen Kunden."
+      },
+      "saved": "Medium-Name für {client} gespeichert."
+    },
     "contract": {
       "label": "Vertrag",
       "description": "Verträge dieses Kunden ansehen, neue Versionen erstellen und unterschriebene Verträge hochladen.",

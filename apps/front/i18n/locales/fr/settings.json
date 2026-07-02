@@ -31,6 +31,16 @@
       "updated": "Langue mise à jour.",
       "clientUpdated": "Langue du projet mise à jour pour {client}."
     },
+    "mediumName": {
+      "label": "Nom du média",
+      "description": "Identifiant Terraform qui relie ce client à son moniteur de disponibilité. Défini lors de l'onboarding.",
+      "hint": "Identifiant Terraform : minuscules, chiffres, tirets bas.",
+      "warning": {
+        "title": "À ne modifier qu'en cas de certitude",
+        "body": "La valeur doit correspondre exactement au nom du média dans l'infrastructure. Une valeur erronée affiche la disponibilité d'un autre média, voire aucune. Laisser vide désactive la surveillance pour ce client."
+      },
+      "saved": "Nom du média enregistré pour {client}."
+    },
     "contract": {
       "label": "Contrat",
       "description": "Consulter les contrats de ce client, créer de nouvelles versions et téléverser les contrats signés.",

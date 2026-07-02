@@ -91,6 +91,12 @@ export interface Client {
   slack_channel_id: string | null
   onboarding_current_step: number | null
   onboarding_manual_checklist: string[] | null
+  /**
+   * Terraform medium identifier (lowercase letters, digits, underscores) — the
+   * "Medium-Name" from onboarding. Maps this client to its monitor in the
+   * infrastructure-configurator for uptime/health. Admin-managed.
+   */
+  medium_name: string | null
   /** Override for the dashboard editor link; falls back to deriving from `apiUrl`. */
   editor_url: string | null
   /** Override for the dashboard website link; falls back to deriving from `apiUrl`. */

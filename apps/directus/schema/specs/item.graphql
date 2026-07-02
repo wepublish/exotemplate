@@ -7,6 +7,10 @@ type Query {
   CaptureIgnoredUsers_by_id(id: ID!, version: String): CaptureIgnoredUsers
   CaptureIgnoredUsers_aggregated(groupBy: [String], filter: CaptureIgnoredUsers_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [CaptureIgnoredUsers_aggregated!]!
   CaptureIgnoredUsers_by_version(version: String!, id: ID!): version_CaptureIgnoredUsers
+  Clients(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients!]!
+  Clients_by_id(id: ID!, version: String): Clients
+  Clients_aggregated(groupBy: [String], filter: Clients_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [Clients_aggregated!]!
+  Clients_by_version(version: String!, id: ID!): version_Clients
   Settings(version: String): Settings
   Settings_by_version(version: String!): version_Settings
   Clients_Periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods!]!
@@ -17,10 +21,10 @@ type Query {
   BillingSnapshots_by_id(id: ID!, version: String): BillingSnapshots
   BillingSnapshots_aggregated(groupBy: [String], filter: BillingSnapshots_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [BillingSnapshots_aggregated!]!
   BillingSnapshots_by_version(version: String!, id: ID!): version_BillingSnapshots
-  Clients(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients!]!
-  Clients_by_id(id: ID!, version: String): Clients
-  Clients_aggregated(groupBy: [String], filter: Clients_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [Clients_aggregated!]!
-  Clients_by_version(version: String!, id: ID!): version_Clients
+  ClientLinks(filter: ClientLinks_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [ClientLinks!]!
+  ClientLinks_by_id(id: ID!, version: String): ClientLinks
+  ClientLinks_aggregated(groupBy: [String], filter: ClientLinks_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [ClientLinks_aggregated!]!
+  ClientLinks_by_version(version: String!, id: ID!): version_ClientLinks
   Periods(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Periods!]!
   Periods_by_id(id: ID!, version: String): Periods
   Periods_aggregated(groupBy: [String], filter: Periods_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [Periods_aggregated!]!
@@ -57,10 +61,6 @@ type Query {
   TopUps_by_id(id: ID!, version: String): TopUps
   TopUps_aggregated(groupBy: [String], filter: TopUps_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [TopUps_aggregated!]!
   TopUps_by_version(version: String!, id: ID!): version_TopUps
-  ClientLinks(filter: ClientLinks_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [ClientLinks!]!
-  ClientLinks_by_id(id: ID!, version: String): ClientLinks
-  ClientLinks_aggregated(groupBy: [String], filter: ClientLinks_filter, limit: Int, offset: Int, page: Int, search: String, sort: [String]): [ClientLinks_aggregated!]!
-  ClientLinks_by_version(version: String!, id: ID!): version_ClientLinks
 }
 
 type Mutation {
@@ -68,12 +68,14 @@ type Mutation {
   create_directus_sync_id_map_item(data: create_directus_sync_id_map_input!): directus_sync_id_map
   create_CaptureIgnoredUsers_items(filter: CaptureIgnoredUsers_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_CaptureIgnoredUsers_input!]): [CaptureIgnoredUsers!]!
   create_CaptureIgnoredUsers_item(data: create_CaptureIgnoredUsers_input!): CaptureIgnoredUsers
+  create_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Clients_input!]): [Clients!]!
+  create_Clients_item(data: create_Clients_input!): Clients
   create_Clients_Periods_items(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Clients_Periods_input!]): [Clients_Periods!]!
   create_Clients_Periods_item(data: create_Clients_Periods_input!): Clients_Periods
   create_BillingSnapshots_items(filter: BillingSnapshots_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_BillingSnapshots_input!]): [BillingSnapshots!]!
   create_BillingSnapshots_item(data: create_BillingSnapshots_input!): BillingSnapshots
-  create_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Clients_input!]): [Clients!]!
-  create_Clients_item(data: create_Clients_input!): Clients
+  create_ClientLinks_items(filter: ClientLinks_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_ClientLinks_input!]): [ClientLinks!]!
+  create_ClientLinks_item(data: create_ClientLinks_input!): ClientLinks
   create_Periods_items(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Periods_input!]): [Periods!]!
   create_Periods_item(data: create_Periods_input!): Periods
   create_Clients_directus_users_items(filter: Clients_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_Clients_directus_users_input!]): [Clients_directus_users!]!
@@ -92,14 +94,15 @@ type Mutation {
   create_PeerArticles_item(data: create_PeerArticles_input!): PeerArticles
   create_TopUps_items(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_TopUps_input!]): [TopUps!]!
   create_TopUps_item(data: create_TopUps_input!): TopUps
-  create_ClientLinks_items(filter: ClientLinks_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_ClientLinks_input!]): [ClientLinks!]!
-  create_ClientLinks_item(data: create_ClientLinks_input!): ClientLinks
   update_directus_sync_id_map_items(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_directus_sync_id_map_input!): [directus_sync_id_map!]!
   update_directus_sync_id_map_batch(filter: directus_sync_id_map_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_directus_sync_id_map_input!]): [directus_sync_id_map!]!
   update_directus_sync_id_map_item(id: ID!, data: update_directus_sync_id_map_input!): directus_sync_id_map
   update_CaptureIgnoredUsers_items(filter: CaptureIgnoredUsers_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_CaptureIgnoredUsers_input!): [CaptureIgnoredUsers!]!
   update_CaptureIgnoredUsers_batch(filter: CaptureIgnoredUsers_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_CaptureIgnoredUsers_input!]): [CaptureIgnoredUsers!]!
   update_CaptureIgnoredUsers_item(id: ID!, data: update_CaptureIgnoredUsers_input!): CaptureIgnoredUsers
+  update_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Clients_input!): [Clients!]!
+  update_Clients_batch(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Clients_input!]): [Clients!]!
+  update_Clients_item(id: ID!, data: update_Clients_input!): Clients
   update_Settings(data: update_Settings_input!): Settings
   update_Clients_Periods_items(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Clients_Periods_input!): [Clients_Periods!]!
   update_Clients_Periods_batch(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Clients_Periods_input!]): [Clients_Periods!]!
@@ -107,9 +110,9 @@ type Mutation {
   update_BillingSnapshots_items(filter: BillingSnapshots_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_BillingSnapshots_input!): [BillingSnapshots!]!
   update_BillingSnapshots_batch(filter: BillingSnapshots_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_BillingSnapshots_input!]): [BillingSnapshots!]!
   update_BillingSnapshots_item(id: ID!, data: update_BillingSnapshots_input!): BillingSnapshots
-  update_Clients_items(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Clients_input!): [Clients!]!
-  update_Clients_batch(filter: Clients_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Clients_input!]): [Clients!]!
-  update_Clients_item(id: ID!, data: update_Clients_input!): Clients
+  update_ClientLinks_items(filter: ClientLinks_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_ClientLinks_input!): [ClientLinks!]!
+  update_ClientLinks_batch(filter: ClientLinks_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_ClientLinks_input!]): [ClientLinks!]!
+  update_ClientLinks_item(id: ID!, data: update_ClientLinks_input!): ClientLinks
   update_Periods_items(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_Periods_input!): [Periods!]!
   update_Periods_batch(filter: Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_Periods_input!]): [Periods!]!
   update_Periods_item(id: ID!, data: update_Periods_input!): Periods
@@ -137,19 +140,18 @@ type Mutation {
   update_TopUps_items(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_TopUps_input!): [TopUps!]!
   update_TopUps_batch(filter: TopUps_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_TopUps_input!]): [TopUps!]!
   update_TopUps_item(id: ID!, data: update_TopUps_input!): TopUps
-  update_ClientLinks_items(filter: ClientLinks_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_ClientLinks_input!): [ClientLinks!]!
-  update_ClientLinks_batch(filter: ClientLinks_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [update_ClientLinks_input!]): [ClientLinks!]!
-  update_ClientLinks_item(id: ID!, data: update_ClientLinks_input!): ClientLinks
   delete_directus_sync_id_map_items(ids: [ID]!): delete_many
   delete_directus_sync_id_map_item(id: ID!): delete_one
   delete_CaptureIgnoredUsers_items(ids: [ID]!): delete_many
   delete_CaptureIgnoredUsers_item(id: ID!): delete_one
+  delete_Clients_items(ids: [ID]!): delete_many
+  delete_Clients_item(id: ID!): delete_one
   delete_Clients_Periods_items(ids: [ID]!): delete_many
   delete_Clients_Periods_item(id: ID!): delete_one
   delete_BillingSnapshots_items(ids: [ID]!): delete_many
   delete_BillingSnapshots_item(id: ID!): delete_one
-  delete_Clients_items(ids: [ID]!): delete_many
-  delete_Clients_item(id: ID!): delete_one
+  delete_ClientLinks_items(ids: [ID]!): delete_many
+  delete_ClientLinks_item(id: ID!): delete_one
   delete_Periods_items(ids: [ID]!): delete_many
   delete_Periods_item(id: ID!): delete_one
   delete_Clients_directus_users_items(ids: [ID]!): delete_many
@@ -168,8 +170,6 @@ type Mutation {
   delete_PeerArticles_item(id: ID!): delete_one
   delete_TopUps_items(ids: [ID]!): delete_many
   delete_TopUps_item(id: ID!): delete_one
-  delete_ClientLinks_items(ids: [ID]!): delete_many
-  delete_ClientLinks_item(id: ID!): delete_one
 }
 
 type Subscription {
@@ -196,10 +196,11 @@ type Subscription {
   directus_comments_mutated(event: EventEnum): directus_comments_mutated
   directus_sync_id_map_mutated(event: EventEnum): directus_sync_id_map_mutated
   CaptureIgnoredUsers_mutated(event: EventEnum): CaptureIgnoredUsers_mutated
+  Clients_mutated(event: EventEnum): Clients_mutated
   Settings_mutated(event: EventEnum): Settings_mutated
   Clients_Periods_mutated(event: EventEnum): Clients_Periods_mutated
   BillingSnapshots_mutated(event: EventEnum): BillingSnapshots_mutated
-  Clients_mutated(event: EventEnum): Clients_mutated
+  ClientLinks_mutated(event: EventEnum): ClientLinks_mutated
   Periods_mutated(event: EventEnum): Periods_mutated
   Clients_directus_users_mutated(event: EventEnum): Clients_directus_users_mutated
   Contracts_mutated(event: EventEnum): Contracts_mutated
@@ -209,7 +210,6 @@ type Subscription {
   NotificationThresholds_mutated(event: EventEnum): NotificationThresholds_mutated
   PeerArticles_mutated(event: EventEnum): PeerArticles_mutated
   TopUps_mutated(event: EventEnum): TopUps_mutated
-  ClientLinks_mutated(event: EventEnum): ClientLinks_mutated
 }
 
 """The `Boolean` scalar type represents `true` or `false`."""
@@ -577,16 +577,21 @@ type Clients {
   Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.
   """
   weekly_report_paused: Boolean!
+
+  """
+  Terraform-Bezeichner: Kleinbuchstaben, Ziffern, Unterstriche. Entspricht dem Medium-Namen aus dem Onboarding; verknüpft diesen Client mit seinem Uptime-Monitor.
+  """
+  medium_name: String
   allowedUsers(filter: Clients_directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_directus_users]
   allowedUsers_func: count_functions
   articles(filter: PeerArticles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [PeerArticles]
   articles_func: count_functions
   contracts(filter: Contracts_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Contracts]
   contracts_func: count_functions
-  periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods]
-  periods_func: count_functions
   links(filter: ClientLinks_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [ClientLinks]
   links_func: count_functions
+  periods(filter: Clients_Periods_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [Clients_Periods]
+  periods_func: count_functions
   jiraWarnings(filter: JiraWarnings_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [JiraWarnings]
 }
 
@@ -665,13 +670,18 @@ type Clients_aggregated_count {
   Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.
   """
   weekly_report_paused: Int
+
+  """
+  Terraform-Bezeichner: Kleinbuchstaben, Ziffern, Unterstriche. Entspricht dem Medium-Namen aus dem Onboarding; verknüpft diesen Client mit seinem Uptime-Monitor.
+  """
+  medium_name: Int
   allowedUsers: Int
   articles: Int
   contracts: Int
-  periods: Int
 
   """Custom quick-access links shown on the dashboard quick-links tile."""
   links: Int
+  periods: Int
 }
 
 type Clients_aggregated_fields {
@@ -2198,11 +2208,16 @@ type version_Clients {
   Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.
   """
   weekly_report_paused: Boolean
+
+  """
+  Terraform-Bezeichner: Kleinbuchstaben, Ziffern, Unterstriche. Entspricht dem Medium-Namen aus dem Onboarding; verknüpft diesen Client mit seinem Uptime-Monitor.
+  """
+  medium_name: String
   allowedUsers: JSON
   articles: JSON
   contracts: JSON
-  periods: JSON
   links: JSON
+  periods: JSON
   jiraWarnings: JSON
 }
 
@@ -2586,16 +2601,17 @@ input Clients_filter {
   user_updated: directus_users_filter
   website_url: string_filter_operators
   weekly_report_paused: boolean_filter_operators
+  medium_name: string_filter_operators
   allowedUsers: Clients_directus_users_quantifier_filter
   allowedUsers_func: count_function_filter_operators
   articles: PeerArticles_quantifier_filter
   articles_func: count_function_filter_operators
   contracts: Contracts_quantifier_filter
   contracts_func: count_function_filter_operators
-  periods: Clients_Periods_quantifier_filter
-  periods_func: count_function_filter_operators
   links: ClientLinks_quantifier_filter
   links_func: count_function_filter_operators
+  periods: Clients_Periods_quantifier_filter
+  periods_func: count_function_filter_operators
   _and: [Clients_filter]
   _or: [Clients_filter]
   jiraWarnings: JiraWarnings_quantifier_filter
@@ -2822,11 +2838,16 @@ input create_Clients_input {
   Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.
   """
   weekly_report_paused: Boolean!
+
+  """
+  Terraform-Bezeichner: Kleinbuchstaben, Ziffern, Unterstriche. Entspricht dem Medium-Namen aus dem Onboarding; verknüpft diesen Client mit seinem Uptime-Monitor.
+  """
+  medium_name: String
   allowedUsers: [create_Clients_directus_users_input]
   articles: [create_PeerArticles_input]
   contracts: [create_Contracts_input]
-  periods: [create_Clients_Periods_input]
   links: [create_ClientLinks_input]
+  periods: [create_Clients_Periods_input]
   jiraWarnings: [create_JiraWarnings_input]
 }
 
@@ -4125,11 +4146,16 @@ input update_Clients_input {
   Wenn aktiv, wird der wöchentliche Slack-Bericht für diesen Kunden unterdrückt. Unabhängig vom allgemeinen Notification-Pause-Schalter.
   """
   weekly_report_paused: Boolean
+
+  """
+  Terraform-Bezeichner: Kleinbuchstaben, Ziffern, Unterstriche. Entspricht dem Medium-Namen aus dem Onboarding; verknüpft diesen Client mit seinem Uptime-Monitor.
+  """
+  medium_name: String
   allowedUsers: [update_Clients_directus_users_input]
   articles: [update_PeerArticles_input]
   contracts: [update_Contracts_input]
-  periods: [update_Clients_Periods_input]
   links: [update_ClientLinks_input]
+  periods: [update_Clients_Periods_input]
   jiraWarnings: [update_JiraWarnings_input]
 }
 

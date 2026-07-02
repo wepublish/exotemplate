@@ -1,0 +1,33 @@
+{
+  "monitoring": {
+    "card": {
+      "title": "Disponibilité",
+      "loadError": "Impossible de charger les données de disponibilité.",
+      "checkedAt": "Dernière vérification : {time}",
+      "notConfigured": {
+        "title": "Aucune surveillance configurée",
+        "description": "Aucun nom de média n'est défini pour ce projet. Un administrateur peut l'ajouter dans les paramètres du projet."
+      },
+      "notMonitored": {
+        "title": "Aucun moniteur trouvé",
+        "description": "Aucune donnée de disponibilité n'est actuellement fournie pour « {mediumName} »."
+      }
+    },
+    "environment": {
+      "production": "Production",
+      "staging": "Staging"
+    },
+    "status": {
+      "healthy": "Disponible",
+      "unhealthy": "Dégradé",
+      "unreachable": "Injoignable",
+      "unknown": "Inconnu"
+    },
+    "overview": {
+      "title": "Disponibilité (tous les médias)",
+      "mediaCount": "{count} média | {count} médias",
+      "searchPlaceholder": "Rechercher un média…",
+      "empty": "Aucun média trouvé."
+    }
+  }
+}

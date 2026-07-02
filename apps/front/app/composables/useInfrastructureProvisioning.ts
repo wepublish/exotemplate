@@ -123,7 +123,10 @@ export function useInfrastructureProvisioning() {
               'onboarding.infrastructure.provisioning.prSuccessToast'
             )
           })
-          await advanceStep({ apiUrl: apiUrl.value })
+          await advanceStep({
+            apiUrl: apiUrl.value,
+            medium_name: data.infraMediumName
+          })
           return
         }
 

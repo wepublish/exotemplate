@@ -211,6 +211,17 @@
     cacheInfo
   } = await useAggregatedHours(clientPeriodId)
 
+  // Uptime/health of the client's medium (status + latency). Independent of the
+  // billing data — has its own graceful states when no medium_name is mapped.
+  const {
+    data: monitoring,
+    pending: monitoringPending,
+    error: monitoringError
+  } = await useClientMonitoring(clientPeriodId)
+  const monitoringErr = computed<Error | null>(
+    () => (monitoringError.value as Error | null) ?? null
+  )
+
   const sums = computed(() => computedEntryGroups.value?.sums)
 
   // Mirror the colouring rules from the Verfügbare Arbeitsstunden detail page
@@ -409,6 +420,16 @@
         />
       </div>
     </template>
+
+    <!-- Uptime monitoring: full-width card showing the client's live site
+         health + latency. Renders as soon as a client/period is selected. -->
+    <div v-if="selectedClientPeriodId" class="col-span-12">
+      <MonitoringCard
+        :monitoring="monitoring"
+        :pending="monitoringPending"
+        :error="monitoringErr"
+      />
+    </div>
 
     <!-- Quick links: full-width tile with shortcuts to Slack, editor, Jira,
          website, docs and any custom links. Independent of the billing data,

@@ -70,6 +70,11 @@
         "source": "src/team/index.ts"
       },
       {
+        "type": "endpoint",
+        "name": "monitoring",
+        "source": "src/monitoring/index.ts"
+      },
+      {
         "type": "operation",
         "name": "billing-snapshot-refresh",
         "source": {

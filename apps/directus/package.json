@@ -12,6 +12,7 @@
     "schema:dump": "directus-sync pull",
     "schema:load": "directus-sync push",
     "seed:prepare": "node scripts/seed-prepare.mjs",
+    "backfill:medium-name": "node scripts/backfill-medium-name.mjs",
     "schema:seed": "npm run seed:prepare && directus-sync seed push",
     "schema:seed:diff": "directus-sync seed diff",
     "database:migrate": "npx directus database migrate:latest",

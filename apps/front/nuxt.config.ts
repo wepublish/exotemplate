@@ -16,7 +16,8 @@ const I18N_NAMESPACES = [
   'networkContribution',
   'billing',
   'onboarding',
-  'contracts'
+  'contracts',
+  'monitoring'
 ] as const
 
 const LOCALE_FILES = (locale: string): string[] =>
