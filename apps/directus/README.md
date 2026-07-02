@@ -59,4 +59,12 @@ This project is deployed automatically via CI/CD:
   Every push to the `main` branch is automatically deployed to **staging**.
 
 - **Production**  
-  Every Git tag matching `v*` (e.g. `v1.2.0`) is automatically deployed to **production**.
+   Every Git tag matching `v*` (e.g. `v1.2.0`) is automatically deployed to **production**.
+  elias@Thinpad-p1:~/gitroot/wepublish/one$ git push --set-upstream origin main
+  To github.com:wepublish/one.git
+  ! [rejected] main -> main (non-fast-forward)
+  error: failed to push some refs to 'github.com:wepublish/one.git'
+  hint: Updates were rejected because the tip of your current branch is behind
+  hint: its remote counterpart. If you want to integrate the remote changes,
+  hint: use 'git pull' before pushing again.
+  hint: See the 'Note about fast-forwards' in 'git push --help' for details.
