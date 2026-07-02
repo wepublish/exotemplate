@@ -64,4 +64,16 @@ export class InfraService {
     )
     return data
   }
+
+  async getReviewInstances(): Promise<any> {
+    const { data } = await this.http.get('/review-instances')
+    return data
+  }
+
+  async getReviewInstancesForMedium(mediumName: string): Promise<any> {
+    const { data } = await this.http.get(
+      `/review-instances/${encodeURIComponent(mediumName)}`
+    )
+    return data
+  }
 }
