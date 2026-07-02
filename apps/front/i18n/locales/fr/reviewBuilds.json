@@ -18,6 +18,7 @@
     },
     "dbSync": {
       "label": "Synchro base de données",
+      "project": "Projet : {project}",
       "syncedBy": "Synchronisé {time} par {user}",
       "never": "Aucune synchro de production",
       "viewRun": "Voir le workflow"

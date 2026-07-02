@@ -59,7 +59,11 @@ function bySortThenId(a: ClientLink, b: ClientLink): number {
 export function buildDashboardLinks(
   client: Client | null | undefined,
   weShareChannelId: string | null | undefined,
-  customLinks: ClientLink[] = []
+  customLinks: ClientLink[] = [],
+  // Authoritative production URLs from the infrastructure-configurator. When
+  // present they beat the apiUrl-derived values (more reliable — e.g. custom
+  // website domains), but an explicit per-client override still wins.
+  infraUrls: { editor?: string | null; website?: string | null } | null = null
 ): DashboardLink[] {
   const links: DashboardLink[] = []
   if (!client) return links
@@ -84,9 +88,12 @@ export function buildDashboardLinks(
     })
   }
 
-  // Editor + Website belong together (both derive from apiUrl), so keep them
-  // adjacent, ahead of Jira.
-  const editor = composeEditorUrl(client.apiUrl, client.editor_url)
+  // Editor + Website belong together, so keep them adjacent, ahead of Jira.
+  // Priority: explicit per-client override → infra config → apiUrl-derived.
+  // Normalize to an absolute URL so a scheme-less value never renders relative.
+  const editor = ensureExternalUrl(
+    client.editor_url || infraUrls?.editor || composeEditorUrl(client.apiUrl)
+  )
   if (editor) {
     links.push({
       key: 'editor',
@@ -97,7 +104,9 @@ export function buildDashboardLinks(
     })
   }
 
-  const website = composeWebsiteUrl(client.apiUrl, client.website_url)
+  const website = ensureExternalUrl(
+    client.website_url || infraUrls?.website || composeWebsiteUrl(client.apiUrl)
+  )
   if (website) {
     links.push({
       key: 'website',
@@ -141,6 +150,37 @@ export function buildDashboardLinks(
     }
   }
 
+  return links
+}
+
+/**
+ * Staging quick-links (editor + website) built from the infra config's staging
+ * URLs. Rendered as a separate "Staging" section on the dashboard; each present
+ * URL becomes a link, and an empty/absent set yields no section.
+ */
+export function buildStagingLinks(
+  urls: { editor?: string | null; website?: string | null } | null
+): DashboardLink[] {
+  const links: DashboardLink[] = []
+  if (!urls) return links
+  if (urls.editor) {
+    links.push({
+      key: 'editor-staging',
+      icon: 'lucide:pencil-line',
+      labelKey: 'dashboard.links.editorStaging',
+      descriptionKey: 'dashboard.links.descriptions.editorStaging',
+      url: urls.editor
+    })
+  }
+  if (urls.website) {
+    links.push({
+      key: 'website-staging',
+      icon: 'lucide:globe',
+      labelKey: 'dashboard.links.websiteStaging',
+      descriptionKey: 'dashboard.links.descriptions.websiteStaging',
+      url: urls.website
+    })
+  }
   return links
 }
 

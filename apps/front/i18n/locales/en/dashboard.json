@@ -24,13 +24,18 @@
       "jira": "Jira",
       "website": "Website",
       "docs": "Documentation",
+      "stagingSection": "Staging",
+      "editorStaging": "Editor (staging)",
+      "websiteStaging": "Website (staging)",
       "descriptions": {
         "slack": "Your direct line to the We.Publish team. This is where we discuss everything about your project.",
         "weShare": "The network-wide exchange across all We.Publish media. Tips, questions and shared learning.",
         "editor": "The editorial system for your website. Create and edit your articles and content here.",
         "jira": "Tasks, tickets and requests around your project – transparently tracked.",
         "website": "Your published website, just as your readers see it.",
-        "docs": "Guides and help for We.Publish. Look up how everything works."
+        "docs": "Guides and help for We.Publish. Look up how everything works.",
+        "editorStaging": "The test/staging environment of the editorial system. Changes here are not public.",
+        "websiteStaging": "The staging version of your website – for testing, not public."
       }
     },
     "workLogAlert": {

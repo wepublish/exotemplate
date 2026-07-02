@@ -222,6 +222,20 @@
     () => (monitoringError.value as Error | null) ?? null
   )
 
+  // Active review builds for this client's medium (lazy, best-effort). The card
+  // only renders when there are builds (or while loading).
+  const { instances: reviewInstances, pending: reviewPending } =
+    await useClientReviewBuilds(clientPeriodId)
+
+  // Authoritative editor/website URLs (+ staging) from the infra config. Lazy
+  // and best-effort — QuickLinks falls back to derived links when unavailable.
+  const mediaUrlsLoader = await useClientMediaUrls(clientPeriodId)
+  const mediaUrls = computed(() => ({
+    mediumName: selectedClient.value?.medium_name ?? null,
+    production: mediaUrlsLoader.production.value,
+    staging: mediaUrlsLoader.staging.value
+  }))
+
   const sums = computed(() => computedEntryGroups.value?.sums)
 
   // Mirror the colouring rules from the Verfügbare Arbeitsstunden detail page
@@ -439,6 +453,18 @@
         :client="selectedClient"
         :we-share-channel-id="weShareChannelId"
         :custom-links="clientLinks"
+        :media-urls="mediaUrls"
+      />
+    </div>
+
+    <!-- Review builds: only shown when the client has active review PRs. -->
+    <div
+      v-if="selectedClientPeriodId && (reviewPending || reviewInstances.length)"
+      class="col-span-12"
+    >
+      <DashboardReviewBuildsCard
+        :instances="reviewInstances"
+        :pending="reviewPending"
       />
     </div>
 

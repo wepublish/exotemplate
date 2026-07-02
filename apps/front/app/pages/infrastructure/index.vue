@@ -27,7 +27,12 @@
   // Driven by the global project selector (top-left) — no separate medium
   // picker. The selected client's medium_name maps to its infra config.
   const selection = useClientSelection()
-  const { selectedClient } = storeToRefs(selection)
+  const { selectedClient, selectedClientPeriodId } = storeToRefs(selection)
+
+  // Active review builds for the selected medium (lazy, best-effort).
+  const { instances: reviewInstances } = await useClientReviewBuilds(
+    selectedClientPeriodId
+  )
 
   const selectedMedium = computed<string>(
     () => selectedClient.value?.medium_name ?? ''
@@ -179,6 +184,21 @@
           :title="t('infrastructure.noEnvironment')"
         />
       </template>
+
+      <!-- Active review builds for this medium (independent of the env config). -->
+      <section v-if="reviewInstances.length" class="mt-6">
+        <h2 class="flex items-center gap-2 text-lg font-semibold mb-2">
+          <UIcon name="lucide:flask-conical" class="text-muted shrink-0" />
+          {{ t('reviewBuilds.cardTitle') }}
+        </h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <ReviewBuildsInstanceCard
+            v-for="inst in reviewInstances"
+            :key="`${inst.review_slot}-${inst.pr_number}`"
+            :instance="inst"
+          />
+        </div>
+      </section>
     </template>
   </div>
 </template>

@@ -96,6 +96,11 @@
           to: link('/infrastructure')
         },
         {
+          label: t('nav.reviewBuilds'),
+          icon: 'lucide:flask-conical',
+          to: link('/review-builds')
+        },
+        {
           label: t('nav.onboarding'),
           icon: 'lucide:user-plus',
           to: link('/onboarding')

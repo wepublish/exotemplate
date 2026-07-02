@@ -8,18 +8,46 @@
    * description and opens in a new tab.
    */
   import type { Client, ClientLink } from '~~/types/DirectusTypes'
+  import type { ClientMediaUrls } from '~/composables/useClientMediaUrls'
 
   const props = defineProps<{
     client: Client
     weShareChannelId: string | null
     customLinks: ClientLink[]
+    // Authoritative URLs from the infra config; optional (dashboard falls back
+    // to derived links when absent).
+    mediaUrls?: ClientMediaUrls | null
   }>()
 
   const { t } = useI18n()
 
   const links = computed(() =>
-    buildDashboardLinks(props.client, props.weShareChannelId, props.customLinks)
+    buildDashboardLinks(
+      props.client,
+      props.weShareChannelId,
+      props.customLinks,
+      props.mediaUrls?.production ?? null
+    )
   )
+
+  const stagingLinks = computed(() =>
+    buildStagingLinks(props.mediaUrls?.staging ?? null)
+  )
+
+  // One section for the main links, plus an optional "Staging" section — so the
+  // link-card markup stays defined once.
+  const sections = computed<
+    { titleKey: string | null; links: typeof links.value }[]
+  >(() => {
+    const out = [{ titleKey: null as string | null, links: links.value }]
+    if (stagingLinks.value.length) {
+      out.push({
+        titleKey: 'dashboard.links.stagingSection',
+        links: stagingLinks.value
+      })
+    }
+    return out
+  })
 </script>
 
 <template>
@@ -32,35 +60,47 @@
     </template>
 
     <div
-      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-fr"
+      v-for="(section, i) in sections"
+      :key="section.titleKey ?? 'main'"
+      :class="i > 0 ? 'mt-5' : ''"
     >
-      <NuxtLink
-        v-for="link in links"
-        :key="link.key"
-        :to="link.url"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="group block rounded-lg border border-default p-4 bg-elevated/30 transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      <p
+        v-if="section.titleKey"
+        class="text-xs font-semibold uppercase tracking-wide text-muted mb-2"
       >
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2 min-w-0">
-            <UIcon :name="link.icon" class="text-primary text-xl shrink-0" />
-            <span class="font-medium truncate group-hover:text-primary">
-              {{ link.label ?? t(link.labelKey as string) }}
-            </span>
-          </div>
-          <UIcon
-            name="lucide:external-link"
-            class="text-muted shrink-0 group-hover:text-primary"
-          />
-        </div>
-        <p
-          v-if="link.description || link.descriptionKey"
-          class="text-xs text-muted leading-snug mt-2"
+        {{ t(section.titleKey) }}
+      </p>
+      <div
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-fr"
+      >
+        <NuxtLink
+          v-for="link in section.links"
+          :key="link.key"
+          :to="link.url"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="group block rounded-lg border border-default p-4 bg-elevated/30 transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
-          {{ link.description ?? t(link.descriptionKey as string) }}
-        </p>
-      </NuxtLink>
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <UIcon :name="link.icon" class="text-primary text-xl shrink-0" />
+              <span class="font-medium truncate group-hover:text-primary">
+                {{ link.label ?? t(link.labelKey as string) }}
+              </span>
+            </div>
+            <UIcon
+              name="lucide:external-link"
+              class="text-muted shrink-0 group-hover:text-primary"
+            />
+          </div>
+          <p
+            v-if="link.description || link.descriptionKey"
+            class="text-xs text-muted leading-snug mt-2"
+          >
+            {{ link.description ?? t(link.descriptionKey as string) }}
+          </p>
+        </NuxtLink>
+      </div>
     </div>
   </UPageCard>
 </template>

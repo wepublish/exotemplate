@@ -18,6 +18,7 @@
     },
     "dbSync": {
       "label": "Database sync",
+      "project": "Project: {project}",
       "syncedBy": "Synced {time} by {user}",
       "never": "No production sync yet",
       "viewRun": "View workflow"

@@ -18,6 +18,7 @@
     },
     "dbSync": {
       "label": "Datenbank-Sync",
+      "project": "Projekt: {project}",
       "syncedBy": "Synchronisiert {time} von {user}",
       "never": "Noch kein Produktions-Sync",
       "viewRun": "Workflow ansehen"

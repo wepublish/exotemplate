@@ -72,29 +72,42 @@
       </UButton>
     </div>
 
-    <!-- Last DB sync -->
+    <!-- Last DB sync (all fields) -->
     <div class="mt-3 flex items-start gap-1.5 text-xs">
       <UIcon name="lucide:database" class="shrink-0 mt-0.5 text-muted" />
-      <div class="text-muted">
+      <div class="text-muted min-w-0">
+        <div class="font-medium text-default">
+          {{ t('reviewBuilds.dbSync.label') }}
+        </div>
         <template v-if="instance.last_db_sync">
-          {{
-            t('reviewBuilds.dbSync.syncedBy', {
-              time: formatDateTime(instance.last_db_sync.synced_at),
-              user: instance.last_db_sync.triggered_by
-            })
-          }}
+          <div>
+            {{
+              t('reviewBuilds.dbSync.project', {
+                project: instance.last_db_sync.project
+              })
+            }}
+          </div>
+          <div>
+            {{
+              t('reviewBuilds.dbSync.syncedBy', {
+                time: formatDateTime(instance.last_db_sync.synced_at),
+                user: instance.last_db_sync.triggered_by
+              })
+            }}
+          </div>
           <a
             :href="instance.last_db_sync.run_url"
             target="_blank"
             rel="noopener"
-            class="text-primary hover:underline ms-1 whitespace-nowrap"
+            class="inline-flex items-center gap-1 text-primary hover:underline mt-0.5"
           >
+            <UIcon name="lucide:external-link" class="shrink-0" />
             {{ t('reviewBuilds.dbSync.viewRun') }}
           </a>
         </template>
-        <template v-else>
+        <div v-else>
           {{ t('reviewBuilds.dbSync.never') }}
-        </template>
+        </div>
       </div>
     </div>
   </div>
