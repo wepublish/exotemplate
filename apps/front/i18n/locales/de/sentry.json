@@ -1,0 +1,59 @@
+{
+  "sentry": {
+    "title": "Sentry — Performance",
+    "openInSentry": "In Sentry öffnen",
+    "loadError": "Sentry-Daten konnten nicht geladen werden",
+    "empty": "Für diesen Zeitraum liegen keine Daten vor.",
+    "noMedium": "Für dieses Projekt ist kein Medium-Name hinterlegt. Sentry-Metriken können erst angezeigt werden, sobald ein Medium-Name gesetzt ist.",
+    "table": {
+      "query": "Abfrage",
+      "queryCopy": "Abfrage kopieren",
+      "queryCopied": "Abfrage kopiert",
+      "queryCopyFailed": "Kopieren fehlgeschlagen",
+      "countPerDay": "×/Tag",
+      "count": "Anzahl",
+      "total": "Gesamt",
+      "openTrace": "Trace in Sentry öffnen"
+    },
+    "tables": {
+      "slow-db-queries": {
+        "title": "Langsamste DB-Abfragen",
+        "subtitle": "Top 10 DB-Abfragen nach p95, gruppiert nach Beschreibung (span.op:db)"
+      },
+      "common-db-queries": {
+        "title": "Häufigste DB-Abfragen",
+        "subtitle": "Top 10 DB-Abfragen nach Impact (Anzahl × Ø-Dauer), gruppiert nach Beschreibung (span.op:db)",
+        "columns": {
+          "sum(span.duration)": "Impact"
+        }
+      },
+      "db-time-per-trace": {
+        "title": "DB-Zeit pro Trace",
+        "subtitle": "Top 10 Traces nach totaler DB-Zeit (span.name: „Database operation“ + pg-pool.connect), sortiert nach Summe",
+        "labelHeader": "Anfrage-URL"
+      }
+    },
+    "charts": {
+      "db-duration": {
+        "title": "Datenbank-Performance",
+        "subtitle": "DB-Span-Dauer (span.op:db)",
+        "chartTitle": "Span-Dauer"
+      },
+      "slow-http": {
+        "title": "Langsamste HTTP-Anfragen",
+        "subtitle": "Dauer eingehender HTTP-Anfragen (span.op:http.server)",
+        "chartTitle": "Anfragedauer"
+      },
+      "pgpool-queue": {
+        "title": "PGPool-Wartezeit",
+        "subtitle": "Wartezeit auf eine DB-Verbindung (pg-pool.connect)",
+        "chartTitle": "Verbindungswartezeit"
+      },
+      "article-list": {
+        "title": "ArticleList-Dauer",
+        "subtitle": "Dauer der ArticleList-Transaktion",
+        "chartTitle": "Transaktionsdauer"
+      }
+    }
+  }
+}

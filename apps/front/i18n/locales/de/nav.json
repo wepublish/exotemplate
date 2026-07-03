@@ -6,6 +6,7 @@
     "projectOverview": "Projektübersicht",
     "timeTrackingOverview": "Übersicht Zeiterfassung",
     "monitoring": "Verfügbarkeit",
+    "sentry": "Sentry",
     "infrastructure": "Infrastruktur",
     "reviewBuilds": "Review-Builds",
     "infraGateway": "Infrastruktur-Gateway",
