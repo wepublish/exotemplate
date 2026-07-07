@@ -1,0 +1,48 @@
+{
+  "messages": {
+    "title": "Meldungen",
+    "subtitle": "Hinweise für das Dashboard und den Editor – allgemein oder pro Medium, nach Dringlichkeit.",
+    "empty": "Noch keine Meldungen.",
+    "loadError": "Meldungen konnten nicht geladen werden.",
+    "new": "Neue Meldung",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "deleteConfirm": "Meldung «{title}» wirklich löschen?",
+    "saved": "Meldung gespeichert.",
+    "deleted": "Meldung gelöscht.",
+    "titleRequired": "Titel erforderlich.",
+    "general": "Allgemein (alle Medien)",
+    "generalHint": "Leer = für alle Medien",
+    "openLink": "Mehr erfahren",
+    "fieldTitle": "Titel",
+    "fieldBody": "Text",
+    "fieldSeverity": "Dringlichkeit",
+    "fieldStatus": "Status",
+    "fieldClient": "Medium",
+    "fieldDismissible": "Vom Nutzer ausblendbar",
+    "fieldLinkLabel": "Link-Text",
+    "fieldLinkUrl": "Link-URL",
+    "fieldStartsAt": "Anzeigen ab",
+    "fieldEndsAt": "Anzeigen bis",
+    "translations": "Übersetzungen",
+    "addTranslation": "Sprache hinzufügen",
+    "translationsHint": "Optional: Titel/Text pro Sprache überschreiben. Fehlt eine Sprache, wird der Basistext angezeigt.",
+    "severity": {
+      "info": "Info",
+      "warning": "Warnung",
+      "critical": "Kritisch"
+    },
+    "status": {
+      "published": "Veröffentlicht",
+      "draft": "Entwurf",
+      "archived": "Archiviert"
+    },
+    "expand": "Wieder einblenden",
+    "allMedia": "Für alle Medien (allgemein)",
+    "searchMedia": "Medium suchen …",
+    "selectAll": "Alle",
+    "selectNone": "Keine",
+    "pickAtLeastOne": "Mindestens ein Medium wählen (oder «alle»).",
+    "selectedCount": "{count} Medium ausgewählt | {count} Medien ausgewählt"
+  }
+}

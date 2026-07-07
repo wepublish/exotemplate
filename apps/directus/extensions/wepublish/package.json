@@ -85,6 +85,11 @@
         "source": "src/resource-planning/index.ts"
       },
       {
+        "type": "endpoint",
+        "name": "messages",
+        "source": "src/messages/index.ts"
+      },
+      {
         "type": "operation",
         "name": "billing-snapshot-refresh",
         "source": {

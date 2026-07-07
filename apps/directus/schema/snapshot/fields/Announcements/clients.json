@@ -1,0 +1,30 @@
+{
+  "collection": "Announcements",
+  "field": "clients",
+  "type": "alias",
+  "meta": {
+    "collection": "Announcements",
+    "conditions": null,
+    "display": null,
+    "display_options": null,
+    "field": "clients",
+    "group": null,
+    "hidden": false,
+    "interface": "list-m2m",
+    "note": "Empty = all media (general); otherwise the selected media.",
+    "options": {
+      "template": "{{clients_id.name}}"
+    },
+    "readonly": false,
+    "required": false,
+    "searchable": true,
+    "sort": 16,
+    "special": [
+      "m2m"
+    ],
+    "translations": null,
+    "validation": null,
+    "validation_message": null,
+    "width": "full"
+  }
+}

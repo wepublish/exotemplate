@@ -109,7 +109,7 @@ To sweep the whole app and confirm every referenced icon exists:
 
 ```bash
 npm install         # Install dependencies (also runs nuxt prepare)
-npm run dev         # Dev server at http://localhost:3000
+npm run dev         # Dev server at http://localhost:3001 (set via nuxt.config devServer.port)
 npm run build       # Production build
 npm run preview     # Preview production build locally
 npm run typecheck   # Run vue-tsc type checking

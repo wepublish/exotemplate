@@ -1,0 +1,25 @@
+{
+  "collection": "Announcements_clients",
+  "field": "announcements_id",
+  "related_collection": "Announcements",
+  "meta": {
+    "junction_field": "clients_id",
+    "many_collection": "Announcements_clients",
+    "many_field": "announcements_id",
+    "one_allowed_collections": null,
+    "one_collection": "Announcements",
+    "one_collection_field": null,
+    "one_deselect_action": "delete",
+    "one_field": "clients",
+    "sort_field": null
+  },
+  "schema": {
+    "table": "Announcements_clients",
+    "column": "announcements_id",
+    "foreign_key_table": "Announcements",
+    "foreign_key_column": "id",
+    "constraint_name": "announcements_clients_announcements_id_foreign",
+    "on_update": "NO ACTION",
+    "on_delete": "CASCADE"
+  }
+}

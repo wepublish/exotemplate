@@ -17,7 +17,7 @@ A third We.Publish project, [`infrastructure-configurator`](https://github.com/w
 
 ```
                 ┌─────────────────────┐
-                │      apps/front     │  Nuxt SPA, port 3000
+                │      apps/front     │  Nuxt SPA, port 3001 (dev)
                 │    (dashboard UI)   │
                 └──────────┬──────────┘
                            │ Directus SDK + custom REST endpoints
@@ -143,4 +143,4 @@ Print a short, scannable summary:
 - _"Start everything"_ → all three above (extensions watcher → backend → frontend), in parallel background processes; report the URLs once up.
 - _"Stop the local database"_ → `cd apps/directus && npm run db:reset` (or `docker compose down`).
 - _"Reset my local DB"_ → `npm run db:reset` in `apps/directus/`. **Destructive** — confirm first, then re-run init + schema:load.
-- _"What's the status of my local setup?"_ → check: `docker ps` (Postgres up?), `lsof -i :8055` / `:3000` (services up?), that `apps/directus` and `apps/front` are installed. Summarise.
+- _"What's the status of my local setup?"_ → check: `docker ps` (Postgres up?), `lsof -i :8055` / `:3001` (services up?), that `apps/directus` and `apps/front` are installed. Summarise.

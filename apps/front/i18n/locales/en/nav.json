@@ -26,6 +26,7 @@
       "period": "Select period"
     },
     "resourcePlanning": "Resource planning",
-    "deployments": "Deployments"
+    "deployments": "Deployments",
+    "messages": "Messages"
   }
 }

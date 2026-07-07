@@ -26,6 +26,7 @@
       "period": "Zeitraum wählen"
     },
     "resourcePlanning": "Ressourcen-Planung",
-    "deployments": "Deployments"
+    "deployments": "Deployments",
+    "messages": "Meldungen"
   }
 }

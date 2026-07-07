@@ -106,6 +106,11 @@
           to: link('/deployments')
         },
         {
+          label: t('nav.messages'),
+          icon: 'lucide:megaphone',
+          to: link('/messages')
+        },
+        {
           label: t('nav.resourcePlanning'),
           icon: 'lucide:calendar-range',
           to: link('/resource-planning')
