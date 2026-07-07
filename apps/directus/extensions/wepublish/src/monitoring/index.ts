@@ -396,4 +396,46 @@ export default defineEndpoint((router, context) => {
       return next(e)
     }
   })
+
+  /**
+   * Admin-only: the latest production deployment per medium (which wepublish
+   * commit/branch/PR is tagged & deployed), from the configurator. Degrades to
+   * empty on 404 (module not deployed everywhere).
+   */
+  router.get('/deployments', async (req: any, res, next) => {
+    try {
+      const accountability = req.accountability
+      if (!accountability?.user) return next(new ForbiddenError())
+      if (!accountability.admin) return next(new ForbiddenError())
+
+      let infraEnv
+      try {
+        infraEnv = readInfraEnv(context.env)
+      } catch {
+        return next(new MissingEnvError())
+      }
+      const infra = new InfraService(infraEnv.url, infraEnv.apiKey)
+
+      let raw: any
+      try {
+        raw = await getMonitoringCache().getOrCompute('deployments-all', () =>
+          infra.getDeployments()
+        )
+      } catch (err: any) {
+        if (err?.response?.status === 404) {
+          return res.send({ data: { deployments: {}, fetchedAt: null } })
+        }
+        return next(new InfraUnavailableError())
+      }
+
+      return res.send({
+        data: {
+          deployments: raw?.deployments ?? {},
+          fetchedAt: raw?.fetched_at ?? null
+        }
+      })
+    } catch (e) {
+      return next(e)
+    }
+  })
 })

@@ -25,6 +25,7 @@
       "project": "Projekt wählen",
       "period": "Zeitraum wählen"
     },
-    "resourcePlanning": "Ressourcen-Planung"
+    "resourcePlanning": "Ressourcen-Planung",
+    "deployments": "Deployments"
   }
 }

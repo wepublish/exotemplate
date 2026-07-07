@@ -20,6 +20,7 @@ const I18N_NAMESPACES = [
   'monitoring',
   'infrastructure',
   'reviewBuilds',
+  'deployments',
   'resourcePlanning'
 ] as const
 

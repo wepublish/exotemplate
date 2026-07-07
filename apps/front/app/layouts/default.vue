@@ -101,6 +101,11 @@
           to: link('/review-builds')
         },
         {
+          label: t('nav.deployments'),
+          icon: 'lucide:rocket',
+          to: link('/deployments')
+        },
+        {
           label: t('nav.resourcePlanning'),
           icon: 'lucide:calendar-range',
           to: link('/resource-planning')

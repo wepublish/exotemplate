@@ -76,4 +76,9 @@ export class InfraService {
     )
     return data
   }
+
+  async getDeployments(): Promise<any> {
+    const { data } = await this.http.get('/deployments')
+    return data
+  }
 }
