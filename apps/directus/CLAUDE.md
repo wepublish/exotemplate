@@ -64,6 +64,10 @@ All TypeScript interfaces are defined in [extensions/wepublish/src/DirectusTypes
 | `Contracts`              | Client contracts, versioned per client (M2O `client` → `Clients`, `version` integer). Each row is an uploaded **PDF** (`file` → `directus_files`) with a `signed` boolean + `signed_at`. The **latest** non-archived `version` is the one "in effect". PDFs live in the dedicated `contracts` `directus_folders` folder. Clients read their own contract rows (scoped by `client.allowedUsers`) and download the files via Directus' native `/assets/:id` (Client policy `directus_files` read is scoped to `folder.name = "contracts"`). Uploads go through `POST /contracts`.                                                                                                                                                                                                                                                                   |
 | `ClientLinks`            | Custom dashboard quick-access links per client (M2O `client` → `Clients`; O2M back-reference `Clients.links`). Structured rows (`label`, `url`, `description`, `sort`, `status`) — replaced an earlier `Clients.custom_links` JSON field. Client-policy **CRUD** scoped by `client.allowedUsers == $CURRENT_USER`, so the client team and admins add/edit/remove their own links; surfaced on the dashboard quick-links tile (`one-front`).                                                                                                                                                                                                                                                                                                                                                                                                       |
 
+| `Announcements` | Admin-authored dashboard/editor messages. `severity` (`info`/`warning`/`critical`), `clients` (**M2M** → `Clients` via `Announcements_clients`; **empty = general/all media**, otherwise the selected media — supports multiple), `status`, optional `starts_at`/`ends_at` window, `dismissible`, `title`/`body`/`link_label`/`link_url`. Served **publicly** (unauthenticated) via the `messages` endpoint for both the client dashboard and the external editor. Admin-only management via SDK (`admin_access`); no client-policy permission needed (the public endpoint reads via a system service). |
+| `Announcements_clients` | M2M junction (`announcements_id` ↔ `clients_id`) linking an announcement to the media it targets. Empty set for an announcement = general (all media). |
+| `Announcements_translations` | Optional per-locale (`de`/`fr`/`en`) overrides for an announcement (O2M `Announcements.translations`; fields `locale`, `title`, `body`, `link_label`). A reader gets the matching locale, falling back per-field to the base announcement — so "write once" works and translations are additive. |
+
 All collections follow Directus conventions: `status` (published/draft/archived), `sort`, `date_created`, `date_updated`, `user_created`, `user_updated`.
 
 ### Custom Extensions
@@ -141,6 +145,12 @@ Upload + versioning for the `Contracts` collection. **No generation, no Google**
 - `POST /contracts` — body `{ clientId, fileBase64, fileName?, signed?, notes? }`. Validates a `%PDF-` payload, uploads it into the `contracts` folder, and creates the next per-client `version` (the one now "in effect"). `signed` defaults to **true** (the common case is uploading the already-signed contract); pass `signed: false` for a draft awaiting signature. Access is checked under the caller's accountability (`ItemsService('Clients').readOne` — admins via `admin_access`, client users via `allowedUsers`), so **both an admin and the client can upload** for that client. The file write + row create then run as **system** so client users need no file-create / item-create permission.
 
 Listing and downloading use the **native SDK + `/assets/:id`**, not custom routes: clients read their own `Contracts` rows (Client-policy read scoped by `client.allowedUsers`) and the file bytes via Directus' native asset endpoint (Client-policy `directus_files` read scoped to `folder.name = "contracts"`). Pure helpers (`nextContractVersion`, `buildContractFileName`, `currentContract`, `currentContractNeedsSignature`) live in [`contracts/helpers.ts`](extensions/wepublish/src/contracts/helpers.ts); `currentContractNeedsSignature` is reused by `/clientsOverview` to set `contractWarning` per tile (true only when a contract exists **and** its latest version is unsigned).
+
+**`messages` endpoint** ([extensions/wepublish/src/messages/index.ts](extensions/wepublish/src/messages/index.ts)):
+
+- `GET /messages?medium=<medium_name>&locale=<de|fr|en>` — **public / unauthenticated** (no `accountability` check; reads via a system `ItemsService`) so the external **editor** can consume it as well as the dashboard. Returns only **published** announcements that are within their optional `[starts_at, ends_at]` window, that are **general** (no target media) or target the given `medium` (matched on `Clients.medium_name` through the `clients` M2M), resolved to the reader's `locale` (translation per-field, else base), sorted **critical → warning → info**. Only safe, resolved fields are returned (never drafts/internal columns). Pure logic (`isActiveAnnouncement`, `resolveAnnouncement`, `selectActiveMessages`) lives in [`messages/messages.ts`](extensions/wepublish/src/messages/messages.ts) and is unit-tested. CORS is already enabled globally, so the editor can call it cross-origin.
+- The raw published rows are cached in-process (60 s TTL, single-flight) via [`shared/cache/announcementsCache.ts`](extensions/wepublish/src/shared/cache/announcementsCache.ts) — one entry serves every medium/locale; the filter/resolve runs per request. `DELETE /messages/cache` (**admin-only**) flushes it; the frontend `/messages` admin page calls it after every write so edits show immediately (otherwise they appear on the next TTL expiry).
+- Admins manage announcements via the frontend `/messages` page (standard SDK CRUD, `admin_access`): base fields, target = **all media** or a multi-select of specific media, and optional per-locale translations.
 
 **`team` endpoint** ([extensions/wepublish/src/team/index.ts](extensions/wepublish/src/team/index.ts)):
 
@@ -292,8 +302,8 @@ REFRESH_TOKEN_TTL=7d
 
 # Frontend URLs the password-reset / invite mails may link to (Directus only
 # honours URLs on these allow-lists). Both point at one-front's /auth/* pages.
-PASSWORD_RESET_URL_ALLOW_LIST=http://localhost:3000/auth/set-new-password
-USER_INVITE_URL_ALLOW_LIST=http://localhost:3000/auth/accept-invite
+PASSWORD_RESET_URL_ALLOW_LIST=http://localhost:3001/auth/set-new-password
+USER_INVITE_URL_ALLOW_LIST=http://localhost:3001/auth/accept-invite
 
 # Storage (dev: local, prod: S3)
 STORAGE_LOCAL_ROOT=./uploads

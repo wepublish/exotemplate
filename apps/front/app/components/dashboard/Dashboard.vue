@@ -20,6 +20,11 @@
   } = storeToRefs(selection)
   const link = useClientPeriodLink()
 
+  // Admin-authored messages (info/warning/critical) shown at the top: general
+  // ones plus any scoped to this client's medium, in the user's language.
+  const mediumName = computed(() => selectedClient.value?.medium_name ?? null)
+  const { messages: announcements } = useAnnouncements(mediumName)
+
   // Quick-links tile: the network-wide #we-share channel lives in the global
   // Settings singleton. Load it once (shared app-wide via useState); the tile
   // reactively shows the #we-share link as soon as it resolves.
@@ -320,6 +325,13 @@
         :refresh="refresh"
       />
     </div>
+
+    <!-- Admin messages (bugs / important info), general or per-medium. -->
+    <DashboardMessages
+      v-if="announcements.length"
+      :messages="announcements"
+      class="col-span-12"
+    />
 
     <!-- No client assigned at all: nothing to show. -->
     <UAlert

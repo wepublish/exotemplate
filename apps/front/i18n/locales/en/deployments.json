@@ -1,0 +1,26 @@
+{
+  "deployments": {
+    "title": "Deployments",
+    "subtitle": "Current production state per medium: which wepublish commit (branch / PR) is tagged and deployed.",
+    "loadError": "Deployments could not be loaded.",
+    "empty": "No production deployments found.",
+    "searchPlaceholder": "Search medium …",
+    "summary": {
+      "deployed": "{count} medium deployed | {count} media deployed",
+      "branches": "{count} branch | {count} branches",
+      "lastDeploy": "Last deployment {time}"
+    },
+    "card": {
+      "branch": "Branch",
+      "commit": "Commit",
+      "deployedAt": "Deployed",
+      "pr": "Pull Request",
+      "noPr": "No pull request",
+      "author": "Author",
+      "viewCommit": "View commit",
+      "viewPr": "View PR",
+      "headBranch": "Head branch",
+      "unknown": "unknown"
+    }
+  }
+}

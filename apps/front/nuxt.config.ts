@@ -21,7 +21,10 @@ const I18N_NAMESPACES = [
   'infrastructure',
   'reviewBuilds',
   'resourcePlanning',
-  'sentry'
+  'deployments',
+  'sentry',
+  'messages',
+  'resourcePlanning'
 ] as const
 
 const LOCALE_FILES = (locale: string): string[] =>
@@ -29,6 +32,9 @@ const LOCALE_FILES = (locale: string): string[] =>
 
 export default defineNuxtConfig({
   modules: ['@nuxt/ui', '@pinia/nuxt', '@nuxtjs/i18n'],
+
+  // Local dev server runs on 3001 (3000 is used elsewhere).
+  devServer: { port: 3001 },
 
   // Branded favicon: SVG for modern browsers, .ico as the legacy fallback
   // (both live in public/ and share the green "1" mark).

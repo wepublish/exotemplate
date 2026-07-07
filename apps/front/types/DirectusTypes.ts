@@ -21,6 +21,9 @@ export interface Schema {
   IntensivePhaseAssignees: PlanAssignee[]
   MinLoadAssignees: PlanAssignee[]
   CompanyClosures: CompanyClosure[]
+  Announcements: Announcement[]
+  Announcements_translations: AnnouncementTranslation[]
+  Announcements_clients: AnnouncementClient[]
   Settings: Settings
   TopUps: TopUp[]
   directus_users: CustomDirectusUser
@@ -145,6 +148,48 @@ export interface ClientLink {
   date_updated: string | null
   user_created: string | DirectusUser<Schema> | null
   user_updated: string | DirectusUser<Schema> | null
+}
+
+export type AnnouncementSeverity = 'info' | 'warning' | 'critical'
+
+/** M2M junction row: which media an announcement targets. */
+export interface AnnouncementClient {
+  id: number
+  announcements_id: number | Announcement | null
+  clients_id: string | Client | null
+}
+
+export interface AnnouncementTranslation {
+  id: number
+  announcement: number | Announcement | null
+  locale: 'de' | 'fr' | 'en' | string
+  title: string | null
+  body: string | null
+  link_label: string | null
+}
+
+/**
+ * A dashboard/editor message. `client` empty = general (all media); otherwise
+ * scoped to that medium. Optional `translations` override the base title/body/
+ * link_label per locale (falling back to the base fields).
+ */
+export interface Announcement {
+  id: number
+  status: 'published' | 'draft' | 'archived'
+  sort: number | null
+  severity: AnnouncementSeverity
+  title: string
+  body: string | null
+  link_label: string | null
+  link_url: string | null
+  starts_at: string | null
+  ends_at: string | null
+  dismissible: boolean
+  // Target media (M2M). Empty = general (all media); otherwise the selected media.
+  clients: AnnouncementClient[] | null
+  translations: AnnouncementTranslation[] | null
+  date_created: string | null
+  date_updated: string | null
 }
 
 export interface CaptureIgnoredUser {

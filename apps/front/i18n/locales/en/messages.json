@@ -1,0 +1,48 @@
+{
+  "messages": {
+    "title": "Messages",
+    "subtitle": "Notices for the dashboard and editor – general or per medium, by severity.",
+    "empty": "No messages yet.",
+    "loadError": "Messages could not be loaded.",
+    "new": "New message",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": "Delete the message “{title}”?",
+    "saved": "Message saved.",
+    "deleted": "Message deleted.",
+    "titleRequired": "Title required.",
+    "general": "General (all media)",
+    "generalHint": "Empty = for all media",
+    "openLink": "Learn more",
+    "fieldTitle": "Title",
+    "fieldBody": "Body",
+    "fieldSeverity": "Severity",
+    "fieldStatus": "Status",
+    "fieldClient": "Medium",
+    "fieldDismissible": "User can dismiss",
+    "fieldLinkLabel": "Link label",
+    "fieldLinkUrl": "Link URL",
+    "fieldStartsAt": "Show from",
+    "fieldEndsAt": "Show until",
+    "translations": "Translations",
+    "addTranslation": "Add language",
+    "translationsHint": "Optional: override title/body per language. A missing language shows the base text.",
+    "severity": {
+      "info": "Info",
+      "warning": "Warning",
+      "critical": "Critical"
+    },
+    "status": {
+      "published": "Published",
+      "draft": "Draft",
+      "archived": "Archived"
+    },
+    "expand": "Show",
+    "allMedia": "All media (general)",
+    "searchMedia": "Search medium …",
+    "selectAll": "All",
+    "selectNone": "None",
+    "pickAtLeastOne": "Pick at least one medium (or “all”).",
+    "selectedCount": "{count} medium selected | {count} media selected"
+  }
+}

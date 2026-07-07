@@ -1,0 +1,48 @@
+{
+  "messages": {
+    "title": "Messages",
+    "subtitle": "Avis pour le tableau de bord et l'éditeur – généraux ou par média, selon la gravité.",
+    "empty": "Aucun message pour l'instant.",
+    "loadError": "Impossible de charger les messages.",
+    "new": "Nouveau message",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer le message « {title} » ?",
+    "saved": "Message enregistré.",
+    "deleted": "Message supprimé.",
+    "titleRequired": "Titre requis.",
+    "general": "Général (tous les médias)",
+    "generalHint": "Vide = pour tous les médias",
+    "openLink": "En savoir plus",
+    "fieldTitle": "Titre",
+    "fieldBody": "Texte",
+    "fieldSeverity": "Gravité",
+    "fieldStatus": "Statut",
+    "fieldClient": "Média",
+    "fieldDismissible": "Masquable par l'utilisateur",
+    "fieldLinkLabel": "Texte du lien",
+    "fieldLinkUrl": "URL du lien",
+    "fieldStartsAt": "Afficher à partir de",
+    "fieldEndsAt": "Afficher jusqu'à",
+    "translations": "Traductions",
+    "addTranslation": "Ajouter une langue",
+    "translationsHint": "Optionnel : remplacer le titre/texte par langue. Langue absente = texte de base.",
+    "severity": {
+      "info": "Info",
+      "warning": "Avertissement",
+      "critical": "Critique"
+    },
+    "status": {
+      "published": "Publié",
+      "draft": "Brouillon",
+      "archived": "Archivé"
+    },
+    "expand": "Afficher",
+    "allMedia": "Pour tous les médias (général)",
+    "searchMedia": "Rechercher un média …",
+    "selectAll": "Tous",
+    "selectNone": "Aucun",
+    "pickAtLeastOne": "Choisissez au moins un média (ou « tous »).",
+    "selectedCount": "{count} média sélectionné | {count} médias sélectionnés"
+  }
+}
