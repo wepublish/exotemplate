@@ -425,72 +425,10 @@ export default defineEndpoint((router, context) => {
         }
       }
 
-      const employees = rows.map((r) => {
-        const s = settingsByUser.get(r.id)
-        const excluded = s?.excluded ?? false
-        const projectPct = s?.projectPct ?? 70
-        const days = r.days.map((d) => ({
-          date: d.date,
-          expectedHours: d.expectedHours
-        }))
-        // Project capacity = available hours scaled by the project-hours %.
-        // Company closures (Betriebsferien) force capacity to 0 — nobody works.
-        // We keep the would-be capacity for closed weeks so the black block on
-        // the per-person graph can be drawn only as tall as that capacity.
-        const grossRaw = employeeWeeklyCapacity(days, 0, weeks, projectPct)
-        const gross = grossRaw.map((h, i) => (closedWeeks[i] ? 0 : h))
-        const closedCapacityWeekly = grossRaw.map((h, i) =>
-          closedWeeks[i] ? h : 0
-        )
-        const committed = committedByUser.get(r.id)
-        const directWeekly = (
-          committed
-            ? committed.slice()
-            : new Array<number>(weeks.length).fill(0)
-        ).map((h, i) => (closedWeeks[i] ? 0 : h))
-        // Capacity still available for general (unassigned) project work.
-        const weekly = gross.map((h, i) => Math.max(0, h - directWeekly[i]))
-        // Vacation: hours lost to absence per week, expressed as project-
-        // capacity-equivalent (× projectPct) so it stacks coherently on top of
-        // `grossWeekly` (gross + vacation = the person's full project capacity
-        // had they not been away). `offWeekly` flags a full week off.
-        const avail = availByUser.get(r.id)
-        const full = fullAvailByUser.get(r.id)
-        const base = baseAvailByUser.get(r.id)
-        const factor = Math.min(100, Math.max(0, projectPct)) / 100
-        // Closed weeks are shown as Betriebsferien (black), not vacation/holiday.
-        const vacationWeekly = weeks.map((_, i) =>
-          closedWeeks[i]
-            ? 0
-            : Math.max(0, (full?.[i] ?? 0) - (avail?.[i] ?? 0)) * factor
-        )
-        // Project-equivalent hours lost to public holidays this week.
-        const holidayHoursWeekly = weeks.map((_, i) =>
-          closedWeeks[i]
-            ? 0
-            : Math.max(0, (base?.[i] ?? 0) - (full?.[i] ?? 0)) * factor
-        )
-        const anyCap = avail ? avail.some((v) => v > 0) : false
-        const offWeekly = weeks.map(
-          (_, i) => !closedWeeks[i] && anyCap && (avail?.[i] ?? 0) === 0
-        )
-        return {
-          id: r.id,
-          name: r.name,
-          excluded,
-          projectPct,
-          weekly,
-          grossWeekly: gross,
-          closedCapacityWeekly,
-          directWeekly,
-          vacationWeekly,
-          holidayHoursWeekly,
-          offWeekly,
-          holidayWeekly: holidayWeeklyByUser.get(r.id) ?? weeks.map(() => []),
-          defaultLoadItems: defaultLoadByUser.get(r.id)?.items ?? [],
-          generalWeekly: new Array<number>(weeks.length).fill(0) // filled below
-        }
-      })
+      // NOTE: the per-person `employees` view is built *after* the projects
+      // map below, because that map commits the auto-distributed base load to
+      // min-load assignees (into `committedByUser`) when a budget has assignees
+      // but no explicit weekly minimum. Building employees here would miss it.
 
       // Billing remaining, needed both to derive budgets below and for the
       // year-end saldo. The REMAINING hours (totalAvailableHours) of the CURRENT
@@ -631,6 +569,34 @@ export default defineEndpoint((router, context) => {
           if (minDir) directWeekly[i] += minDir[i]
           if (minGen) baseWeekly[i] += minGen[i]
         }
+        // Min-load with assignees but NO explicit weekly value: the assignees
+        // carry the project's auto-distributed base load. On weeks they're
+        // available, move that week's base from the general pool into their
+        // direct load (and commit it to their capacity); on weeks they're off,
+        // it stays general so the rest of the team picks it up. (This is why the
+        // per-person `employees` view is computed after this map.)
+        const baseMinAs = resolveAssignees(
+          b.min_assignees,
+          b.min_weekly_clockodo_user_id
+        )
+        if (baseMinAs.length && Math.max(0, b.min_weekly_hours || 0) === 0) {
+          const totalW = baseMinAs.reduce((s, x) => s + x.w, 0) || 1
+          for (let i = 0; i < weeks.length; i++) {
+            if (closedWeeks[i]) continue
+            const baseH = baseWeekly[i]
+            if (baseH <= 0) continue
+            let assigned = 0
+            for (const a of baseMinAs) {
+              if ((availByUser.get(a.uid)?.[i] ?? 0) > 0) {
+                const share = (baseH * a.w) / totalW
+                commit(a.uid, i, share)
+                assigned += share
+              }
+            }
+            directWeekly[i] += assigned
+            baseWeekly[i] -= assigned
+          }
+        }
         return {
           clientId: b.client?.id ?? null,
           clientName: b.client?.name ?? '—',
@@ -642,6 +608,75 @@ export default defineEndpoint((router, context) => {
           directWeekly,
           phaseMeta,
           availableHours: null // filled in after remainingByClient is built
+        }
+      })
+
+      // Per-person view — built after `projects` so `committedByUser` already
+      // includes the base load assigned to min-load assignees (see above).
+      const employees = rows.map((r) => {
+        const s = settingsByUser.get(r.id)
+        const excluded = s?.excluded ?? false
+        const projectPct = s?.projectPct ?? 70
+        const days = r.days.map((d) => ({
+          date: d.date,
+          expectedHours: d.expectedHours
+        }))
+        // Project capacity = available hours scaled by the project-hours %.
+        // Company closures (Betriebsferien) force capacity to 0 — nobody works.
+        // We keep the would-be capacity for closed weeks so the black block on
+        // the per-person graph can be drawn only as tall as that capacity.
+        const grossRaw = employeeWeeklyCapacity(days, 0, weeks, projectPct)
+        const gross = grossRaw.map((h, i) => (closedWeeks[i] ? 0 : h))
+        const closedCapacityWeekly = grossRaw.map((h, i) =>
+          closedWeeks[i] ? h : 0
+        )
+        const committed = committedByUser.get(r.id)
+        const directWeekly = (
+          committed
+            ? committed.slice()
+            : new Array<number>(weeks.length).fill(0)
+        ).map((h, i) => (closedWeeks[i] ? 0 : h))
+        // Capacity still available for general (unassigned) project work.
+        const weekly = gross.map((h, i) => Math.max(0, h - directWeekly[i]))
+        // Vacation: hours lost to absence per week, expressed as project-
+        // capacity-equivalent (× projectPct) so it stacks coherently on top of
+        // `grossWeekly` (gross + vacation = the person's full project capacity
+        // had they not been away). `offWeekly` flags a full week off.
+        const avail = availByUser.get(r.id)
+        const full = fullAvailByUser.get(r.id)
+        const base = baseAvailByUser.get(r.id)
+        const factor = Math.min(100, Math.max(0, projectPct)) / 100
+        // Closed weeks are shown as Betriebsferien (black), not vacation/holiday.
+        const vacationWeekly = weeks.map((_, i) =>
+          closedWeeks[i]
+            ? 0
+            : Math.max(0, (full?.[i] ?? 0) - (avail?.[i] ?? 0)) * factor
+        )
+        // Project-equivalent hours lost to public holidays this week.
+        const holidayHoursWeekly = weeks.map((_, i) =>
+          closedWeeks[i]
+            ? 0
+            : Math.max(0, (base?.[i] ?? 0) - (full?.[i] ?? 0)) * factor
+        )
+        const anyCap = avail ? avail.some((v) => v > 0) : false
+        const offWeekly = weeks.map(
+          (_, i) => !closedWeeks[i] && anyCap && (avail?.[i] ?? 0) === 0
+        )
+        return {
+          id: r.id,
+          name: r.name,
+          excluded,
+          projectPct,
+          weekly,
+          grossWeekly: gross,
+          closedCapacityWeekly,
+          directWeekly,
+          vacationWeekly,
+          holidayHoursWeekly,
+          offWeekly,
+          holidayWeekly: holidayWeeklyByUser.get(r.id) ?? weeks.map(() => []),
+          defaultLoadItems: defaultLoadByUser.get(r.id)?.items ?? [],
+          generalWeekly: new Array<number>(weeks.length).fill(0) // filled below
         }
       })
 
