@@ -91,6 +91,11 @@
           to: link('/monitoring')
         },
         {
+          label: t('nav.sentry'),
+          icon: 'lucide:chart-line',
+          to: link('/sentry')
+        },
+        {
           label: t('nav.infrastructure'),
           icon: 'lucide:server-cog',
           to: link('/infrastructure')

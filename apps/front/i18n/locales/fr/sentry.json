@@ -1,0 +1,59 @@
+{
+  "sentry": {
+    "title": "Sentry — Performance",
+    "openInSentry": "Ouvrir dans Sentry",
+    "loadError": "Impossible de charger les données Sentry",
+    "empty": "Aucune donnée pour cette période.",
+    "noMedium": "Aucun nom de média n'est défini pour ce projet. Les métriques Sentry ne peuvent s'afficher qu'une fois un nom de média renseigné.",
+    "table": {
+      "query": "Requête",
+      "queryCopy": "Copier la requête",
+      "queryCopied": "Requête copiée",
+      "queryCopyFailed": "Échec de la copie",
+      "countPerDay": "×/jour",
+      "count": "Nombre",
+      "total": "Total",
+      "openTrace": "Ouvrir la trace dans Sentry"
+    },
+    "tables": {
+      "slow-db-queries": {
+        "title": "Requêtes DB les plus lentes",
+        "subtitle": "Top 10 des requêtes DB par p95, groupées par description (span.op:db)"
+      },
+      "common-db-queries": {
+        "title": "Requêtes DB les plus fréquentes",
+        "subtitle": "Top 10 des requêtes DB par impact (nombre × durée moyenne), groupées par description (span.op:db)",
+        "columns": {
+          "sum(span.duration)": "Impact"
+        }
+      },
+      "db-time-per-trace": {
+        "title": "Temps DB par trace",
+        "subtitle": "Top 10 des traces par temps DB total (span.name : « Database operation » + pg-pool.connect), trié par somme",
+        "labelHeader": "URL de la requête"
+      }
+    },
+    "charts": {
+      "db-duration": {
+        "title": "Performance de la base de données",
+        "subtitle": "Durée des spans DB (span.op:db)",
+        "chartTitle": "Durée des spans"
+      },
+      "slow-http": {
+        "title": "Requêtes HTTP les plus lentes",
+        "subtitle": "Durée des requêtes HTTP entrantes (span.op:http.server)",
+        "chartTitle": "Durée des requêtes"
+      },
+      "pgpool-queue": {
+        "title": "Temps d'attente PGPool",
+        "subtitle": "Temps d'attente d'une connexion DB (pg-pool.connect)",
+        "chartTitle": "Temps d'attente de connexion"
+      },
+      "article-list": {
+        "title": "Durée ArticleList",
+        "subtitle": "Durée de la transaction ArticleList",
+        "chartTitle": "Durée de la transaction"
+      }
+    }
+  }
+}

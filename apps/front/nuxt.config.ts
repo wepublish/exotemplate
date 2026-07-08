@@ -21,6 +21,7 @@ const I18N_NAMESPACES = [
   'infrastructure',
   'reviewBuilds',
   'deployments',
+  'sentry',
   'messages',
   'resourcePlanning'
 ] as const
