@@ -1,0 +1,2717 @@
+{
+ "data": [
+  {
+   "id": "77de88b0-e272-4ed1-88dc-679abcaa793c",
+   "slug": "geo_international",
+   "label": "International",
+   "bereich": "geo",
+   "aliases": [
+    "International",
+    "weltweit",
+    "global",
+    "Süd-Länder",
+    "Entwicklungszusammenarbeit",
+    "ausland"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "a32cfb5e-5c61-4180-a822-a6a496437d6d",
+   "slug": "geo_luzern",
+   "label": "Luzern",
+   "bereich": "geo",
+   "aliases": [
+    "Luzern",
+    "Innerschweiz",
+    "Zentralschweiz",
+    "Region Luzern"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "876757ab-7082-4c2e-8b7e-1a46250ee248",
+   "slug": "geo_st_gallen",
+   "label": "St gallen",
+   "bereich": "geo",
+   "aliases": [
+    "St. Gallen",
+    "Ostschweiz",
+    "Region Sankt Gallen",
+    "Bodenseeraum"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "583536d1-fe4b-4cda-8e08-58c68ce90b2f",
+   "slug": "geo_winterthur",
+   "label": "Winterthur",
+   "bereich": "geo",
+   "aliases": [
+    "Winterthur",
+    "Region Winterthur",
+    "Zürcher Unterland"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "71b0b805-90c9-4321-8fa7-d270d5db1454",
+   "slug": "gesellschaft_demokratie_bekaempfung_fake_news",
+   "label": "Bekaempfung fake news",
+   "bereich": "gesellschaft_demokratie",
+   "aliases": [
+    "Faktencheck",
+    "Desinformation",
+    "Fake News",
+    "Bekämpfung von Desinformation",
+    "Faktenchecks",
+    "Verifikation"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "c1afafc8-17b8-42f7-a7bd-c7ae5e93b75c",
+   "slug": "gesellschaft_demokratie_demokratiefoerderung",
+   "label": "Demokratiefoerderung",
+   "bereich": "gesellschaft_demokratie",
+   "aliases": [
+    "Demokratieförderung",
+    "Demokratie",
+    "demokratische Institutionen",
+    "politische Teilhabe",
+    "liberale Demokratie"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "80bfd940-f762-461d-b316-bf94cee56ae4",
+   "slug": "gesellschaft_demokratie_meinungsfreiheit",
+   "label": "Meinungsfreiheit",
+   "bereich": "gesellschaft_demokratie",
+   "aliases": [
+    "Meinungsfreiheit",
+    "Pressefreiheit",
+    "Redefreiheit",
+    "freie Rede",
+    "Zensurfreiheit",
+    "Artikel 16 BV"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "fa3e3ec0-ffa3-4b19-901d-ea6800ab9074",
+   "slug": "gesellschaft_demokratie_transparenz_staat_wirtschaft",
+   "label": "Transparenz staat wirtschaft",
+   "bereich": "gesellschaft_demokratie",
+   "aliases": [
+    "Transparenz",
+    "Lobbytransparenz",
+    "Offenheit",
+    "Korruptionsbekämpfung",
+    "Public Disclosure",
+    "Open Government",
+    "Open Data"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "d4e6c810-07d7-4daa-963b-76d7c7701a98",
+   "slug": "kultur_kunst_lifestyle_architektur_baukultur",
+   "label": "Architektur baukultur",
+   "bereich": "kultur_kunst_lifestyle",
+   "aliases": [
+    "Architektur",
+    "Baukultur",
+    "Denkmalpflege",
+    "Heimatschutz",
+    "gebaute Umwelt",
+    "Architekturvermittlung"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "3db2028c-160a-4660-b05f-18cdaf6a4f7c",
+   "slug": "kultur_kunst_lifestyle_film_kino_video",
+   "label": "Film kino video",
+   "bereich": "kultur_kunst_lifestyle",
+   "aliases": [
+    "Film",
+    "Kino",
+    "Filmförderung",
+    "Schweizer Film",
+    "Dokumentarfilm",
+    "Filmfestivals",
+    "Videokunst"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "2ae7ee2e-0c1e-4f00-90df-7c56f2cac71f",
+   "slug": "kultur_kunst_lifestyle_kulturkritik_feuilleton",
+   "label": "Kulturkritik feuilleton",
+   "bereich": "kultur_kunst_lifestyle",
+   "aliases": [
+    "Kulturkritik",
+    "feuilletonistische Kritik",
+    "Rezension",
+    "Kunstkritik",
+    "Kulturanalyse"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "4a02dfdc-2d29-49fc-b50e-4bd2bbb4a9f8",
+   "slug": "kultur_kunst_lifestyle_kulturvermittlung",
+   "label": "Kulturvermittlung",
+   "bereich": "kultur_kunst_lifestyle",
+   "aliases": [
+    "Kulturvermittlung",
+    "Kulturpädagogik",
+    "Museumspädagogik",
+    "Kunstvermittlung",
+    "Outreach"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "a1ad0038-160c-4620-8b6d-337907d4d147",
+   "slug": "kultur_kunst_lifestyle_literatur_buch",
+   "label": "Literatur buch",
+   "bereich": "kultur_kunst_lifestyle",
+   "aliases": [
+    "Literatur",
+    "Buch",
+    "Verlagswesen",
+    "Schweizer Literatur",
+    "Lyrik",
+    "Prosa",
+    "Belletristik",
+    "Buchhandel"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "f4ee71c6-ef28-459b-a487-e3b60dfba6a3",
+   "slug": "kultur_kunst_lifestyle_theater_tanz",
+   "label": "Theater tanz",
+   "bereich": "kultur_kunst_lifestyle",
+   "aliases": [
+    "Theater",
+    "Tanz",
+    "Bühnenkunst",
+    "Tanztheater",
+    "Schauspiel",
+    "Performance",
+    "freie Szene"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "59809779-d417-4f29-b0ae-bb6dc2eaf78b",
+   "slug": "medien_journalismus_content_sharing_netzwerk",
+   "label": "Content sharing netzwerk",
+   "bereich": "medien_journalismus",
+   "aliases": [
+    "Content Sharing",
+    "Medien-Pool",
+    "Korrespondentennetzwerk",
+    "gemeinsame Inhalte",
+    "Medien-Kooperation",
+    "Kulturpool"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "2f61fb5a-375a-476e-b113-ef074ab0c7ec",
+   "slug": "medien_journalismus_infrastruktur_publishing",
+   "label": "Infrastruktur publishing",
+   "bereich": "medien_journalismus",
+   "aliases": [
+    "Publishing-Infrastruktur",
+    "Medien-Tech",
+    "Verlagsplattformen",
+    "Open-Source-CMS",
+    "Publishing-Tools"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "a13e7a77-fa6a-4274-901e-2f23bdd9c643",
+   "slug": "medien_journalismus_investigativ_recherche",
+   "label": "Investigativ recherche",
+   "bereich": "medien_journalismus",
+   "aliases": [
+    "Investigativ",
+    "investigative Recherche",
+    "Enthüllungsjournalismus",
+    "Investigativ-Journalismus",
+    "Recherche-Verbund"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "47a83f83-a2fa-434e-9917-e8b3b5ce0578",
+   "slug": "medien_journalismus_kulturjournalismus",
+   "label": "Kulturjournalismus",
+   "bereich": "medien_journalismus",
+   "aliases": [
+    "Kulturjournalismus",
+    "Kulturberichterstattung",
+    "Feuilleton-Journalismus",
+    "Kulturmedien",
+    "Cultural Journalism"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "cd878fb9-3b22-4fef-9f95-77a433a600d0",
+   "slug": "medien_journalismus_medienkritik",
+   "label": "Medienkritik",
+   "bereich": "medien_journalismus",
+   "aliases": [
+    "Medienkritik",
+    "Medienbeobachtung",
+    "Mediensystem-Kritik",
+    "Pressekritik"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "f926ad1c-d24f-4bc1-9ef8-c4c8f9d4c710",
+   "slug": "medien_journalismus_medienvielfalt",
+   "label": "Medienvielfalt",
+   "bereich": "medien_journalismus",
+   "aliases": [
+    "Medienvielfalt",
+    "Medienpluralismus",
+    "Pluralität der Medien",
+    "Konzentrationsbekämpfung",
+    "Medienkonzentration vermeiden"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "78803d1e-5776-4b95-b83b-bae5618f58cd",
+   "slug": "medien_journalismus_partizipativ_community",
+   "label": "Partizipativ community",
+   "bereich": "medien_journalismus",
+   "aliases": [
+    "partizipativer Journalismus",
+    "Community-Medien",
+    "Bürgermedien",
+    "Citizen Journalism",
+    "Leserbeteiligung"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "6d52fa2c-ddea-4191-87ba-f3f5730ccf00",
+   "slug": "medien_journalismus_recherchefonds",
+   "label": "Recherchefonds",
+   "bereich": "medien_journalismus",
+   "aliases": [
+    "Recherchefonds",
+    "Reporters-Funds",
+    "Investigativ-Stipendium",
+    "Recherche-Stipendium"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "6fb83151-6c8b-4c7f-b319-b0aaf73aac8f",
+   "slug": "medien_journalismus_unabhaengigkeit_redaktionell",
+   "label": "Unabhaengigkeit redaktionell",
+   "bereich": "medien_journalismus",
+   "aliases": [
+    "Unabhängigkeit",
+    "redaktionelle Freiheit",
+    "Pressefreiheit",
+    "journalistische Selbstständigkeit",
+    "Trennung Redaktion Verlag"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "dd893a15-1c3a-4830-969b-e14c3b18b898",
+   "slug": "soziales_inklusion_barrierefreiheit",
+   "label": "Barrierefreiheit",
+   "bereich": "soziales_inklusion",
+   "aliases": [
+    "Barrierefreiheit",
+    "Accessibility",
+    "barrierefreies Bauen",
+    "leichte Sprache",
+    "Inklusion im Alltag"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "9edebb01-c8ba-46c6-b23e-a7eda5a4038b",
+   "slug": "soziales_inklusion_empowerment",
+   "label": "Empowerment",
+   "bereich": "soziales_inklusion",
+   "aliases": [
+    "Empowerment",
+    "Selbstermächtigung",
+    "Stärkung benachteiligter Gruppen",
+    "Self-Advocacy"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "ec058e8b-d5ff-4d4b-af60-8cb103658d10",
+   "slug": "soziales_inklusion_generationendialog",
+   "label": "Generationendialog",
+   "bereich": "soziales_inklusion",
+   "aliases": [
+    "Generationendialog",
+    "intergenerationale Kontakte",
+    "Generationenbrücke",
+    "Mehrgenerationen-Projekte"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "1ecc054b-3611-469a-96d7-b69ec9d69a9d",
+   "slug": "soziales_inklusion_inklusion_behinderung",
+   "label": "Inklusion behinderung",
+   "bereich": "soziales_inklusion",
+   "aliases": [
+    "Inklusion",
+    "Menschen mit Behinderung",
+    "Behindertenrechte",
+    "Barrierefreiheit",
+    "IV",
+    "UN-BRK"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "77cdc21a-fdc8-4cbc-905e-2f71c638b2dd",
+   "slug": "soziales_inklusion_intersektionalitaet",
+   "label": "Intersektionalitaet",
+   "bereich": "soziales_inklusion",
+   "aliases": [
+    "Intersektionalität",
+    "Mehrfachdiskriminierung",
+    "intersektional",
+    "Cross-Cutting Discrimination"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "3f7bcc21-61ab-45e9-ac2b-a294974f464b",
+   "slug": "soziales_inklusion_marginalisierte_stimmen",
+   "label": "Marginalisierte stimmen",
+   "bereich": "soziales_inklusion",
+   "aliases": [
+    "marginalisierte Stimmen",
+    "unerhörte Perspektiven",
+    "Minderheiten",
+    "Randgruppen",
+    "versteckte Communities"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "01fef335-5883-4720-9aba-1fbd540f1ec9",
+   "slug": "geo_genf_romandie",
+   "label": "Genf romandie",
+   "bereich": "geo",
+   "aliases": [
+    "Genf",
+    "Romandie",
+    "Westschweiz",
+    "Suisse romande",
+    "Lac Léman",
+    "französische Schweiz"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "f263f694-f46d-4843-870f-d4a6bd0863b8",
+   "slug": "bildung_wissenschaft_ethik_medienkompetenz",
+   "label": "Medienkompetenz",
+   "bereich": "bildung_wissenschaft_ethik",
+   "aliases": [
+    "Medienkompetenz",
+    "Medienbildung",
+    "kritisches Lesen",
+    "Fake-News-Erkennung",
+    "Quellenkritik",
+    "Digital Literacy"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "6327ab8d-195c-483c-9dce-4caa2c8109af",
+   "slug": "bildung_wissenschaft_ethik_religion_theologie",
+   "label": "Religion theologie",
+   "bereich": "bildung_wissenschaft_ethik",
+   "aliases": [
+    "Religion",
+    "Theologie",
+    "interreligiöser Dialog",
+    "Kirche",
+    "Glaubensgemeinschaften",
+    "religiöse Bildung"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "21fe2d97-e3a4-4362-b25c-87ece175d50b",
+   "slug": "bildung_wissenschaft_ethik_wissenschaftsfoerderung",
+   "label": "Wissenschaftsfoerderung",
+   "bereich": "bildung_wissenschaft_ethik",
+   "aliases": [
+    "Forschungsförderung",
+    "Wissenschaft",
+    "akademische Forschung",
+    "Grundlagenforschung",
+    "Hochschulforschung",
+    "wissenschaftliche Nachwuchsförderung"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "7dc7c58b-cbfa-4736-a07a-12874d61c0b5",
+   "slug": "geo_oesterreich",
+   "label": "Oesterreich",
+   "bereich": "geo",
+   "aliases": [
+    "Österreich",
+    "Wien",
+    "österreichische Bundesländer",
+    "Donau-Region",
+    "AT"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "6a36ec32-68a7-4da1-a96a-7930d74765ac",
+   "slug": "gesundheit_praevention_gesundheitsfoerderung",
+   "label": "Gesundheitsfoerderung",
+   "bereich": "gesundheit_praevention",
+   "aliases": [
+    "Gesundheitsförderung",
+    "Public Health",
+    "Prävention",
+    "gesunder Lebensstil",
+    "Gesundheitsbildung",
+    "Health Promotion"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "1bd8378a-51e1-48ba-82fd-7f680d9c2a6a",
+   "slug": "gesundheit_praevention_palliative_care",
+   "label": "Palliative care",
+   "bereich": "gesundheit_praevention",
+   "aliases": [
+    "Palliative Care",
+    "Palliativpflege",
+    "Sterbebegleitung",
+    "Hospiz",
+    "Lebensende-Begleitung",
+    "Schmerzlinderung"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "bfb69672-877c-4692-8a24-0127213baad4",
+   "slug": "gesundheit_praevention_suchtpraevention",
+   "label": "Suchtpraevention",
+   "bereich": "gesundheit_praevention",
+   "aliases": [
+    "Sucht",
+    "Drogenprävention",
+    "Alkoholprävention",
+    "Suchthilfe",
+    "Suchtberatung",
+    "Glücksspielprävention"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "ca77a2e4-ee01-459d-b2e4-30c5c1983041",
+   "slug": "feuilleton",
+   "label": "Feuilleton",
+   "bereich": "kultur_kunst_lifestyle",
+   "aliases": [
+    "Feuilleton",
+    "Feuilletonkultur",
+    "feuilletonistisches Schreiben",
+    "Kulturteil",
+    "Wochenende-Beilage"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "229ca6e7-ac8c-4478-b4a7-775c8eba6d9a",
+   "slug": "kultur_kunst_lifestyle_interdisziplinaer_crosskultur",
+   "label": "Interdisziplinaer crosskultur",
+   "bereich": "kultur_kunst_lifestyle",
+   "aliases": [
+    "interdisziplinär",
+    "Crosskultur",
+    "Sparten-übergreifend",
+    "Hybrid-Formate",
+    "intermediale Kunst",
+    "Crossover"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "9e7f4c6b-22f0-4301-acee-fd15bd22d9c9",
+   "slug": "tradition",
+   "label": "Tradition / historische Kontinuitaet",
+   "bereich": "kultur_kunst_lifestyle",
+   "aliases": [
+    "Tradition",
+    "historische Kontinuität",
+    "Brauchtum",
+    "Volkskultur",
+    "Erbe",
+    "Kulturerbe"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "b6e3e7b1-1223-4847-a54b-0cb8c756bab5",
+   "slug": "werbefrei_gemeinnuetzig",
+   "label": "Werbefrei / gemeinnuetzig",
+   "bereich": "medien_journalismus",
+   "aliases": [
+    "werbefrei",
+    "gemeinnützig",
+    "non-profit",
+    "gemeinnützige Trägerschaft",
+    "ohne Werbung",
+    "steuerbefreit gemeinnützig"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "74332ecd-64b6-4a82-820e-f74fe26719ba",
+   "slug": "soziales_inklusion_alter_betreuung",
+   "label": "Alter betreuung",
+   "bereich": "soziales_inklusion",
+   "aliases": [
+    "Alterspflege",
+    "Seniorenbetreuung",
+    "Altenhilfe",
+    "Altersarbeit",
+    "Seniorenangebote",
+    "Altersresidenzen"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "f3e70d35-7361-4e5c-997c-1d8db5ac2c00",
+   "slug": "sport_freizeit_breitensport",
+   "label": "Breitensport",
+   "bereich": "sport_freizeit",
+   "aliases": [
+    "Breitensport",
+    "Vereinssport",
+    "Amateursport",
+    "Freizeitsport",
+    "Hobbysport"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "de9b18e2-bda6-47fc-9f57-7c6bd0c7472e",
+   "slug": "sport_freizeit_fussballkultur",
+   "label": "Fussballkultur",
+   "bereich": "sport_freizeit",
+   "aliases": [
+    "Fussballkultur",
+    "Fussball-Soziales",
+    "Fussball-Vereine",
+    "Fan-Kultur Fussball"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "1c1765dd-9f6a-450e-8f84-775efb304967",
+   "slug": "sport_freizeit_radsport_velokultur",
+   "label": "Radsport velokultur",
+   "bereich": "sport_freizeit",
+   "aliases": [
+    "Radsport",
+    "Velokultur",
+    "Velo-Förderung",
+    "Bike-Politik",
+    "Cycling Advocacy"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "a94c9c27-4c36-42dd-a92e-d617a1bf19f6",
+   "slug": "umwelt_tech_stadt_innovation_technologie",
+   "label": "Innovation technologie",
+   "bereich": "umwelt_tech_stadt",
+   "aliases": [
+    "Innovation",
+    "Technologie",
+    "R&D",
+    "Tech-Startups",
+    "Innovationsförderung",
+    "Tech-Entwicklung"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "8c5efba5-64d6-4753-85f9-a4daafc1965e",
+   "slug": "umwelt_tech_stadt_klimaschutz_nachhaltigkeit",
+   "label": "Klimaschutz nachhaltigkeit",
+   "bereich": "umwelt_tech_stadt",
+   "aliases": [
+    "Klimaschutz",
+    "Nachhaltigkeit",
+    "CO2-Reduktion",
+    "Klimaneutralität",
+    "Klima-Ziele",
+    "Sustainability"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "94d88a2d-b0db-4b78-af3d-8988aca6ff31",
+   "slug": "umwelt_tech_stadt_mobilitaetswende_verkehr",
+   "label": "Mobilitaetswende verkehr",
+   "bereich": "umwelt_tech_stadt",
+   "aliases": [
+    "Mobilitätswende",
+    "Verkehrswende",
+    "ÖV-Förderung",
+    "Velo-Verkehr",
+    "autofreie Städte"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "44329bb7-1a9a-4f07-a5d1-3f3a4b84eb75",
+   "slug": "umwelt_tech_stadt_open_source_software",
+   "label": "Open source software",
+   "bereich": "umwelt_tech_stadt",
+   "aliases": [
+    "Open Source",
+    "Open Source Software",
+    "freie Software",
+    "Civic Tech",
+    "Open-Source-Communities"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "5f50b9e3-f831-4dc6-b9f5-85a543f86070",
+   "slug": "umwelt_tech_stadt_tierschutz",
+   "label": "Tierschutz",
+   "bereich": "umwelt_tech_stadt",
+   "aliases": [
+    "Tierschutz",
+    "Tierrechte",
+    "Tierwohl",
+    "Tierheime",
+    "Wildtierrettung"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "e0017568-5580-410d-b55d-69917613448c",
+   "slug": "umwelt_tech_stadt_umweltschutz",
+   "label": "Umweltschutz",
+   "bereich": "umwelt_tech_stadt",
+   "aliases": [
+    "Umweltschutz",
+    "Naturschutz",
+    "Biodiversität",
+    "Artenschutz",
+    "Ökologie"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "44d0ade4-f95d-4ed9-91f0-b7950bf8367b",
+   "slug": "umwelt_tech_stadt_wohnen_gentrifizierung",
+   "label": "Wohnen gentrifizierung",
+   "bereich": "umwelt_tech_stadt",
+   "aliases": [
+    "Wohnen",
+    "bezahlbares Wohnen",
+    "Gentrifizierung",
+    "Mieterschutz",
+    "Wohnungsnot",
+    "Genossenschaftswohnen"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "a5bdcc25-301a-4362-bb43-ed837f93be5b",
+   "slug": "gewalt_praevention_digitale_gewalt",
+   "label": "Digitale Gewalt",
+   "bereich": "gewalt_praevention",
+   "aliases": [
+    "Cybermobbing",
+    "Online-Hass",
+    "Hass im Netz",
+    "Cyberstalking",
+    "digitale Belästigung",
+    "Hatespeech",
+    "bildbasierte sexuelle Gewalt",
+    "Doxxing"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "bfff4f43-b4b4-4e73-a07c-9f8f40ff1f02",
+   "slug": "gewalt_praevention_hasskriminalitaet",
+   "label": "Hasskriminalität",
+   "bereich": "gewalt_praevention",
+   "aliases": [
+    "Hate Crime",
+    "gruppenbezogene Menschenfeindlichkeit",
+    "rassistische Gewalt",
+    "antisemitische Übergriffe",
+    "queerfeindliche Gewalt",
+    "religiös motivierte Gewalt"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "721bdfe0-b251-4302-90f1-6c17d700a7b8",
+   "slug": "gewalt_praevention_sexualisierte_gewalt",
+   "label": "Sexualisierte Gewalt",
+   "bereich": "gewalt_praevention",
+   "aliases": [
+    "sexueller Übergriff",
+    "Missbrauch",
+    "sexuelle Belästigung",
+    "MeToo",
+    "Vergewaltigung",
+    "sexuelle Nötigung"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "da138d9b-cae8-40bd-b3f9-a1d8e9823e89",
+   "slug": "gewalt_praevention_stalking",
+   "label": "Stalking",
+   "bereich": "gewalt_praevention",
+   "aliases": [
+    "Nachstellung",
+    "Verfolgung",
+    "Belästigung über Zeit",
+    "Cyberstalking",
+    "Anti-Stalking-Beratung"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "45228c9e-5f8d-4eaa-bfc8-4430c0549dbf",
+   "slug": "gewalt_praevention_zwangsverheiratung_fgm",
+   "label": "Zwangsverheiratung, FGM, Ehrengewalt",
+   "bereich": "gewalt_praevention",
+   "aliases": [
+    "Zwangsehe",
+    "Genitalverstümmelung",
+    "weibliche Beschneidung",
+    "Ehrenmord",
+    "ehrbezogene Gewalt"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "21758b2b-3ed0-42df-b8aa-0c0fc3f87989",
+   "slug": "gewalt_praevention_menschenhandel",
+   "label": "Menschenhandel, sexuelle Ausbeutung",
+   "bereich": "gewalt_praevention",
+   "aliases": [
+    "Trafficking",
+    "moderne Sklaverei",
+    "Zwangsprostitution",
+    "Ausbeutung von Migrantinnen",
+    "Schutz Sexarbeitender"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "147087f5-9e00-4848-86d5-61835370a9bb",
+   "slug": "bildung_wissenschaft_ethik_bildung_allgemein",
+   "label": "Bildung allgemein",
+   "bereich": "bildung_wissenschaft_ethik",
+   "aliases": [
+    "Bildungsförderung",
+    "Schulbildung",
+    "Grundbildung",
+    "Allgemeinbildung",
+    "Bildungschancen",
+    "Bildungssystem"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "b79fb24a-e90b-42d1-ac74-59ad49c006da",
+   "slug": "gewalt_praevention_frauenhaus_schutzunterkunft",
+   "label": "Frauenhaus, Schutzunterkunft",
+   "bereich": "gewalt_praevention",
+   "aliases": [
+    "Schutzwohnung",
+    "Notunterkunft",
+    "Frauenhaus",
+    "Krisenintervention",
+    "Schutzhaus",
+    "Übergangswohnen"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "40d9f177-ddbf-4543-a206-2ed39c2423f5",
+   "slug": "gewalt_praevention_kinderschutz",
+   "label": "Kinderschutz",
+   "bereich": "gewalt_praevention",
+   "aliases": [
+    "Schutz vor Kindesmisshandlung",
+    "Kinderschutzgruppe",
+    "Kinder-Notruf",
+    "Kindesmissbrauch-Prävention",
+    "sexuelle Ausbeutung von Kindern"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "ec36ab8e-0a72-4f58-b4b7-a21aa4b8d5c3",
+   "slug": "gewalt_praevention_taeterarbeit",
+   "label": "Täterarbeit",
+   "bereich": "gewalt_praevention",
+   "aliases": [
+    "Resozialisierung",
+    "Anti-Gewalt-Trainings",
+    "Männerberatung",
+    "Täter-Therapie",
+    "Lernprogramme häusliche Gewalt"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "8ecb78b7-4245-4820-ab6e-70dab0bd64b5",
+   "slug": "gewalt_praevention_gewalt_in_institutionen",
+   "label": "Gewalt in Institutionen",
+   "bereich": "gewalt_praevention",
+   "aliases": [
+    "Heimaufarbeitung",
+    "Misshandlung in Heimen",
+    "Pflegegewalt",
+    "Gewalt in psychiatrischen Einrichtungen",
+    "Polizeigewalt",
+    "Gewalt im Strafvollzug"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "c6ae79c5-8ef8-4a87-96cb-e814c9f27644",
+   "slug": "gewalt_praevention_paedagogisch",
+   "label": "Pädagogische Gewaltprävention",
+   "bereich": "gewalt_praevention",
+   "aliases": [
+    "Schulische Präventionsprogramme",
+    "ausserschulische Prävention",
+    "Empowerment-Workshops",
+    "Selbstbehauptungskurse",
+    "Konsens-Bildung"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "342b31d0-f9ce-4f74-86ea-4fb4f312063e",
+   "slug": "gemeinschaft_quartier_quartiersarbeit",
+   "label": "Quartiersarbeit",
+   "bereich": "gemeinschaft_quartier",
+   "aliases": [
+    "Soziokulturelle Animation",
+    "Quartiersentwicklung sozial",
+    "Stadtteilarbeit",
+    "Gemeinwesenarbeit"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "87f46c70-62ce-4501-8d03-ed7403e6725c",
+   "slug": "gemeinschaft_quartier_nachbarschaftsverein",
+   "label": "Nachbarschaftsverein",
+   "bereich": "gemeinschaft_quartier",
+   "aliases": [
+    "Hilfsbörse",
+    "Nachbarschaftshilfe",
+    "Quartiersverein",
+    "Anwohnerverein"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "9d1c12f4-c8fa-4e43-930c-87786b627357",
+   "slug": "gemeinschaft_quartier_treffpunktkultur",
+   "label": "Treffpunktkultur",
+   "bereich": "gemeinschaft_quartier",
+   "aliases": [
+    "Quartiersbeiz",
+    "Kafee",
+    "Begegnungszentrum",
+    "niederschwelliger Treffpunkt"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "2dc437c6-f747-43bc-a6e4-528197a2034a",
+   "slug": "gemeinschaft_quartier_buergerbeteiligung_lokal",
+   "label": "Lokale Bürgerbeteiligung",
+   "bereich": "gemeinschaft_quartier",
+   "aliases": [
+    "Quartiers-Politik",
+    "Mitwirkungsverfahren lokal",
+    "Bezirkspolitik",
+    "Stadtteilversammlung"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "b7631733-0de2-4903-bed5-d771cc8fd655",
+   "slug": "gemeinschaft_quartier_niederschwellig",
+   "label": "Niederschwellige Angebote",
+   "bereich": "gemeinschaft_quartier",
+   "aliases": [
+    "Aufsuchende Arbeit",
+    "Streetwork",
+    "Tagesstrukturen",
+    "offene Türen"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "ad90b757-338d-48fe-ad64-40dd2968d9e7",
+   "slug": "gleichstellung_geschlechter",
+   "label": "Geschlechtergleichstellung (allgemein)",
+   "bereich": "gleichstellung",
+   "aliases": [
+    "Gender Equality",
+    "rechtliche Gleichstellung",
+    "Gleichberechtigung",
+    "Frauenrechte",
+    "Geschlechtergerechtigkeit"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "6908775b-f59a-4499-ae64-8a0cf176d20d",
+   "slug": "gleichstellung_lohn_oekonomisch",
+   "label": "Lohngleichheit, ökonomische Gleichstellung",
+   "bereich": "gleichstellung",
+   "aliases": [
+    "Equal Pay",
+    "Pay Gap",
+    "Lohngleichheit",
+    "ökonomische Ungleichheit Geschlechter",
+    "Care-Wirtschaft"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "d81ca8c7-2e52-48a5-a467-4f66debdbda5",
+   "slug": "gleichstellung_repraesentation_fuehrung",
+   "label": "Repräsentation und Führung",
+   "bereich": "gleichstellung",
+   "aliases": [
+    "Frauen in Führung",
+    "Quotenregelung",
+    "Diversität in Gremien",
+    "Frauenanteil Politik",
+    "Gender-Quote"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "87f53c2f-21af-4e20-91db-32032b9e963a",
+   "slug": "gleichstellung_vereinbarkeit",
+   "label": "Vereinbarkeit Familie und Beruf",
+   "bereich": "gleichstellung",
+   "aliases": [
+    "Vereinbarkeit",
+    "Work-Life-Balance",
+    "Elternzeit",
+    "Vaterschaftsurlaub",
+    "Familienzeitpolitik",
+    "Teilzeit-Modelle"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "68ddc037-e2b7-49be-81db-da61139f23d6",
+   "slug": "gleichstellung_reproduktive_rechte",
+   "label": "Reproduktive Rechte",
+   "bereich": "gleichstellung",
+   "aliases": [
+    "sexuelle und reproduktive Gesundheit",
+    "Abtreibung",
+    "Verhütung",
+    "Schwangerschaftsabbruch",
+    "Selbstbestimmung Körper",
+    "sexuelle Aufklärung"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "d22a0fa7-2f84-4bf2-9c77-59125b112892",
+   "slug": "gleichstellung_anti_sexismus",
+   "label": "Anti-Sexismus",
+   "bereich": "gleichstellung",
+   "aliases": [
+    "Sexismusbekämpfung",
+    "sexualisierte Diskriminierung",
+    "MeToo",
+    "sexuelle Belästigung Arbeitsplatz",
+    "Catcalling",
+    "Alltagssexismus"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "6acade61-5a6b-45c9-9b0f-6efba1c90c01",
+   "slug": "soziales_inklusion_care_arbeit",
+   "label": "Care-Arbeit",
+   "bereich": "soziales_inklusion",
+   "aliases": [
+    "Sorgearbeit",
+    "unbezahlte Arbeit",
+    "Reproduktionsarbeit",
+    "Caring",
+    "Caring-Communities",
+    "Pflegezeitkonto"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "311724fd-a60b-49d2-b304-04f2a4a91d90",
+   "slug": "soziales_inklusion_pflegende_angehoerige",
+   "label": "Pflegende Angehörige",
+   "bereich": "soziales_inklusion",
+   "aliases": [
+    "Family Caregiver",
+    "häusliche Pflege",
+    "pflegende Familie",
+    "Vereinbarkeit Pflege",
+    "Pflegegeld Angehörige"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "8e23e4ab-5147-455d-95bc-ca536e401eb7",
+   "slug": "soziales_inklusion_diaspora_arbeit",
+   "label": "Diaspora-Arbeit",
+   "bereich": "soziales_inklusion",
+   "aliases": [
+    "Migranten-Community",
+    "ethnische Diaspora",
+    "transnationale Vereine",
+    "Heimatkultur in der Fremde",
+    "Rückkehrhilfe"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "f901eaeb-a06d-4836-8c19-8d4785751312",
+   "slug": "umwelt_tech_stadt_klima_aktivismus",
+   "label": "Klima-Aktivismus",
+   "bereich": "umwelt_tech_stadt",
+   "aliases": [
+    "Klimabewegung",
+    "Klimakampagnen",
+    "Klimaprotest",
+    "FridaysForFuture",
+    "Klima-NGO"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "3589fd27-f808-4211-843e-9e280ebdf1ca",
+   "slug": "umwelt_tech_stadt_klimagerechtigkeit",
+   "label": "Klimagerechtigkeit",
+   "bereich": "umwelt_tech_stadt",
+   "aliases": [
+    "Climate Justice",
+    "intergenerationale Klimagerechtigkeit",
+    "globale Klimagerechtigkeit",
+    "Klima-Süd"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "282cf1a9-9306-4f59-be3f-5380e047210b",
+   "slug": "umwelt_tech_stadt_energiewende_buergerprojekte",
+   "label": "Energiewende-Bürgerprojekte",
+   "bereich": "umwelt_tech_stadt",
+   "aliases": [
+    "Bürgerenergie",
+    "Energiegenossenschaft",
+    "Solar-Coop",
+    "Bürgersolaranlage"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "41e6fb39-3a19-4dbb-bf68-fdb38ba9ee8f",
+   "slug": "gesellschaft_demokratie_kampagnenarbeit",
+   "label": "Kampagnenarbeit",
+   "bereich": "gesellschaft_demokratie",
+   "aliases": [
+    "Advocacy",
+    "NGO-Campaigning",
+    "politische Kampagnen",
+    "Mobilisierung",
+    "politischer Druckaufbau"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "be013580-b4d6-46d1-a3f3-3f526e405829",
+   "slug": "gesellschaft_demokratie_buergerinitiative",
+   "label": "Bürgerinitiative",
+   "bereich": "gesellschaft_demokratie",
+   "aliases": [
+    "Volksinitiative-Komitee",
+    "Referendum",
+    "organisierte Zivilgesellschaft",
+    "Petitionen",
+    "Bürgerbegehren"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "eaa5ad5c-e137-4780-a5f0-63a655d70e0a",
+   "slug": "gesellschaft_demokratie_digitale_grundrechte",
+   "label": "Digitale Grundrechte",
+   "bereich": "gesellschaft_demokratie",
+   "aliases": [
+    "Datenschutz",
+    "Privacy",
+    "digitale Bürgerrechte",
+    "Überwachung",
+    "digitale Selbstbestimmung",
+    "KI-Ethik"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "db321c47-4547-464b-930f-046319e72c5a",
+   "slug": "gesellschaft_demokratie_whistleblowing",
+   "label": "Whistleblowing, Hinweisgeber-Schutz",
+   "bereich": "gesellschaft_demokratie",
+   "aliases": [
+    "Whistleblower-Schutz",
+    "Hinweisgeberschutz",
+    "Schutz von Informanten",
+    "Skandal-Aufdeckung"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "364a5103-26cc-4e9c-8e31-9e1b1cad26cf",
+   "slug": "gesundheit_praevention_betroffene_gewalt",
+   "label": "Gesundheitsfolgen von Gewalt",
+   "bereich": "gesundheit_praevention",
+   "aliases": [
+    "psychische Traumata",
+    "körperliche Folgen häuslicher Gewalt",
+    "Traumatherapie",
+    "PTBS"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "c5a449ea-7c85-4ff8-bbcf-1534751e828d",
+   "slug": "gesundheit_praevention_psychosoziale_beratung",
+   "label": "Psychosoziale Beratung",
+   "bereich": "gesundheit_praevention",
+   "aliases": [
+    "Lebenshilfe",
+    "niederschwellige Therapie-Angebote",
+    "psychosoziale Hilfe",
+    "Krisenintervention"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "16302441-d0ef-4af5-923e-155301486193",
+   "slug": "bildung_wissenschaft_ethik_digitale_bildung",
+   "label": "Digitale Bildung",
+   "bereich": "bildung_wissenschaft_ethik",
+   "aliases": [
+    "Digital Literacy",
+    "Medienpädagogik",
+    "IT-Bildung",
+    "Coding-Bildung für Kinder",
+    "digitale Kompetenz"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "aa622f2f-6375-402d-bf3d-3a9eff43d41d",
+   "slug": "bildung_wissenschaft_ethik_erwachsenenbildung",
+   "label": "Erwachsenenbildung",
+   "bereich": "bildung_wissenschaft_ethik",
+   "aliases": [
+    "Weiterbildung",
+    "lebenslanges Lernen",
+    "Bildung für Berufstätige",
+    "Volkshochschule"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "9164b3a8-62b6-49ce-b384-2b84a1784d2b",
+   "slug": "bildung_wissenschaft_ethik_aufklaerung_sensibilisierung",
+   "label": "Aufklaerung sensibilisierung",
+   "bereich": "bildung_wissenschaft_ethik",
+   "aliases": [
+    "Aufklärungsarbeit",
+    "Sensibilisierung",
+    "Awareness",
+    "Bildungskampagne",
+    "Informationskampagnen",
+    "Sensibilisierungsarbeit"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "9dcfd9ae-5708-48eb-bbc1-6f93bf8b69cc",
+   "slug": "bildung_wissenschaft_ethik_berufsbildung",
+   "label": "Berufsbildung",
+   "bereich": "bildung_wissenschaft_ethik",
+   "aliases": [
+    "Berufslehre",
+    "Lehrstellen",
+    "Berufsausbildung",
+    "duale Ausbildung",
+    "Berufsmaturität",
+    "Berufsbildungspolitik"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "5f4f4904-5499-4c8d-9a88-54bc87bc4889",
+   "slug": "bildung_wissenschaft_ethik_ethik_humanismus",
+   "label": "Ethik humanismus",
+   "bereich": "bildung_wissenschaft_ethik",
+   "aliases": [
+    "Ethik",
+    "Humanismus",
+    "Werteorientierung",
+    "ethische Bildung",
+    "säkularer Humanismus",
+    "Menschenwürde"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "de94d781-3aa3-4891-a506-f3e1d453da4e",
+   "slug": "bildung_wissenschaft_ethik_pazifismus_frieden",
+   "label": "Pazifismus frieden",
+   "bereich": "bildung_wissenschaft_ethik",
+   "aliases": [
+    "Pazifismus",
+    "Friedensarbeit",
+    "Friedensförderung",
+    "Friedensbildung",
+    "Konfliktprävention",
+    "gewaltfreie Konfliktlösung"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "cb333a6e-7b22-45ca-9e4c-51e222bf0d6b",
+   "slug": "bildung_wissenschaft_ethik_sozialismus_soziale_modelle",
+   "label": "Sozialismus soziale modelle",
+   "bereich": "bildung_wissenschaft_ethik",
+   "aliases": [
+    "Sozialismus",
+    "Genossenschaftswesen",
+    "Solidarwirtschaft",
+    "alternative Wirtschaftsmodelle",
+    "Sozialstaatsmodelle"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "a5ab4a6f-6a54-4de5-be27-e96daeb3ac00",
+   "slug": "geo_basel",
+   "label": "Basel",
+   "bereich": "geo",
+   "aliases": [
+    "Basel-Stadt",
+    "Basel-Landschaft",
+    "Region Basel",
+    "Basel-Stadt und Baselland",
+    "Nordwestschweiz"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "30e38016-992e-40a6-bf14-12b8908312d6",
+   "slug": "geo_bern",
+   "label": "Bern",
+   "bereich": "geo",
+   "aliases": [
+    "Kanton Bern",
+    "Stadt Bern",
+    "Berner Mittelland",
+    "Region Bern",
+    "Bern-Solothurn"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "e33d5d6f-267b-4077-bec7-d1339194fdd3",
+   "slug": "geo_dach_region",
+   "label": "Dach region",
+   "bereich": "geo",
+   "aliases": [
+    "Deutschland-Österreich-Schweiz",
+    "DACH",
+    "D-A-CH",
+    "Deutschsprachiger Raum",
+    "DACH-Region"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "42b87c50-4321-463d-9e50-691d4fae8d90",
+   "slug": "geo_graubuenden",
+   "label": "Graubuenden",
+   "bereich": "geo",
+   "aliases": [
+    "Bündner",
+    "Kanton Graubünden",
+    "Bergregion",
+    "Engadin",
+    "romanische Schweiz",
+    "Surselva"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "dc4b566b-6029-4c92-9ce9-2cf60b9b12ae",
+   "slug": "geo_schweiz_weit",
+   "label": "Schweiz weit",
+   "bereich": "geo",
+   "aliases": [
+    "gesamtschweizerisch",
+    "schweizweit",
+    "Schweiz",
+    "CH",
+    "national Schweiz",
+    "ganze Schweiz"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "4accfa6a-350e-4ac4-8411-353ba4e59971",
+   "slug": "geo_tessin",
+   "label": "Tessin",
+   "bereich": "geo",
+   "aliases": [
+    "Tessin",
+    "Ticino",
+    "italienische Schweiz",
+    "Svizzera italiana"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "c86261f8-c2c0-4d4d-af52-82a525e35c1b",
+   "slug": "geo_zuerich",
+   "label": "Zuerich",
+   "bereich": "geo",
+   "aliases": [
+    "Zürich",
+    "Kanton Zürich",
+    "Stadt Zürich",
+    "Limmattal",
+    "Region Zürich"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "75548892-bc57-4755-9b4f-aa7ca51c77cd",
+   "slug": "gesellschaft_demokratie_antidiskriminierung",
+   "label": "Antidiskriminierung",
+   "bereich": "gesellschaft_demokratie",
+   "aliases": [
+    "Antirassismus",
+    "Diskriminierungsbekämpfung",
+    "Antisemitismus",
+    "Rassismus",
+    "Anti-Diskriminierung",
+    "Gleichbehandlung"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "e42b6809-ba6a-41eb-a1ac-c4b2d29f1d1e",
+   "slug": "gesellschaft_demokratie_buergerbeteiligung",
+   "label": "Buergerbeteiligung",
+   "bereich": "gesellschaft_demokratie",
+   "aliases": [
+    "Bürgerbeteiligung",
+    "Partizipation",
+    "Mitwirkung",
+    "Bürgerräte",
+    "direkte Demokratie",
+    "Volksrechte"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "c0506da5-6723-4dac-9b75-a47e781f9562",
+   "slug": "gesellschaft_demokratie_politische_bildung",
+   "label": "Politische bildung",
+   "bereich": "gesellschaft_demokratie",
+   "aliases": [
+    "politische Bildung",
+    "Demokratiebildung",
+    "Civic Education",
+    "Politik-Unterricht",
+    "Wahlbildung"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "f5438986-325d-423d-a225-ec7f854f316b",
+   "slug": "gesellschaft_demokratie_zivilgesellschaft_staerkung",
+   "label": "Zivilgesellschaft staerkung",
+   "bereich": "gesellschaft_demokratie",
+   "aliases": [
+    "Zivilgesellschaft",
+    "NGO-Förderung",
+    "Stärkung der Zivilgesellschaft",
+    "Vereinslandschaft",
+    "gemeinnützige Strukturen"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "e9c20766-c82b-4686-ab44-66f459e683f1",
+   "slug": "verstaendigung_zwischen_sprachregionen",
+   "label": "Verstaendigung zwischen Sprachregionen",
+   "bereich": "gesellschaft_demokratie",
+   "aliases": [
+    "Mehrsprachigkeit",
+    "Verständigung zwischen Sprachregionen",
+    "viersprachige Schweiz",
+    "romanisch-deutsch-französisch-italienisch",
+    "Sprachregionen",
+    "interkulturelle Verständigung"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "d1a74156-a47a-42f6-9fc7-0809d5b293f9",
+   "slug": "gesundheit_praevention_medizinische_forschung",
+   "label": "Medizinische forschung",
+   "bereich": "gesundheit_praevention",
+   "aliases": [
+    "medizinische Forschung",
+    "klinische Studien",
+    "biomedizinische Forschung",
+    "Krebsforschung",
+    "Pharmaforschung",
+    "Gesundheitsforschung"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "d58bd0ea-5387-4d25-9e72-35715d18bc78",
+   "slug": "gesundheit_praevention_psychische_gesundheit",
+   "label": "Psychische gesundheit",
+   "bereich": "gesundheit_praevention",
+   "aliases": [
+    "Mental Health",
+    "psychische Erkrankungen",
+    "Depression",
+    "Burnout",
+    "Suizidprävention",
+    "Psyche",
+    "psychische Krisen"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "c5ea9217-603f-4ae5-9ebc-4b257a5cef45",
+   "slug": "kultur_kunst_lifestyle_bildende_kunst",
+   "label": "Bildende kunst",
+   "bereich": "kultur_kunst_lifestyle",
+   "aliases": [
+    "bildende Kunst",
+    "Malerei",
+    "Skulptur",
+    "Galerien",
+    "Kunstvereine",
+    "zeitgenössische Kunst",
+    "Visual Arts"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "2cf914ed-a8e5-47a0-8854-9c2e2874a7e1",
+   "slug": "kultur_kunst_lifestyle_gastronomie_esskultur",
+   "label": "Gastronomie esskultur",
+   "bereich": "kultur_kunst_lifestyle",
+   "aliases": [
+    "Gastronomie",
+    "Esskultur",
+    "Slow Food",
+    "kulinarische Kultur",
+    "Genusskultur",
+    "Wein",
+    "traditionelles Handwerk Lebensmittel"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "b5405f7f-73eb-4b15-ad98-b4980d973865",
+   "slug": "kultur_kunst_lifestyle_kulturteilhabe",
+   "label": "Kulturteilhabe",
+   "bereich": "kultur_kunst_lifestyle",
+   "aliases": [
+    "Kulturteilhabe",
+    "kulturelle Teilhabe",
+    "Cultural Participation",
+    "Zugang zu Kultur",
+    "Audience Development"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "e55f4119-73a2-4b3e-98c3-a36a6dcca626",
+   "slug": "kultur_kunst_lifestyle_kunstfoerderung_allg",
+   "label": "Kunstfoerderung allg",
+   "bereich": "kultur_kunst_lifestyle",
+   "aliases": [
+    "Kunstförderung",
+    "Künstler-Stipendien",
+    "Atelierstipendium",
+    "allgemeine Kulturförderung",
+    "Werkbeiträge"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "cf6bc0ce-693d-481b-93e1-da9bc571d524",
+   "slug": "kultur_kunst_lifestyle_musik_clubkultur",
+   "label": "Musik clubkultur",
+   "bereich": "kultur_kunst_lifestyle",
+   "aliases": [
+    "Musik",
+    "Clubkultur",
+    "Konzerte",
+    "klassische Musik",
+    "zeitgenössische Musik",
+    "Musikförderung",
+    "Festivals"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "cd11e085-e486-4003-9a70-c1bfdfbde909",
+   "slug": "kultur_kunst_lifestyle_nischenkultur",
+   "label": "Nischenkultur",
+   "bereich": "kultur_kunst_lifestyle",
+   "aliases": [
+    "Nischenkultur",
+    "Subkulturen",
+    "unkommerzielle Kultur",
+    "Untergrundszene",
+    "alternative Kulturszene"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "50f54d84-5684-4598-a9cc-27bbb113620c",
+   "slug": "medien_journalismus_digitaler_wandel_medien",
+   "label": "Digitaler wandel medien",
+   "bereich": "medien_journalismus",
+   "aliases": [
+    "digitaler Wandel",
+    "digitale Transformation Medien",
+    "Plattform-Wandel",
+    "Online-Journalismus",
+    "Digitalisierung Verlage"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "4fad93a2-6802-495d-bf4d-041975a3f03c",
+   "slug": "medien_journalismus_innovation_medien",
+   "label": "Innovation medien",
+   "bereich": "medien_journalismus",
+   "aliases": [
+    "Medien-Innovation",
+    "Medieninnovation",
+    "journalistisches Experimentieren",
+    "Innovation Journalism",
+    "Format-Innovation"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "1cbf8862-b90c-441e-8b03-c48c3f035d06",
+   "slug": "medien_journalismus_journalisten_ausbildung",
+   "label": "Journalisten ausbildung",
+   "bereich": "medien_journalismus",
+   "aliases": [
+    "Journalisten-Ausbildung",
+    "Journalistenschule",
+    "Medienschule",
+    "journalistische Weiterbildung",
+    "Volontariat"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "d06a09bd-1394-439d-891b-e644ac0fd1fa",
+   "slug": "geo_rheinland_pfalz",
+   "label": "Rheinland-Pfalz",
+   "bereich": "geo",
+   "aliases": [
+    "Mainz",
+    "Koblenz",
+    "Trier"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "d4c2020c-79eb-4c2c-aa5b-f22da2dfa12c",
+   "slug": "geo_thueringen",
+   "label": "Thueringen",
+   "bereich": "geo",
+   "aliases": [
+    "Erfurt",
+    "Jena",
+    "Weimar"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "33c6dfce-b81a-4a07-8387-b7b851934614",
+   "slug": "geo_berlin",
+   "label": "Berlin",
+   "bereich": "geo",
+   "aliases": [
+    "Hauptstadt",
+    "Berlin-Brandenburg"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "7a7cb730-e767-49f6-900c-0b099eb7cbc0",
+   "slug": "gesellschaft_demokratie_menschenrechte",
+   "label": "Menschenrechte",
+   "bereich": "gesellschaft_demokratie",
+   "aliases": [
+    "Menschenrechte",
+    "UN-Menschenrechte",
+    "EMRK",
+    "Grundrechte",
+    "menschenrechtliche Standards",
+    "Menschenrechtsorganisationen"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "39f5f07e-3f74-4fba-af07-40f9dc1397b5",
+   "slug": "gewalt_praevention_haeusliche_gewalt",
+   "label": "Häusliche Gewalt",
+   "bereich": "gewalt_praevention",
+   "aliases": [
+    "Beziehungsgewalt",
+    "Partnerschaftsgewalt",
+    "Intimpartner-Gewalt",
+    "häusliche Übergriffe",
+    "Gewalt in der Familie",
+    "Femizid",
+    "ökonomische Gewalt",
+    "Würgen"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "56d3e6a4-0542-4943-9663-d7fcbc8d1be2",
+   "slug": "sport_freizeit_sport_integration",
+   "label": "Sport integration",
+   "bereich": "sport_freizeit",
+   "aliases": [
+    "Sport und Integration",
+    "interkultureller Sport",
+    "Sport als Integrationsmittel",
+    "Migration und Sport"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "ecebe1c7-e692-4c00-820c-d04a2268cbbf",
+   "slug": "gewalt_praevention_opferhilfe",
+   "label": "Opferhilfe",
+   "bereich": "gewalt_praevention",
+   "aliases": [
+    "Opferberatung",
+    "Beratungsstellen für Betroffene",
+    "Opferunterstützung",
+    "juristische Hilfe für Opfer",
+    "Opferhilfegesetz"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "d55038ad-bb90-4149-bdab-0201be0b1ba8",
+   "slug": "gemeinschaft_quartier_intergenerationale_begegnung",
+   "label": "Intergenerationale Begegnung",
+   "bereich": "gemeinschaft_quartier",
+   "aliases": [
+    "Mehrgenerationenhaus",
+    "Generationenbrücke",
+    "Senioren-Jugend-Projekte"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "46d92c39-5276-4c02-bea0-41fc17d634f3",
+   "slug": "soziales_inklusion_familien_unterstuetzung",
+   "label": "Familien-Unterstützung",
+   "bereich": "soziales_inklusion",
+   "aliases": [
+    "Alleinerziehende",
+    "Familien in Notlagen",
+    "Familienhilfe",
+    "Kinder in armen Familien",
+    "Patchworkfamilien",
+    "Familienarmut"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "40ee06cf-8bf5-4519-8b45-36548b9bf6e7",
+   "slug": "bildung_wissenschaft_ethik_politische_bildung_jugend",
+   "label": "Politische Bildung Jugend",
+   "bereich": "bildung_wissenschaft_ethik",
+   "aliases": [
+    "Jugendparlament",
+    "politische Bildung in Schulen",
+    "Demokratie-Bildung",
+    "Schule und Politik"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "25fa281f-a969-47bb-8587-245e99716a4c",
+   "slug": "gesellschaft_demokratie_extremismuspraevention",
+   "label": "Extremismuspraevention",
+   "bereich": "gesellschaft_demokratie",
+   "aliases": [
+    "Extremismusprävention",
+    "Radikalisierungsprävention",
+    "Deradikalisierung",
+    "Hass- und Hetze-Prävention",
+    "Rechtsextremismus",
+    "Islamismus-Prävention"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "268f3c93-fb9a-437b-b401-c637767f94f3",
+   "slug": "medien_journalismus_lokaljournalismus",
+   "label": "Lokaljournalismus",
+   "bereich": "medien_journalismus",
+   "aliases": [
+    "Lokaljournalismus",
+    "Lokalmedien",
+    "Regionalmedien",
+    "Quartiermedien",
+    "Stadtteil-Berichterstattung",
+    "Hyperlokal"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "ad8ff2fe-bb4f-4560-87a5-0bbd3fffb51e",
+   "slug": "medien_journalismus_open_access_no_paywall",
+   "label": "Open access no paywall",
+   "bereich": "medien_journalismus",
+   "aliases": [
+    "Open Access",
+    "No Paywall",
+    "kostenlose Medien",
+    "frei zugänglicher Journalismus",
+    "Bezahlschranken-frei"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "3a1a6c94-c63f-4232-b33a-69ac7c9fc9b3",
+   "slug": "medien_journalismus_pressefreiheit",
+   "label": "Pressefreiheit",
+   "bereich": "medien_journalismus",
+   "aliases": [
+    "Pressefreiheit",
+    "Press Freedom",
+    "Journalisten-Schutz",
+    "Pressefreiheits-Indizes",
+    "redaktionelle Freiheit"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "975a6e23-a5bb-436f-ba65-649266d9a8b9",
+   "slug": "medien_journalismus_sportjournalismus",
+   "label": "Sportjournalismus",
+   "bereich": "medien_journalismus",
+   "aliases": [
+    "Sportjournalismus",
+    "Sportberichterstattung",
+    "Sport-Magazin"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "2f97b552-8186-4c84-9e49-bf4fbf7fe263",
+   "slug": "nachwuchsfoerderung_kulturjournalismus",
+   "label": "Nachwuchsfoerderung Kulturjournalismus",
+   "bereich": "medien_journalismus",
+   "aliases": [
+    "Nachwuchsförderung Kulturjournalismus",
+    "junge Kulturjournalisten",
+    "Nachwuchsstipendien",
+    "Journalisten-Nachwuchs"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "06a4b561-e631-450f-8c73-0b29f9310622",
+   "slug": "soziales_inklusion_armutsbekaempfung",
+   "label": "Armutsbekaempfung",
+   "bereich": "soziales_inklusion",
+   "aliases": [
+    "Armut",
+    "Sozialhilfe",
+    "Working Poor",
+    "Lebenshaltungskosten",
+    "Existenzsicherung",
+    "Armutsbekämpfung"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "155fb121-9d5f-4d44-b46c-9cb5889cff92",
+   "slug": "soziales_inklusion_chancengleichheit",
+   "label": "Chancengleichheit",
+   "bereich": "soziales_inklusion",
+   "aliases": [
+    "Chancengerechtigkeit",
+    "Bildungsgerechtigkeit",
+    "soziale Mobilität",
+    "Bildungsaufstieg",
+    "Chancengleichheit"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "e1f56507-d21f-4508-811d-d5c09fff7934",
+   "slug": "soziales_inklusion_freiwilligenarbeit",
+   "label": "Freiwilligenarbeit",
+   "bereich": "soziales_inklusion",
+   "aliases": [
+    "Freiwilligenarbeit",
+    "Ehrenamt",
+    "Volunteering",
+    "Freiwilligenagenturen",
+    "unbezahltes Engagement"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "ab9d7749-0761-466d-81df-8b08bbf053d8",
+   "slug": "soziales_inklusion_gender_frauenfoerderung",
+   "label": "Gender frauenfoerderung",
+   "bereich": "soziales_inklusion",
+   "aliases": [
+    "Frauenförderung",
+    "Frauenrechte",
+    "Genderpolitik",
+    "Frauen in Führung",
+    "Equal Pay-Initiativen",
+    "Frauen-Empowerment"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "f43ea26a-6991-4d1a-8880-d456898d7a2f",
+   "slug": "soziales_inklusion_integration_migration",
+   "label": "Integration migration",
+   "bereich": "soziales_inklusion",
+   "aliases": [
+    "Migration",
+    "Integration",
+    "Geflüchtete",
+    "Asyl",
+    "Sans-Papiers",
+    "Migrationspolitik",
+    "interkulturell",
+    "Migranten-Selbstorganisationen"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "6581e1aa-7721-44e4-b513-5cb8879e6d15",
+   "slug": "soziales_inklusion_lgbtiq_rechte",
+   "label": "Lgbtiq rechte",
+   "bereich": "soziales_inklusion",
+   "aliases": [
+    "LGBT",
+    "Queer",
+    "Regenbogen",
+    "Trans-Rechte",
+    "Homosexualität",
+    "Sexuelle Vielfalt",
+    "LGBTIQ"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "e865e253-f7c4-47c0-8551-0cdf68315e85",
+   "slug": "soziales_inklusion_soziale_gerechtigkeit",
+   "label": "Soziale gerechtigkeit",
+   "bereich": "soziales_inklusion",
+   "aliases": [
+    "soziale Gerechtigkeit",
+    "Verteilungsgerechtigkeit",
+    "Sozialpolitik",
+    "soziale Ungleichheit",
+    "Social Justice"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "040f4653-fee3-45a8-a0f9-3bb18f51cedc",
+   "slug": "sport_freizeit_fankultur_identitaet",
+   "label": "Fankultur identitaet",
+   "bereich": "sport_freizeit",
+   "aliases": [
+    "Fankultur",
+    "Fan-Vereinigungen",
+    "Fan-Identität",
+    "Stadionkultur"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "099fa5cb-c7c2-40c2-a14e-b343c4d89086",
+   "slug": "sport_freizeit_sport_frauenfoerderung",
+   "label": "Sport frauenfoerderung",
+   "bereich": "sport_freizeit",
+   "aliases": [
+    "Frauensport",
+    "Frauen im Sport",
+    "Gendergerechter Sport",
+    "Frauenfussball"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "17d0a1a5-c63f-46d2-addf-128664ac0870",
+   "slug": "sport_freizeit_sport_jugendfoerderung",
+   "label": "Sport jugendfoerderung",
+   "bereich": "sport_freizeit",
+   "aliases": [
+    "Jugendsport",
+    "Sport-Jugendförderung",
+    "Nachwuchsförderung Sport",
+    "Vereins-Jugendarbeit"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "0fb81def-f688-49dd-a7c3-9d39a4561ae9",
+   "slug": "umwelt_tech_stadt_it_digitale_transformation",
+   "label": "It digitale transformation",
+   "bereich": "umwelt_tech_stadt",
+   "aliases": [
+    "IT",
+    "Digitalisierung",
+    "digitale Transformation",
+    "Digital Society",
+    "Tech-Bildung"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "f643b279-9b9a-429b-a18a-dffb99825e74",
+   "slug": "umwelt_tech_stadt_landwirtschaft_ernaehrung",
+   "label": "Landwirtschaft ernaehrung",
+   "bereich": "umwelt_tech_stadt",
+   "aliases": [
+    "Landwirtschaft",
+    "Ernährung",
+    "Bio-Landwirtschaft",
+    "regionale Lebensmittel",
+    "Solidarische Landwirtschaft"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "12dd31ea-2224-453d-9b19-ed3f981c5ff2",
+   "slug": "umwelt_tech_stadt_stadtentwicklung_quartier",
+   "label": "Stadtentwicklung quartier",
+   "bereich": "umwelt_tech_stadt",
+   "aliases": [
+    "Stadtentwicklung",
+    "Quartiersentwicklung",
+    "Stadtplanung",
+    "urbane Räume",
+    "Städtebau"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "c13b4791-9fe8-487d-bd61-e09bf4da3995",
+   "slug": "umwelt_tech_stadt_wirtschaftsfoerderung",
+   "label": "Wirtschaftsfoerderung",
+   "bereich": "umwelt_tech_stadt",
+   "aliases": [
+    "Wirtschaftsförderung",
+    "KMU-Förderung",
+    "Startup-Förderung",
+    "Standortförderung",
+    "Wirtschaftsentwicklung"
+   ],
+   "vocabulary_version": 1
+  },
+  {
+   "id": "abccfde1-0d4e-44d4-8287-a36684c6a3c0",
+   "slug": "geo_deutschland",
+   "label": "Deutschland",
+   "bereich": "geo",
+   "aliases": [
+    "DE",
+    "bundesweit",
+    "deutschlandweit"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "3917b741-ff58-4341-9ab9-f3265569b02d",
+   "slug": "geo_bayern",
+   "label": "Bayern",
+   "bereich": "geo",
+   "aliases": [
+    "Muenchen",
+    "Nuernberg",
+    "Bavaria"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "a7261eae-b597-4b6a-bad1-6c20058f8385",
+   "slug": "geo_nordrhein_westfalen",
+   "label": "Nordrhein-Westfalen",
+   "bereich": "geo",
+   "aliases": [
+    "NRW",
+    "Koeln",
+    "Duesseldorf",
+    "Essen",
+    "Dortmund"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "88fbc6b7-9f89-4f44-9917-bbccb77d2871",
+   "slug": "geo_baden_wuerttemberg",
+   "label": "Baden-Wuerttemberg",
+   "bereich": "geo",
+   "aliases": [
+    "BW",
+    "Stuttgart",
+    "Karlsruhe",
+    "Mannheim",
+    "Heidelberg"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "b1cdc249-9c16-4d93-b476-07b352c89e24",
+   "slug": "geo_hessen",
+   "label": "Hessen",
+   "bereich": "geo",
+   "aliases": [
+    "Frankfurt",
+    "Wiesbaden",
+    "Kassel"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "909d765c-1fb3-45e0-816f-ab2e42a1ebf7",
+   "slug": "geo_hamburg_de",
+   "label": "Hamburg",
+   "bereich": "geo",
+   "aliases": [
+    "Hansestadt Hamburg"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "a6f79cae-0b73-44cf-a1b2-b345dbbad518",
+   "slug": "geo_schleswig_holstein",
+   "label": "Schleswig-Holstein",
+   "bereich": "geo",
+   "aliases": [
+    "Kiel",
+    "Luebeck",
+    "Flensburg"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "f9a4f307-6a4f-4236-9c7d-3bb576fc7197",
+   "slug": "geo_sachsen",
+   "label": "Sachsen",
+   "bereich": "geo",
+   "aliases": [
+    "Dresden",
+    "Leipzig",
+    "Chemnitz"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "6a34e3f4-ec01-4b53-af99-afdd0caf3903",
+   "slug": "geo_niedersachsen",
+   "label": "Niedersachsen",
+   "bereich": "geo",
+   "aliases": [
+    "Hannover",
+    "Braunschweig",
+    "Osnabrueck"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "0a84e92d-3f46-4d41-8a2e-c84ce7a1a6b0",
+   "slug": "geo_sachsen_anhalt",
+   "label": "Sachsen-Anhalt",
+   "bereich": "geo",
+   "aliases": [
+    "Magdeburg",
+    "Halle"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "59ba0485-edb3-4a79-85f4-6dcfa829a2b2",
+   "slug": "geo_bremen",
+   "label": "Bremen",
+   "bereich": "geo",
+   "aliases": [
+    "Hansestadt Bremen",
+    "Bremerhaven"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "9218a948-e792-4d40-9edc-3559ad057d22",
+   "slug": "geo_brandenburg",
+   "label": "Brandenburg",
+   "bereich": "geo",
+   "aliases": [
+    "Potsdam",
+    "Cottbus"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "0a58269d-2112-4c1e-931d-bc3bf0d2c5ac",
+   "slug": "geo_mecklenburg_vorpommern",
+   "label": "Mecklenburg-Vorpommern",
+   "bereich": "geo",
+   "aliases": [
+    "Schwerin",
+    "Rostock",
+    "MV"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "ab8cb959-f9ab-4d66-8b87-d52a0de4a77a",
+   "slug": "geo_saarland",
+   "label": "Saarland",
+   "bereich": "geo",
+   "aliases": [
+    "Saarbruecken"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "2c850bec-e335-4c68-b470-b9c5502fc6c4",
+   "slug": "geo_wien",
+   "label": "Wien",
+   "bereich": "geo",
+   "aliases": [
+    "Hauptstadt Wien",
+    "Bundesland Wien"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "11b7e3aa-e580-4215-bcb6-841b6fb134b9",
+   "slug": "geo_oberoesterreich",
+   "label": "Oberoesterreich",
+   "bereich": "geo",
+   "aliases": [
+    "Linz",
+    "Wels",
+    "Steyr"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "85729793-24bf-4282-8193-472d23616dd9",
+   "slug": "geo_niederoesterreich",
+   "label": "Niederoesterreich",
+   "bereich": "geo",
+   "aliases": [
+    "St. Poelten",
+    "Krems",
+    "Wiener Neustadt"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "6648bfa8-39ff-4f81-a8f0-2ace8c8e5817",
+   "slug": "geo_steiermark",
+   "label": "Steiermark",
+   "bereich": "geo",
+   "aliases": [
+    "Graz",
+    "Leoben"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "2cf78ca1-7057-4992-ac4c-73b6cb73937b",
+   "slug": "geo_tirol",
+   "label": "Tirol",
+   "bereich": "geo",
+   "aliases": [
+    "Innsbruck",
+    "Kufstein"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "3a11e6c3-3a6b-429a-b4a6-75d9e045b8b2",
+   "slug": "geo_kaernten",
+   "label": "Kaernten",
+   "bereich": "geo",
+   "aliases": [
+    "Klagenfurt",
+    "Villach"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "0675f3ac-66aa-440f-a1ef-982db227436f",
+   "slug": "geo_vorarlberg",
+   "label": "Vorarlberg",
+   "bereich": "geo",
+   "aliases": [
+    "Bregenz",
+    "Dornbirn",
+    "Feldkirch"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "d28660d0-98bd-4028-b7dd-3cc4223b06e1",
+   "slug": "geo_salzburg_at",
+   "label": "Salzburg (AT)",
+   "bereich": "geo",
+   "aliases": [
+    "Land Salzburg",
+    "Stadt Salzburg"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "718fe725-8842-4351-ab3e-689705dfb7da",
+   "slug": "geo_burgenland",
+   "label": "Burgenland",
+   "bereich": "geo",
+   "aliases": [
+    "Eisenstadt"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "bf7c40c1-c865-4863-9c13-6d2c84a4a408",
+   "slug": "geo_liechtenstein",
+   "label": "Liechtenstein",
+   "bereich": "geo",
+   "aliases": [
+    "FL",
+    "Vaduz",
+    "Fuerstentum Liechtenstein"
+   ],
+   "vocabulary_version": 2
+  },
+  {
+   "id": "a951e5ef-34fc-4d25-be66-d4790ae7cbf6",
+   "slug": "kinder_jugend_offene_verbandliche_jugendarbeit",
+   "label": "Offene und verbandliche Jugendarbeit",
+   "bereich": "kinder_jugend",
+   "aliases": [
+    "Pfadi",
+    "Pfadfinder",
+    "Jungwacht",
+    "Blauring",
+    "Cevi",
+    "Jubla",
+    "Jugendverband",
+    "offene Jugendarbeit",
+    "Jugendtreff"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "d6e30fb1-c71c-4b3d-8d42-acb38ff2245b",
+   "slug": "kinder_jugend_fruehe_kindheit_betreuung",
+   "label": "Frühe Kindheit und Betreuung",
+   "bereich": "kinder_jugend",
+   "aliases": [
+    "Kita",
+    "Kindertagesstätte",
+    "Spielgruppe",
+    "frühkindliche Förderung",
+    "Krippe",
+    "Tagesfamilie",
+    "Frühförderung"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "7733a721-0535-491e-b16b-d9b62e6be0b9",
+   "slug": "kinder_jugend_ferien_lager_freizeit",
+   "label": "Ferien, Lager und Jugendfreizeit",
+   "bereich": "kinder_jugend",
+   "aliases": [
+    "Ferienlager",
+    "Jugendlager",
+    "Pfadilager",
+    "Ferienpass",
+    "Jugendreisen",
+    "Freizeitangebot"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "452d38d2-689d-4d1a-a22a-5c11a9ab3c66",
+   "slug": "kinder_jugend_foerderung_allgemein",
+   "label": "Kinder- und Jugendförderung allgemein",
+   "bereich": "kinder_jugend",
+   "aliases": [
+    "Jugendförderung",
+    "Kinderförderung",
+    "Jugendprojekte",
+    "Partizipation Jugendliche"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "a6244951-981c-4153-91ff-1277e4702fca",
+   "slug": "entwicklung_humanitaer_entwicklungszusammenarbeit",
+   "label": "Entwicklungszusammenarbeit",
+   "bereich": "entwicklung_humanitaer",
+   "aliases": [
+    "EZA",
+    "Entwicklungshilfe",
+    "Globaler Süden",
+    "Projektarbeit Ausland",
+    "Helvetas",
+    "Caritas"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "123da6bb-4229-4e7a-a5ef-10003078ce21",
+   "slug": "entwicklung_humanitaer_humanitaere_nothilfe",
+   "label": "Humanitäre Nothilfe",
+   "bereich": "entwicklung_humanitaer",
+   "aliases": [
+    "humanitäre Hilfe",
+    "Nothilfe",
+    "Flüchtlingshilfe international",
+    "IKRK",
+    "HEKS"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "5293702d-f980-4d9f-ae58-aaae5a0ac581",
+   "slug": "entwicklung_humanitaer_katastrophenhilfe",
+   "label": "Katastrophenhilfe",
+   "bereich": "entwicklung_humanitaer",
+   "aliases": [
+    "Katastrophenhilfe",
+    "Wiederaufbau",
+    "Soforthilfe",
+    "Erdbebenhilfe",
+    "Hungerhilfe"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "05ff96d5-575c-4772-83f7-c5a60b3cca6f",
+   "slug": "entwicklung_humanitaer_fairer_handel",
+   "label": "Fairer Handel und nachhaltiger Konsum",
+   "bereich": "entwicklung_humanitaer",
+   "aliases": [
+    "Fairtrade",
+    "fairer Handel",
+    "fair trade",
+    "Lieferketten",
+    "nachhaltiger Konsum"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "b4afbf02-5bc3-4a71-a93a-d0070f23cb8c",
+   "slug": "entwicklung_humanitaer_globales_lernen",
+   "label": "Globales Lernen und Sensibilisierung",
+   "bereich": "entwicklung_humanitaer",
+   "aliases": [
+    "globales Lernen",
+    "Nord-Süd-Bildung",
+    "entwicklungspolitische Bildung",
+    "Sensibilisierung Süden"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "30be7d82-612f-4099-a6da-d476cafb5833",
+   "slug": "religion_spiritualitaet_gemeindearbeit",
+   "label": "Kirchliche und religiöse Gemeindearbeit",
+   "bereich": "religion_spiritualitaet",
+   "aliases": [
+    "Kirchgemeinde",
+    "Pfarrei",
+    "religiöse Gemeinschaft",
+    "Kirche",
+    "Freikirche",
+    "Gemeindearbeit"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "0401638a-8a43-4e86-9e26-18f665d6c26e",
+   "slug": "religion_spiritualitaet_seelsorge_begleitung",
+   "label": "Seelsorge und spirituelle Begleitung",
+   "bereich": "religion_spiritualitaet",
+   "aliases": [
+    "Seelsorge",
+    "Spitalseelsorge",
+    "Notfallseelsorge",
+    "spirituelle Begleitung",
+    "Trauerbegleitung"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "47bc70ca-06a2-4658-8e44-1a9dcd923806",
+   "slug": "religion_spiritualitaet_interreligioeser_dialog",
+   "label": "Interreligiöser Dialog",
+   "bereich": "religion_spiritualitaet",
+   "aliases": [
+    "interreligiöser Dialog",
+    "Religionsdialog",
+    "religiöse Verständigung",
+    "interkonfessionell"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "86102b7d-4651-4247-83b6-8a010c6bc1a9",
+   "slug": "rettung_sicherheit_rettungswesen",
+   "label": "Rettungswesen und Erste Hilfe",
+   "bereich": "rettung_sicherheit",
+   "aliases": [
+    "Samariter",
+    "Samariterverein",
+    "Bergrettung",
+    "SAC-Rettung",
+    "Wasserrettung",
+    "SLRG",
+    "Rettungsdienst",
+    "Erste Hilfe",
+    "Rega"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "747cf5d3-8bc8-4c80-ae25-c5a4c8acdd20",
+   "slug": "rettung_sicherheit_feuerwehr_zivilschutz",
+   "label": "Feuerwehr und Zivilschutz",
+   "bereich": "rettung_sicherheit",
+   "aliases": [
+    "Feuerwehr",
+    "Feuerwehrverein",
+    "Zivilschutz",
+    "Bevölkerungsschutz",
+    "Brandverhütung"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "ad23eb90-d37a-4734-bf41-949b586409bc",
+   "slug": "sport_freizeit_behindertensport_inklusiv",
+   "label": "Behinderten- und inklusiver Sport",
+   "bereich": "sport_freizeit",
+   "aliases": [
+    "Behindertensport",
+    "PluSport",
+    "inklusiver Sport",
+    "Handicap-Sport",
+    "Rollstuhlsport"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "746eafc8-b3d7-414e-a4ab-575235b41870",
+   "slug": "sport_freizeit_vereinssport_tradition",
+   "label": "Traditioneller Vereins- und Volkssport",
+   "bereich": "sport_freizeit",
+   "aliases": [
+    "Turnverein",
+    "STV",
+    "Turnen",
+    "Schwingen",
+    "Schützenverein",
+    "Schützen",
+    "Hornussen",
+    "Jodel"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "c51faee8-1f34-4f99-a301-1f36bc545817",
+   "slug": "kultur_kunst_lifestyle_laienkultur_amateurmusik",
+   "label": "Laienkultur und Amateurmusik",
+   "bereich": "kultur_kunst_lifestyle",
+   "aliases": [
+    "Blasmusik",
+    "Musikgesellschaft",
+    "Chor",
+    "Gesangverein",
+    "Guggenmusik",
+    "Trachtengruppe",
+    "Amateurtheater",
+    "Laienchor"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "ec0129a5-cb67-4476-a5b1-82c1a5c7cbfc",
+   "slug": "kultur_kunst_lifestyle_museen_denkmalpflege",
+   "label": "Museen und Denkmalpflege",
+   "bereich": "kultur_kunst_lifestyle",
+   "aliases": [
+    "Museum",
+    "Sammlung",
+    "Denkmalpflege",
+    "Kulturerbe",
+    "Heimatmuseum",
+    "Heimatschutz"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "62139c87-671e-490d-8c68-fecfa0b36eeb",
+   "slug": "umwelt_tech_stadt_tierheim_tierwohl",
+   "label": "Tierheime und Tierwohl",
+   "bereich": "umwelt_tech_stadt",
+   "aliases": [
+    "Tierheim",
+    "Tierschutzverein",
+    "Tierwohl",
+    "Tierrettung",
+    "Tierpflege",
+    "Katzenhilfe"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "1ea24b0e-ebea-4a3a-a98b-3da51c8e510b",
+   "slug": "umwelt_tech_stadt_biodiversitaet_artenschutz",
+   "label": "Biodiversität und Artenschutz",
+   "bereich": "umwelt_tech_stadt",
+   "aliases": [
+    "Biodiversität",
+    "Artenschutz",
+    "Naturschutz",
+    "Renaturierung",
+    "Vogelschutz",
+    "Lebensraum"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "1e66fbf5-f174-4c06-bd08-184323c0bc90",
+   "slug": "gesundheit_praevention_selbsthilfe_patientenorg",
+   "label": "Selbsthilfe und Patientenorganisationen",
+   "bereich": "gesundheit_praevention",
+   "aliases": [
+    "Selbsthilfegruppe",
+    "Patientenorganisation",
+    "Betroffenenverband",
+    "seltene Krankheiten",
+    "Angehörigengruppe"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "3d39ea5c-8682-4fe8-aea7-b2fed51c2a85",
+   "slug": "soziales_inklusion_arbeitsintegration",
+   "label": "Arbeitsintegration und soziale Unternehmen",
+   "bereich": "soziales_inklusion",
+   "aliases": [
+    "Arbeitsintegration",
+    "geschützte Arbeitsplätze",
+    "soziale Firma",
+    "berufliche Eingliederung",
+    "Sozialfirma"
+   ],
+   "vocabulary_version": 3
+  },
+  {
+   "id": "5663f0f5-2a37-4dcd-b1f8-ea3b147a1952",
+   "slug": "gemeinschaft_quartier_vereinsleben_infrastruktur",
+   "label": "Vereinsleben und Vereinsinfrastruktur",
+   "bereich": "gemeinschaft_quartier",
+   "aliases": [
+    "Vereinsleben",
+    "Vereinsheim",
+    "Vereinslokal",
+    "Vereinsanlass",
+    "Dorfverein",
+    "Vereinsbetrieb"
+   ],
+   "vocabulary_version": 3
+  }
+ ]
+}

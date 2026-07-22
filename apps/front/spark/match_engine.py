@@ -1,0 +1,1183 @@
+#!/usr/bin/env python3
+"""match_engine.py – Match-Engine v0.5 (Math + Embedding + LLM)
+
+v0.5 (2026-05-18): Math-Score nutzt jetzt die veredelte Stiftungs-DNA, sofern
+vorhanden — gewichtetes Tag-Produkt (gewicht_medium * gewicht_stiftung) statt
+Match gegen die alten Llama-Boolean-Felder. Fallback auf Booleans nur fuer
+Stiftungen ohne aktive Stiftungs-DNA. Damit ist die Top-N-Vorauswahl ebenfalls
+DNA-basiert.
+
+Liest aktive medium_dna-Eintraege und alle stiftungen aus Directus.
+Berechnet pro (medium, stiftung)-Paar drei Komponenten und einen Combined-Score:
+
+- Math-Komponente (v0.5): gewichtetes DNA-vs-DNA-Matching. Pro gemeinsamem Tag
+  matched += gewicht_medium * gewicht_stiftung. Theoretisches Maximum:
+  sum(gewicht_medium * 3). Fallback fuer Stiftungen ohne DNA: Anwesenheits-Match
+  gegen Boolean-Felder (wie v0.4c).
+- Embedding-Komponente: Cosine-Similarity ueber Qdrant (768-dim nomic-embed-text)
+- LLM-Komponente: qwen3.6-27b via vLLM (OpenAI-Chat, :8001), JSON-Output (score, begruendung)
+  Backend per FAAS_LLM_BACKEND umschaltbar: vllm (default) | ollama
+  Gecached pro (medium_dna_version_id, stiftung_id, stiftung_dna_version_id, model)
+- Exclusion-Check: wenn Stiftung einen Exclusion-Tag traegt -> Score 0
+
+Combined-Score: gewichtete Summe der drei Komponenten. Fehlt eine Komponente
+(z. B. kein Embedding fuer das Medium), wird ihr Gewicht proportional auf die
+anderen umverteilt. Defaults: math 0.30, embedding 0.20, llm 0.50.
+
+Schreibt Top-N pro Medium nach Directus match_results.
+
+Usage:
+    python3 match_engine.py --dry-run
+    python3 match_engine.py --medium wepublish
+    python3 match_engine.py                       # full run, alle aktiven Medien
+    python3 match_engine.py --medium wepublish --no-llm        # nur Math+Embedding (Diagnose)
+    python3 match_engine.py --medium wepublish --no-embedding  # nur Math+LLM (Diagnose)
+
+ENV-Variablen:
+    DIRECTUS_URL          (default: https://stiftungen.winkelriedtoechter.ch)
+    DIRECTUS_TOKEN        (default: aus ~/.hermes/.env)
+    TOP_N_PER_MEDIUM      (default: 200)
+    FAAS_LLM_BACKEND      (default: vllm; alternativ: ollama)
+    VLLM_URL              (default: http://127.0.0.1:8001)
+    FAAS_VLLM_MODEL       (default: qwen3.6-27b)
+    OLLAMA_URL            (default: http://127.0.0.1:11434)        [nur bei backend=ollama]
+    FAAS_LLM_MODEL        (default: nemotron-3-super:120b-a12b)    [nur bei backend=ollama]
+    QDRANT_URL            (default: http://127.0.0.1:6333)
+    QDRANT_STIFTUNGS_COLL (default: faas_stiftungen_dna)
+    QDRANT_MEDIEN_COLL    (default: faas_medien_dna)
+    MATH_WEIGHT           (default: 0.30)
+    EMBEDDING_WEIGHT      (default: 0.20)
+    LLM_WEIGHT            (default: 0.50)
+
+Autor: Jolanda Spiess + Claude (Anthropic), 2026-04-30 / 2026-05-07
+"""
+
+import os
+import sys
+import json
+import uuid
+import argparse
+import subprocess
+from datetime import datetime, timezone
+
+import requests
+
+DIRECTUS_URL = os.environ.get("DIRECTUS_URL", "https://stiftungen.winkelriedtoechter.ch")
+DIRECTUS_TOKEN = os.environ.get("DIRECTUS_TOKEN", "")
+TOP_N_PER_MEDIUM = int(os.environ.get("TOP_N_PER_MEDIUM", "200"))
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434")
+OLLAMA_MODEL = os.environ.get("FAAS_LLM_MODEL", "nemotron-3-super:120b-a12b")
+# vLLM-Backend (OpenAI-kompatibel, qwen3.6-27b auf :8001). Default seit 2026-06-01,
+# loest Ollama/Nemotron ab: vLLM teilt sich die GPU sauber mit dem DNA-Pool-Lauf
+# (Ollama + vLLM gleichzeitig qwen laden = OOM). Reversibel via FAAS_LLM_BACKEND=ollama.
+LLM_BACKEND = (os.environ.get("FAAS_LLM_BACKEND", "vllm") or "").strip().lower()
+VLLM_URL = os.environ.get("VLLM_URL", "http://127.0.0.1:8001")
+VLLM_MODEL = os.environ.get("FAAS_VLLM_MODEL", "qwen3.6-27b")
+# Aktives Modell fuer Cache-Key (match_llm_cache.model) + Logging. Modellwechsel
+# invalidiert den Cache automatisch (anderer Key) -> sauberer Re-Score.
+ACTIVE_MODEL = VLLM_MODEL if LLM_BACKEND == "vllm" else OLLAMA_MODEL
+QDRANT_URL = os.environ.get("QDRANT_URL", "http://127.0.0.1:6333")
+QDRANT_STIFTUNGS_COLL = os.environ.get("QDRANT_STIFTUNGS_COLL", "faas_stiftungen_dna")
+QDRANT_MEDIEN_COLL = os.environ.get("QDRANT_MEDIEN_COLL", "faas_medien_dna")
+MATCH_MIN_SCORE = int(os.environ.get("MATCH_MIN_SCORE", "30"))  # Score-Threshold: Matches darunter werden nicht in Directus geschrieben (verhindert Tinder-Muell / schwache Treffer wie Score 16). Default 30 (Jolanda 2026-06-02; war vorher faelschlich 0).
+MATCH_MIN_TIER = (os.environ.get("MATCH_MIN_TIER", "qwen_v3") or "").strip().lower() or None  # Tier-Filter: nur Records mit diesem dna_quality_tier werden geschrieben. Default "qwen_v3" (finale Matching-Methode, Jolanda 2026-06-02 — nur noch qwen-v3-Treffer; Opus-"deep" war nur die Eich-Latte). Leer = aus.
+
+# Drei-Komponenten-Gewichte (Summe = 1.0). Fallback-Logik in combine_scores:
+# fehlt eine Komponente, wird ihr Gewicht proportional auf die anderen umverteilt.
+MATH_WEIGHT = float(os.environ.get("MATH_WEIGHT", "0.10"))
+EMBEDDING_WEIGHT = float(os.environ.get("EMBEDDING_WEIGHT", "0.10"))
+LLM_WEIGHT = float(os.environ.get("LLM_WEIGHT", "0.80"))
+LLM_TIMEOUT = int(os.environ.get("LLM_TIMEOUT", "180"))
+
+
+# ============================================================
+# Directus REST-Client (minimal)
+# ============================================================
+
+
+def _classify_dna_tier(klassifiziert_by: str | None) -> tuple[bool, str]:
+    """Aus klassifiziert_by die DNA-Qualitaets-Klasse ableiten.
+
+    Returns:
+        (dna_verified: bool, dna_quality_tier: str)
+        Tier-Werte: "deep" | "boolean_v2" | "hermes_v1" | "unknown"
+    """
+    if not klassifiziert_by:
+        return (False, "unknown")
+    k = klassifiziert_by.lower()
+    # qwen-v3-Pool: das neue, poolweite Produktionsmass — symmetrisch zu den
+    # Medien-v3-DNAs (gleiches Vokabular, gleiche Ellenlaenge). DIE finale
+    # Matching-Methode (Entscheidung Jolanda, 2026-06-02): nur noch qwen-Treffer.
+    # Opus-"deep" war nur die Eich-Latte, nicht das Endprodukt.
+    if "qwen" in k and "v3" in k:
+        return (True, "qwen_v3")
+    # Deep-Klasse: alte Opus-Tiefen-Veredelung (Eich-Latte, nicht mehr Match-Basis)
+    if "cron-deep" in k or "cron-poolb-deep" in k:
+        return (True, "deep")
+    # Skill v0.3.1+: aeltere Skill-Veredelung mit echter Begruendung, qualitaetsgleich
+    if "skill v0.3" in k or "skill v0.4" in k or "skill v0.5" in k:
+        return (True, "deep")
+    # Boolean-Stamping (alte Cron-Wellen)
+    if "cron-night" in k or "cowork-welle" in k:
+        return (False, "boolean_v2")
+    # Hermes-Llama-Baseline (v1)
+    if "hermes" in k or "spark-agent" in k or "llama" in k:
+        return (False, "hermes_v1")
+    # Skill v0.1/v0.2 alt — Mittellage, eher Boolean
+    if "skill v0.1" in k or "skill v0.2" in k:
+        return (False, "boolean_v2")
+    return (False, "unknown")
+
+
+def _headers():
+    if not DIRECTUS_TOKEN:
+        raise RuntimeError("DIRECTUS_TOKEN ist nicht gesetzt (env oder ~/.hermes/.env)")
+    return {"Authorization": f"Bearer {DIRECTUS_TOKEN}"}
+
+
+def directus_get(endpoint, params=None):
+    resp = requests.get(f"{DIRECTUS_URL}{endpoint}", headers=_headers(), params=params or {}, timeout=60)
+    resp.raise_for_status()
+    return resp.json()
+
+
+def directus_post(endpoint, body, max_retries=4):
+    """Directus POST mit Retry bei transienten 5xx-Fehlern und Connection-Aussetzern.
+
+    Beim Cueltuer-Lauf am 2026-05-07 schlug 1 Push mit 502 Bad Gateway fehl, weil
+    Directus kurz ueberlastet war. Fuer den taeglichen 04:00-Cron-Lauf mit ~600
+    Pushs muss das robust laufen, sonst sammeln sich Fehler.
+    """
+    import time
+    headers = {**_headers(), "Content-Type": "application/json"}
+    last_err = None
+    for attempt in range(1, max_retries + 1):
+        try:
+            resp = requests.post(f"{DIRECTUS_URL}{endpoint}", headers=headers, json=body, timeout=60)
+            if resp.status_code in (502, 503, 504, 429):
+                last_err = f"HTTP {resp.status_code}"
+                if attempt < max_retries:
+                    time.sleep(2 * attempt)
+                    continue
+            resp.raise_for_status()
+            return resp.json()
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            last_err = f"{type(e).__name__}: {str(e)[:150]}"
+            if attempt < max_retries:
+                time.sleep(2 * attempt)
+                continue
+            raise
+    raise RuntimeError(f"directus_post {endpoint} nach {max_retries} Versuchen fehlgeschlagen: {last_err}")
+
+
+# ============================================================
+# Postgres-Direktzugriff fuer match_llm_cache
+# (gleiche Methode wie premium_enricher.py / parse_stiftungsraete.py)
+# ============================================================
+PG_DOCKER_CONTAINER = os.environ.get("PG_DOCKER_CONTAINER", "directus-postgres-spark")
+PG_DB_USER = os.environ.get("PG_DB_USER", "directus")
+PG_DB_NAME = os.environ.get("PG_DB_NAME", "directus_db")
+
+# Sentinel fuer Stiftungen ohne aktive stiftungs_dna - macht sie cachebar.
+# Cache-Auto-Invalidierung greift weiter: bekommt eine Stiftung spaeter eine DNA,
+# ist die `current_stiftung_dna_version_id` != Sentinel und der Cache-Eintrag wird
+# als invalid behandelt (Cache-Miss -> neuer LLM-Call).
+NO_DNA_SENTINEL = "_no_active_dna_v0"
+
+
+def _norm_sdna(stiftung_dna_version_id):
+    """Leerstring/None -> Sentinel, sonst durchreichen."""
+    return stiftung_dna_version_id if stiftung_dna_version_id else NO_DNA_SENTINEL
+
+
+def _quote_pg(value):
+    """SQL-Literal-Escape fuer Postgres. None -> NULL."""
+    if value is None:
+        return "NULL"
+    if isinstance(value, bool):
+        return "TRUE" if value else "FALSE"
+    if isinstance(value, (int, float)):
+        return str(value)
+    s = str(value).replace("'", "''")
+    return f"'{s}'"
+
+
+def _psql_run(sql, timeout=30):
+    """SQL via docker exec ausfuehren; liefert stdout (TSV bei SELECT)."""
+    cmd = ["docker", "exec", "-i", PG_DOCKER_CONTAINER,
+           "psql", "-U", PG_DB_USER, "-d", PG_DB_NAME,
+           "-t", "-A", "-F", "\t"]
+    proc = subprocess.run(cmd, input=sql, capture_output=True, text=True, timeout=timeout)
+    if proc.returncode != 0:
+        raise RuntimeError(f"psql fehlgeschlagen: {proc.stderr.strip()[:300]}")
+    return proc.stdout
+
+
+def cache_lookup(medium_dna_version_id, stiftung_id, current_stiftung_dna_version_id):
+    """Cache-Lookup. Nur Hit, wenn cached_dna_v == current_dna_v (Auto-Invalidierung).
+
+    Stiftungen ohne aktive DNA werden ueber NO_DNA_SENTINEL gematcht.
+    """
+    current_norm = _norm_sdna(current_stiftung_dna_version_id)
+    sql = (f"SELECT score, COALESCE(begruendung, ''), "
+           f"COALESCE(stiftung_dna_version_id, '{NO_DNA_SENTINEL}') "
+           f"FROM match_llm_cache "
+           f"WHERE medium_dna_version_id = {_quote_pg(medium_dna_version_id)} "
+           f"AND stiftung_id = {int(stiftung_id)} "
+           f"AND model = {_quote_pg(ACTIVE_MODEL)} LIMIT 1;")
+    try:
+        out = _psql_run(sql).strip()
+    except Exception:
+        return None
+    if not out:
+        return None
+    parts = out.split("\t")
+    if len(parts) < 3:
+        return None
+    try:
+        score = int(parts[0])
+    except ValueError:
+        return None
+    cached_dna_v = parts[2] or NO_DNA_SENTINEL
+    if cached_dna_v != current_norm:
+        return None
+    return score, parts[1]
+
+
+def cache_write(medium_dna_version_id, stiftung_id, stiftung_dna_version_id,
+                score, begruendung, model, max_retries=3):
+    """UPSERT in match_llm_cache. RETURNING bestaetigt das INSERT/UPDATE.
+
+    Retry-Loop gegen transiente docker-exec/Postgres-Stoerungen unter
+    Parallel-Last (z.B. Embedding-Pass). Liefert nur True, wenn die
+    RETURNING-Zeile zurueckkommt - schuetzt vor dem Bug aus 2026-05-07,
+    bei dem einzelne docker-exec-Calls returncode 0 zurueckgaben, ohne
+    dass die Zeile tatsaechlich geschrieben wurde.
+    """
+    import time
+    sql = (
+        f"INSERT INTO match_llm_cache "
+        f"(medium_dna_version_id, stiftung_id, stiftung_dna_version_id, score, begruendung, model, computed_at) "
+        f"VALUES ({_quote_pg(medium_dna_version_id)}, {int(stiftung_id)}, "
+        f"{_quote_pg(stiftung_dna_version_id)}, {int(score)}, "
+        f"{_quote_pg((begruendung or '')[:500])}, {_quote_pg(model)}, NOW()) "
+        f"ON CONFLICT (medium_dna_version_id, stiftung_id) DO UPDATE SET "
+        f"stiftung_dna_version_id = EXCLUDED.stiftung_dna_version_id, "
+        f"score = EXCLUDED.score, "
+        f"begruendung = EXCLUDED.begruendung, "
+        f"model = EXCLUDED.model, "
+        f"computed_at = NOW() "
+        f"RETURNING stiftung_id;"
+    )
+    last_err = None
+    for attempt in range(1, max_retries + 1):
+        try:
+            out = _psql_run(sql).strip()
+            if out and str(stiftung_id) in out.split("\n")[0]:
+                return True
+            last_err = f"RETURNING leer (out={out!r})"
+        except Exception as e:
+            last_err = str(e)[:200]
+        if attempt < max_retries:
+            time.sleep(0.5 * attempt)
+    print(f"    cache_write FAIL stiftung_id={stiftung_id} nach {max_retries} Versuchen: {last_err}", flush=True)
+    return False
+
+
+def load_active_stiftungs_dna_map():
+    """Liefert dict: stiftung_id (int) -> {version_id, klassifiziert_by}.
+    Erweitert 2026-05-13: zusaetzlich klassifiziert_by fuer DNA-Quality-Tier-Bestimmung."""
+    sql = "SELECT stiftung_id, version_id, COALESCE(klassifiziert_by,'') FROM stiftungs_dna WHERE is_active = TRUE;"
+    out = _psql_run(sql, timeout=60).strip()
+    result = {}
+    for line in out.split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+        parts = line.split("\t")
+        if len(parts) < 2:
+            continue
+        try:
+            result[int(parts[0])] = {"version_id": parts[1], "klassifiziert_by": parts[2] if len(parts) >= 3 else ""}
+        except ValueError:
+            continue
+    return result
+
+
+
+def load_active_stiftungs_dna_full():
+    """Volle aktive Stiftungs-DNA pro Stiftung (stiftung_id -> dict).
+
+    Implementiert direkt via psql + json_agg, weil Directus REST mit JSON-Feldern
+    in den fields (tags, exclusion_tags, foerderpraxis) und limit=-1 zu langsam ist.
+    Liefert in unter einer Sekunde."""
+    sql = (
+        "SELECT json_agg(json_build_object("
+        "'stiftung_id', stiftung_id,"
+        "'stiftung_name', stiftung_name,"
+        "'version_id', version_id,"
+        "'version_number', version_number,"
+        "'klassifiziert_by', klassifiziert_by,"
+        "'schaerfe_prozent', schaerfe_prozent,"
+        "'sound_feeling', sound_feeling,"
+        "'tags', tags,"
+        "'exclusion_tags', exclusion_tags,"
+        "'foerderpraxis', foerderpraxis))::text "
+        "FROM stiftungs_dna WHERE is_active = TRUE;"
+    )
+    raw = _psql_run(sql, timeout=180).strip()
+    if not raw or raw == 'null':
+        return {}
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        return {}
+    out = {}
+    for d in data:
+        sid = d.get("stiftung_id")
+        if sid is None:
+            continue
+        try:
+            sid_int = int(sid)
+        except (TypeError, ValueError):
+            continue
+        out[sid_int] = d
+    return out
+
+
+# ============================================================
+# Daten-Loader (Directus REST)
+# ============================================================
+def load_active_dna(medium_filter=None):
+    params = {"filter[is_active][_eq]": "true", "limit": -1}
+    if medium_filter:
+        params["filter[medium_id][_eq]"] = medium_filter
+    return directus_get("/items/medium_dna", params)["data"]
+
+
+def load_stiftungen():
+    """Alle Stiftungen direkt aus Postgres via psql laden.
+
+    Schneller als Directus REST (5s statt 15+min fuer 40k Stiftungen).
+    Das embedding-Feld wird per Default ausgeschlossen (gross + unnoetig
+    fuer die Match-Engine, die das Embedding ueber Qdrant holt).
+    """
+    sql = ("SELECT json_agg(to_jsonb(s) - 'embedding')::text FROM stiftungen s;")
+    raw = _psql_run(sql, timeout=180).strip()
+    if not raw or raw == 'null':
+        return []
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        return []
+
+
+# ============================================================
+# Tag-Extraktion
+# ============================================================
+TAG_PREFIXES = (
+    "matching_targets_",
+    "geo_",
+    "medien_journalismus_",
+    "gesellschaft_demokratie_",
+    "soziales_inklusion_",
+    "kultur_kunst_lifestyle_",
+    "sport_freizeit_",
+    "bildung_wissenschaft_ethik_",
+    "umwelt_tech_stadt_",
+)
+
+
+# DACH-Geo-Tags die fuer DACH-Stiftungen automatisch matchen sollen.
+_DACH_GEO_BYPASS = (
+    "geo_basel", "geo_bern", "geo_zuerich", "geo_winterthur",
+    "geo_st_gallen", "geo_luzern", "geo_genf_romandie",
+    "geo_graubuenden", "geo_tessin", "geo_schweiz_weit",
+    "geo_oesterreich", "geo_dach_region", "geo_international",
+)
+
+
+def extract_stiftung_tags(stiftung):
+    """Liefert ein set aller Tag-Felder der Stiftung mit Wert TRUE.
+
+    Sonderfall DACH: Wenn `geo_dach_region` aktiv ist, werden alle
+    DACH-Geo-Tags virtuell mitgesetzt.
+    """
+    tags = set()
+    for key, value in stiftung.items():
+        if value is True and key.startswith(TAG_PREFIXES):
+            tags.add(key)
+    if "geo_dach_region" in tags:
+        tags.update(_DACH_GEO_BYPASS)
+    return tags
+
+
+# ============================================================
+# Math-Komponente
+# ============================================================
+def _stiftung_dna_tag_weights(sdna_full):
+    """Aus voller Stiftungs-DNA dict {tag_slug: gewicht} bauen."""
+    out = {}
+    if not isinstance(sdna_full, dict):
+        return out
+    for tag_obj in sdna_full.get("tags") or []:
+        if not isinstance(tag_obj, dict):
+            continue
+        slug = tag_obj.get("tag_slug") or tag_obj.get("tag") or ""
+        gew = int(tag_obj.get("gewicht", 0) or 0)
+        if slug and gew > 0:
+            # Falls Duplikat im Array: hoechstes Gewicht behalten.
+            out[slug] = max(out.get(slug, 0), gew)
+    return out
+
+
+def compute_math_score(dna, stiftung, sdna_full=None):
+    """Math-Score 0-100 plus Breakdown.
+
+    v0.5 (2026-05-18): gewichtetes DNA-vs-DNA-Matching, wenn Stiftungs-DNA
+    vorhanden ist. Beide Seiten verwenden dasselbe Tag-Vokabular (v2, 171 Tags).
+    Pro gemeinsamem Tag: matched += gewicht_medium * gewicht_stiftung.
+    Theoretisches Maximum: sum(gewicht_medium * 3) — wenn die Stiftung jeden
+    Medium-Tag mit Maximalgewicht 3 spiegelt.
+
+    Fallback fuer Stiftungen ohne veredelte DNA: alte Boolean-Felder-Logik
+    (extract_stiftung_tags), aber als reine Anwesenheits-Pruefung — der Math-
+    Score ist dann strukturell niedriger als bei DNA-vs-DNA. Dieser Bias ist
+    gewollt: er gewichtet veredelte Stiftungen in der Top-N-Vorauswahl hoeher.
+    """
+    sdna_tag_weights = _stiftung_dna_tag_weights(sdna_full)
+    use_dna = bool(sdna_tag_weights)
+
+    matched_score = 0
+    max_score = 0
+    matched_breakdown = []
+    mode = "dna_vs_dna" if use_dna else "boolean_fallback"
+
+    if not use_dna:
+        # Fallback: Anwesenheits-Match gegen Boolean-Felder der stiftungen-Tabelle.
+        boolean_tags = extract_stiftung_tags(stiftung)
+
+    # Medium-Tags extrahieren — ZWEI Schemata:
+    #  - altes Medium-Schema (wepublish, cueltuer, neue_wege): sektionen-Dict mit Tag-Listen.
+    #  - neues v3-Schema (app-gemessen via measure-medium-dna, symmetrisch zu stiftungs_dna):
+    #    flache tags-Liste. Ohne diesen Fallback bekaeme JEDES app-gemessene Medium math=0.
+    sektionen = dna.get("sektionen") or {}
+    if sektionen:
+        medium_tag_objs = [(sn, t) for sn, tl in sektionen.items()
+                           if isinstance(tl, list) for t in tl if isinstance(t, dict)]
+    else:
+        medium_tag_objs = [("tags", t) for t in (dna.get("tags") or []) if isinstance(t, dict)]
+    for sektion_name, tag_obj in medium_tag_objs:
+        # DNA-Studio-Schema-Drift: einige Medien nutzen tag_slug, andere tag.
+        tag = tag_obj.get("tag") or tag_obj.get("tag_slug") or ""
+        gewicht_m = int(tag_obj.get("gewicht", 0) or 0)
+        if gewicht_m <= 0 or not tag:
+            continue
+        if use_dna:
+            # Theoretisches Max: Stiftung spiegelt mit Maximalgewicht 3.
+            max_score += gewicht_m * 3
+            gewicht_s = sdna_tag_weights.get(tag, 0)
+            if gewicht_s > 0:
+                matched_score += gewicht_m * gewicht_s
+                matched_breakdown.append({
+                    "tag": tag,
+                    "gewicht": gewicht_m,
+                    "gewicht_stiftung": gewicht_s,
+                    "sektion": sektion_name,
+                })
+        else:
+            # Fallback-Logik wie v0.4c: reines Anwesenheits-Match, gewicht_medium gilt.
+            max_score += gewicht_m
+            if tag in boolean_tags:
+                matched_score += gewicht_m
+                matched_breakdown.append({
+                    "tag": tag,
+                    "gewicht": gewicht_m,
+                    "sektion": sektion_name,
+                })
+
+    score = int(round((matched_score / max_score) * 100)) if max_score > 0 else 0
+    breakdown = {
+        "matched": matched_breakdown,
+        "matched_score": matched_score,
+        "max_score": max_score,
+        "mode": mode,
+    }
+    return score, breakdown
+
+
+# ============================================================
+# Exclusion-Check
+# ============================================================
+def check_exclusion(dna, stiftung):
+    stiftung_tags = extract_stiftung_tags(stiftung)
+    exclusion_list = dna.get("exclusion_tags") or []
+    if not isinstance(exclusion_list, list):
+        return False, None
+    for ex in exclusion_list:
+        if isinstance(ex, dict):
+            tag = ex.get("tag") or ex.get("tag_slug") or ""
+            # Geo-Exclusions eines MEDIUMS schliessen Foerderer NICHT hart aus:
+            # der redaktionelle Geo-Fokus (z.B. bajour = Basel) ist keine Foerder-
+            # Eligibilitaet — eine Basler Redaktion kann von einer Zuercher National-
+            # Stiftung gefoerdert werden. Geografische Naehe wirkt im math-Score.
+            # Foerderer-eigene Geo-Restriktionen bleiben davon unberuehrt.
+            if tag.startswith("geo_"):
+                continue
+            if tag and tag in stiftung_tags:
+                return True, ex
+    return False, None
+
+
+# ============================================================
+# LLM-Komponente (Hermes via Ollama, JSON-Mode)
+# ============================================================
+def _top_dna_tags(dna, limit=15):
+    """Top-Tags der Medium-DNA (gewicht >= 2), als flache Liste.
+    Beide Schemata: sektionen-Dict (alt) oder flache tags-Liste (neu, app-gemessen)."""
+    out = []
+    sektionen = dna.get("sektionen") or {}
+    if sektionen:
+        tag_objs = [t for s in sektionen.values() if isinstance(s, list) for t in s]
+    else:
+        tag_objs = dna.get("tags") or []
+    for tag_obj in tag_objs:
+        if not isinstance(tag_obj, dict):
+            continue
+        if int(tag_obj.get("gewicht", 0) or 0) >= 2:
+            out.append(tag_obj.get("tag") or tag_obj.get("tag_slug") or "")
+    return [t for t in out if t][:limit]
+
+
+def _extract_json_obj(text):
+    """Erstes balanciertes {...}-JSON-Objekt aus einem Text robust extrahieren.
+    vLLM liefert (ohne response_format) den JSON-Body als reinen Text in content."""
+    text = (text or "").strip()
+    if not text:
+        return None
+    try:
+        return json.loads(text)
+    except Exception:
+        pass
+    start = text.find("{")
+    if start < 0:
+        return None
+    depth = 0
+    for i in range(start, len(text)):
+        c = text[i]
+        if c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+            if depth == 0:
+                try:
+                    return json.loads(text[start:i + 1])
+                except Exception:
+                    return None
+    return None
+
+
+def _llm_call_vllm(prompt):
+    """vLLM OpenAI-Chat-Call (qwen3.6-27b). KEIN response_format (haengt qwen3.6 bei
+    laengerem JSON), enable_thinking:false, content per loser JSON-Extraktion.
+    Rueckgabe: dict oder None bei Fehler."""
+    payload = {
+        "model": VLLM_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.2,
+        "max_tokens": 256,
+        "chat_template_kwargs": {"enable_thinking": False},
+    }
+    try:
+        r = requests.post(f"{VLLM_URL}/v1/chat/completions", json=payload, timeout=LLM_TIMEOUT)
+        r.raise_for_status()
+        choices = r.json().get("choices") or []
+        content = (choices[0].get("message", {}).get("content", "") if choices else "") or ""
+        return _extract_json_obj(content)
+    except Exception:
+        return None
+
+
+def _llm_call_ollama(prompt):
+    """LLM-JSON-Call. Dispatcht je nach FAAS_LLM_BACKEND auf vLLM (default) oder
+    Ollama-Generate. Rueckgabe: dict oder None bei Fehler. (Funktionsname historisch
+    beibehalten; einzige Aufrufstelle in compute_llm_score.)"""
+    if LLM_BACKEND == "vllm":
+        return _llm_call_vllm(prompt)
+    payload = {
+        "model": OLLAMA_MODEL,
+        "prompt": prompt,
+        "stream": False,
+        "format": "json",
+        "keep_alive": "1h",
+        "options": {"temperature": 0.2, "num_predict": 250},
+    }
+    try:
+        r = requests.post(f"{OLLAMA_URL}/api/generate", json=payload, timeout=LLM_TIMEOUT)
+        r.raise_for_status()
+        raw = r.json().get("response", "").strip()
+        return json.loads(raw)
+    except Exception:
+        return None
+
+
+def compute_llm_score(dna, stiftung, math_score, stiftung_dna_version_id,
+                      sdna_full=None, use_cache=True):
+    """LLM-Score 0-100 + Begruendung. DNA-vs-DNA-Bewertung (v0.4 / 2026-05-17).
+
+    Wenn sdna_full uebergeben wird, fliesst die volle veredelte Stiftungs-DNA in den
+    Prompt ein (Tags+Begruendungen, Exclusion-Tags, Foerderpraxis, Sound, Schaerfe).
+    Sonst Fallback auf Stammdaten.
+
+    Cached pro (medium_dna_version_id, stiftung_id, stiftung_dna_version_id).
+    """
+    medium_dna_version_id = dna.get("version_id")
+    stiftung_id = stiftung.get("id")
+
+    if use_cache and medium_dna_version_id and stiftung_id is not None:
+        hit = cache_lookup(medium_dna_version_id, stiftung_id, stiftung_dna_version_id)
+        if hit is not None:
+            return hit[0], hit[1], "cache"
+
+    def _fmt_tag_list(tag_list, max_items=30):
+        lines = []
+        for t in (tag_list or [])[:max_items]:
+            if not isinstance(t, dict):
+                continue
+            slug = t.get("tag_slug") or t.get("tag") or "?"
+            gew = t.get("gewicht", "?")
+            beg = (t.get("begruendung") or "").strip().replace("\n", " ")[:280]
+            lines.append(f"    - {slug} [Gewicht {gew}]: {beg}")
+        return "\n".join(lines) if lines else "    (keine)"
+
+    def _fmt_excl(ex_list, max_items=20):
+        lines = []
+        for e in (ex_list or [])[:max_items]:
+            if not isinstance(e, dict):
+                continue
+            slug = e.get("tag_slug") or e.get("tag") or "?"
+            beg = (e.get("begruendung") or "").strip().replace("\n", " ")[:200]
+            lines.append(f"    - {slug}: {beg}")
+        return "\n".join(lines) if lines else "    (keine)"
+
+    # Medium-DNA-Block
+    m_name = dna.get("medium_name") or dna.get("medium_id") or ""
+    m_sound = (dna.get("sound_feeling") or "")[:1200]
+    m_schaerfe = dna.get("schaerfe_prozent")
+    m_tags_raw = dna.get("tags") or (dna.get("sektionen") or {}).get("tags") or []
+    m_excl = dna.get("exclusion_tags") or []
+    m_foerder = dna.get("foerderpraxis") or {}
+
+    medium_block = (
+        f"  Name: {m_name}\n"
+        f"  Schaerfe-Prozent (Strikte des Profils): {m_schaerfe}\n"
+        f"  Sound/Selbstverstaendnis:\n    {m_sound}\n"
+        f"  Tags (mit Gewicht und Begruendung):\n{_fmt_tag_list(m_tags_raw)}\n"
+        f"  Tabu-Themen / Exclusion-Tags:\n{_fmt_excl(m_excl)}\n"
+        f"  Foerderpraxis (Medium-Sicht): {json.dumps(m_foerder, ensure_ascii=False)[:600]}\n"
+    )
+
+    # Stiftungs-DNA-Block
+    if sdna_full and isinstance(sdna_full, dict) and sdna_full.get("stiftung_id") is not None:
+        s_name = sdna_full.get("stiftung_name") or stiftung.get("Stiftungsname") or ""
+        s_sound = (sdna_full.get("sound_feeling") or "")[:1500]
+        s_schaerfe = sdna_full.get("schaerfe_prozent")
+        s_tags_raw = sdna_full.get("tags") or []
+        s_excl = sdna_full.get("exclusion_tags") or []
+        s_foerder = sdna_full.get("foerderpraxis") or {}
+        stiftung_block = (
+            f"  Name: {s_name}\n"
+            f"  Sitz: {stiftung.get('sitz') or ''} ({stiftung.get('land') or ''})\n"
+            f"  Schaerfe-Prozent (Strikte des DNA-Profils): {s_schaerfe}\n"
+            f"  Sound/Selbstverstaendnis:\n    {s_sound}\n"
+            f"  Tags (mit Gewicht und Begruendung):\n{_fmt_tag_list(s_tags_raw)}\n"
+            f"  Tabu-Themen / Exclusion-Tags:\n{_fmt_excl(s_excl)}\n"
+            f"  Foerderpraxis: {json.dumps(s_foerder, ensure_ascii=False)[:800]}\n"
+        )
+    else:
+        stiftung_block = (
+            f"  Name: {stiftung.get('Stiftungsname') or ''}\n"
+            f"  Sitz: {stiftung.get('sitz') or ''} ({stiftung.get('land') or ''})\n"
+            f"  Zwecktext (Roh): {(stiftung.get('zwecktext') or '')[:800]}\n"
+            f"  Foerderbedingungen (Roh): {(stiftung.get('foerderbedingungen') or '')[:500]}\n"
+            "  HINWEIS: Diese Stiftung hat noch keine veredelte DNA. Bewerte konservativ.\n"
+        )
+
+    prompt = (
+        "Du bewertest die Passgenauigkeit zwischen einem Medium und einer Foerderstiftung "
+        "auf Basis ihrer veredelten DNA-Profile. Beide Profile sind sorgfaeltig recherchierte "
+        "Selbst- bzw. Fremdbeschreibungen mit Tags, Begruendungen, Tabu-Themen, Sound und Foerderpraxis. "
+        "Nutze diese Informationen voll aus.\n\n"
+        "MEDIUM-DNA:\n"
+        f"{medium_block}\n"
+        "STIFTUNGS-DNA:\n"
+        f"{stiftung_block}\n"
+        "KONTEXT (technische Hilfsgroessen):\n"
+        f"  Math-Score (Tag-Overlap): {math_score}/100\n\n"
+        "Bewertungsaufgabe:\n"
+        "Bewerte die Passgenauigkeit auf einer Skala 0-100. Pruefkaskade:\n"
+        "  1. Tabu-Check: Wenn ein Tabu-Thema der Stiftung das Kerngeschaeft des Mediums trifft, "
+        "oder umgekehrt das Medium ein Tabu der Stiftung im Kern hat: Score <= 20.\n"
+        "  2. Foerderpraxis-Check: Foerdert die Stiftung den Antragstyp (Medium/Verlag/journalistisches "
+        "Projekt)? Falls Foerderpraxis explizit Forschung/Einzelpersonen/Technologie ohne Medienbezug: "
+        "Score <= 30, auch wenn thematisch Naehe besteht.\n"
+        "  3. Geo-Check: Foerdert die Stiftung im Geo-Scope des Mediums? Mismatch verringert Score.\n"
+        "  4. Themen-Match: Wie stark deckt sich die Themen-DNA? Hoch-gewichtete Tags (Gewicht 3) auf beiden "
+        "Seiten im selben Themenbereich = starkes Plus.\n"
+        "  5. Sound/Selbstverstaendnis: Passt die Welt-Sicht? (Z.B. kapitalismuskritisches Medium vs. "
+        "wirtschaftsnahe Foerderstiftung = Mismatch.)\n\n"
+        "Begruendungs-Regeln:\n"
+        "  - 1-3 Saetze auf Deutsch, klar und faktisch.\n"
+        "  - Keine Konjunktive, kein 'koennte', kein 'eventuell'.\n"
+        "  - Bei Mismatch: benenne PRAEZISE den Grund (welcher Tabu, welche Foerderpraxis, welche Geo-Differenz).\n"
+        "  - Bei Match: benenne die zwei staerksten Resonanz-Achsen.\n"
+        "  - Kein scharfes ss (immer ss schreiben).\n\n"
+        "Output ausschliesslich als JSON-Objekt mit zwei Feldern:\n"
+        '  {"score": <0-100>, "begruendung": "<deutscher Text>"}'
+    )
+
+    obj = _llm_call_ollama(prompt)
+    if not isinstance(obj, dict):
+        return None, None, "fail"
+    try:
+        score = int(obj.get("score") or 0)
+    except (TypeError, ValueError):
+        return None, None, "fail"
+    score = max(0, min(100, score))
+    begruendung = (obj.get("begruendung") or "").strip()[:600]
+
+    if use_cache and medium_dna_version_id and stiftung_id is not None:
+        cache_write(medium_dna_version_id, stiftung_id, _norm_sdna(stiftung_dna_version_id),
+                    score, begruendung, ACTIVE_MODEL)
+
+    return score, begruendung, "llm"
+
+
+# ============================================================
+# Embedding-Score (Cosine Similarity ueber Qdrant)
+# ============================================================
+def query_stiftung_similarities(medium_dna_id, top_k=5000):
+    """Holt Qdrant-Similarity-Scores aller Stiftungen zum Medium-Vektor.
+    Rueckgabe: dict {stiftung_id (int): cosine_similarity_score 0-100}.
+    Bei Fehler oder fehlendem Medium-Vektor: leeres dict.
+    """
+    try:
+        # 1. Medium-Vektor aus Qdrant holen
+        r = requests.post(
+            f"{QDRANT_URL}/collections/{QDRANT_MEDIEN_COLL}/points",
+            json={"ids": [str(medium_dna_id)], "with_vector": True},
+            timeout=10,
+        )
+        if r.status_code != 200:
+            # Falls Qdrant Hash-IDs nutzt (siehe embedding_pass.py): UUID aus md5 nachbauen
+            import hashlib, uuid
+            qid = str(uuid.UUID(hashlib.md5(str(medium_dna_id).encode()).hexdigest()))
+            r = requests.post(
+                f"{QDRANT_URL}/collections/{QDRANT_MEDIEN_COLL}/points",
+                json={"ids": [qid], "with_vector": True},
+                timeout=10,
+            )
+            r.raise_for_status()
+        points = r.json().get("result", [])
+        if not points or not points[0].get("vector"):
+            return {}
+        medium_vec = points[0]["vector"]
+
+        # 2. Qdrant-Suche: Top-K Stiftungen nach cosine
+        r = requests.post(
+            f"{QDRANT_URL}/collections/{QDRANT_STIFTUNGS_COLL}/points/search",
+            json={"vector": medium_vec, "limit": top_k, "with_payload": True},
+            timeout=30,
+        )
+        r.raise_for_status()
+        results = r.json().get("result", [])
+
+        # 3. Mapping {stiftung_id (int): score 0-100}
+        sim_map = {}
+        for p in results:
+            payload = p.get("payload", {})
+            sid = payload.get("stiftung_id")
+            if sid is None:
+                continue
+            try:
+                sid_int = int(sid)
+            except (TypeError, ValueError):
+                continue
+            # Qdrant Cosine-Score ist 0-1; auf 0-100 skalieren
+            sim_map[sid_int] = int(round(float(p.get("score", 0.0)) * 100))
+        return sim_map
+    except Exception as e:
+        print(f"    WARN: Qdrant-Similarity-Query fehlgeschlagen: {e}", flush=True)
+        return {}
+
+
+# ============================================================
+# Score-Kombination (drei-Komponenten)
+# ============================================================
+def combine_scores(math_score, embedding_score, llm_score):
+    """Drei-Komponenten-Combined-Score mit fehlertoleranter Umverteilung.
+
+    Gewichte: MATH_WEIGHT, EMBEDDING_WEIGHT, LLM_WEIGHT (Summe = 1.0 wenn alle da).
+    Wenn eine Komponente None ist: ihr Gewicht wird proportional auf die anderen umverteilt.
+    """
+    components = []  # list of (score, weight)
+    if math_score is not None:
+        components.append((math_score, MATH_WEIGHT))
+    if embedding_score is not None:
+        components.append((embedding_score, EMBEDDING_WEIGHT))
+    if llm_score is not None:
+        components.append((llm_score, LLM_WEIGHT))
+    if not components:
+        return 0
+    total_weight = sum(w for _, w in components)
+    if total_weight == 0:
+        return 0
+    weighted_sum = sum(s * (w / total_weight) for s, w in components)
+    return int(round(weighted_sum))
+
+
+# ============================================================
+# Main loop
+# ============================================================
+
+GEO_FIELDS_FOR_MODIFIKATOREN = [
+    'geo_schweiz_weit','geo_zuerich','geo_basel','geo_bern',
+    'geo_st_gallen','geo_luzern','geo_tessin','geo_genf_romandie',
+    'geo_graubuenden','geo_winterthur',
+    'geo_oesterreich','geo_dach_region','geo_international',
+]
+
+def _stiftungs_geo_modifikator(stiftung, sdna_full=None):
+    scope=set(); flags=[]
+    land=stiftung.get('land')
+    name=stiftung.get('Stiftungsname') or (sdna_full or {}).get('stiftung_name')
+    sitz=stiftung.get('sitz')
+    if land in ('CH','DE','AT'): scope.add(land)
+    for f in GEO_FIELDS_FOR_MODIFIKATOREN:
+        if stiftung.get(f) is True:
+            flags.append(f)
+            if f=='geo_oesterreich': scope.add('AT')
+            elif f=='geo_dach_region': scope.update(['CH','DE','AT'])
+            elif f=='geo_international': scope.add('INTL')
+            else: scope.add('CH')
+    if not scope: scope.add('CH')
+    _foerder=(sdna_full or {}).get('foerderpraxis') or {}
+    _schaerfe=(sdna_full or {}).get('schaerfe_prozent')
+    _excl=(sdna_full or {}).get('exclusion_tags') or []
+    _sound=((sdna_full or {}).get('sound_feeling') or '')[:400]
+    return {'type':'stiftungs_geo_scope','stiftung_id':stiftung.get('id'),
+            'name':name,'sitz':sitz,
+            'land':stiftung.get('land'),'geo_scope':sorted(scope),'geo_flags':flags,
+            'foerderpraxis':_foerder,
+            'schaerfe_prozent':_schaerfe,
+            'exclusion_tags_summary':[(e.get('tag_slug') or e.get('tag')) for e in _excl if isinstance(e,dict)],
+            'sound_feeling':_sound}
+
+
+def directus_patch(endpoint, body, max_retries=4):
+    """Directus PATCH mit gleicher Retry-Logik wie directus_post."""
+    import time
+    headers = {**_headers(), "Content-Type": "application/json"}
+    last_err = None
+    for attempt in range(1, max_retries + 1):
+        try:
+            resp = requests.patch(f"{DIRECTUS_URL}{endpoint}", headers=headers, json=body, timeout=60)
+            if resp.status_code in (502, 503, 504, 429):
+                last_err = f"HTTP {resp.status_code}"
+                if attempt < max_retries:
+                    time.sleep(2 * attempt)
+                    continue
+            resp.raise_for_status()
+            return resp.json()
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            last_err = f"{type(e).__name__}: {str(e)[:150]}"
+            if attempt < max_retries:
+                time.sleep(2 * attempt)
+                continue
+            raise
+    raise RuntimeError(f"directus_patch {endpoint} nach {max_retries} Versuchen fehlgeschlagen: {last_err}")
+
+
+def load_existing_match_result_ids(medium_id, medium_dna_version_id):
+    """Lade Mapping {stiftung_id: row_id} aller existierenden match_results
+    fuer (medium_id, medium_dna_version_id). Wird vor dem Push-Loop verwendet,
+    um INSERT vs PATCH zu entscheiden (UPSERT statt INSERT-Spam).
+    Bei Konflikt (mehrere Rows pro stiftung_id) wird die juengste behalten;
+    aeltere bleiben verwaist und werden vom Cleanup-Job entsorgt.
+    """
+    params = {
+        "filter[medium_id][_eq]": medium_id,
+        "filter[medium_dna_version_id][_eq]": medium_dna_version_id,
+        "fields": "id,stiftung_id,date_created",
+        "sort": "-date_created",
+        "limit": -1,
+    }
+    rows = directus_get("/items/match_results", params).get("data", [])
+    mapping = {}
+    for r in rows:
+        sid = r.get("stiftung_id")
+        if sid is None or sid in mapping:
+            continue
+        mapping[sid] = r["id"]
+    return mapping
+
+
+
+def push_match_result(dna, stiftung, math_score, math_breakdown, embedding_score,
+                      llm_score, begruendung,
+                      exclusion_triggered, exclusion_info, run_id,
+                      dna_verified=False, dna_quality_tier="unknown",
+                      sdna_full=None,
+                      dry_run=False,
+                      existing_match_ids=None):
+    combined = combine_scores(math_score, embedding_score, llm_score)
+    if exclusion_triggered:
+        combined = 0
+
+    breakdown = dict(math_breakdown) if isinstance(math_breakdown, dict) else {}
+    breakdown["weights"] = {
+        "math": MATH_WEIGHT, "embedding": EMBEDDING_WEIGHT, "llm": LLM_WEIGHT,
+    }
+    breakdown["components"] = {
+        "math": math_score, "embedding": embedding_score, "llm": llm_score,
+    }
+    if exclusion_triggered:
+        breakdown["exclusion_tag"] = exclusion_info
+
+    body = {
+        "medium_id": dna["medium_id"],
+        "medium_dna_version_id": dna["version_id"],
+        "stiftung_id": stiftung.get("id"),
+        "score": combined,
+        "score_math": math_score,
+        "embedding_score": embedding_score,
+        "score_llm": llm_score,
+        "score_breakdown": breakdown,
+        "begruendung": begruendung,
+        "modifikatoren": [_stiftungs_geo_modifikator(stiftung, sdna_full)],
+        "exclusion_triggered": exclusion_triggered,
+        "funder_updated_at_snapshot": stiftung.get("date_updated"),
+        "computed_at": datetime.now(timezone.utc).isoformat(),
+        "compute_run_id": run_id,
+        "dna_verified": dna_verified,
+        "dna_quality_tier": dna_quality_tier,
+    }
+    if dry_run:
+        return body
+    # Score-Threshold: niedrigwertige Matches gar nicht erst in Directus speichern.
+    # Exclusion-Triggered (score=0) ebenfalls ueberspringen.
+    if combined < MATCH_MIN_SCORE:
+        return {"skipped": True, "reason": f"score {combined} < threshold {MATCH_MIN_SCORE}"}
+    if MATCH_MIN_TIER and (dna_quality_tier or "unknown").lower() != MATCH_MIN_TIER:
+        return {"skipped": True, "reason": f"tier {dna_quality_tier} != min_tier {MATCH_MIN_TIER}"}
+    # UPSERT: wenn bestehender Eintrag fuer (medium_id, stiftung_id, dna_version) existiert,
+    # PATCHEN statt neu INSERTen. Verhindert Duplikat-Spam pro Match-Engine-Lauf.
+    sid = stiftung.get("id")
+    existing_id = (existing_match_ids or {}).get(sid) if sid is not None else None
+    if existing_id is not None:
+        return directus_patch(f"/items/match_results/{existing_id}", body)
+    # v0.5.2 (2026-05-19): UNIQUE-Constraint match_results_unique_per_dna_version greift
+    # in der DB. Bei Race-Condition (Map veraltet) wuerde POST mit 400/409/422 abbrechen.
+    # Fallback: existierende ID per GET nachladen und PATCHen statt zu crashen.
+    try:
+        return directus_post("/items/match_results", body)
+    except Exception as e:
+        emsg = str(e).lower()
+        if any(x in emsg for x in ("400", "409", "422", "duplicate key", "unique", "violates unique")):
+            try:
+                lookup = directus_get("/items/match_results", {
+                    "filter[medium_id][_eq]": body["medium_id"],
+                    "filter[stiftung_id][_eq]": body["stiftung_id"],
+                    "filter[medium_dna_version_id][_eq]": body["medium_dna_version_id"],
+                    "fields": "id",
+                    "limit": 1,
+                })
+                rows = lookup.get("data") or []
+                if rows:
+                    return directus_patch(f"/items/match_results/{rows[0]['id']}", body)
+            except Exception as e2:
+                raise RuntimeError(
+                    f"UPSERT-Fallback fehlgeschlagen fuer stiftung_id={body.get('stiftung_id')} "
+                    f"(medium={body.get('medium_id')}, dna={body.get('medium_dna_version_id')}): {e2}"
+                )
+        raise
+
+
+def run_match(args):
+    print(f"[{datetime.now().isoformat()}] match-engine v0.5.3 (MIN_TIER) startet", flush=True)
+    print(f"  LLM-Backend: {LLM_BACKEND} | Modell: {ACTIVE_MODEL}", flush=True)
+    print(f"  Gewichte: math={MATH_WEIGHT} embedding={EMBEDDING_WEIGHT} llm={LLM_WEIGHT}", flush=True)
+    print(f"  Score-Threshold: MATCH_MIN_SCORE={MATCH_MIN_SCORE} (Matches darunter werden nicht in Directus geschrieben)", flush=True)
+    print(f"  Tier-Filter: MATCH_MIN_TIER={MATCH_MIN_TIER!r} (Records mit anderem dna_quality_tier werden nicht geschrieben)", flush=True)
+    print(f"  Aktive Komponenten: math=Y embedding={'N' if args.no_embedding else 'Y'} llm={'N' if args.no_llm else 'Y'} | dry_run: {args.dry_run}", flush=True)
+    run_id = str(uuid.uuid4())
+    print(f"  Run-ID: {run_id}", flush=True)
+
+    dnas = load_active_dna(args.medium)
+    print(f"  Aktive DNAs: {len(dnas)}", flush=True)
+    if not dnas:
+        print("  Keine aktiven DNAs gefunden, Abbruch.", flush=True)
+        return 1
+
+    stiftungen = load_stiftungen()
+    print(f"  Stiftungen: {len(stiftungen)}", flush=True)
+
+    # v0.5.1 (2026-05-19): Stiftungs-DNA-Map IMMER laden, weil compute_math_score
+    # sie auch ohne LLM braucht (DNA-vs-DNA-Math). Vorher war der Load an
+    # `not args.no_llm` gekoppelt, was bei `--no-llm`-Laeufen den DNA-Math
+    # umging und alle Stiftungen in den Boolean-Fallback zwang.
+    try:
+        sdna_map = load_active_stiftungs_dna_map()
+        sdna_full_map = load_active_stiftungs_dna_full()
+        print(f"  Aktive stiftungs_dna-Versionen: {len(sdna_map)} (full: {len(sdna_full_map)})", flush=True)
+    except Exception as e:
+        print(f"  WARN: stiftungs_dna-Map-Load fehlgeschlagen: {e} - DNA-Math + LLM-Cache deaktiviert", flush=True)
+        sdna_map = {}
+        sdna_full_map = {}
+
+    total_pushed = 0
+    consecutive_fails = 0
+    for dna in dnas:
+        medium = dna["medium_id"]
+        print(f"\n  Medium: {medium} (DNA v{dna.get('version')}, version_id {dna.get('version_id')})", flush=True)
+
+        # Embedding-Similarity-Map fuer dieses Medium aus Qdrant holen
+        embedding_sim_map = {}
+        if not args.no_embedding:
+            embedding_sim_map = query_stiftung_similarities(dna.get("id"), top_k=5000)
+            if embedding_sim_map:
+                print(f"    Embedding-Similarities geladen: {len(embedding_sim_map)} Stiftungen", flush=True)
+            else:
+                print(f"    Embedding-Similarities: leer (Medium-Vektor fehlt oder Qdrant down)", flush=True)
+
+        candidates = []
+        for stiftung in stiftungen:
+            excluded, ex_info = check_exclusion(dna, stiftung)
+            if excluded:
+                candidates.append({
+                    "stiftung": stiftung,
+                    "math_score": 0,
+                    "math_breakdown": {},
+                    "exclusion_triggered": True,
+                    "exclusion_info": ex_info,
+                })
+                continue
+
+            _sid_pre = stiftung.get("id")
+            math_score, math_breakdown = compute_math_score(
+                dna, stiftung,
+                sdna_full=sdna_full_map.get(_sid_pre) if isinstance(sdna_full_map, dict) else None,
+            )
+            if math_score <= 0:
+                continue
+
+            # DNA-Klassifikator aus sdna_map fuer DNA-Quality-Tier in match_results
+            _sid = stiftung.get("id")
+            _entry = sdna_map.get(_sid) if isinstance(sdna_map, dict) else None
+            _sdna_klass_for_c = _entry["klassifiziert_by"] if _entry else ""
+            candidates.append({
+                "stiftung": stiftung,
+                "math_score": math_score,
+                "math_breakdown": math_breakdown,
+                "exclusion_triggered": False,
+                "exclusion_info": None,
+                "stiftung_dna_klassifiziert_by": _sdna_klass_for_c,
+            })
+
+        candidates.sort(key=lambda c: c["math_score"], reverse=True)
+        top = candidates[:TOP_N_PER_MEDIUM]
+        non_exclusions = [c for c in top if not c["exclusion_triggered"]]
+        print(f"    Kandidaten gesamt: {len(candidates)}, Top-{TOP_N_PER_MEDIUM}: {len(top)} "
+              f"(non-excluded: {len(non_exclusions)})", flush=True)
+
+        # UPSERT-Vorbereitung: existing match_results fuer (medium, dna_version) laden.
+        # Pro Push wird per stiftung_id im Mapping geprueft -> bestehender Eintrag wird via PATCH
+        # aktualisiert statt ein zweiter INSERT zu erzeugen. Verhindert Duplikate.
+        try:
+            existing_match_ids = load_existing_match_result_ids(dna["medium_id"], dna["version_id"])
+            print(f"    UPSERT-Map: {len(existing_match_ids)} bestehende match_results fuer Update vorgesehen", flush=True)
+        except Exception as e:
+            print(f"    WARN: existing match_results konnten nicht geladen werden ({e}); falle auf INSERT-only zurueck", flush=True)
+            existing_match_ids = {}
+
+
+        cache_hits = 0
+        llm_calls = 0
+        llm_fails = 0
+        for idx, c in enumerate(top, 1):
+            if c["exclusion_triggered"]:
+                llm_score, begruendung = None, None
+            elif args.no_llm:
+                llm_score, begruendung = None, None
+            else:
+                sid = c["stiftung"].get("id")
+                _entry = sdna_map.get(sid)
+                sdna_v = _entry["version_id"] if _entry else None
+                _sdna_klass = _entry["klassifiziert_by"] if _entry else ""
+                llm_score, begruendung, source = compute_llm_score(
+                    dna, c["stiftung"], c["math_score"], sdna_v,
+                    sdna_full=sdna_full_map.get(sid),
+                    use_cache=not args.no_cache,
+                )
+                if source == "cache":
+                    cache_hits += 1
+                    consecutive_fails = 0
+                elif source == "llm":
+                    llm_calls += 1
+                    consecutive_fails = 0
+                else:
+                    llm_fails += 1
+                    consecutive_fails += 1
+                    if consecutive_fails >= 100:
+                        print(f"    ABBRUCH: 100x in Folge LLM-Fail. Pruefe Ollama.", flush=True)
+                        return 2
+                if idx % 25 == 0:
+                    print(f"    [{idx}/{len(top)}] cache_hits={cache_hits} llm_calls={llm_calls} llm_fails={llm_fails}",
+                          flush=True)
+
+            sid = c["stiftung"].get("id")
+            embedding_score = embedding_sim_map.get(int(sid)) if sid is not None else None
+            try:
+                # DNA-Qualitaets-Tier aus aktiver Stiftungs-DNA ableiten
+                _stiftung_dna_klass = c.get("stiftung_dna_klassifiziert_by") or c["stiftung"].get("_stiftung_dna_klassifiziert_by")
+                _dna_verified, _dna_quality_tier = _classify_dna_tier(_stiftung_dna_klass)
+                push_match_result(
+                    dna, c["stiftung"], c["math_score"], c["math_breakdown"],
+                    embedding_score, llm_score, begruendung,
+                    c["exclusion_triggered"], c["exclusion_info"],
+                    run_id,
+                    dna_verified=_dna_verified,
+                    dna_quality_tier=_dna_quality_tier,
+                    sdna_full=sdna_full_map.get(sid),
+                    dry_run=args.dry_run,
+                    existing_match_ids=existing_match_ids,
+                )
+                total_pushed += 1
+            except Exception as e:
+                sid = c["stiftung"].get("id")
+                print(f"    Push-Fehler fuer stiftung_id={sid}: {e}", flush=True)
+
+        print(f"    Medium {medium} fertig: cache_hits={cache_hits} llm_calls={llm_calls} llm_fails={llm_fails}",
+              flush=True)
+
+    print(f"\n[{datetime.now().isoformat()}] Lauf abgeschlossen. Run-ID: {run_id} | "
+          f"Pushed: {total_pushed}{' (DRY-RUN)' if args.dry_run else ''}", flush=True)
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Match-Engine v0.3 (Math + Embedding + LLM)")
+    parser.add_argument("--medium", help="Nur ein bestimmtes Medium (z.B. wepublish)")
+    parser.add_argument("--dry-run", action="store_true", help="Keine Push-Operationen, nur Logs")
+    parser.add_argument("--no-llm", action="store_true",
+                        help="LLM-Score skippen (nur Math+Embedding) - fuer Diagnose")
+    parser.add_argument("--no-embedding", action="store_true",
+                        help="Embedding-Score skippen (nur Math+LLM) - fuer Diagnose")
+    parser.add_argument("--no-cache", action="store_true",
+                        help="Cache umgehen (immer frisch rechnen) - fuer Re-Eval")
+    args = parser.parse_args()
+    sys.exit(run_match(args))
+
+
+if __name__ == "__main__":
+    main()

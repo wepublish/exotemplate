@@ -9,7 +9,7 @@ Each app has its own `CLAUDE.md` with detailed instructions. Load the relevant o
 | Path                             | Purpose                                                                                                          | Stack                             | Detailed Instructions                              |
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------- | -------------------------------------------------- |
 | [apps/directus/](apps/directus/) | Backend — Directus 11 headless CMS. Manages clients, billing periods, time entries, invoices. Custom extensions. | Directus 11, TypeScript, Postgres | [apps/directus/CLAUDE.md](apps/directus/CLAUDE.md) |
-| [apps/front/](apps/front/)       | Frontend — billing & time-tracking dashboard for media clients.                                                  | Nuxt 4, Vue 3, Pinia, @nuxt/ui    | [apps/front/CLAUDE.md](apps/front/CLAUDE.md)       |
+| [apps/front/](apps/front/)       | Frontend — client dashboard (matching list & self-service portal).                                               | Next.js 15, React 19, MUI, Apollo | [apps/front/README.md](apps/front/README.md)       |
 
 A third We.Publish project, [`infrastructure-configurator`](https://github.com/wepublish/infrastructure-configurator) (NestJS; onboards new media via GitHub PRs), is **operationally separate** and lives in its **own repository** — it is not part of this monorepo.
 
@@ -17,10 +17,10 @@ A third We.Publish project, [`infrastructure-configurator`](https://github.com/w
 
 ```
                 ┌─────────────────────┐
-                │      apps/front     │  Nuxt SPA, port 3001 (dev)
+                │      apps/front     │  Next.js app, port 3000 (dev)
                 │    (dashboard UI)   │
                 └──────────┬──────────┘
-                           │ Directus SDK + custom REST endpoints
+                           │ Apollo Client (GraphQL) + /api proxy routes
                            ▼
                 ┌─────────────────────┐
                 │    apps/directus    │  Directus, port 8055
@@ -33,7 +33,7 @@ A third We.Publish project, [`infrastructure-configurator`](https://github.com/w
 - **"Add a field / collection / endpoint" → backend** → [apps/directus/](apps/directus/)
 - **"Change the dashboard / a page / UI behavior" → frontend** → [apps/front/](apps/front/)
 - **"Add an integration with Clockodo / Jira / Bexio" → backend** (extensions) → [apps/directus/extensions/wepublish/](apps/directus/extensions/wepublish/)
-- **A change spans frontend and backend** — start in `apps/directus` (data model first), then propagate types to `apps/front/types/DirectusTypes.ts`.
+- **A change spans frontend and backend** — start in `apps/directus` (data model first), then update the affected GraphQL queries in `apps/front/src/graphql/`.
 
 ## Cross-cutting conventions
 
@@ -61,7 +61,7 @@ CI structure: one reusable builder ([publish-docker-image.yml](.github/workflows
 
 ## Shared data model
 
-The canonical schema lives in [apps/directus/extensions/wepublish/src/DirectusTypes.ts](apps/directus/extensions/wepublish/src/DirectusTypes.ts). The frontend keeps a **copy** at [apps/front/types/DirectusTypes.ts](apps/front/types/DirectusTypes.ts) — when changing collections in the backend, update both.
+The canonical schema lives in [apps/directus/extensions/wepublish/src/DirectusTypes.ts](apps/directus/extensions/wepublish/src/DirectusTypes.ts). The frontend consumes Directus over **GraphQL via Apollo Client** (queries under [apps/front/src/graphql/](apps/front/src/graphql/)); it does not keep a hand-maintained type copy. GraphQL type generation is available but optional — see [apps/front/codegen.ts](apps/front/codegen.ts) and `npm run codegen`. When changing collections in the backend, update the affected GraphQL queries in the frontend accordingly.
 
 ## Things to know before editing
 
@@ -109,9 +109,9 @@ From `apps/directus/`, in this order:
 
 From `apps/front/`:
 
-1. If `.env` doesn't exist, copy `.env.example` to `.env` (local Directus URLs only — no secrets).
-2. `npm install` — also runs `nuxt prepare` via postinstall.
-3. Verify: `npm run typecheck` passes (or at minimum `npm install` exits 0).
+1. If `.env.local` doesn't exist, copy `.env.local.example` to `.env.local` (local Directus URL + token, portal secret — see `apps/front/README.md`).
+2. `npm install` — installs dependencies (Next.js).
+3. Verify: `npm install` exits 0 (there is no `typecheck` script; `npm run build` or `npm test` can additionally sanity-check).
 
 Do not start `npm run dev` during setup.
 
@@ -143,4 +143,4 @@ Print a short, scannable summary:
 - _"Start everything"_ → all three above (extensions watcher → backend → frontend), in parallel background processes; report the URLs once up.
 - _"Stop the local database"_ → `cd apps/directus && npm run db:reset` (or `docker compose down`).
 - _"Reset my local DB"_ → `npm run db:reset` in `apps/directus/`. **Destructive** — confirm first, then re-run init + schema:load.
-- _"What's the status of my local setup?"_ → check: `docker ps` (Postgres up?), `lsof -i :8055` / `:3001` (services up?), that `apps/directus` and `apps/front` are installed. Summarise.
+- _"What's the status of my local setup?"_ → check: `docker ps` (Postgres up?), `lsof -i :8055` / `:3000` (services up?), that `apps/directus` and `apps/front` are installed. Summarise.

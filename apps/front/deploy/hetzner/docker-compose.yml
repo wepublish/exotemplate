@@ -1,0 +1,52 @@
+# Hetzner-Deploy-Paket, Phase 1: nur die App läuft hier. Directus, vLLM
+# (LLM), der Crawler und der Hermes-Adapter bleiben auf dem Spark und werden
+# über Tailscale erreicht (siehe README.md). Phase 2 (Directus-Umzug auf
+# Hetzner) ist ein separates, späteres Projekt.
+
+services:
+  faas-app:
+    build:
+      # Compose-Datei liegt zwei Ebenen unter dem Repo-Root
+      # (deploy/hetzner/), das Dockerfile aber im Root -> Kontext dorthin.
+      context: ../..
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  # Optionaler rclone-Mount-Container: stellt die geteilte Drive-Ablage
+  # (Fundraising/FaaS) read-only unter /datensuppe bereit - dasselbe Remote
+  # wie auf dem Spark. Nur nötig, wenn DATENSUPPE_BASE genutzt werden soll
+  # (Ein-Knopf-DNA-Generierung mit Datensuppe-Quellen). Auskommentiert, weil
+  # rclone.conf mit den Drive-Credentials separat bereitgestellt werden muss
+  # (nicht ins Repo, nicht in dieses Compose-File).
+  #
+  # rclone-datensuppe:
+  #   image: rclone/rclone:latest
+  #   command:
+  #     - mount
+  #     - gdrive-faas:Fundraising/FaaS
+  #     - /datensuppe
+  #     - --read-only
+  #     - --allow-other
+  #     - --vfs-cache-mode=minimal
+  #   volumes:
+  #     - ./rclone.conf:/config/rclone/rclone.conf:ro
+  #     - datensuppe:/datensuppe:shared
+  #   cap_add:
+  #     - SYS_ADMIN
+  #   devices:
+  #     - /dev/fuse
+  #   security_opt:
+  #     - apparmor:unconfined
+  #   restart: unless-stopped
+  #
+  # Bei aktiviertem Mount zusätzlich bei faas-app eintragen:
+  #   volumes:
+  #     - datensuppe:/datensuppe:ro
+  #   und DATENSUPPE_BASE=/datensuppe in .env setzen.
+
+# volumes:
+#   datensuppe:
