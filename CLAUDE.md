@@ -1,6 +1,6 @@
-# We.Publish ONE — Monorepo Entry Point
+# We.Publish FaaS — Monorepo Entry Point
 
-This repository is the **We.Publish ONE** platform: a billing, time-tracking, and onboarding system for media clients in the We.Publish network. It is a **monorepo** — both applications live here, side by side, under `apps/`. It is **not** an npm workspace: each app is independently versioned, installed, built, and deployed, and has its own lockfile. The root only carries shared pre-commit tooling and CI.
+This repository is the **We.Publish FaaS** platform: a billing, time-tracking, and onboarding system for media clients in the We.Publish network. It is a **monorepo** — both applications live here, side by side, under `apps/`. It is **not** an npm workspace: each app is independently versioned, installed, built, and deployed, and has its own lockfile. The root only carries shared pre-commit tooling and CI.
 
 ## Apps
 
@@ -52,10 +52,10 @@ These apply across both apps unless the local CLAUDE.md says otherwise:
 Docker images are published to GitHub Container Registry, built by the workflows in [.github/workflows/](.github/workflows/):
 
 - **Staging** — a push to `main` rebuilds only the app whose `apps/<app>/**` changed (path-filtered):
-  - backend → `ghcr.io/wepublish/one-backend:main` (+ `:main-<ts>-<sha>`)
-  - frontend → `ghcr.io/wepublish/one-front:main` (+ `:main-<ts>-<sha>`)
+  - backend → `ghcr.io/wepublish/faas-backend:main` (+ `:main-<ts>-<sha>`)
+  - frontend → `ghcr.io/wepublish/faas-front:main` (+ `:main-<ts>-<sha>`)
 - **Production** — a `v*` tag builds **both** production images together (lockstep release):
-  - `ghcr.io/wepublish/one-backend:production` and `ghcr.io/wepublish/one-front:production`
+  - `ghcr.io/wepublish/faas-backend:production` and `ghcr.io/wepublish/faas-front:production`
 
 CI structure: one reusable builder ([publish-docker-image.yml](.github/workflows/publish-docker-image.yml)) takes a build `context` (the app subfolder) + image `tags`; [build-backend-main.yml](.github/workflows/build-backend-main.yml) / [build-front-main.yml](.github/workflows/build-front-main.yml) call it with path filters; [build-production.yml](.github/workflows/build-production.yml) calls it twice on a `v*` tag. GitHub only reads workflows at the **repo root**, so both apps' pipelines live in the root `.github/workflows/`.
 

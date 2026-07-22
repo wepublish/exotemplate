@@ -1,8 +1,8 @@
 {
-  "name": "wepublish-one",
+  "name": "wepublish-faas",
   "version": "1.0.0",
   "private": true,
-  "description": "We.Publish ONE monorepo — Directus backend (apps/directus) + Nuxt frontend (apps/front). Not an npm workspace: each app installs and builds independently. This root package owns only the shared pre-commit tooling (husky + lint-staged + prettier).",
+  "description": "We.Publish FaaS monorepo — Directus backend (apps/directus) + Nuxt frontend (apps/front). Not an npm workspace: each app installs and builds independently. This root package owns only the shared pre-commit tooling (husky + lint-staged + prettier).",
   "scripts": {
     "prepare": "husky",
     "lint": "prettier . --write --ignore-unknown"

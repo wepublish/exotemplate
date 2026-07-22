@@ -33,10 +33,10 @@ This project is deployed automatically via CI/CD:
 
 - **Production**  
    Every Git tag matching `v*` (e.g. `v1.2.0`) is automatically deployed to **production**.
-  elias@Thinpad-p1:~/gitroot/wepublish/one$ git push --set-upstream origin main
-  To github.com:wepublish/one.git
+  elias@Thinpad-p1:~/gitroot/wepublish/faas$ git push --set-upstream origin main
+  To github.com:wepublish/faas.git
   ! [rejected] main -> main (non-fast-forward)
-  error: failed to push some refs to 'github.com:wepublish/one.git'
+  error: failed to push some refs to 'github.com:wepublish/faas.git'
   hint: Updates were rejected because the tip of your current branch is behind
   hint: its remote counterpart. If you want to integrate the remote changes,
   hint: use 'git pull' before pushing again.
