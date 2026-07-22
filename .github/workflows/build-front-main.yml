@@ -4,7 +4,7 @@ name: Publish frontend main image
 # apps/front/** changes on main.
 
 on:
-  # Manual trigger — rebuilds one-front:main on demand (e.g. after a history
+  # Manual trigger — rebuilds faas-front:main on demand (e.g. after a history
   # rewrite where the path filter didn't see the frontend changes).
   workflow_dispatch:
   push:
@@ -28,6 +28,6 @@ jobs:
     with:
       context: apps/front
       tags: |
-        ghcr.io/wepublish/one-front:main-${{ needs.date_sha_tag.outputs.tag }}
-        ghcr.io/wepublish/one-front:main
+        ghcr.io/wepublish/faas-front:main-${{ needs.date_sha_tag.outputs.tag }}
+        ghcr.io/wepublish/faas-front:main
     secrets: inherit

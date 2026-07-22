@@ -4,7 +4,7 @@ name: Publish backend main image
 # apps/directus/** changes on main.
 
 on:
-  # Manual trigger — rebuilds one-backend:main on demand.
+  # Manual trigger — rebuilds faas-backend:main on demand.
   workflow_dispatch:
   push:
     branches:
@@ -27,6 +27,6 @@ jobs:
     with:
       context: apps/directus
       tags: |
-        ghcr.io/wepublish/one-backend:main-${{ needs.date_sha_tag.outputs.tag }}
-        ghcr.io/wepublish/one-backend:main
+        ghcr.io/wepublish/faas-backend:main-${{ needs.date_sha_tag.outputs.tag }}
+        ghcr.io/wepublish/faas-backend:main
     secrets: inherit

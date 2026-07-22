@@ -23,8 +23,8 @@ jobs:
     with:
       context: apps/directus
       tags: |
-        ghcr.io/wepublish/one-backend:production-${{ needs.date_sha_tag.outputs.tag }}
-        ghcr.io/wepublish/one-backend:production
+        ghcr.io/wepublish/faas-backend:production-${{ needs.date_sha_tag.outputs.tag }}
+        ghcr.io/wepublish/faas-backend:production
     secrets: inherit
 
   publish_front:
@@ -33,6 +33,6 @@ jobs:
     with:
       context: apps/front
       tags: |
-        ghcr.io/wepublish/one-front:production-${{ needs.date_sha_tag.outputs.tag }}
-        ghcr.io/wepublish/one-front:production
+        ghcr.io/wepublish/faas-front:production-${{ needs.date_sha_tag.outputs.tag }}
+        ghcr.io/wepublish/faas-front:production
     secrets: inherit
