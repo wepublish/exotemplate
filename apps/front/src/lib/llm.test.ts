@@ -1,86 +1,100 @@
 /**
- * Tests für llm.ts
- * Nur reine Logik (parseJsonLoose).
- * Kein HTTP, kein vLLM.
+ * Tests für llm.ts (Claude-API via @anthropic-ai/sdk).
+ * Reine Logik (parseJsonLoose) + callLLM gegen einen gemockten SDK-Client.
+ * Kein echter Netzwerk-Call.
  */
+
+const mockFinalMessage = jest.fn()
+const mockStream = jest.fn(() => ({ finalMessage: mockFinalMessage }))
+
+jest.mock('@anthropic-ai/sdk', () => ({
+  __esModule: true,
+  default: jest.fn().mockImplementation(() => ({
+    messages: { stream: mockStream }
+  }))
+}))
 
 import { parseJsonLoose, callLLM } from './llm'
 
-// ─── callLLM Fallback-Logik (Spark → Studio) ───────────────────────────────────
+function textMessage(text: string) {
+  return { content: [{ type: 'text', text }], stop_reason: 'end_turn' }
+}
 
-describe('callLLM Fallback', () => {
-  const origFetch = global.fetch
-  const origUrl = process.env.LLM_URL
-  const origFallback = process.env.LLM_URL_FALLBACK
-  const origFallbackModel = process.env.LLM_MODEL_FALLBACK
+// ─── callLLM ────────────────────────────────────────────────────────────────
 
-  afterEach(() => {
-    global.fetch = origFetch
-    process.env.LLM_URL = origUrl
-    if (origFallback === undefined) delete process.env.LLM_URL_FALLBACK
-    else process.env.LLM_URL_FALLBACK = origFallback
-    if (origFallbackModel === undefined) delete process.env.LLM_MODEL_FALLBACK
-    else process.env.LLM_MODEL_FALLBACK = origFallbackModel
+describe('callLLM (Claude)', () => {
+  const origModel = process.env.ANTHROPIC_MODEL
+
+  beforeEach(() => {
+    delete process.env.ANTHROPIC_MODEL
+    mockStream.mockClear()
+    mockFinalMessage.mockReset()
   })
 
-  /** Erzeugt einen Timeout-artigen Fehler (umgeht den 5s-Retry-Backoff). */
-  function timeoutFehler(): Error {
-    const e = new Error('The operation timed out')
-    e.name = 'TimeoutError'
-    return e
-  }
+  afterAll(() => {
+    if (origModel === undefined) delete process.env.ANTHROPIC_MODEL
+    else process.env.ANTHROPIC_MODEL = origModel
+  })
 
-  function okResponse(content: string): Response {
-    return {
-      ok: true,
-      json: async () => ({ choices: [{ message: { content } }] }),
-    } as unknown as Response
-  }
-
-  it('nutzt den Fallback-Endpoint, wenn der primäre scheitert', async () => {
-    process.env.LLM_URL = 'http://primaer:8001'
-    process.env.LLM_URL_FALLBACK = 'http://studio:8002'
-    const aufgerufen: string[] = []
-    global.fetch = (async (url: string) => {
-      aufgerufen.push(String(url))
-      if (String(url).includes('primaer')) throw timeoutFehler()
-      return okResponse('aus-fallback')
-    }) as unknown as typeof fetch
-
+  it('gibt den zusammengesetzten Text der Antwort zurück (nur text-Blöcke)', async () => {
+    mockFinalMessage.mockResolvedValue({
+      content: [
+        { type: 'text', text: 'hallo' },
+        { type: 'thinking', thinking: '…' },
+        { type: 'text', text: ' welt' }
+      ],
+      stop_reason: 'end_turn'
+    })
     const ergebnis = await callLLM({ user: 'test', temperature: 0, max_tokens: 10 })
-    expect(ergebnis).toBe('aus-fallback')
-    expect(aufgerufen.some(u => u.includes('primaer'))).toBe(true)
-    expect(aufgerufen.some(u => u.includes('studio'))).toBe(true)
+    expect(ergebnis).toBe('hallo welt')
   })
 
-  it('nutzt den Fallback NICHT, wenn der primäre liefert', async () => {
-    process.env.LLM_URL = 'http://primaer:8001'
-    process.env.LLM_URL_FALLBACK = 'http://studio:8002'
-    const aufgerufen: string[] = []
-    global.fetch = (async (url: string) => {
-      aufgerufen.push(String(url))
-      return okResponse('aus-primaer')
-    }) as unknown as typeof fetch
-
-    const ergebnis = await callLLM({ user: 'test', temperature: 0, max_tokens: 10 })
-    expect(ergebnis).toBe('aus-primaer')
-    expect(aufgerufen.some(u => u.includes('studio'))).toBe(false)
+  it('reicht temperature NICHT an die API weiter und nutzt das Default-Modell', async () => {
+    mockFinalMessage.mockResolvedValue(textMessage('ok'))
+    await callLLM({ user: 'test', temperature: 0.7, max_tokens: 42 })
+    const req = mockStream.mock.calls[0][0]
+    expect(req).not.toHaveProperty('temperature')
+    expect(req.model).toBe('claude-opus-4-8')
+    expect(req.max_tokens).toBe(42)
+    expect(req.messages).toEqual([{ role: 'user', content: 'test' }])
   })
 
-  it('wirft, wenn kein Fallback konfiguriert ist und der primäre scheitert', async () => {
-    process.env.LLM_URL = 'http://primaer:8001'
-    delete process.env.LLM_URL_FALLBACK
-    global.fetch = (async () => { throw timeoutFehler() }) as unknown as typeof fetch
+  it('respektiert ANTHROPIC_MODEL aus der Umgebung', async () => {
+    process.env.ANTHROPIC_MODEL = 'claude-sonnet-5'
+    mockFinalMessage.mockResolvedValue(textMessage('ok'))
+    await callLLM({ user: 'test', temperature: 0, max_tokens: 10 })
+    expect(mockStream.mock.calls[0][0].model).toBe('claude-sonnet-5')
+  })
+
+  it('übergibt den System-Prompt als Top-Level-Feld', async () => {
+    mockFinalMessage.mockResolvedValue(textMessage('ok'))
+    await callLLM({ system: 'sei knapp', user: 'test', temperature: 0, max_tokens: 10 })
+    expect(mockStream.mock.calls[0][0].system).toBe('sei knapp')
+  })
+
+  it('lässt system weg, wenn nicht gesetzt', async () => {
+    mockFinalMessage.mockResolvedValue(textMessage('ok'))
+    await callLLM({ user: 'test', temperature: 0, max_tokens: 10 })
+    expect(mockStream.mock.calls[0][0]).not.toHaveProperty('system')
+  })
+
+  it('wirft bei leerer Antwort (kein text-Block)', async () => {
+    mockFinalMessage.mockResolvedValue({
+      content: [{ type: 'thinking', thinking: '…' }],
+      stop_reason: 'end_turn'
+    })
     await expect(callLLM({ user: 'test', temperature: 0, max_tokens: 10 })).rejects.toThrow()
   })
 
-  it('wirft mit kombinierter Meldung, wenn primär UND Fallback scheitern', async () => {
-    process.env.LLM_URL = 'http://primaer:8001'
-    process.env.LLM_URL_FALLBACK = 'http://studio:8002'
-    global.fetch = (async () => { throw timeoutFehler() }) as unknown as typeof fetch
-    await expect(callLLM({ user: 'test', temperature: 0, max_tokens: 10 })).rejects.toThrow(/primär UND Fallback/)
+  it('propagiert einen API-Fehler (SDK-Retries erschöpft)', async () => {
+    mockFinalMessage.mockRejectedValue(new Error('rate limited'))
+    await expect(
+      callLLM({ user: 'test', temperature: 0, max_tokens: 10 })
+    ).rejects.toThrow(/rate limited/)
   })
 })
+
+// ─── parseJsonLoose ───────────────────────────────────────────────────────────
 
 describe('parseJsonLoose', () => {
   it('parst direktes JSON-Objekt', () => {
@@ -118,9 +132,6 @@ describe('parseJsonLoose', () => {
 
   it('parst JSON nach think-Block (realer LLM-Output)', () => {
     const input = '<think>Ich überlege…</think>\n{"suggested_amount": 5000, "reasoning": "klein"}'
-    // parseJsonLoose selbst entfernt keinen think-Block —
-    // das macht parseOllamaAntwort in dna-mess-kern.ts.
-    // Hier testen wir nur, dass ein Objekt irgendwo im String gefunden wird.
     const result = parseJsonLoose(input)
     expect(result).toEqual({ suggested_amount: 5000, reasoning: 'klein' })
   })
