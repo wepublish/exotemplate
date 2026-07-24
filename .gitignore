@@ -8,3 +8,7 @@ Thumbs.db
 .vscode/*
 !.vscode/settings.json
 *.dump
+
+# Python
+__pycache__/
+*.pyc
