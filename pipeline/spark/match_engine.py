@@ -390,7 +390,10 @@ def load_stiftungen():
     # Zeilenweise (EIN JSON-Objekt pro Zeile): json_agg baute EINEN Riesenwert
     # (40k x ~190 Spalten) und kippte den VPS-Postgres (Befund 2026-07-24).
     # jsonb::text ist einzeilig (Newlines in Strings sind als \n escaped).
-    sql = ("SELECT (to_jsonb(s) - 'embedding')::text FROM stiftungen s;")
+    # duplicate_of: als Duplikat verlinkte Eintraege sind nie Kandidaten -
+    # sonst erscheint dieselbe Foerderung doppelt in den Treffern (MFF-Fall).
+    sql = ("SELECT (to_jsonb(s) - 'embedding')::text FROM stiftungen s "
+           "WHERE s.duplicate_of IS NULL;")
     raw = _psql_run(sql, timeout=180, remote=True)
     rows = []
     for line in raw.split("\n"):
