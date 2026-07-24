@@ -61,6 +61,10 @@ services:
       # des Spark-Daemons ueber Tailscale zusaetzlich die Tailscale-IP der VPS
       # binden (nach `tailscale up` eintragen), z.B.:  - "100.x.y.z:8055:8055"
       - "127.0.0.1:8055:8055"
+      # B9: Interim-Schreibpfad. Der Spark-Forwarder (127.0.0.1:8055 des Spark)
+      # leitet ueber Tailscale hierher. NUR die Tailscale-IP, NIE 0.0.0.0
+      # (die VPS hat eine oeffentliche IP). ufw laesst tailscale0 zu, sonst deny.
+      - "100.120.78.79:8055:8055"
     depends_on:
       postgres:
         condition: service_healthy
@@ -121,6 +125,10 @@ services:
     ports:
       # NICHT 0.0.0.0: nur lokal, der Cloudflare-Tunnel erreicht die App lokal.
       - "127.0.0.1:3000:3000"
+      # B7-Cutover: der token-managed Tunnel-Ingress zeigt (wie am Spark) auf
+      # http://localhost:3009 -> dieselbe Portnummer hier spiegeln, damit der
+      # VPS-cloudflared-Connector (network_mode: host) den Front erreicht.
+      - "127.0.0.1:3009:3000"
     depends_on:
       directus:
         condition: service_healthy
@@ -145,6 +153,21 @@ services:
       HERMES_API_KEY: ${HERMES_API_KEY:-}
       FAAS_AGENT_ENABLED: ${FAAS_AGENT_ENABLED:-false}
       DATENSUPPE_BASE: ${DATENSUPPE_BASE:-}
+
+  # cloudflared – Cloudflare-Tunnel-Connector (B7-Cutover).
+  # network_mode: host, damit das token-managed Ingress-Ziel http://localhost:3009
+  # (aus dem Dashboard, identisch zum Spark) den lokal auf 127.0.0.1:3009
+  # publizierten Front erreicht. Gleicher TUNNEL_TOKEN wie der Spark = zweiter
+  # Connector desselben Tunnels; nach Verifikation wird der Spark-Connector gestoppt.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    network_mode: host
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?TUNNEL_TOKEN fehlt – 1:1 vom Spark uebernehmen}
+    depends_on:
+      - front
 
   # ---------------------------------------------------------------------------
   # OPTIONAL: Drive read-only Mount (Datensuppe) fuer DATENSUPPE_BASE.

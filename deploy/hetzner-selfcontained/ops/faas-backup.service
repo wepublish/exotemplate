@@ -1,0 +1,8 @@
+[Unit]
+Description=FaaS VPS Directus backup (dump + rotation + offsite)
+After=docker.service
+Wants=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/root/faas/backups/faas_vps_backup.sh
