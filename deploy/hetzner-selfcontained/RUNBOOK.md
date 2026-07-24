@@ -14,12 +14,15 @@ Dieses Runbook trennt strikt:
 > komplette Altbetrieb (Spark + Cloudflare-Tunnel + Pipeline) unveraendert
 > weiter. TEIL A aendert daran nichts.
 
-> **Adversariale Pruefung eingearbeitet (23.07.):** Die HOCH-Befunde eines
-> Audit-Durchlaufs sind hier bereits behoben: Ports nicht oeffentlich (Compose
-> bindet 127.0.0.1), KEIN `directus-sync push` in Produktion (destruktiv),
-> `dropdb/createdb` als Pflicht vor Restore, Wartungsfenster/Quiesce ALLER
-> Schreiber vor dem Dump, `down -v` nach Produktionsdaten verboten, Firewall +
-> Backup als Pflichtschritte.
+> **Zweite adversariale Pruefung eingearbeitet (24.07., Preflight gegen den realen
+> Spark-Live-Zustand).** Die fruehere Fassung legte nur einzelne Prozesse stumm und
+> repointete nur "den Daemon". Der Live-Check zeigte ~18 aktive Cron-Schreiber
+> (teils im 2-Minuten-Takt), einen per Cron/@reboot neu startenden DE/LI-Daemon,
+> Directus auf 0.0.0.0:8055 und ein hartcodiertes `localhost:8055` in `scout.py`.
+> Die 20 bestaetigten Befunde sind unten eingearbeitet. Die entscheidende Aenderung:
+> **die Cron-Quelle als Ganzes stilllegen und den Directus-Container als harten
+> Choke-Point stoppen** (nicht PIDs einzeln einfrieren), und beim Resume **ALLE**
+> Schreiber neu gegen die VPS starten (nie `kill -CONT` des Alt-Daemons).
 
 ---
 
@@ -33,6 +36,7 @@ Dieses Runbook trennt strikt:
    │  directus (11.17.2, 127.0.0.1:8055 + Tailscale-IP)   │
    │     └─ DB_HOST = postgres (intern)                   │
    │  postgres (15, Volume pgdata, NICHT exponiert)       │
+   │  cloudflared (host-network ODER im Compose-Netz)     │
    └─────────────────────────────────────────────────────┘
              ▲                              ▲
              │ Tailscale                    │ Tailscale (interim)
@@ -51,18 +55,20 @@ direkt in Postgres). App + Directus + Postgres laufen bereits self-contained auf
 Hetzner. Sobald der Port fertig ist, faellt die Spark-Abhaengigkeit weg.
 
 Deshalb braucht die VPS **Tailscale**. `tailscale up` erfordert **interaktive
-Autorisierung** (Nutzerin/Lukas gibt das Geraet im Tailnet frei) – manueller
-Schritt, nicht automatisierbar (A0c).
+Autorisierung** – manueller Schritt, nicht automatisierbar (A0c).
 
-**Embeddings/Qdrant entfallen** (per Code-Analyse belegt: Kandidatenauswahl im
-Matching nutzt reinen Tag-Math, kein Qdrant; die Front zeigt nur einen
-vorberechneten `embedding_score` an). Kein Qdrant-Container.
+**cloudflared auf der VPS (wichtig, CN-04):** Die App-Ports sind auf 127.0.0.1
+gebunden. Ein Bridge-Container erreicht `localhost:3000`/`:8055` NICHT. cloudflared
+daher entweder mit `--network host` betreiben (dann loesen `localhost:3000/:8055`
+auf den Host auf) ODER in das Compose-Netz aufnehmen und den Ingress auf die
+Service-Namen `http://front:3000` / `http://directus:8055` zeigen lassen. NICHT das
+Spark-Muster (0.0.0.0-Bridge) unbesehen uebernehmen.
+
+**Embeddings/Qdrant entfallen** (per Code-Analyse belegt). Kein Qdrant-Container.
 
 **Crawler-Empfehlung:** Interim den **Spark-Crawler ueber Tailscale**
-weiternutzen (`FIRECRAWL_URL=http://100.80.47.49:8891`, zustandslos, kein
-Datenrisiko). Nur falls der Spark ganz abgeschaltet wird: Crawler-Image ist
-lokal gebaut (nicht Registry) und ARM64 -> auf x86_64 **neu bauen**
-(`docker save/load` reicht bei Arch-Wechsel NICHT).
+weiternutzen (`FIRECRAWL_URL=http://100.80.47.49:8891`). Nur falls der Spark ganz
+abgeschaltet wird: Crawler-Image ist lokal/ARM64 gebaut -> auf x86_64 **neu bauen**.
 
 ---
 
@@ -70,165 +76,186 @@ lokal gebaut (nicht Registry) und ARM64 -> auf x86_64 **neu bauen**
 
 Vor TEIL A durchgehen, vor TEIL B **vollstaendig** abgehakt:
 
-- [ ] **Secrets 1:1 aus dem Altsystem (NICHT neu wuerfeln):** `KEY`, `SECRET`,
-      `DB_PASSWORD` — auf dem Spark unter
-      `/home/dergeraet/wepublish/faas/stiftungsdatenbank/`.
+- [ ] **Secrets 1:1 aus dem Altsystem (NICHT neu wuerfeln):** `KEY`, `SECRET` —
+      auf dem Spark **inline** im `environment:`-Block von
+      `/home/dergeraet/wepublish/faas/stiftungsdatenbank/docker-compose.yml`
+      (es gibt dort KEINE separate `.env`).
       **KEY/SECRET-Mismatch => alle verschluesselten Felder + Sessions kaputt.**
-- [ ] **`DIRECTUS_TOKEN` 1:1 uebernehmen** (kommt ohnehin mit dem DB-Dump).
-      **Kopplung:** derselbe Token wird von der Front UND vom Spark-Daemon
-      genutzt. Neu erzeugen bricht einen der beiden -> stille 401. Nur bewusst
-      rotieren und dann Front-`.env` UND Spark-Daemon-Env GEMEINSAM angleichen.
-- [ ] **Neu erzeugen** (kein Alt-Wert noetig): `PORTAL_SESSION_SECRET`
-      (`openssl rand -hex 32`).
-- [ ] **`ANTHROPIC_API_KEY`** gesetzt (nicht in env-check erfasst -> Ausfall
-      erst zur Nutzungszeit; Claude-Anbindung end-to-end bereits verifiziert).
-- [ ] **`PUBLIC_URL`, `PORTAL_BASE_URL`, `PASSWORD_RESET_URL_ALLOW_LIST`,
-      `USER_INVITE_URL_ALLOW_LIST`** auf die echte Domain gesetzt
-      (z.B. `https://matching.winkelriedtoechter.ch`). Sonst brechen
-      Reset-/Invite-Mails und Portal-Magic-Links **still** nach dem Cutover.
-- [ ] **Keine Platzhalter mehr in `.env`:** `grep -n '__' .env` muss leer sein
-      (non-empty Platzhalter taeuschen die `:?`-Guards und env-check -> App
-      bootet gruen, aber jeder Directus-Call 401/403).
+- [ ] **`DB_PASSWORD` ueber TEIL A und TEIL B KONSTANT halten (S1).** Es ist ein
+      rein internes Passwort (Postgres und Directus teilen dieselbe `${DB_PASSWORD}`).
+      Wird es zwischen A und B geaendert, traegt die in TEIL A gebootete Rolle noch
+      das alte Passwort und Directus kommt gegen die restaurierte DB nicht hoch
+      (SCRAM-Auth-Fehler, verschleiert durch `trust`-lokalen `dropdb`). Also: einen
+      Wert waehlen und behalten (Wert muss NICHT der Spark-Wert sein, da die DB nur
+      Daten, nicht die Rolle mitbringt). Alternativ vor B4 `down -v` (pgdata leeren,
+      vor B4 unbedenklich) und mit dem finalen Wert neu hochziehen.
+- [ ] **`DIRECTUS_TOKEN` 1:1 uebernehmen** (kommt mit dem DB-Dump, da statisch am
+      User gespeichert; die `--exclude`-Tabellen betreffen ihn nicht). **Kopplung:**
+      derselbe Token wird von der Front UND von allen Spark-Schreibern genutzt.
+- [ ] **Neu erzeugen:** `PORTAL_SESSION_SECRET` (`openssl rand -hex 32`).
+- [ ] **`ANTHROPIC_API_KEY`** gesetzt.
+- [ ] **`PUBLIC_URL`, `PORTAL_BASE_URL`, beide `*_URL_ALLOW_LIST`** auf die echte
+      Domain (z.B. `https://matching.winkelriedtoechter.ch`). Sonst brechen
+      Reset-/Invite-Mails und Portal-Magic-Links **still**.
+- [ ] **Keine Platzhalter mehr in `.env`:** `grep -n '__' .env` muss leer sein.
+- [ ] **Admin-Login nach Restore (DRS-6):** Nach dem `pg_restore` gilt der
+      **Spark-Admin-Account**, NICHT die `.env`-`ADMIN_PASSWORD` (die wirkt nur beim
+      Bootstrap gegen eine leere DB). Beim Smoke-Test mit den Spark-Credentials
+      anmelden; falls unbekannt, im Container zuruecksetzen:
+      `docker compose exec directus npx directus users passwd --email <admin> --password <neu>`.
 - [ ] **uploads** (`data/uploads`) + **extensions** (`data/extensions`, inkl.
       directus-extension-sync) vom Spark mitnehmen.
 - [ ] **Firewall** auf der VPS: `ufw` default deny incoming, nur SSH (22) +
-      Tailscale. Die App-Ports sind auf 127.0.0.1 gebunden, aber ufw ist die
-      zweite Verteidigungslinie (A0e).
-- [ ] **Backup-Plan** nach dem Cutover eingeplant (B10): taeglicher pg_dump +
-      Off-Site (NAS Winkelried), sonst ist die eine VPS-Disk der Single Point of
-      Failure fuer den gesamten Produktivbestand.
-- [ ] **Tailscale-Auth** eingeplant (`tailscale up`, interaktiv).
-- [ ] **Directus-Versions-Abgleich:** Template `apps/directus/package.json`
-      pinnt 11.13.4, Compose + Spark laufen 11.17.2. Vor produktivem Betrieb im
-      Repo auf 11.17.x bumpen (Migrationen sind versionsabhaengig).
+      `tailscale0`. App-Ports auf 127.0.0.1 (A0e).
+- [ ] **Crontab-Sicherung des Spark eingeplant** (B1): `crontab -l > backup` vor
+      dem Stilllegen, damit der Resume (B9) die Schreiber wieder aktivieren kann.
+- [ ] **Directus-Bindung an die VPS-Tailscale-IP eingeplant** (B9): Compose um
+      `"<VPS-TS-IP>:8055:8055"` erweitern, erst NACH `tailscale up` (IP vorher
+      unbekannt), dann Recreate. NIE 0.0.0.0. Postgres bleibt unexponiert.
+- [ ] **Backup-Plan konkret** (B10): VPS-Timer + Skript + Off-Site NAS + Restore-Test;
+      Spark-`faas_daily_backup.sh` nach Cutover deaktivieren (dumpt sonst die tote DB).
+- [ ] **Directus-Versions-Abgleich:** Template `apps/directus/package.json` pinnt
+      11.13.4, Compose + Spark laufen 11.17.2 -> vor Betrieb auf 11.17.x bumpen.
 
 ---
 
 # TEIL A – SICHER (leere DB, kein Produktivzugriff)
 
-Ziel: beweisen, dass der Stack auf der VPS bootet, bevor irgendwelche Live-Daten
-angefasst werden. Beliebig wiederholbar.
+Ziel: beweisen, dass der Stack auf der VPS bootet, bevor Live-Daten angefasst
+werden. Beliebig wiederholbar.
 
 ### A0 – Vorbereitung auf der VPS
-
-**A0a. Repo/Paket auf die VPS bringen** (git clone des Repos, da `front` aus
-`../../apps/front` gebaut wird).
+**A0a. Repo/Paket auf die VPS bringen** (git clone; `front` wird aus `../../apps/front` gebaut).
 
 **A0b. `.env` anlegen:**
 ```bash
 cd deploy/hetzner-selfcontained
 cp .env.example .env
-# Fuer TEIL A genuegen FRISCHE Werte fuer KEY/SECRET/DB_PASSWORD/ADMIN_PASSWORD
-# (nur gegen leere DB getestet). Platzhalter (__...) trotzdem alle ersetzen.
+# Fuer TEIL A genuegen frische Werte fuer KEY/SECRET/ADMIN_PASSWORD.
+# ACHTUNG DB_PASSWORD (S1): denselben Wert waehlen, den TEIL B behaelt.
 chmod 600 .env
 ```
 
 **A0c. Tailscale (manuell, interaktiv):**
 ```bash
 curl -fsSL https://tailscale.com/install.sh | sh
-tailscale up      # interaktiver Autorisierungslink; Geraet im Tailnet freigeben
-tailscale status  # eigene VPS-IP (100.x) + Spark-IP sichtbar?
+tailscale up          # interaktiver Autorisierungslink; Geraet im Tailnet freigeben
+tailscale ip -4       # VPS-Tailscale-IP notieren -> wird in B9 (Compose-Binding) gebraucht
+tailscale status      # eigene VPS-IP (100.x) + Spark-IP sichtbar?
 ```
-Fuer TEIL A optional, fuer TEIL B Pflicht (Crawler/Pipeline-Anbindung).
+Fuer TEIL A optional, fuer TEIL B Pflicht.
 
-**A0d. Leere Bind-Mount-Ordner** (fuer den reinen Boot-Test):
-```bash
-mkdir -p data/uploads data/extensions
-```
+**A0d. Leere Bind-Mount-Ordner:** `mkdir -p data/uploads data/extensions`
 
-**A0e. Firewall setzen** (bevor irgendetwas laeuft):
+**A0e. Firewall setzen:**
 ```bash
 ufw default deny incoming
 ufw default allow outgoing
 ufw allow 22/tcp
-ufw allow in on tailscale0        # Tailnet-Verkehr (Directus 8055 via TS)
+ufw allow in on tailscale0
 ufw --force enable
 ufw status verbose
 ```
-> Die Compose-Ports sind bereits auf 127.0.0.1 gebunden (nicht 0.0.0.0); ufw ist
-> die zweite Verteidigungslinie. Directus 8055 ist damit nur lokal (Tunnel) und
-> ueber das Tailscale-Interface (interim Pipeline) erreichbar, nie oeffentlich.
 
 ### A1 – Config validieren
 ```bash
-docker compose config    # interpoliert .env, meldet fehlende Pflichtwerte
+docker compose config
 ```
 
 ### A2 – Stack hochziehen (leere DB)
 ```bash
 docker compose up -d --build
-docker compose ps        # postgres healthy, directus healthy, front up
+docker compose ps      # postgres healthy, directus healthy, front up
 ```
-Directus fuehrt beim ersten Start automatisch `bootstrap` gegen die leere DB aus
-(Schema-Grundgeruest + Admin).
 
 ### A3 – Boot-Tests
 ```bash
 curl -sS http://127.0.0.1:8055/server/ping        # -> "pong"
 curl -sS -I http://127.0.0.1:3000                 # -> HTTP 200/3xx
-docker compose exec directus wget --version >/dev/null && echo "wget im Image ok (Healthcheck-Abhaengigkeit)"
+docker compose exec directus wget --version >/dev/null && echo "wget im Image ok"
 ```
 
 ### A4 – (Optional) Schema-Test auf leerer DB
-Nur um das versionierte Schema isoliert zu testen. **NICHT gegen eine mit Daten
-befuellte DB laufen lassen** (`directus-sync push` ist destruktiv – siehe B5):
-```bash
-cd apps/directus
-# DIRECTUS_URL/-TOKEN auf die (leere) VPS-Directus zeigen, dann:
-npm run schema:load     # directus-sync push — NUR gegen leere Test-DB
-```
+Nur isoliert. **NICHT gegen eine befuellte DB** (`directus-sync push` ist destruktiv, siehe B5).
 
 ### A-Rollback
 ```bash
 docker compose down          # Container weg, Volume pgdata bleibt
-docker compose down -v       # ACHTUNG: loescht das pgdata-Volume
+docker compose down -v       # loescht pgdata-Volume
 rm -rf data/uploads data/extensions
 ```
-> **Nur solange KEINE Produktionsdaten geladen sind (also ausschliesslich vor
-> B4) ist `down -v` / `rm -rf data/*` gefahrlos.** Nach dem Restore (B4) zeigen
-> beide Befehle auf den echten Produktivbestand und loeschen ihn irreversibel –
-> ab B4 VERBOTEN. TEIL A ist bis dahin beliebig wiederholbar.
+> **Nur vor B4 gefahrlos.** Ab B4 (Produktionsdaten geladen) sind `down -v` /
+> `rm -rf data/*` VERBOTEN – sie loeschen den Produktivbestand.
 
 ---
 
 # TEIL B – PRODUKTION (nur mit ausdruecklichem GO im Moment)
 
-> **STOP.** Vor jedem Schritt dieses Teils muss ein ausdrueckliches GO fuer genau
-> diesen Moment vorliegen. Kein GO = nicht ausfuehren. Bis zum Cutover (B7) laeuft
-> der Altbetrieb parallel weiter (trivialer Rueckweg).
+> **STOP.** Vor jedem Schritt ein ausdrueckliches GO fuer genau diesen Moment.
+> Bis zum Cutover (B7) laeuft der Altbetrieb parallel weiter (trivialer Rueckweg).
+> Ab **B9** ist der Point-of-no-return ueberschritten (F6) – danach ist Rollback
+> verlustbehaftet.
 
 ### B0 – Voraussetzungen (alle erfuellt?)
 - [ ] TEIL A auf der VPS gruen.
-- [ ] `.env`: echte Alt-`KEY`/`SECRET`/`DB_PASSWORD`, `DIRECTUS_TOKEN` = Alt-Wert
-      1:1, `PUBLIC_URL`/`PORTAL_BASE_URL`/beide `*_URL_ALLOW_LIST` auf die echte
-      Domain, `ANTHROPIC_API_KEY` gesetzt. `grep -n '__' .env` ist LEER.
+- [ ] `.env`: Alt-`KEY`/`SECRET`, `DB_PASSWORD` = derselbe Wert wie in TEIL A (S1),
+      `DIRECTUS_TOKEN` = Alt-Wert 1:1, `PUBLIC_URL`/`PORTAL_BASE_URL`/beide
+      `*_URL_ALLOW_LIST` auf die echte Domain, `ANTHROPIC_API_KEY` gesetzt.
+      `grep -n '__' .env` LEER.
 - [ ] Firewall aktiv (A0e), Ports nicht oeffentlich.
-- [ ] Tailscale aktiv, Spark erreichbar (`tailscale status`). VPS-Tailscale-IP
-      notiert (fuer B9).
-- [ ] Wartungsfenster deklariert (B1).
+- [ ] Tailscale aktiv, `tailscale ip -4` notiert (fuer B9), Spark erreichbar.
+- [ ] cloudflared-Netzwerkmodus geklaert (CN-04: host-network oder Compose-Netz).
+- [ ] Wartungsfenster deklariert (B1). Fenster strikt kurz halten.
 
-### B1 – Wartungsfenster + ALLE Schreiber stilllegen (Datenverlust vermeiden)
-Der Dump (B2) ist ein Snapshot. Alles, was zwischen Dump und Cutover (B7) noch
-in die **Alt**-DB geschrieben wird, geht sonst verloren. Daher VOR dem Dump ein
-Wartungsfenster und **alle Schreiber** stilllegen (nicht nur der DE/LI-Daemon).
-**Auf dem Spark, Mutationen – nur mit GO:**
+### B1 – ALLE Schreiber stilllegen (Cron-Quelle + Choke-Point, nicht PIDs einzeln)
+Der Dump (B2) ist ein Snapshot. Alles, was danach in die **Alt**-DB geschrieben
+wird, geht beim Cutover verloren. `kill -STOP` + `pgrep` genuegt NICHT (Q1/Q2/Q3/F1):
+Cron feuert weiter (u.a. `embedding_pass` alle 2 Min, `run_rematch` alle 6 h), und
+`run_web_enrich.sh` startet den DE/LI-Daemon per `05:35`-Cron und `@reboot` neu.
+Directus ist zudem auf 0.0.0.0:8055 erreichbar, eine Cloudflare-Access-Regel deckt
+Direktzugriffe nicht (Q5/CN-02). Daher: **Scheduler abschalten + Directus stoppen.**
+
+**Auf dem Spark, Mutationen – nur mit GO, in dieser Reihenfolge:**
 ```bash
-# 1) Alt-App schreibgeschuetzt/Wartung: Operatorinnen + Portal duerfen nicht mehr
-#    schreiben (Cloudflare-Access-Wartungsregel ODER Alt-Front kurz stoppen).
-# 2) Anreicherungs-/Matching-Pipeline + DE/LI-Daemon pausieren:
-pgrep -af 'web_enrich_daemon.py'          # DE/LI-Daemon (stabile Kommando-Kennung)
-pgrep -af 'match_engine.py|paket_builder.py|scout.py'   # weitere Schreiber pruefen
-kill -STOP <PID>   # je Prozess; haelt an ohne Fortschrittsverlust
+# 1) Operator/Portal-Schreibpfad zu: Alt-Front WIRKLICH stoppen (nicht nur Access, CN-02)
+docker stop faas-matching
+
+# 2) Crontab sichern, dann KOMPLETT entfernen (deaktiviert auch @reboot + 05:35-Relaunch)
+crontab -l > ~/scripts/crontab_backup_pre_cutover_$(date +%Y%m%d_%H%M).txt
+crontab -r
+# Gegenpruefen, ob FaaS-Jobs auch woanders liegen:
+sudo crontab -l 2>/dev/null | grep -i faas || true
+ls -la /etc/cron.d/ ; grep -ri faas /etc/crontab /etc/cron.d/ 2>/dev/null || true
+
+# 3) systemd-User-Daemons stoppen (persistente Schreiber ausserhalb Cron)
+systemctl --user stop faas-chat-adapter faas-slack-daemon 2>/dev/null || true
+
+# 4) Laufenden DE/LI-Daemon beenden (nicht nur STOP) und verifizieren
+kill 3752801        # aktuelle PID per 'pgrep -af web_enrich_daemon.py' bestaetigen
+pgrep -af 'web_enrich_daemon.py' || echo "Daemon weg"
+
+# 5) HARTER CHOKE-POINT: Directus-Container stoppen -> kein HTTP-API-Schreiber mehr moeglich
+docker stop stiftungsdatenbank-spark
 ```
-> Das Fenster zwischen B2 und B7 strikt kurz halten. **B1-Rollback:**
-> `kill -CONT <PID>` je Prozess + Wartungsregel entfernen -> Altbetrieb laeuft
-> normal weiter, TEIL B beenden.
+**Ruhe verifizieren (Pflicht):** 2x im Abstand von ~60 s die Zeilenzahlen von
+`match_results`, `stiftungs_dna`, `medium_dna` messen (direkt im Postgres-Container,
+der laeuft weiter fuer den Dump). Erst wenn sie sich NICHT mehr aendern, weiter zu B2.
+Diese eingefrorenen Werte sind der **Referenz-Snapshot fuer B6**.
+```bash
+docker exec directus-postgres-spark psql -U directus -d directus_db -tAc \
+ "SELECT 'stiftungen',count(*) FROM stiftungen
+  UNION ALL SELECT 'match_results',count(*) FROM match_results
+  UNION ALL SELECT 'stiftungs_dna',count(*) FROM stiftungs_dna
+  UNION ALL SELECT 'medium_dna',count(*) FROM medium_dna
+  UNION ALL SELECT 'applications',count(*) FROM applications;"
+```
+> **B1-Rollback:** `docker start stiftungsdatenbank-spark faas-matching`;
+> `crontab ~/scripts/crontab_backup_pre_cutover_*.txt`;
+> `systemctl --user start faas-chat-adapter faas-slack-daemon`; Daemon laeuft per
+> Cron/@reboot wieder an. Altbetrieb normal, TEIL B beenden.
 
 ### B2 – pg_dump der Live-DB (Ballast ausschliessen)
-`directus_revisions` (~5.6 GB) + `directus_activity` sind ~89% der DB und reiner
-Audit-Ballast; Struktur bleibt, nur die Datenzeilen entfallen -> Dump schrumpft
-von ~6.4 GB auf ~0.7 GB. **Einen** Dateinamen-Variablenwert verwenden
-(kein doppeltes `$(date)` – sonst Mismatch ueber Mitternacht):
+`pg_dump` laeuft direkt im Postgres-Container; Directus darf dafuer gestoppt sein.
 ```bash
 DUMP=directus_db_$(date +%Y%m%d_%H%M).dump
 docker exec directus-postgres-spark pg_dump -U directus -d directus_db \
@@ -238,7 +265,7 @@ docker exec directus-postgres-spark pg_dump -U directus -d directus_db \
   --exclude-table-data='public.match_results_backup_2026_05_15' \
   -f /tmp/$DUMP
 docker cp directus-postgres-spark:/tmp/$DUMP ./
-echo "$DUMP"   # Dateiname merken, in B3/B4 wiederverwenden
+echo "$DUMP"
 ```
 > **B2-Rollback:** reiner Lesevorgang; Dump-Datei bei Abbruch loeschen.
 
@@ -248,111 +275,155 @@ scp ./$DUMP root@167.233.56.27:/root/faas/deploy/hetzner-selfcontained/
 rsync -a <spark>:/home/dergeraet/wepublish/faas/stiftungsdatenbank/data/uploads/    ./data/uploads/
 rsync -a <spark>:/home/dergeraet/wepublish/faas/stiftungsdatenbank/data/extensions/ ./data/extensions/
 ```
-> **B3-Rollback:** Zieldateien auf der VPS loeschen; Quelle unangetastet.
 
 ### B4 – Restore: DB frisch aufsetzen (Pflicht!), dann restaurieren
-Nach dem A-Boot ist `directus_db` durch den Bootstrap **NICHT leer**. Ein
-`pg_restore` dagegen liefe in „relation already exists" und laedt Daten nur
-teilweise (stiller Verlust). Deshalb die DB VOR dem Restore verwerfen und frisch
-anlegen – das entfernt auch die mit Frisch-Secrets gebooteten Reste:
+Nach dem A-Boot ist `directus_db` nicht leer. Deshalb verwerfen und frisch anlegen:
 ```bash
-docker compose stop directus front           # nichts darf nebenher schreiben
+docker compose stop directus front
 docker compose exec postgres dropdb   -U directus directus_db
 docker compose exec postgres createdb -U directus directus_db
 docker compose exec -T postgres \
   pg_restore -U directus -d directus_db --no-owner --no-privileges < ./$DUMP
 ```
-> Postgres-Major 15 (Quelle 15.x) – passt. **B4-Rollback:** `dropdb`/`createdb`
-> -> leer; erneut restoren oder TEIL B beenden. Solange B7 nicht erfolgt ist,
-> laeuft der Altbetrieb ungestoert.
+> Postgres-Major 15 (Quelle 15.x). **DB_PASSWORD-Falle (S1):** Directus verbindet
+> gleich per TCP (SCRAM) mit `${DB_PASSWORD}` gegen die Rolle `directus`. Traegt die
+> Rolle noch ein anderes Passwort (weil in A ein anderer Wert gebootet wurde),
+> in-place korrigieren:
+> `docker compose exec postgres psql -U directus -c "ALTER USER directus PASSWORD '<wert>';"`.
+> **Admin (DRS-6):** ab jetzt gilt der Spark-Admin-Account, nicht `.env ADMIN_PASSWORD`.
+> **B4-Rollback:** `dropdb`/`createdb` -> leer; erneut restoren oder TEIL B beenden.
+> **`down -v` / `rm -rf data/*` ab hier VERBOTEN.**
 
 ### B5 – Directus + Front gegen die restaurierte DB starten
-Das **vollstaendige Schema kommt mit dem pg_restore** (B4). **KEIN
-`directus-sync push` / `schema:load` in Produktion** – der Repo-Snapshot ist
-aelter als Produktion (11.13.4, Welle-1 uncommitted) und `push` reconciled
-DESTRUKTIV: er wuerde in Produktion vorhandene, im Repo unbekannte Collections/
-Felder samt Daten loeschen (stiller Schemaruecksprung + Datenverlust).
+**KEIN `directus-sync push` / `schema:load` in Produktion** (destruktiv). Das Schema
+kommt mit dem `pg_restore`.
 ```bash
 docker compose up -d directus
 curl -sS http://127.0.0.1:8055/server/ping     # pong
 docker compose up -d front
 ```
-> Falls spaeter ein Schema-Abgleich gewuenscht ist: nur **nicht-destruktiv**
-> pruefen (`directus-sync diff`/`pull`), niemals `push` gegen Produktion.
+> Schema-Abgleich spaeter nur nicht-destruktiv (`directus-sync diff`/`pull`), nie `push`.
 
-### B6 – Verifikation (Zeilenzahlen gegen den Spark)
+### B6 – Verifikation gegen den FROZEN-Snapshot aus B1
+Nicht gegen hartcodierte Zahlen pruefen (die Spark-DB waechst laufend; die alten
+Notiz-Werte 40184/36462/4630 sind veraltet). Gegen die in **B1 eingefrorenen** Werte:
 ```bash
 docker compose exec postgres psql -U directus -d directus_db -tAc \
-  "SELECT 'stiftungen', count(*) FROM stiftungen
-   UNION ALL SELECT 'match_results', count(*) FROM match_results
-   UNION ALL SELECT 'stiftungs_dna', count(*) FROM stiftungs_dna
-   UNION ALL SELECT 'applications', count(*) FROM applications;"
+  "SELECT 'stiftungen',count(*) FROM stiftungen
+   UNION ALL SELECT 'match_results',count(*) FROM match_results
+   UNION ALL SELECT 'stiftungs_dna',count(*) FROM stiftungs_dna
+   UNION ALL SELECT 'medium_dna',count(*) FROM medium_dna
+   UNION ALL SELECT 'applications',count(*) FROM applications;"
 ```
-Gegen die (lesend ermittelten) Spark-Werte abgleichen. Erwartet u.a.
-stiftungen ~40184, stiftungs_dna ~36462, match_results ~4630.
+Muss den B1-Snapshot exakt treffen.
 > **B6-Rollback:** bei Abweichung Cutover NICHT durchfuehren, per B4-Rollback neu
 > restoren, Ursache klaeren.
 
 ### B7 – Cloudflare/DNS-Cutover
-Der Tunnel ist token-managed (gleiche Tunnel-ID -> keine DNS-Aenderung noetig).
-1. `cloudflared` auf der VPS mit **demselben** `TUNNEL_TOKEN` wie auf dem Spark
-   starten. Public-Hostname-Regel im Dashboard auf die VPS-App zeigen lassen.
-2. **Vor dem Umschalten** end-to-end pruefen (ueber den Tunnel-Hostnamen):
-   Passwort-Reset-Mail-Link UND Portal-Magic-Link funktionieren (haengt an
-   korrekt gesetztem `PUBLIC_URL`/`PORTAL_BASE_URL`/Allow-Lists — B0).
-3. Erst wenn die VPS-App stabil live verifiziert ist: **Spark-cloudflared
-   stoppen** (Mutation auf dem Spark, nur mit GO). Sonst balanced Cloudflare ueber
-   beide Connectoren.
-4. Klaeren, ob `fundraising.wepublish.cloud` an denselben Tunnel gebunden ist.
+Token-managed (gleiche Tunnel-ID -> keine DNS-Aenderung).
+1. **Zuerst (CN-07) klaeren, ob `fundraising.wepublish.cloud` denselben Tunnel teilt.**
+   Wenn ja und der Origin nur auf dem Spark existiert: Spark-cloudflared fuer diesen
+   Hostnamen weiterlaufen lassen oder Origin vorher auf die VPS bringen/separaten
+   Tunnel. Diese Frage MUSS vor Schritt 4 (Spark-Connector-Stopp) beantwortet sein.
+2. `cloudflared` auf der VPS mit **demselben** `TUNNEL_TOKEN` starten
+   (Netzwerkmodus laut CN-04). Public-Hostname-Service-URL auf den VPS-Front-Port
+   zeigen lassen. Achtung (CN-08): eine geteilte Service-URL kann Spark `:3009` und
+   VPS `:3000` nicht gleichzeitig bedienen -> Service-URL-Umstellung und
+   Connector-Wechsel gemeinsam planen; VPS vorab ueber privaten Pfad verifizieren.
+3. **Vor dem Umschalten** end-to-end pruefen (Passwort-Reset-Link UND
+   Portal-Magic-Link) ueber den Tunnel-Hostnamen.
+4. Erst wenn die VPS-App stabil live ist: **Spark-cloudflared stoppen**
+   (Mutation, nur mit GO).
 > **B7-Rollback (schnellster Rueckweg):** Spark-cloudflared wieder starten, VPS-
-> cloudflared stoppen -> Traffic geht sofort auf die unveraenderte Spark-App.
+> cloudflared stoppen. **Zusaetzlich (CN-08): die Dashboard-Service-URL wieder auf
+> den Spark-Wert (`:3009`) zuruecksetzen**, sonst 502t der Spark-Connector.
 
 ### B8 – Smoke-Test Portal + Cockpit
 - [ ] `/portal/login` ohne Access-Login erreichbar (Bypass greift).
 - [ ] `/` verlangt Access-Login (Operator-Schutz greift).
 - [ ] Cockpit laedt, Treffer sichtbar (`match_results`).
-- [ ] Directus-Admin-Login ok (KEY/SECRET korrekt -> Sessions gueltig).
-- [ ] **Passwort-Reset-Mail + Portal-Magic-Link** end-to-end (Zugangsschicht!).
-- [ ] LLM-Stichprobe (DNA-Messung/Betrag-Recherche) -> prueft `ANTHROPIC_API_KEY`.
+- [ ] Directus-Admin-Login ok – mit **Spark-Admin-Credentials** (DRS-6), nicht `.env`.
+- [ ] **Passwort-Reset-Mail + Portal-Magic-Link** end-to-end.
+- [ ] LLM-Stichprobe -> prueft `ANTHROPIC_API_KEY`.
 
-### B9 – Spark-Pipeline auf die VPS richten + Schreiber fortsetzen
-Die Pipeline schreibt **ueber die Directus-HTTP-API** (nicht direkt in Postgres –
-Postgres bleibt unexponiert). Umzustellen ist also **`DIRECTUS_URL` + `DIRECTUS_TOKEN`**
-des Spark-Daemons, keine DB-Verbindung:
+### B9 – Interim-Schreibpfad herstellen + ALLE Schreiber neu gegen die VPS (POINT OF NO RETURN)
+Ab hier schreibt die Pipeline in die VPS-DB; ein Spark-Rollback wird verlustbehaftet (F6).
+
+**9a. Directus an die Tailscale-IP binden (F5/CN-05) – VOR dem Resume:**
 ```bash
-# Auf dem Spark, in der Daemon-/Pipeline-Env:
-#   DIRECTUS_URL = http://<VPS-Tailscale-IP>:8055   (nicht localhost)
-#   DIRECTUS_TOKEN = derselbe Token wie in der VPS-.env (1:1)
-# Voraussetzung: Directus ist auf dem Tailscale-Interface der VPS gebunden
-#   (Compose-ports: zusaetzlich "<VPS-TS-IP>:8055:8055"; NIE 0.0.0.0), ufw erlaubt tailscale0.
-kill -CONT <PID>   # pausierte Schreiber (B1) fortsetzen
+# Voraussetzung: 'tailscale up' erledigt, VPS-TS-IP aus 'tailscale ip -4'.
+# Compose (ports) um die TS-Bindung ergaenzen (zusaetzlich zu 127.0.0.1), NIE 0.0.0.0:
+#   - "127.0.0.1:8055:8055"
+#   - "<VPS-TS-IP>:8055:8055"
+docker compose up -d directus            # Recreate mit neuer Bindung
+# Vom Spark aus verifizieren, BEVOR Schreiber loslaufen:
+ssh <spark> 'curl -sS http://<VPS-TS-IP>:8055/server/ping'   # -> pong
 ```
+
+**9b. ALLE Schreiber repointen (Q4/F4/S2) – nicht nur den Daemon:**
+```bash
+# Auf dem Spark, in der GEMEINSAMEN Env-Quelle der Pipeline
+# (.hermes/.env / Daemon-Env / run_*.sh-Exports):
+#   DIRECTUS_URL   = http://<VPS-TS-IP>:8055   (nicht localhost)
+#   DIRECTUS_TOKEN = derselbe Token wie in der VPS-.env (1:1)
+# scout.py hat localhost:8055 HARTCODIERT -> explizit ueberschreiben
+#   (Cron setzt export DIRECTUS_URL vor dem Aufruf, bzw. Default im Skript patchen).
+# Gegenpruefen, dass KEIN Schreiber mehr auf localhost:8055 zeigt:
+grep -rn 'localhost:8055\|127.0.0.1:8055' /home/dergeraet/faas-matching-wepublish/spark \
+     /home/dergeraet/scripts_v2 || echo "kein localhost-Rest"
+```
+
+**9c. Schreiber neu starten – NIE `kill -CONT` des Alt-Daemons (Q4):**
+Der in B1 beendete Daemon ist tot; ein fortgesetzter haette die alte Env
+(localhost) und schriebe in die tote DB. Reihenfolge zwingend **Repoint (9b) VOR
+Crontab-Restore**:
+```bash
+# 1) Crontab wiederherstellen (bringt Daemon-Relaunch + alle Cron-Schreiber zurueck,
+#    jetzt mit VPS-Env):
+crontab ~/scripts/crontab_backup_pre_cutover_*.txt
+# 2) systemd-Daemons mit VPS-Env starten:
+systemctl --user start faas-chat-adapter faas-slack-daemon
+# 3) Alte Directus (stiftungsdatenbank-spark) + alte Front (faas-matching) BLEIBEN
+#    gestoppt -> keine versehentlichen Schreibzugriffe auf die tote DB.
+```
+**Verifizieren:** VPS-Zeilenzahlen wachsen, Alt-Spark-DB-Zaehler bleiben eingefroren.
 > Postgres NICHT nach aussen oeffnen. Bis der TS-Port fertig ist, bleibt dieser
 > Spark->VPS-Schreibpfad die Uebergangsloesung.
 
 ### B10 – Backup einrichten (Pflicht nach Cutover)
-Ab jetzt ist die VPS-DB die alleinige produktive Wahrheit. Ohne Backup ist die
-eine Disk der Single Point of Failure.
+Die VPS-DB ist ab jetzt die alleinige produktive Wahrheit.
 ```bash
-# Taeglicher, ballastfreier Dump per systemd-Timer/Cron auf der VPS,
-# danach Off-Site (NAS Winkelried via Tailscale, oder Drive):
-#   docker exec <pg> pg_dump ... --exclude-table-data=directus_revisions ...
-#   rsync dump -> NAS
+# a) Taeglicher, ballastfreier Dump auf der VPS (systemd-Timer ODER cron):
+#    docker exec <pg> pg_dump -U directus -d directus_db -Fc --no-owner --no-privileges \
+#      --exclude-table-data=public.directus_revisions \
+#      --exclude-table-data=public.directus_activity -f /backup/directus_db_$(date +\%F).dump
+# b) Off-Site zur NAS Winkelried ueber Tailscale – EINMAL real verifizieren:
+#    rsync -a /backup/ <nas-ts>:/faas-backup/   && echo "rsync ok"
+# c) Freshness-/Erfolgskontrolle (Timer-Status, Dateigroesse/-alter pruefen).
+# d) Periodischer RESTORE-TEST (Dump in Wegwerf-DB laden, Zeilenzahlen pruefen).
 ```
-Zusaetzlich optional taeglicher Volume-Snapshot.
+**Wichtig (F8):** Auf dem Spark `faas_daily_backup.sh` (Cron `30 3`) nach dem Cutover
+**deaktivieren/umwidmen** – sonst sichert es weiter die tote Spark-DB (Scheingruen).
 
 ---
 
-## Gesamt-Rollback (Notausstieg TEIL B)
+## Gesamt-Rollback
 
-Solange **B7 (Cutover)** nicht vollzogen ist, ist der Rueckweg trivial (Altbetrieb
-lief die ganze Zeit weiter):
+**Vor B9** (Altbetrieb lief die ganze Zeit weiter, trivial):
 ```bash
-# Spark: pausierte Schreiber fortsetzen
-kill -CONT <PID>
-# Wartungsregel entfernen
-# VPS: Stack stoppen — ABER: NUR `docker compose down`, NIEMALS `down -v`,
-# sobald in B4 Produktionsdaten geladen wurden (loescht sonst den Produktivbestand).
+# Spark: Scheduler + Dienste + Alt-App zurueck
+crontab ~/scripts/crontab_backup_pre_cutover_*.txt
+systemctl --user start faas-chat-adapter faas-slack-daemon
+docker start stiftungsdatenbank-spark faas-matching
+# Cloudflare-Wartungsregel entfernen
+# Falls B7 erfolgt: Spark-cloudflared starten, VPS-cloudflared stoppen,
+#   Dashboard-Service-URL auf :3009 zuruecksetzen (CN-08)
+# VPS: Stack stoppen — NUR 'docker compose down', NIEMALS 'down -v' nach B4
 docker compose down
 ```
-Nach B7: zuerst Cloudflare zurueckdrehen (B7-Rollback), dann VPS stoppen.
+
+**Nach B9 (Point-of-no-return, F6):** Der B2-Dump ist KEIN gueltiges Rollback-Ziel
+mehr (er kennt keine Post-Cutover-Schreibvorgaenge). Rollback nur noch als
+**Forward-Fix auf der VPS** oder als **Reverse-Dump VPS -> Spark** (VPS quiescen,
+dumpen, auf den Spark zuruueckspielen, Schreiber wieder auf localhost). Nicht mehr
+"einfach den Spark anwerfen".
