@@ -53,6 +53,7 @@ Autor: Jolanda Spiess + Claude (Anthropic), 2026-04-30 / 2026-05-07
 """
 
 import os
+import re
 import sys
 import json
 import uuid
@@ -392,8 +393,15 @@ def load_stiftungen():
     # jsonb::text ist einzeilig (Newlines in Strings sind als \n escaped).
     # duplicate_of: als Duplikat verlinkte Eintraege sind nie Kandidaten -
     # sonst erscheint dieselbe Foerderung doppelt in den Treffern (MFF-Fall).
-    sql = ("SELECT (to_jsonb(s) - 'embedding')::text FROM stiftungen s "
-           "WHERE s.duplicate_of IS NULL;")
+    # ist_foerderstiftung IS NOT FALSE (W1.6): explizite Nicht-Foerderer (operative
+    # Stiftungen, Verbaende ohne Vergabe) raus; TRUE und NULL (ungeprueft) bleiben.
+    # IS NOT FALSE nur, wenn die Spalte existiert (dynamischer Schutz).
+    spalten_check = "SELECT 1 FROM information_schema.columns WHERE table_name='stiftungen' AND column_name='ist_foerderstiftung' LIMIT 1;"
+    hat_foerder_spalte = bool(_psql_run(spalten_check, timeout=30, remote=True).strip())
+    where = "s.duplicate_of IS NULL"
+    if hat_foerder_spalte:
+        where += " AND s.ist_foerderstiftung IS NOT FALSE"
+    sql = f"SELECT (to_jsonb(s) - 'embedding')::text FROM stiftungen s WHERE {where};"
     raw = _psql_run(sql, timeout=180, remote=True)
     rows = []
     for line in raw.split("\n"):
@@ -932,6 +940,62 @@ def _stiftungs_geo_modifikator(stiftung, sdna_full=None):
             'sound_feeling':_sound}
 
 
+_PREIS_RE = re.compile(r'preis|kulturpreis|stipend|werkbeitrag|auszeichnung', re.I)
+
+
+def _parse_betrag_grenzen(foerdersummen_range):
+    """(min, max) CHF-Betrag aus einem Freitext-Range wie "CHF 2'000-165'000"
+    oder "CHF 10.000". (None, None) wenn nicht parsebar."""
+    if not foerdersummen_range or not isinstance(foerdersummen_range, str):
+        return None, None
+    werte = []
+    for n in re.findall(r"\d[\d'.,’\s]*\d|\d", foerdersummen_range):
+        n2 = re.sub(r"[^\d]", "", n)
+        if n2:
+            werte.append(int(n2))
+    if not werte:
+        return None, None
+    return min(werte), max(werte)
+
+
+def _institutionalitaets_modifikator(stiftung, sdna_full=None):
+    """Deterministisches Score-Delta aus HARTEN Feldern (nicht aus LLM-Prosa):
+    schuetzt belegbare institutionelle Geldgeber vor halluzinierten Namensprofilen
+    (Kalibrierung 2026-07-24 — Ursache: kleine Preis-/Namensstiftungen mit erfundener
+    'institutioneller' DNA rankten vor echten Grossfoerderern wie Migros-Kulturprozent).
+    Rueckgabe: (delta:int in [-25,+10], info:dict). Bewusst konservativ."""
+    delta = 0
+    gruende = []
+    ist_foerder = stiftung.get('ist_foerderstiftung')
+    fs = stiftung.get('foerdersummen_range')
+    kat = stiftung.get('kategorie') or ''
+    name = stiftung.get('Stiftungsname') or ''
+    lo, hi = _parse_betrag_grenzen(fs)
+
+    if ist_foerder is False:  # Nicht-Foerderer (Sicherheitsnetz; W1.6 filtert i.d.R. schon)
+        delta -= 20
+        gruende.append('kein_foerderer')
+
+    if _PREIS_RE.search(name) or _PREIS_RE.search(kat):  # Preis/Stipendium = Einzelpersonen, keine Org-Foerderung
+        delta -= 12
+        gruende.append('preis_stipendium')
+    elif lo is not None and hi is not None and lo == hi and hi > 0:  # fixe Dotation = Preis, keine Projektspanne
+        delta -= 10
+        gruende.append('fixe_dotation')
+
+    if not fs:  # kein Betrags-Beleg -> evidenzarmes Profil (faengt halluzinierte stammdaten-DNA)
+        delta -= 8
+        gruende.append('kein_betrag_beleg')
+    elif hi is not None and hi >= 30000 and ist_foerder is not False:  # belegter, relevanter Spielraum -> echter Grossfoerderer
+        delta += 8
+        gruende.append('belegter_grossfoerderer')
+
+    delta = max(-25, min(10, delta))
+    return delta, {'type': 'institutionalitaet', 'delta': delta, 'gruende': gruende,
+                   'foerdersummen_range': fs, 'ist_foerderstiftung': ist_foerder,
+                   'betrag_min': lo, 'betrag_max': hi}
+
+
 def directus_patch(endpoint, body, max_retries=4):
     """Directus PATCH mit gleicher Retry-Logik wie directus_post."""
     import time
@@ -1024,6 +1088,12 @@ def push_match_result(dna, stiftung, math_score, math_breakdown, embedding_score
     combined = combine_scores(math_score, embedding_score, llm_score)
     if exclusion_triggered:
         combined = 0
+    # Deterministischer Institutionalitaets-Modifikator (Kalibrierung 2026-07-24):
+    # hebt belegte Geldgeber, senkt Preis-/evidenzlose Namensprofile. Nur wenn nicht
+    # ohnehin ausgeschlossen und ein positiver Score vorliegt.
+    inst_delta, inst_info = _institutionalitaets_modifikator(stiftung, sdna_full)
+    if not exclusion_triggered and combined > 0 and inst_delta:
+        combined = max(0, min(100, combined + inst_delta))
 
     breakdown = dict(math_breakdown) if isinstance(math_breakdown, dict) else {}
     breakdown["weights"] = {
@@ -1045,7 +1115,7 @@ def push_match_result(dna, stiftung, math_score, math_breakdown, embedding_score
         "score_llm": llm_score,
         "score_breakdown": breakdown,
         "begruendung": begruendung,
-        "modifikatoren": [_stiftungs_geo_modifikator(stiftung, sdna_full)],
+        "modifikatoren": [_stiftungs_geo_modifikator(stiftung, sdna_full), inst_info],
         "exclusion_triggered": exclusion_triggered,
         "funder_updated_at_snapshot": stiftung.get("date_updated"),
         "computed_at": datetime.now(timezone.utc).isoformat(),

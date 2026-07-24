@@ -166,5 +166,61 @@ class TestCombineScoresRegression(unittest.TestCase):
             self.assertEqual(match_engine.combine_scores(None, None, None), 0)
 
 
+class TestParseBetragGrenzen(unittest.TestCase):
+    def test_range(self):
+        self.assertEqual(match_engine._parse_betrag_grenzen("CHF 2'000-165'000"), (2000, 165000))
+
+    def test_fixwert(self):
+        self.assertEqual(match_engine._parse_betrag_grenzen("CHF 10.000"), (10000, 10000))
+
+    def test_leer(self):
+        self.assertEqual(match_engine._parse_betrag_grenzen(None), (None, None))
+        self.assertEqual(match_engine._parse_betrag_grenzen(""), (None, None))
+
+
+class TestInstitutionalitaetsModifikator(unittest.TestCase):
+    def _delta(self, **kw):
+        return match_engine._institutionalitaets_modifikator(kw)[0]
+
+    def test_belegter_grossfoerderer_bekommt_bonus(self):
+        # Migros-Kulturprozent: belegter breiter Foerderrange, echte Foerderstiftung
+        self.assertEqual(self._delta(ist_foerderstiftung=True,
+                                     foerdersummen_range="CHF 2'000-165'000",
+                                     Stiftungsname="Migros-Kulturprozent"), 8)
+
+    def test_preisstiftung_bekommt_malus(self):
+        # Kulturpreis im Namen -> Preis/Einzelperson
+        self.assertEqual(self._delta(ist_foerderstiftung=True,
+                                     foerdersummen_range="CHF 10.000",
+                                     Stiftungsname="GREULICH STIFTUNG KULTURPREIS"), -12)
+
+    def test_evidenzloses_profil_malus(self):
+        # halluzinierte Namens-DNA ohne Betrags-Beleg
+        self.assertEqual(self._delta(ist_foerderstiftung=True, foerdersummen_range=None,
+                                     Stiftungsname="Edi und Brigitt Gysi Stiftung"), -8)
+
+    def test_nicht_foerderer_harter_malus_geclamped(self):
+        # ist_foerderstiftung False (-20) + kein Betrag (-8) = -28 -> clamp -25
+        self.assertEqual(self._delta(ist_foerderstiftung=False, foerdersummen_range=None,
+                                     Stiftungsname="Berti Aschmann Stiftung"), -25)
+
+    def test_fixe_dotation_ohne_preiswort(self):
+        self.assertEqual(self._delta(ist_foerderstiftung=True, foerdersummen_range="5000-5000",
+                                     Stiftungsname="Beispiel Stiftung"), -10)
+
+    def test_legitimer_kleinfoerderer_bleibt_neutral(self):
+        # echte kleine Projektfoerderstiftung mit belegtem (kleinem) Range -> kein Malus, kein Bonus
+        self.assertEqual(self._delta(ist_foerderstiftung=True,
+                                     foerdersummen_range="CHF 1'000-20'000",
+                                     Stiftungsname="Gottfried und Ursula Schaeppi-Jecklin Stiftung"), 0)
+
+    def test_delta_immer_geclamped(self):
+        d, info = match_engine._institutionalitaets_modifikator(
+            {'ist_foerderstiftung': True, 'foerdersummen_range': "CHF 50'000-500'000", 'Stiftungsname': 'X'})
+        self.assertGreaterEqual(d, -25)
+        self.assertLessEqual(d, 10)
+        self.assertEqual(info['type'], 'institutionalitaet')
+
+
 if __name__ == "__main__":
     unittest.main()
