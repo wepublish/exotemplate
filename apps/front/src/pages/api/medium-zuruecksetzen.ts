@@ -3,8 +3,9 @@
  * («Voller Neustart»), damit es das Onboarding neu durchlaufen kann.
  *
  * POST { medium_slug }
- *   → löscht alle medium_dna-Versionen, medium_knowledge-Uploads und
- *     match_results des Mediums und setzt in faas_medien Logo, DNA-Freigabe,
+ *   → DEAKTIVIERT alle medium_dna-Versionen (is_active=false, wiederherstellbar —
+ *     W1.2 Lösch-Guard), löscht medium_knowledge-Uploads und match_results des
+ *     Mediums und setzt in faas_medien Logo, DNA-Freigabe,
  *     Matching-Freischaltung und die arbeits_dna-Felder zurück. Portal-Zugänge
  *     bleiben bestehen (Login funktioniert weiter). Antwortet 200 mit einer
  *     Zusammenfassung, wie viel entfernt wurde.
@@ -53,6 +54,33 @@ async function loescheNachMedium(collection: string, mediumSlug: string): Promis
   return ids.length
 }
 
+/**
+ * W1.2 Lösch-Guard: Statt die teuer LLM-veredelte medium_dna HART zu löschen
+ * (historische Ursache des We.Publish-DNA-Verlusts), werden alle Versionen nur
+ * DEAKTIVIERT (is_active=false). Der Reset wirkt wie zuvor — das Medium hat
+ * danach keine aktive DNA und durchläuft Onboarding neu —, aber die veredelte
+ * Historie bleibt erhalten und ist wiederherstellbar. Gibt die Anzahl
+ * deaktivierter Versionen zurück (0, wenn keine vorhanden).
+ */
+export async function deaktiviereDnaNachMedium(mediumSlug: string): Promise<number> {
+  const filter = encodeURIComponent(JSON.stringify({ medium_id: { _eq: mediumSlug } }))
+  const resIds = await fetch(`${base()}/items/medium_dna?filter=${filter}&limit=-1&fields=id`, {
+    headers: schreibHeaders(),
+    signal: AbortSignal.timeout(15_000),
+  })
+  if (!resIds.ok) throw new Error(`medium_dna lesen fehlgeschlagen (${resIds.status})`)
+  const ids = (((await resIds.json())?.data ?? []) as Array<{ id: unknown }>).map((r) => r.id)
+  if (ids.length === 0) return 0
+  const resPatch = await fetch(`${base()}/items/medium_dna`, {
+    method: 'PATCH',
+    headers: schreibHeaders(),
+    body: JSON.stringify({ keys: ids, data: { is_active: false } }),
+    signal: AbortSignal.timeout(15_000),
+  })
+  if (!resPatch.ok) throw new Error(`medium_dna deaktivieren fehlgeschlagen (${resPatch.status})`)
+  return ids.length
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const cfEmailHeader = req.headers['cf-access-authenticated-user-email'] as string | undefined
   if (istPortalZugriffAufProxy(req.headers.cookie, cfEmailHeader, process.env.PORTAL_SESSION_SECRET)) {
@@ -84,7 +112,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const wer = cfEmailHeader ?? 'team'
 
   try {
-    const dna = await loescheNachMedium('medium_dna', mediumSlug)
+    // medium_dna wird DEAKTIVIERT, nicht gelöscht (W1.2 Lösch-Guard —
+    // wiederherstellbar). uploads + match_results werden gelöscht (recomputebar).
+    const dna = await deaktiviereDnaNachMedium(mediumSlug)
     const uploads = await loescheNachMedium('medium_knowledge', mediumSlug)
     const matches = await loescheNachMedium('match_results', mediumSlug)
 

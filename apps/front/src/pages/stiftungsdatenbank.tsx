@@ -34,6 +34,8 @@ import {
   type Land,
   type FoerderFilter,
 } from '@/graphql/stiftungen.helpers'
+import { ThemenFilter } from '@/components/ThemenFilter'
+import { themenLabel } from '@/lib/themen-facetten'
 
 const PAGE_SIZE = 50
 
@@ -413,6 +415,7 @@ export default function StiftungsdatenbankPage() {
   const [suche, setSuche] = useState('')
   const [page, setPage] = useState(1)
   const [detailId, setDetailId] = useState<string | null>(null)
+  const [themen, setThemen] = useState<string[]>([])
 
   // Debounce der Suche: erst 300 ms nach dem letzten Tastendruck feuert die
   // Query (und der Count) neu — sonst eine Abfrage pro Zeichen gegen 40k Einträge.
@@ -424,7 +427,7 @@ export default function StiftungsdatenbankPage() {
     return () => clearTimeout(t)
   }, [sucheInput])
 
-  const filter = buildFilter(land, foerder, suche)
+  const filter = buildFilter(land, foerder, suche, themen)
   const offset = (page - 1) * PAGE_SIZE
 
   const handleFilterChange = useCallback((fn: () => void) => {
@@ -498,6 +501,9 @@ export default function StiftungsdatenbankPage() {
           />
         </div>
 
+        {/* Themen-Filter */}
+        <ThemenFilter ausgewaehlt={themen} onChange={(s) => handleFilterChange(() => setThemen(s))} />
+
         {/* Trefferzahl + Stiftung hinzufügen */}
         <div className="ml-auto flex items-center gap-4">
           {!listLoading && (
@@ -508,6 +514,30 @@ export default function StiftungsdatenbankPage() {
           <StiftungAnlegenDialog onAngelegt={() => { refetchListe(); refetchCount() }} />
         </div>
       </div>
+
+      {/* Aktive Themen als entfernbare Chips */}
+      {themen.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 -mt-3 mb-6">
+          {themen.map((slug) => (
+            <button
+              key={slug}
+              type="button"
+              onClick={() => handleFilterChange(() => setThemen(themen.filter((s) => s !== slug)))}
+              className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs px-2.5 py-1 hover:bg-emerald-100"
+            >
+              {themenLabel(slug)}
+              <span aria-hidden className="text-emerald-500">×</span>
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => handleFilterChange(() => setThemen([]))}
+            className="text-xs text-slate-500 hover:underline"
+          >
+            alle entfernen
+          </button>
+        </div>
+      )}
 
       {/* Lade-Skeletons */}
       {listLoading && stiftungen.length === 0 && (

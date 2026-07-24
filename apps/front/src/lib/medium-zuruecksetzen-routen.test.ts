@@ -72,7 +72,7 @@ describe('/api/medium-zuruecksetzen', () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
-  it('Happy Path: löscht dna/knowledge/matches, PATCH setzt Felder zurück, 200', async () => {
+  it('Happy Path: deaktiviert dna (W1.2), löscht knowledge/matches, PATCH setzt Felder zurück, 200', async () => {
     ladeMock.mockResolvedValue({ id: '9', name: 'Zwölf', slug: 'zwolf', matchingFreigeschaltet: null, dnaFreigabe: null })
     const fetchMock = jest.fn().mockResolvedValue({
       ok: true,
@@ -89,11 +89,18 @@ describe('/api/medium-zuruecksetzen', () => {
 
     const calls = fetchMock.mock.calls as Array<[string, RequestInit]>
     const deletes = calls.filter(([, o]) => o?.method === 'DELETE').map(([u]) => u)
-    expect(deletes.some((u) => u.includes('/items/medium_dna'))).toBe(true)
+    // W1.2 Lösch-Guard: medium_dna wird NICHT gelöscht, sondern deaktiviert.
+    expect(deletes.some((u) => u.includes('/items/medium_dna'))).toBe(false)
     expect(deletes.some((u) => u.includes('/items/medium_knowledge'))).toBe(true)
     expect(deletes.some((u) => u.includes('/items/match_results'))).toBe(true)
 
-    const patch = calls.find(([, o]) => o?.method === 'PATCH')
+    // medium_dna: PATCH is_active=false (Deaktivierung statt Löschung).
+    const dnaPatch = calls.find(([u, o]) => o?.method === 'PATCH' && String(u).includes('/items/medium_dna'))
+    expect(dnaPatch).toBeDefined()
+    expect(JSON.parse(dnaPatch![1].body as string).data.is_active).toBe(false)
+
+    // faas_medien: der Felder-Reset-PATCH (gezielt, da es jetzt zwei PATCHes gibt).
+    const patch = calls.find(([u, o]) => o?.method === 'PATCH' && String(u).includes('/items/faas_medien'))
     expect(patch).toBeDefined()
     const [purl, popts] = patch as [string, RequestInit]
     expect(purl).toContain('/items/faas_medien')

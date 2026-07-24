@@ -3,17 +3,27 @@
  * Ausgelagert für Unit-Tests.
  */
 
+import { ALLE_THEMEN_SLUGS } from '@/lib/themen-facetten'
+
 export type Land = 'alle' | 'CH' | 'AT' | 'DE'
 export type FoerderFilter = 'alle' | 'nur_foerder'
+
+const THEMEN_WHITELIST = new Set<string>(ALLE_THEMEN_SLUGS)
 
 /**
  * Baut das Directus-Filter-Objekt aus den UI-Zuständen.
  * Gibt undefined zurück, wenn kein Filter aktiv ist.
+ *
+ * themen: Liste boolescher Themen-Spalten (aus themen-facetten.ts). Mehrere
+ * Themen werden als ODER verknüpft (Stiftung matcht IRGENDEIN gewähltes Thema)
+ * und mit Land/Förder/Suche per UND kombiniert. Nur gewhitelistete Slugs werden
+ * übernommen (Schutz gegen beliebige Spaltennamen).
  */
 export function buildFilterForTest(
   land: Land,
   foerder: FoerderFilter,
-  suche: string
+  suche: string,
+  themen: string[] = []
 ): Record<string, unknown> | undefined {
   const conditions: unknown[] = []
 
@@ -25,6 +35,13 @@ export function buildFilterForTest(
   }
   if (suche.trim()) {
     conditions.push({ Stiftungsname: { _icontains: suche.trim() } })
+  }
+
+  const gueltigeThemen = themen.filter((s) => THEMEN_WHITELIST.has(s))
+  if (gueltigeThemen.length === 1) {
+    conditions.push({ [gueltigeThemen[0]]: { _eq: true } })
+  } else if (gueltigeThemen.length > 1) {
+    conditions.push({ _or: gueltigeThemen.map((s) => ({ [s]: { _eq: true } })) })
   }
 
   if (conditions.length === 0) return undefined

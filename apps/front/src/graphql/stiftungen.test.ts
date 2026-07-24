@@ -3,6 +3,7 @@
  * Importiert die isolierte Hilfsfunktion aus einem eigenen Export.
  */
 import { buildFilterForTest as buildFilter, clean } from './stiftungen.helpers'
+import { ALLE_THEMEN_SLUGS } from '../lib/themen-facetten'
 
 describe('buildFilter', () => {
   it('gibt undefined zurück wenn kein Filter aktiv', () => {
@@ -37,6 +38,42 @@ describe('buildFilter', () => {
   it('ignoriert leere Suche', () => {
     const f = buildFilter('alle', 'alle', '   ')
     expect(f).toBeUndefined()
+  })
+})
+
+describe('buildFilter mit Themen-Facetten', () => {
+  const T1 = 'medien_journalismus_lokaljournalismus'
+  const T2 = 'kultur_kunst_lifestyle_theater_tanz'
+
+  it('ein Thema -> direkte _eq-Bedingung', () => {
+    expect(buildFilter('alle', 'alle', '', [T1])).toEqual({ [T1]: { _eq: true } })
+  })
+
+  it('mehrere Themen -> _or (Stiftung matcht IRGENDEIN Thema)', () => {
+    const f = buildFilter('alle', 'alle', '', [T1, T2]) as Record<string, unknown>
+    expect(f._or).toEqual([{ [T1]: { _eq: true } }, { [T2]: { _eq: true } }])
+  })
+
+  it('Themen kombiniert mit Land -> _and mit _or-Block', () => {
+    const f = buildFilter('CH', 'alle', '', [T1, T2]) as Record<string, unknown>
+    const and = f._and as unknown[]
+    expect(and).toContainEqual({ land: { _eq: 'CH' } })
+    expect(and).toContainEqual({ _or: [{ [T1]: { _eq: true } }, { [T2]: { _eq: true } }] })
+  })
+
+  it('unbekannte/erfundene Slugs werden verworfen (Whitelist)', () => {
+    expect(buildFilter('alle', 'alle', '', ['drop_table_stiftungen'])).toBeUndefined()
+    // gültiges Thema bleibt, ungültiges fliegt raus
+    expect(buildFilter('alle', 'alle', '', ['boese', T1])).toEqual({ [T1]: { _eq: true } })
+  })
+
+  it('alle 98 echten Slugs sind gültig (kein versehentliches Verwerfen)', () => {
+    const f = buildFilter('alle', 'alle', '', [...ALLE_THEMEN_SLUGS]) as Record<string, unknown>
+    expect((f._or as unknown[]).length).toBe(98)
+  })
+
+  it('leere Themenliste ändert nichts', () => {
+    expect(buildFilter('CH', 'alle', '', [])).toEqual({ land: { _eq: 'CH' } })
   })
 })
 
