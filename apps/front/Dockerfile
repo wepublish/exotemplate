@@ -3,6 +3,11 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
+# Build-Marke: NEXT_PUBLIC_* muss WAEHREND `next build` gesetzt sein, damit der
+# Wert in das Client-Bundle eingebacken wird. Wird von scripts/deploy-front.sh
+# als --build-arg BUILD_SHA=<commit> uebergeben; ohne Angabe bleibt es "dev".
+ARG BUILD_SHA=dev
+ENV NEXT_PUBLIC_BUILD_SHA=$BUILD_SHA
 RUN npm run build
 
 FROM node:24-alpine

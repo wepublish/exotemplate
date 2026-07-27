@@ -204,6 +204,17 @@ export default function Layout({ children, pageTitle }: LayoutProps) {
           <p className="font-mono text-[10px] text-slate-500 text-center">
             © 2026 We.Publish · <span className="text-indigo-500 font-semibold">FaaS</span>
           </p>
+          {/* Build-Marke: sagt auf einen Blick, WELCHER Stand im Browser geladen ist.
+              Next.js ist eine SPA — ein Tab, der vor einem Deploy geoeffnet wurde,
+              behaelt sein HTML-Dokument und damit die alten Chunks, ohne dass etwas
+              fehlschlaegt. Am 27.07.2026 hat genau das zweimal zu der Fehlannahme
+              gefuehrt, ein Deploy sei nicht angekommen. Diese Zeile beendet das Raten. */}
+          <p
+            className="font-mono text-[9px] text-slate-600 text-center mt-1 select-all"
+            title="Geladener Build. Stimmt er nicht mit dem erwarteten Commit überein, hält der Tab einen alten Stand: privates Fenster öffnen."
+          >
+            build {process.env.NEXT_PUBLIC_BUILD_SHA || 'dev'}
+          </p>
         </div>
       </aside>
 

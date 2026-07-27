@@ -29,6 +29,7 @@ echo ">> Build linux/amd64 auf dem Mac  ->  $IMAGE:$TAG"
 # Der Mac ist arm64, die VPS amd64 -> Cross-Build (Emulation, dauert ein paar
 # Minuten). Bewusst langsamer, dafuer faellt auf der Produktion keine Last an.
 docker buildx build --platform linux/amd64 \
+  --build-arg "BUILD_SHA=$TAG" \
   -t "$IMAGE:$TAG" -t "$IMAGE:latest" --load apps/front
 
 echo ">> Image uebertragen (gzip ueber ssh)"
@@ -57,4 +58,7 @@ echo ">> Alte, unbenutzte faas-front-Images aufraeumen (behaelt latest + laufend
 ssh "$VPS" "docker image prune -f >/dev/null; docker images '$IMAGE' --format '  {{.Repository}}:{{.Tag}} {{.Size}}'"
 
 echo "OK -> Deploy fertig (Image $IMAGE:$TAG)."
+echo "   Build-Marke in der App (Sidebar unten): build $TAG"
+echo "   Zeigt der Browser eine andere Marke, haelt der Tab einen alten Stand:"
+echo "   privates Fenster oeffnen (Next.js holt das HTML-Dokument beim Navigieren nicht neu)."
 echo "   Rollback: auf der VPS  FRONT_TAG=<alter-sha> docker compose up -d --no-build front"
