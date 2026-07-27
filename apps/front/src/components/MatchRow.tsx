@@ -654,17 +654,25 @@ export function MatchRow({
             )}
           </div>
 
-          {/* Rechts: Betrag + Link */}
+          {/* Rechts: Betrag + Link.
+              `betrag` ist Freitext aus foerdersummen_range bzw. foerderbeitraege und
+              reicht von "CHF 5'000" bis zu ganzen Absaetzen (Kanton Bern: 224 Zeichen).
+              Ohne Breitengrenze sprengte der Block die Karte: er war flex-shrink-0,
+              nahm also die ganze Zeile, quetschte den Stiftungsnamen auf null und lief
+              rechts aus der Karte (Befund 2026-07-27, 21 von 532 sichtbaren Stiftungen
+              betroffen, drei davon schwer). Darum: schrumpfbar, gedeckelt, gekuerzt,
+              vollstaendiger Text im title und im aufgeklappten Detail. */}
           <div
-            className="flex items-center gap-2 flex-shrink-0"
+            className="flex items-center gap-2 min-w-0 max-w-[45%] shrink"
             onClick={e => e.stopPropagation()}
           >
             {row.betrag && (
               <Badge
                 variant="outline"
-                className="bg-green-50 text-green-700 border-green-200 hidden sm:inline-flex text-[10px]"
+                title={row.betrag}
+                className="bg-green-50 text-green-700 border-green-200 hidden sm:inline-flex text-[10px] max-w-[15rem] min-w-0 overflow-hidden"
               >
-                {row.betrag}
+                <span className="truncate">{row.betrag}</span>
               </Badge>
             )}
             {row.website && (
@@ -672,7 +680,7 @@ export function MatchRow({
                 href={row.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-slate-400 hover:text-indigo-600 p-1 inline-block"
+                className="text-slate-400 hover:text-indigo-600 p-1 inline-block shrink-0"
                 onClick={e => e.stopPropagation()}
               >
                 <ExternalLink className="w-4 h-4" />
@@ -701,6 +709,18 @@ export function MatchRow({
       <AccordionContent className="pt-0 pb-0 px-0">
         <div className="px-4 pt-4 pb-4 space-y-4">
           {betrag && <BetragBegruendung betrag={betrag} />}
+
+          {/* Belegte Foerdersummen im Volltext. Oben in der Kopfzeile ist der Wert
+              gekuerzt, weil er Freitext ist und bis zu ganze Absaetze enthaelt;
+              hier steht er vollstaendig und umbruchfaehig. */}
+          {row.betrag && (
+            <div className="rounded-md border border-green-200 bg-green-50 px-3 py-2">
+              <p className="text-[11px] font-semibold text-green-800 mb-0.5">Belegte Fördersummen</p>
+              <p className="text-xs text-green-900 leading-relaxed whitespace-pre-line break-words">
+                {row.betrag}
+              </p>
+            </div>
+          )}
 
           <MatchRationale row={row} />
 

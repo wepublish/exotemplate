@@ -82,3 +82,53 @@ test('Antrag ausgeblendet: zeigt Wieder-Einblenden-Knopf, keinen Ausblenden-Knop
   expect(screen.getByRole('button', { name: /Wieder einblenden/ })).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: /^Ausblenden$/ })).not.toBeInTheDocument()
 })
+
+// ─── Regression: langer Freitext-Betrag darf die Karte nicht sprengen ──────────
+// Befund 2026-07-27: `betrag` kommt aus foerdersummen_range bzw. foerderbeitraege
+// und ist Freitext von "CHF 5'000" bis zu ganzen Absaetzen (Kanton Bern:
+// 224 Zeichen). Der Block war flex-shrink-0 und ohne Breitengrenze: er nahm die
+// ganze Zeile, quetschte den Stiftungsnamen auf null und lief aus der Karte.
+const LANGER_BETRAG =
+  'Nachrichtenagenturen: Leistungsvertraege mit Betriebsbeitraegen bis hoechstens ' +
+  "100'000 Franken pro Jahr. Projektfoerderung: befristete Beitraege bis 20'000 " +
+  'Franken pro Jahr und Vorhaben; angemessene Eigenleistungen vorausgesetzt.'
+
+function renderMitBetrag(betrag: string) {
+  const r = { ...row, betrag }
+  return render(
+    <Accordion type="multiple" defaultValue={[r.id]}>
+      <MatchRow row={r} rank={1} medium="wepublish" />
+    </Accordion>
+  )
+}
+
+test('langer Betrag: Badge ist gedeckelt und gekuerzt, nicht unbegrenzt breit', () => {
+  const { container } = renderMitBetrag(LANGER_BETRAG)
+  const badge = container.querySelector(`[title="${LANGER_BETRAG}"]`)
+  expect(badge).not.toBeNull()
+  const klassen = badge!.className
+  expect(klassen).toMatch(/max-w-/)
+  expect(klassen).toMatch(/overflow-hidden/)
+  expect(badge!.querySelector('.truncate')).not.toBeNull()
+})
+
+test('langer Betrag: umgebender Block darf schrumpfen (kein flex-shrink-0)', () => {
+  const { container } = renderMitBetrag(LANGER_BETRAG)
+  const badge = container.querySelector(`[title="${LANGER_BETRAG}"]`)
+  const block = badge!.parentElement!
+  expect(block.className).not.toMatch(/shrink-0/)
+  expect(block.className).toMatch(/min-w-0/)
+})
+
+test('langer Betrag: Volltext steht im aufgeklappten Detail', () => {
+  renderMitBetrag(LANGER_BETRAG)
+  expect(screen.getByText('Belegte Fördersummen')).toBeInTheDocument()
+  const volltext = screen.getAllByText(LANGER_BETRAG)
+  // Einmal gekuerzt im Badge, einmal vollstaendig im Detail.
+  expect(volltext.length).toBeGreaterThanOrEqual(2)
+})
+
+test('Stiftungsname bleibt trotz langem Betrag im DOM', () => {
+  renderMitBetrag(LANGER_BETRAG)
+  expect(screen.getByText('Medien-Stiftung')).toBeInTheDocument()
+})
