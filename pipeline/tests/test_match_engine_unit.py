@@ -263,3 +263,66 @@ class TestWaehleZuBewertende(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestBestehendeZeileFolgtDerWahrheit(unittest.TestCase):
+    """Befund 2026-07-27: fiel eine bereits geschriebene Zeile beim Neurechnen unter
+    MATCH_MIN_SCORE, wurde sie uebersprungen und behielt ihren alten, hoeheren Score
+    dauerhaft. 1047 Zeilen waren so eingefroren, 73 davon im Portal sichtbar.
+    Neue Zeilen entstehen weiterhin erst ab der Schwelle."""
+
+    DNA = {"medium_id": "testmedium", "version_id": "v1-test", "tags": [], "id": 1}
+    STIFTUNG = {"id": 4242, "Stiftungsname": "Teststiftung", "ist_foerderstiftung": True,
+                "foerdersummen_range": None, "kategorie": "", "land": "CH"}
+
+    def _push(self, score, existing, tier="qwen_v3"):
+        aufrufe = {"patch": [], "post": []}
+        with mock.patch.object(match_engine, "combine_scores", return_value=score), \
+             mock.patch.object(match_engine, "_institutionalitaets_modifikator",
+                               return_value=(0, {"type": "institutionalitaet", "delta": 0})), \
+             mock.patch.object(match_engine, "_stiftungs_geo_modifikator",
+                               return_value={"type": "stiftungs_geo_scope"}), \
+             mock.patch.object(match_engine, "directus_patch",
+                               side_effect=lambda ep, body: aufrufe["patch"].append(ep) or {"ok": True}), \
+             mock.patch.object(match_engine, "directus_post",
+                               side_effect=lambda ep, body: aufrufe["post"].append(ep) or {"ok": True}), \
+             mock.patch.object(match_engine, "MATCH_MIN_SCORE", 10), \
+             mock.patch.object(match_engine, "MATCH_MIN_TIER", "qwen_v3"):
+            ergebnis = match_engine.push_match_result(
+                self.DNA, self.STIFTUNG, math_score=score, math_breakdown={},
+                embedding_score=0, llm_score=score, begruendung="test",
+                exclusion_triggered=False, exclusion_info=None, run_id="run-test",
+                dna_verified=True, dna_quality_tier=tier, sdna_full=None,
+                existing_match_ids=existing)
+        return ergebnis, aufrufe
+
+    def test_unter_schwelle_mit_bestehender_zeile_wird_fortgeschrieben(self):
+        ergebnis, aufrufe = self._push(4, {4242: "row-1"})
+        self.assertEqual(aufrufe["patch"], ["/items/match_results/row-1"])
+        self.assertEqual(aufrufe["post"], [])
+        self.assertNotIn("skipped", ergebnis)
+
+    def test_unter_schwelle_ohne_bestehende_zeile_bleibt_uebersprungen(self):
+        ergebnis, aufrufe = self._push(4, {})
+        self.assertTrue(ergebnis.get("skipped"))
+        self.assertEqual(aufrufe["patch"], [])
+        self.assertEqual(aufrufe["post"], [])
+
+    def test_ueber_schwelle_mit_bestehender_zeile_patcht(self):
+        _ergebnis, aufrufe = self._push(55, {4242: "row-1"})
+        self.assertEqual(aufrufe["patch"], ["/items/match_results/row-1"])
+        self.assertEqual(aufrufe["post"], [])
+
+    def test_ueber_schwelle_ohne_bestehende_zeile_legt_neu_an(self):
+        _ergebnis, aufrufe = self._push(55, {})
+        self.assertEqual(aufrufe["post"], ["/items/match_results"])
+        self.assertEqual(aufrufe["patch"], [])
+
+    def test_falscher_tier_mit_bestehender_zeile_wird_fortgeschrieben(self):
+        _ergebnis, aufrufe = self._push(55, {4242: "row-1"}, tier="opus_deep")
+        self.assertEqual(aufrufe["patch"], ["/items/match_results/row-1"])
+
+    def test_falscher_tier_ohne_bestehende_zeile_bleibt_uebersprungen(self):
+        ergebnis, aufrufe = self._push(55, {}, tier="opus_deep")
+        self.assertTrue(ergebnis.get("skipped"))
+        self.assertEqual(aufrufe["post"], [])

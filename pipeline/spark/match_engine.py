@@ -1146,16 +1146,28 @@ def push_match_result(dna, stiftung, math_score, math_breakdown, embedding_score
     }
     if dry_run:
         return body
-    # Score-Threshold: niedrigwertige Matches gar nicht erst in Directus speichern.
-    # Exclusion-Triggered (score=0) ebenfalls ueberspringen.
-    if combined < MATCH_MIN_SCORE:
-        return {"skipped": True, "reason": f"score {combined} < threshold {MATCH_MIN_SCORE}"}
-    if MATCH_MIN_TIER and (dna_quality_tier or "unknown").lower() != MATCH_MIN_TIER:
-        return {"skipped": True, "reason": f"tier {dna_quality_tier} != min_tier {MATCH_MIN_TIER}"}
-    # UPSERT: wenn bestehender Eintrag fuer (medium_id, stiftung_id, dna_version) existiert,
-    # PATCHEN statt neu INSERTen. Verhindert Duplikat-Spam pro Match-Engine-Lauf.
     sid = stiftung.get("id")
     existing_id = (existing_match_ids or {}).get(sid) if sid is not None else None
+    # Score-Threshold: niedrigwertige Matches gar nicht erst in Directus speichern.
+    # Exclusion-Triggered (score=0) ebenfalls ueberspringen.
+    #
+    # ABER: existiert fuer die Stiftung schon eine Zeile, wird sie fortgeschrieben
+    # statt uebersprungen. Sonst behaelt sie ihren alten, hoeheren Score fuer immer
+    # (Befund 2026-07-27: 1047 solche Zeilen, 73 davon oberhalb der Anzeigeschwelle
+    # von 20 und damit im Portal sichtbar - u.a. der Media Forward Fund auf Rang 1
+    # bei cueltuer). Ein einmal geschriebener Treffer muss der Wahrheit folgen,
+    # auch wenn sie unter die Schwelle faellt. Neue Zeilen entstehen unveraendert
+    # erst ab MATCH_MIN_SCORE.
+    if combined < MATCH_MIN_SCORE:
+        if existing_id is None:
+            return {"skipped": True, "reason": f"score {combined} < threshold {MATCH_MIN_SCORE}"}
+        return directus_patch(f"/items/match_results/{existing_id}", body)
+    if MATCH_MIN_TIER and (dna_quality_tier or "unknown").lower() != MATCH_MIN_TIER:
+        if existing_id is None:
+            return {"skipped": True, "reason": f"tier {dna_quality_tier} != min_tier {MATCH_MIN_TIER}"}
+        return directus_patch(f"/items/match_results/{existing_id}", body)
+    # UPSERT: wenn bestehender Eintrag fuer (medium_id, stiftung_id, dna_version) existiert,
+    # PATCHEN statt neu INSERTen. Verhindert Duplikat-Spam pro Match-Engine-Lauf.
     if existing_id is not None:
         return directus_patch(f"/items/match_results/{existing_id}", body)
     # v0.5.2 (2026-05-19): UNIQUE-Constraint match_results_unique_per_dna_version greift
