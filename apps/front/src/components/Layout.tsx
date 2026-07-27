@@ -234,6 +234,15 @@ export default function Layout({ children, pageTitle }: LayoutProps) {
             <span className="text-slate-300">{'// '}</span>
             {pageTitle ?? currentItem?.name ?? ''}
           </h2>
+          {/* Build-Marke, bewusst in der oberen Leiste und nicht nur im Sidebar-Fuss:
+              der Fuss liegt bei kurzem Fenster ausserhalb des Bildes, was am
+              27.07.2026 die Frage «welcher Stand ist geladen» offen liess. */}
+          <span
+            className="ml-auto font-mono text-[10px] text-slate-400 select-all"
+            title="Geladener Build. Weicht er vom erwarteten Commit ab, hält der Tab einen alten Stand: privates Fenster öffnen."
+          >
+            build {process.env.NEXT_PUBLIC_BUILD_SHA || 'dev'}
+          </span>
         </header>
 
         {/* Page content */}
