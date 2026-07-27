@@ -343,6 +343,10 @@ def main():
     ap.add_argument("--apply", action="store_true", help="Scharf: schreibt + flippt + re-matcht")
     ap.add_argument("--dry-run", action="store_true", help="(Default) nur messen + zeigen, kein Schreiben")
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--force", action="store_true",
+                    help="Manifest-Filter (erledigt/kein_web/fehl) ignorieren. Noetig fuer die "
+                         "Nachveredelung bereits einmal veredelter Stiftungen - sonst werden sie "
+                         "STILL uebersprungen und der Lauf meldet nur '0 Stiftungen offen'.")
     ap.add_argument("--shard", default="", help="i/n fuer disjunktes Multi-Maschinen-Sharding, z.B. 0/2")
     ap.add_argument("--laender", default="CH,AT", help="Laender-Filter fuer --pool, z.B. DE,LI (Schritt D)")
     ap.add_argument("--nur-stammdaten", action="store_true",
@@ -362,7 +366,12 @@ def main():
         sys.exit("--pool, --from-top N oder --ids angeben")
     erl, kw = set(man["erledigt"]), set(man["kein_web"])
     fehl = man.setdefault("fehl", {})  # sid(str) -> Anzahl mess_fehler; ab 2 uebersprungen (Manifest-Reset oeffnet neu)
-    ids = [i for i in ids if i not in erl and i not in kw and fehl.get(str(i), 0) < 2]
+    if args.force:
+        # Nachveredelung: bereits erledigte IDs bewusst nochmals durchlassen.
+        vorher = len(ids)
+        log(f"  --force: Manifest-Filter uebersprungen ({vorher} IDs bleiben in der Queue)")
+    else:
+        ids = [i for i in ids if i not in erl and i not in kw and fehl.get(str(i), 0) < 2]
     if args.shard:
         si, sn = (int(x) for x in args.shard.split("/"))
         ids = [s for s in ids if s % sn == si]
