@@ -222,5 +222,44 @@ class TestInstitutionalitaetsModifikator(unittest.TestCase):
         self.assertEqual(info['type'], 'institutionalitaet')
 
 
+class TestWaehleZuBewertende(unittest.TestCase):
+    """Vergleichsbasis-Konsistenz (Befund 2026-07-27): bestehende Zeilen duerfen
+    nie veralten, auch wenn die Stiftung aus den Top-N faellt."""
+
+    @staticmethod
+    def _kand(sid, score):
+        return {"stiftung": {"id": sid}, "math_score": score, "exclusion_triggered": False}
+
+    def test_top_n_ohne_bestehende_zeilen(self):
+        kand = [self._kand(i, 100 - i) for i in range(5)]
+        zu_bewerten, nach = match_engine.waehle_zu_bewertende(kand, {}, 3)
+        self.assertEqual([c["stiftung"]["id"] for c in zu_bewerten], [0, 1, 2])
+        self.assertEqual(nach, [])
+
+    def test_bestehende_zeile_ausserhalb_top_n_wird_mitbewertet(self):
+        """Der Migros-Fall: Rang 5 von 5, aber es gibt schon eine Zeile."""
+        kand = [self._kand(i, 100 - i) for i in range(5)]
+        zu_bewerten, nach = match_engine.waehle_zu_bewertende(kand, {4: "row-id"}, 3)
+        self.assertEqual([c["stiftung"]["id"] for c in zu_bewerten], [0, 1, 2, 4])
+        self.assertEqual([c["stiftung"]["id"] for c in nach], [4])
+
+    def test_keine_doppelten_wenn_bestehende_zeile_schon_in_top_n(self):
+        kand = [self._kand(i, 100 - i) for i in range(5)]
+        zu_bewerten, nach = match_engine.waehle_zu_bewertende(kand, {1: "row-id"}, 3)
+        ids = [c["stiftung"]["id"] for c in zu_bewerten]
+        self.assertEqual(ids, [0, 1, 2])
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertEqual(nach, [])
+
+    def test_ausgeschlossene_bestehende_zeile_wird_aufgefrischt(self):
+        """Faellt eine bestehende Zeile in einen Ausschluss, muss sie trotzdem
+        neu geschrieben werden, statt mit altem Score liegenzubleiben."""
+        kand = [self._kand(0, 90), self._kand(1, 80)]
+        kand.append({"stiftung": {"id": 9}, "math_score": 0, "exclusion_triggered": True})
+        zu_bewerten, nach = match_engine.waehle_zu_bewertende(kand, {9: "row-id"}, 2)
+        self.assertIn(9, [c["stiftung"]["id"] for c in zu_bewerten])
+        self.assertEqual([c["stiftung"]["id"] for c in nach], [9])
+
+
 if __name__ == "__main__":
     unittest.main()

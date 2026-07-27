@@ -958,6 +958,27 @@ def _parse_betrag_grenzen(foerdersummen_range):
     return min(werte), max(werte)
 
 
+def waehle_zu_bewertende(candidates, existing_match_ids, top_n):
+    """Welche Kandidaten in diesem Lauf bewertet werden.
+
+    Top-N nach Math-Score PLUS jede Stiftung, die fuer dieses Medium schon eine
+    match_results-Zeile hat. Ohne den zweiten Teil altern Zeilen unbegrenzt: sie
+    stehen in der UPSERT-Map, werden aber nie angefasst, weil die Stiftung nicht
+    mehr unter die Top-N kommt. Genau so trug Migros-Kulturprozent bei cueltuer
+    am 27.07.2026 noch einen Rechenstand vom 8. Juli und rankte damit auf Platz 8
+    (Befund 2026-07-27: 1038 von 3145 Zeilen aelter als der jeweils letzte Lauf).
+
+    `candidates` muss bereits nach math_score absteigend sortiert sein.
+    Rueckgabe: (zu_bewerten, nachzuegler) - nachzuegler nur fuer die Protokollzeile.
+    """
+    top = candidates[:top_n]
+    top_ids = {c["stiftung"].get("id") for c in top}
+    nachzuegler = [c for c in candidates[top_n:]
+                   if c["stiftung"].get("id") in existing_match_ids
+                   and c["stiftung"].get("id") not in top_ids]
+    return top + nachzuegler, nachzuegler
+
+
 def _institutionalitaets_modifikator(stiftung, sdna_full=None):
     """Deterministisches Score-Delta aus HARTEN Feldern (nicht aus LLM-Prosa):
     schuetzt belegbare institutionelle Geldgeber vor halluzinierten Namensprofilen
@@ -1211,6 +1232,20 @@ def run_match(args):
             else:
                 print(f"    Embedding-Similarities: leer (Medium-Vektor fehlt oder Qdrant down)", flush=True)
 
+        # UPSERT-Map ZUERST laden (vor dem Kandidatenaufbau): sie sagt, welche
+        # Stiftungen fuer dieses Medium bereits eine Zeile haben. Diese Zeilen werden
+        # in JEDEM Lauf mitbewertet, auch wenn die Stiftung nicht mehr unter die
+        # Top-N kommt oder ihr Math-Score auf 0 gefallen ist. Sonst altern sie
+        # unbegrenzt: Migros-Kulturprozent trug bei cueltuer am 27.07. noch einen
+        # Stand vom 8. Juli und rankte damit auf Platz 8 mit einem Wert, den die
+        # heutige Engine nie berechnet hat (Befund 2026-07-27).
+        try:
+            existing_match_ids = load_existing_match_result_ids(dna["medium_id"], dna["version_id"])
+            print(f"    UPSERT-Map: {len(existing_match_ids)} bestehende match_results fuer Update vorgesehen", flush=True)
+        except Exception as e:
+            print(f"    WARN: existing match_results konnten nicht geladen werden ({e}); falle auf INSERT-only zurueck", flush=True)
+            existing_match_ids = {}
+
         candidates = []
         for stiftung in stiftungen:
             excluded, ex_info = check_exclusion(dna, stiftung)
@@ -1229,7 +1264,10 @@ def run_match(args):
                 dna, stiftung,
                 sdna_full=sdna_full_map.get(_sid_pre) if isinstance(sdna_full_map, dict) else None,
             )
-            if math_score <= 0:
+            # Math-Score 0 = normalerweise kein Kandidat. Existiert fuer die Stiftung
+            # aber schon eine Zeile, wird sie trotzdem bewertet und ehrlich
+            # fortgeschrieben, statt mit einem alten Wert liegenzubleiben.
+            if math_score <= 0 and _sid_pre not in existing_match_ids:
                 continue
 
             # DNA-Klassifikator aus sdna_map fuer DNA-Quality-Tier in match_results
@@ -1246,21 +1284,15 @@ def run_match(args):
             })
 
         candidates.sort(key=lambda c: c["math_score"], reverse=True)
-        top = candidates[:TOP_N_PER_MEDIUM]
+        top, nachzuegler = waehle_zu_bewertende(candidates, existing_match_ids, TOP_N_PER_MEDIUM)
         non_exclusions = [c for c in top if not c["exclusion_triggered"]]
-        print(f"    Kandidaten gesamt: {len(candidates)}, Top-{TOP_N_PER_MEDIUM}: {len(top)} "
+        print(f"    Kandidaten gesamt: {len(candidates)}, Top-{TOP_N_PER_MEDIUM}: {len(top) - len(nachzuegler)} "
+              f"+ {len(nachzuegler)} bestehende Zeilen ausserhalb der Top-N = {len(top)} zu bewerten "
               f"(non-excluded: {len(non_exclusions)})", flush=True)
 
-        # UPSERT-Vorbereitung: existing match_results fuer (medium, dna_version) laden.
-        # Pro Push wird per stiftung_id im Mapping geprueft -> bestehender Eintrag wird via PATCH
-        # aktualisiert statt ein zweiter INSERT zu erzeugen. Verhindert Duplikate.
-        try:
-            existing_match_ids = load_existing_match_result_ids(dna["medium_id"], dna["version_id"])
-            print(f"    UPSERT-Map: {len(existing_match_ids)} bestehende match_results fuer Update vorgesehen", flush=True)
-        except Exception as e:
-            print(f"    WARN: existing match_results konnten nicht geladen werden ({e}); falle auf INSERT-only zurueck", flush=True)
-            existing_match_ids = {}
-
+        # (Die UPSERT-Map wurde oben, vor dem Kandidatenaufbau, geladen: pro Push wird
+        # per stiftung_id geprueft -> bestehender Eintrag wird via PATCH aktualisiert
+        # statt ein zweiter INSERT zu erzeugen. Verhindert Duplikate.)
 
         cache_hits = 0
         llm_calls = 0
