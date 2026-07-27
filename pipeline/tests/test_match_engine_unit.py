@@ -326,3 +326,58 @@ class TestBestehendeZeileFolgtDerWahrheit(unittest.TestCase):
         ergebnis, aufrufe = self._push(55, {}, tier="opus_deep")
         self.assertTrue(ergebnis.get("skipped"))
         self.assertEqual(aufrufe["post"], [])
+
+
+class TestDuplikatHygiene(unittest.TestCase):
+    """Befund 2026-07-27: Zeilen als Duplikat markierter Stiftungen sind nie
+    Kandidaten und froren daher mit altem Score ein - der Media Forward Fund stand
+    unter einer Zweit-ID in allen fuenf Medien doppelt und ueber dem echten Eintrag."""
+
+    def _lauf(self, existing, duplikate):
+        geloescht = []
+        with mock.patch.object(match_engine, "directus_delete_match_results",
+                               side_effect=lambda ids: geloescht.extend(ids) or True):
+            n = match_engine.cleanup_duplikat_match_results(existing, duplikate)
+        return n, geloescht, existing
+
+    def test_entfernt_nur_duplikate(self):
+        existing = {46988: "row-dup", 11991: "row-echt", 4242: "row-x"}
+        n, geloescht, rest = self._lauf(existing, {46988})
+        self.assertEqual(n, 1)
+        self.assertEqual(geloescht, ["row-dup"])
+        self.assertEqual(sorted(rest.keys()), [4242, 11991])
+
+    def test_nimmt_geloeschte_aus_der_upsert_map(self):
+        """Sonst patcht der Push-Loop danach auf eine geloeschte Zeile."""
+        existing = {46988: "row-dup"}
+        _n, _g, rest = self._lauf(existing, {46988})
+        self.assertNotIn(46988, rest)
+
+    def test_ohne_duplikate_keine_loeschung(self):
+        existing = {11991: "row-echt"}
+        n, geloescht, rest = self._lauf(existing, {46988})
+        self.assertEqual(n, 0)
+        self.assertEqual(geloescht, [])
+        self.assertEqual(list(rest.keys()), [11991])
+
+    def test_idempotent_beim_zweiten_lauf(self):
+        existing = {46988: "row-dup", 11991: "row-echt"}
+        self._lauf(existing, {46988})
+        n, geloescht, _rest = self._lauf(existing, {46988})
+        self.assertEqual(n, 0)
+        self.assertEqual(geloescht, [])
+
+    def test_batching_bei_vielen_zeilen(self):
+        existing = {1000 + i: f"row-{i}" for i in range(250)}
+        duplikate = set(existing.keys())
+        n, geloescht, rest = self._lauf(existing, duplikate)
+        self.assertEqual(n, 250)
+        self.assertEqual(len(geloescht), 250)
+        self.assertEqual(rest, {})
+
+    def test_duplikat_ids_parsen(self):
+        with mock.patch.object(match_engine, "_psql_run", return_value="46988\n6645\n\n42254\n"):
+            match_engine._DUPLIKAT_IDS_CACHE = None
+            ids = match_engine.load_duplikat_stiftung_ids()
+        match_engine._DUPLIKAT_IDS_CACHE = None
+        self.assertEqual(ids, {46988, 6645, 42254})

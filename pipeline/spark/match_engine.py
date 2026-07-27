@@ -1074,6 +1074,46 @@ def cleanup_stale_match_results(medium_id, active_version_id, batch=100):
     return len(ids)
 
 
+_DUPLIKAT_IDS_CACHE = None
+
+
+def load_duplikat_stiftung_ids():
+    """IDs aller als Duplikat markierten Stiftungen (`duplicate_of` gesetzt).
+    Einmal pro Lauf gelesen und zwischengespeichert."""
+    global _DUPLIKAT_IDS_CACHE
+    if _DUPLIKAT_IDS_CACHE is None:
+        out = _psql_run("SELECT id FROM stiftungen WHERE duplicate_of IS NOT NULL;",
+                        timeout=60, remote=True)
+        _DUPLIKAT_IDS_CACHE = {int(z.strip()) for z in out.split("\n") if z.strip().isdigit()}
+    return _DUPLIKAT_IDS_CACHE
+
+
+def cleanup_duplikat_match_results(existing_match_ids, duplikat_ids, batch=100):
+    """Treffer-Zeilen von als Duplikat markierten Stiftungen entfernen.
+
+    `load_stiftungen` filtert Duplikate (`duplicate_of IS NULL`), damit dieselbe
+    Foerderung nicht zweimal als Kandidat auftritt. Bestehende Zeilen solcher
+    Stiftungen waren dadurch aber unerreichbar: kein Lauf konnte sie mehr
+    anfassen, sie froren mit ihrem alten Score ein. Befund 2026-07-27: der Media
+    Forward Fund stand unter der Zweit-ID 46988 in ALLEN fuenf Medien doppelt und
+    rankte dort mit eingefrorenen 79 bis 86 jeweils UEBER dem kanonischen
+    Eintrag 11991. Dazu zwei Migros-Duplikate.
+
+    Entfernt die Zeilen und nimmt sie aus der UPSERT-Map, damit der Push-Loop
+    danach nicht auf eine geloeschte Zeile patcht.
+    Rueckgabe: Anzahl entfernter Zeilen.
+    """
+    treffer = [(sid, rid) for sid, rid in existing_match_ids.items() if sid in duplikat_ids]
+    if not treffer:
+        return 0
+    ids = [rid for _sid, rid in treffer]
+    for i in range(0, len(ids), batch):
+        directus_delete_match_results(ids[i:i + batch])
+    for sid, _rid in treffer:
+        existing_match_ids.pop(sid, None)
+    return len(ids)
+
+
 def load_existing_match_result_ids(medium_id, medium_dna_version_id):
     """Lade Mapping {stiftung_id: row_id} aller existierenden match_results
     fuer (medium_id, medium_dna_version_id). Wird vor dem Push-Loop verwendet,
@@ -1257,6 +1297,15 @@ def run_match(args):
         except Exception as e:
             print(f"    WARN: existing match_results konnten nicht geladen werden ({e}); falle auf INSERT-only zurueck", flush=True)
             existing_match_ids = {}
+
+        # Duplikat-Hygiene: Zeilen als Duplikat markierter Stiftungen entfernen.
+        # Sie sind nie Kandidaten und wuerden sonst mit altem Score einfrieren.
+        try:
+            n_dup = cleanup_duplikat_match_results(existing_match_ids, load_duplikat_stiftung_ids())
+            if n_dup:
+                print(f"    Duplikat-Hygiene: {n_dup} Treffer-Zeile(n) als Duplikat markierter Stiftungen entfernt", flush=True)
+        except Exception as e:
+            print(f"    WARN: Duplikat-Hygiene uebersprungen ({e})", flush=True)
 
         candidates = []
         for stiftung in stiftungen:
