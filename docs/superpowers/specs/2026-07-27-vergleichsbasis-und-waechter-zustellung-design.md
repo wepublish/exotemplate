@@ -46,6 +46,26 @@ Abgedeckt durch vier Tests in `pipeline/tests/test_match_engine_unit.py`: Top-N 
 - Gibt es nichts Neues, wird nichts gepostet.
 - `--dry-run` ist Standard, `--apply` postet, `--alle` ignoriert den Zustand.
 
+## Teil 1b — zwei weitere Ursachen, erst bei der Verifikation sichtbar
+
+Der Top-N-Schnitt war nur die erste von drei Ursachen. Die Prüflatte nach dem ersten Volldurchgang zeigte weiter 1'067 eingefrorene Zeilen.
+
+**Schreib-Schwelle.** `push_match_result` brach bei `combined < MATCH_MIN_SCORE` ab – auch für **bestehende** Zeilen. Da der Institutionalitäts-Modifikator bis zu 25 Punkte abzieht, rutschten viele Zeilen unter die Schwelle 10 und behielten ihren alten, höheren Score. 1'047 Zeilen waren so eingefroren, 73 davon oberhalb der Anzeigeschwelle 20 und damit im Portal sichtbar. Behoben: existiert eine Zeile, wird sie fortgeschrieben, auch unter der Schwelle oder bei abweichendem Tier. Neue Zeilen entstehen unverändert erst ab Score 10. Sechs Tests decken alle vier Kombinationen ab.
+
+**Duplikat-Filter.** `load_stiftungen` filtert `duplicate_of IS NULL`, Duplikate sind also nie Kandidaten – ihre bestehenden Zeilen dadurch für jeden Lauf unerreichbar. Folge: der Media Forward Fund stand unter der Zweit-ID 46988 in **allen fünf** Medien doppelt und rankte mit eingefrorenen 79–86 jeweils über dem kanonischen Eintrag 11991 (bei cueltuer 79 gegen 35). Behoben durch `cleanup_duplikat_match_results`, aufgerufen je Medium direkt nach der UPSERT-Map; entfernt die Zeilen und nimmt sie aus der Map, damit der Push-Loop nicht auf Gelöschtes patcht. Sechs Tests, inklusive Idempotenz und Batching.
+
+Lehre für die Zukunft: **bei Zweifeln an einer Rangfolge zuerst `computed_at` prüfen, nicht den Score interpretieren.** Eine Zeile mit altem Zeitstempel trägt einen Wert, den die heutige Engine nie berechnet hat.
+
+## Teil 4 — Riegel gegen das falsche Mess-Modell
+
+Bei der Veredelung der drei Gruppe-A-Stiftungen fiel auf, dass `~/.hermes/.env` `FAAS_DNA_MODEL` auf einen Altwert setzt (`nemotron-3-super:120b-a12b`). Nur die Wrapper `run_web_enrich.sh` und `run_rematch.sh` überschreiben ihn danach; ein manueller Aufruf, der bloss die `.env` sourct, misst mit dem falschen Modell.
+
+Das ist gefährlicher, als es klingt: `push_dna` stempelt `klassifiziert_by` **hart** auf `qwen3.6-v3-webenrich*`, unabhängig vom tatsächlich verwendeten Modell. Ein Lauf mit einem anderen Modell hätte also DNA geschrieben, die falsch als qwen-v3 etikettiert ist, den Tier-Filter der Engine passiert und die einheitliche Mess-Elle still gebrochen hätte.
+
+Behoben durch einen harten Riegel: `web_enrich_daemon.py` bricht bei `--apply` ab, wenn `FAAS_DNA_MODEL` nicht dem erwarteten Produktionsmodell entspricht, mit Hinweis auf die Ursache. Dry-Runs bleiben unbeeinträchtigt, weil sie nichts schreiben. Überschreibbar via `FAAS_DNA_MODELL_ERWARTET`, falls das Produktionsmodell wechselt.
+
+Nicht gewählt: `klassifiziert_by` aus dem Modellnamen ableiten. Der Tier-Filter der Engine prüft auf «qwen» **und** «v3»; ein abgeleitetes `qwen3.6-27b-webenrich` enthielte kein «v3» und würde die DNA verwerfen. Der Riegel ist der sichere Weg.
+
 ## Verifikation
 
 Nach Teil 1 ein vollständiger Re-Match über alle sechs Medien, danach die Prüflatte: null Zeilen mit einem Rechenstand vor dem Lauf und null Zeilen ohne Institutionalitäts-Modifikator, Projekt-Zeilen ausgenommen. Anschliessend der Gütetest, um den Migros-Rang auf sauberer Basis zu messen.
