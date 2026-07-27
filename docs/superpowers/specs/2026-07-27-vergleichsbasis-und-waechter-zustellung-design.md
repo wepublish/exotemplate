@@ -1,0 +1,60 @@
+# Vergleichsbasis vereinheitlichen + Wächter-Meldungen zustellen
+
+Stand: 2026-07-27
+
+## Ausgangslage
+
+Beim Versuch, für die DNA-Nachveredelung (Punkt C der Übergabe) einen Guardrail zu entwerfen, zeigte sich, dass die Messgrundlage selbst nicht tragfähig ist.
+
+**Befund 1 — ein Drittel der Treffer ist veraltet.** Von 3'145 Zeilen in `match_results` stammten 1'038 von vor dem jeweils letzten Lauf, die ältesten vom 5. Juni. Vier der sechs Medien hatten keine einzige Zeile mit dem Institutionalitäts-Modifikator.
+
+Ursache: `match_engine.py` bewertet je Lauf nur `candidates[:TOP_N_PER_MEDIUM]`. Wer aus dem Kandidatenfeld fällt, behält seinen alten Wert unbegrenzt, obwohl die Zeile in der UPSERT-Map steht. Migros-Kulturprozent trug bei cueltuer einen Rechenstand vom 8. Juli und rankte damit auf Platz 8 mit einem Wert, den die heutige Engine nie berechnet hat.
+
+Ausgeschlossen als Ursache: die Bindung an die `medium_dna`-Version. Die Altzeilen hängen an der **aktiven** Version v11; der Top-N-Schnitt ist der alleinige Grund.
+
+**Befund 2 — der Wächter meldet ins Leere.** In `agent_vorschlaege` standen 95 offene Einträge, darunter «Medium solvio hat keine aktive DNA» vom 4. Juni, dasselbe für vmz vom 4. Juni und zwolf vom 8. Juli. Drei onboardete Medien waren monatelang für das Matching unsichtbar, ohne dass es jemand erfuhr. Die Erkennung funktioniert, der Weg zu einem Menschen fehlt.
+
+## Leitprinzip
+
+Alle Stiftungen müssen mit derselben Elle gemessen werden. Das gilt auf zwei Ebenen: die DNA entsteht ausschliesslich mit qwen3.6-v3 auf dem Spark (Entscheid vom 2026-06-02, erzwungen über `MATCH_MIN_TIER`), und die Treffer müssen aus demselben Rechenstand stammen. Solange ein Drittel der Zeilen aus verschiedenen Wochen und von zwei Engine-Ständen kommt, kalibriert jede Nachjustierung gegen ein bewegliches Ziel.
+
+## Teil 1 — Kandidatenmenge erweitern
+
+Die UPSERT-Map wird vor dem Kandidatenaufbau geladen. Die zu bewertende Menge ist danach die Vereinigung aus den Top-N nach Math-Score und allen Stiftungen, die für dieses Medium und diese DNA-Version bereits eine Zeile haben.
+
+Umgesetzt in `pipeline/spark/match_engine.py`:
+
+- `load_existing_match_result_ids` wandert vor die Kandidatenschleife.
+- Der Abbruch `if math_score <= 0: continue` gilt nicht mehr für Stiftungen mit bestehender Zeile. Sonst könnte eine Zeile, deren Math-Score auf 0 gefallen ist, nie mehr aufgefrischt werden.
+- Die Auswahl liegt in der reinen Funktion `waehle_zu_bewertende(candidates, existing_match_ids, top_n)` und ist damit testbar.
+- Der Lauf protokolliert beide Zahlen getrennt: «Top-400: 400 + 166 bestehende Zeilen ausserhalb der Top-N = 566 zu bewerten».
+
+Bewusst nicht gewählt: nicht aufgefrischte Zeilen löschen (destruktiv, schrumpft jedes Medium hart auf die Top-N) oder die Frische erst im Portal filtern (behebt nur das Symptom, Gütetest und SQL-Auswertungen blieben verfälscht).
+
+Kosten: gering. Der Cache greift, ein typischer Lauf hat rund 400 Cache-Treffer bei ein bis zwei Modellaufrufen. Der Institutionalitäts-Modifikator wird auch bei Cache-Treffern frisch gerechnet.
+
+Nebenwirkungen: Projekt-Zeilen hängen an eigenen Projekt-DNA-Versionen und stehen nicht in der Map, sie bleiben unberührt. Eine bestehende Zeile, deren Stiftung inzwischen einen Ausschluss auslöst, wird aufgefrischt und trägt danach den Ausschluss-Zustand.
+
+Abgedeckt durch vier Tests in `pipeline/tests/test_match_engine_unit.py`: Top-N ohne bestehende Zeilen, bestehende Zeile ausserhalb der Top-N wird mitbewertet (der Migros-Fall), keine Doppelten, ausgeschlossene bestehende Zeile wird aufgefrischt.
+
+## Teil 2 — Wächter-Meldungen zustellen
+
+`pipeline/spark/faas_waechter_push.py`, nach dem Muster von `faas_briefing_push.py`. Liest offene `agent_vorschlaege`, verdichtet sie und postet nach #faas-admin (C0B7SD7JCEM).
+
+- Gruppiert nach Typ, in fester Reihenfolge: Fristen (zeitkritisch) und Hygiene (verrottet unbemerkt) ausgeschrieben, Gesuch-Entwürfe nur als Zähler. Ohne diese Gruppierung deckten beim ersten Lauf 77 Entwürfe die 11 Hygiene-Meldungen zu.
+- Jede Meldung geht genau einmal raus. Der Zustand liegt in `~/faas_classify/waechter_push_state.json`, bewusst nicht in `agent_outbox`, damit der Push den Wächter-Datenfluss nicht berührt.
+- Gibt es nichts Neues, wird nichts gepostet.
+- `--dry-run` ist Standard, `--apply` postet, `--alle` ignoriert den Zustand.
+
+## Verifikation
+
+Nach Teil 1 ein vollständiger Re-Match über alle sechs Medien, danach die Prüflatte: null Zeilen mit einem Rechenstand vor dem Lauf und null Zeilen ohne Institutionalitäts-Modifikator, Projekt-Zeilen ausgenommen. Anschliessend der Gütetest, um den Migros-Rang auf sauberer Basis zu messen.
+
+Bei Teil 2 zuerst der Dry-Run, dann ein einmaliges `--apply` nach ausdrücklicher Freigabe, weil Slack nach aussen wirkt. Erst danach ein Cron-Eintrag.
+
+## Offen, bewusst nicht Teil dieser Änderung
+
+- Der eigentliche Guardrail für konservative DNA-Messung bei dünnem Belegmaterial. Ob er noch nötig ist, entscheidet sich nach der Messung auf sauberer Basis.
+- Die `schon_webenrich`-Sperre im Daemon, die eine bewusste Nachveredelung verhindert.
+- Der Rückstau im Wächter selbst: abgelaufene Fristmeldungen (JournaFONDS, netidee) und vierfach gemeldeter Sichtungs-Stau. Der Push macht ihn sichtbar, räumt ihn aber nicht auf.
+- Der doppelte `zwolf`-Datensatz in `faas_medien` (id 13 und 14).
