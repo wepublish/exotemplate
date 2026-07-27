@@ -52,9 +52,21 @@ Nach Teil 1 ein vollständiger Re-Match über alle sechs Medien, danach die Prü
 
 Bei Teil 2 zuerst der Dry-Run, dann ein einmaliges `--apply` nach ausdrücklicher Freigabe, weil Slack nach aussen wirkt. Erst danach ein Cron-Eintrag.
 
+## Teil 3 — Lebenszyklus der Wächter-Vorschläge (nachgezogen)
+
+Der Rückstau war nicht nur Anzeigelärm, sondern ein Lebenszyklus-Loch: der Wächter legt Wochenmeldungen (`stau|<woche>`, `goldentwurf|<woche>`) je Woche neu an und schliesst die alte nie, und abgelaufene Fristmeldungen bleiben offen stehen. Am 27.07. lagen dadurch vier Sichtungs-Stau-Meldungen und je drei abgelaufene Fristmeldungen für JournaFONDS (15.06.) und netidee (07.07.) gleichzeitig offen.
+
+Einmalige Bereinigung: 12 Einträge auf `abgeloest` gesetzt, 95 offene wurden zu 83. Übrig bleiben 77 Gesuch-Entwürfe und sechs echte, aktuelle Punkte.
+
+Dauerhaft behoben in `pipeline/spark/faas_waechter.py` durch `schliesse_ueberholte`, aufgerufen am Ende von `lauf()` — nach dem Anlegen, damit die eben erzeugte Wochenmeldung als die jüngste gilt. Zwei Regeln: je Wochenpräfix bleibt nur die jüngste offen, und Fristmeldungen werden geschlossen, sobald der Termin vorbei ist. Termine kommen aus `ausschreibungen.deadline` beziehungsweise `applications.frist`, aufgelöst über die id im `dedup_key`.
+
+Bewusst konservativ: ist kein Termin auffindbar, bleibt die Meldung offen. Dauerbefunde ohne Wochenpräfix, etwa «Medium vmz hat keine aktive DNA», werden nie angetastet. Sieben Tests in `pipeline/tests/test_waechter_lebenszyklus.py` deckten das ab, inklusive der beiden Nicht-Anfass-Fälle.
+
+Nebeneffekt: `faas_waechter.py` ist damit erstmals im Monorepo versioniert. Vorher existierte es nur auf dem Spark — dieselbe Drift-Gefahr, die beim Doppelpfad von `match_engine.py` zugeschlagen hat.
+
 ## Offen, bewusst nicht Teil dieser Änderung
 
 - Der eigentliche Guardrail für konservative DNA-Messung bei dünnem Belegmaterial. Ob er noch nötig ist, entscheidet sich nach der Messung auf sauberer Basis.
 - Die `schon_webenrich`-Sperre im Daemon, die eine bewusste Nachveredelung verhindert.
-- Der Rückstau im Wächter selbst: abgelaufene Fristmeldungen (JournaFONDS, netidee) und vierfach gemeldeter Sichtungs-Stau. Der Push macht ihn sichtbar, räumt ihn aber nicht auf.
 - Der doppelte `zwolf`-Datensatz in `faas_medien` (id 13 und 14).
+- Der erste `--apply`-Lauf des Wächter-Push, weil Slack nach aussen wirkt.
