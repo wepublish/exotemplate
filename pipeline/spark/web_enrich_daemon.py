@@ -25,6 +25,15 @@ DIRECTUS = os.environ.get("DIRECTUS_URL", "http://localhost:8055").rstrip("/")
 TOKEN = os.environ.get("DIRECTUS_TOKEN", "")
 CRAWLER = os.environ.get("FAAS_CRAWLER_URL", "http://127.0.0.1:8891").rstrip("/") + "/v1/scrape"
 MODEL = os.environ.get("FAAS_DNA_MODEL", "qwen3.6-27b")
+# Erwartetes Produktionsmodell. push_dna stempelt `klassifiziert_by` HART auf
+# "qwen3.6-v3-webenrich*", unabhaengig davon, welches Modell wirklich gemessen hat.
+# Ein Lauf mit einem anderen Modell wuerde also DNA schreiben, die faelschlich als
+# qwen-v3 etikettiert ist und damit den Tier-Filter der Engine passiert - die
+# einheitliche Mess-Elle waere still gebrochen. Genau das droht bei manuellen
+# Aufrufen: ~/.hermes/.env setzt FAAS_DNA_MODEL auf einen Altwert
+# (nemotron-3-super, Befund 2026-07-27); nur die Wrapper-Skripte ueberschreiben
+# ihn danach. Deshalb hier ein harter Riegel vor jedem Schreibzugriff.
+ERWARTETES_MODELL = os.environ.get("FAAS_DNA_MODELL_ERWARTET", "qwen3.6-27b")
 MIN_TAGS = 8
 KORPUS_CAP = 6000  # Web-Korpus-Cap: haelt input+max_tokens unter vLLM max_model_len 8192 (sonst HTTP 400 -> mess_fehler)
 LOG = os.path.expanduser("~/faas_classify/web_enrich.log")
@@ -354,6 +363,14 @@ def main():
     args = ap.parse_args()
     if not TOKEN:
         sys.exit("DIRECTUS_TOKEN fehlt")
+    if args.apply and MODEL != ERWARTETES_MODELL:
+        sys.exit(
+            f"ABBRUCH: FAAS_DNA_MODEL ist '{MODEL}', erwartet '{ERWARTETES_MODELL}'.\n"
+            "  push_dna etikettiert die DNA hart als qwen3.6-v3 – mit einem anderen Modell\n"
+            "  entstuende falsch beschriftete DNA, die den Tier-Filter der Engine passiert.\n"
+            "  Ursache meist: ~/.hermes/.env traegt einen Altwert. Vor dem Aufruf setzen:\n"
+            "    export FAAS_DNA_MODEL=qwen3.6-27b\n"
+            "  (Die Wrapper run_web_enrich.sh und run_rematch.sh tun das bereits.)")
     man = lade_manifest()
     if args.ids:
         ids = [int(x) for x in args.ids.split(",") if x.strip()]
