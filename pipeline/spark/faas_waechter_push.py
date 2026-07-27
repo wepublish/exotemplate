@@ -28,8 +28,29 @@ import urllib.request
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+def _lade_env() -> None:
+    """Laedt ~/.hermes/.env in os.environ, damit das Skript aus dem Cron ohne
+    Wrapper laeuft (identisch zu faas_waechter.py). DIRECTUS_URL wird bewusst
+    uebersprungen: das Skript laeuft Spark-lokal und erreicht Directus ueber
+    den Tailscale-Forwarder auf localhost:8055, waehrend .env je nach Stand die
+    oeffentliche Cloudflare-URL tragen kann (dort steht Access davor -> 403)."""
+    pfad = Path.home() / ".hermes" / ".env"
+    if not pfad.exists():
+        return
+    for zeile in pfad.read_text().splitlines():
+        zeile = zeile.strip()
+        if not zeile or zeile.startswith("#") or "=" not in zeile:
+            continue
+        k, v = zeile.split("=", 1)
+        if k.strip() == "DIRECTUS_URL":
+            continue
+        os.environ[k.strip()] = v.strip().strip('"')
+
+
+_lade_env()
+
 CHANNEL = "C0B7SD7JCEM"  # #faas-admin
-DIRECTUS = os.environ.get("DIRECTUS_URL", "http://localhost:8055").rstrip("/")
+DIRECTUS = "http://localhost:8055"
 TOKEN = os.environ.get("DIRECTUS_TOKEN", "")
 STATE = Path.home() / "faas_classify" / "waechter_push_state.json"
 MAX_MELDUNGEN = 10  # Deckel, damit ein Rueckstau keine Textwand erzeugt
