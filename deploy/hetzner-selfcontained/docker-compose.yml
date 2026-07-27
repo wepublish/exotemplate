@@ -117,6 +117,15 @@ services:
       start_period: 60s
 
   front:
+    # Das Image wird auf dem Mac gebaut (linux/amd64) und per `docker load`
+    # hierher uebertragen -> `scripts/deploy-front.sh`. FRONT_TAG erlaubt den
+    # Rollback auf einen frueheren Commit-SHA:
+    #   FRONT_TAG=<sha> docker compose up -d --no-build front
+    image: faas-front:${FRONT_TAG:-latest}
+    # ACHTUNG: NIE `docker compose up --build front` auf der VPS ausfuehren.
+    # `next build` sprengt hier den Speicher (Vorfall 24.07.2026: Portal 530,
+    # SSH tot) - auch mit 4 GB Swap. Der build-Block bleibt nur fuer den
+    # Notfall-Bootstrap auf einer Maschine mit genug RAM stehen.
     build:
       # Von deploy/hetzner-selfcontained/ aus: ../../apps/front = App-Verzeichnis.
       context: ../../apps/front
