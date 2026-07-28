@@ -19,6 +19,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { istPortalZugriffAufProxy, ladePortalMedium } from '@/lib/portal-guard'
 import { triggerErstMatch } from '@/lib/dna-pipeline'
+import { schreibeMediumEvent } from '@/lib/medium-events'
 import { tenant } from '../../../config/tenant'
 
 const base = () => (process.env.DIRECTUS_URL || 'http://localhost:8055').replace(/\/$/, '')
@@ -82,6 +83,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   await triggerErstMatch(mediumSlug)
+
+  // Roadmap-Ereignis (fire-and-forget): die Slack-Roadmap im Medien-Channel
+  // meldet dem Medium, dass seine gesichtete Trefferliste jetzt online ist.
+  void schreibeMediumEvent({
+    medium_id: mediumSlug,
+    typ: 'matching_freigegeben',
+    titel: 'Matching freigegeben, Trefferliste ist im Portal sichtbar',
+    actor: wer,
+  })
 
   return res.status(200).json({ status: 'ok' })
 }
