@@ -47,6 +47,33 @@ Herzlich
 {absender}, Fundraising-Team We.Publish`,
 }
 
+/**
+ * Benachrichtigung nach der Matching-Freischaltung (Entscheid 28.07.2026:
+ * «wenn wir sie freigeben, soll das medium wiederum eine meldung bekommen
+ * (mail und slack) und die liste erstmals sehen»). Die Portal-Steuerung
+ * erzeugt beim Freischalten gleich einen frischen Login-Link und füllt {link};
+ * die Slack-Meldung übernimmt die Roadmap auf dem Spark (faas_roadmap_slack).
+ */
+export const MAIL_MATCHING_FREI: MailVorlage = {
+  betreff: 'Eure Stiftungs-Treffer sind bereit',
+  text: `Hallo {name}
+
+gute Nachrichten: wir haben eure Trefferliste geprüft und das Matching für {medium} freigeschaltet. Ihr seht jetzt die Stiftungen, die am besten zu euch passen.
+
+So geht ihr vor:
+
+1. Meldet euch im Portal an: {link}
+2. Schaut die Treffer in Ruhe durch. Zuoberst steht, was am besten zu euch passt.
+3. Mit «Anschreiben» sagt ihr uns, für welche Stiftungen wir die Gesuche vorbereiten sollen.
+
+Der Link ist persönlich, einmal verwendbar und 24 Stunden gültig. Falls er abgelaufen ist, melde dich kurz, dann schicken wir dir einen neuen.
+
+Wenn etwas unklar ist, antworte einfach auf diese Mail.
+
+Herzlich
+{absender}, Fundraising-Team We.Publish`,
+}
+
 export const MAIL_NEUER_LINK: MailVorlage = {
   betreff: 'Dein neuer Zugang zum FaaS-Portal',
   text: `Hallo {name}

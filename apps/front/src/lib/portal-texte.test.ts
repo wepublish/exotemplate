@@ -1,4 +1,4 @@
-import { MAIL_EINLADUNG, MAIL_NEUER_LINK, PORTAL_TEXTE, fuelleText, fuelleVorlage } from './portal-texte'
+import { MAIL_EINLADUNG, MAIL_MATCHING_FREI, MAIL_NEUER_LINK, PORTAL_TEXTE, fuelleText, fuelleVorlage } from './portal-texte'
 
 describe('fuelleVorlage', () => {
   it('MAIL_EINLADUNG: ersetzt {medium} und {link}, lässt {name} unangetastet', () => {
@@ -21,6 +21,20 @@ describe('fuelleVorlage', () => {
     expect(ergebnis.text).toContain('Hallo {name}')
     expect(ergebnis.text).not.toContain('{link}')
     expect(ergebnis.text).not.toContain('{medium}')
+  })
+
+  it('MAIL_MATCHING_FREI: ersetzt {medium} und {link}, lässt {name}/{absender} unangetastet', () => {
+    const ergebnis = fuelleVorlage(MAIL_MATCHING_FREI, {
+      medium: 'Bajour',
+      link: 'https://portal.example/api/portal/einloesen?token=frisch.789',
+    })
+    expect(ergebnis.betreff).toBe('Eure Stiftungs-Treffer sind bereit')
+    expect(ergebnis.text).toContain('das Matching für Bajour freigeschaltet')
+    expect(ergebnis.text).toContain('https://portal.example/api/portal/einloesen?token=frisch.789')
+    expect(ergebnis.text).toContain('Hallo {name}')
+    expect(ergebnis.text).toContain('{absender}')
+    expect(ergebnis.text).not.toContain('{medium}')
+    expect(ergebnis.text).not.toContain('{link}')
   })
 
   it('unbekannte Platzhalter bleiben stehen, wenn kein Wert übergeben wird', () => {

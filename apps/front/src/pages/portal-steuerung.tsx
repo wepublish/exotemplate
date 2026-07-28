@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { MAIL_EINLADUNG, MAIL_NEUER_LINK, fuelleVorlage, type MailVorlage } from '@/lib/portal-texte'
+import { MAIL_EINLADUNG, MAIL_MATCHING_FREI, MAIL_NEUER_LINK, fuelleVorlage, type MailVorlage } from '@/lib/portal-texte'
 import { baueMailtoUrl, mailtoIstZuLang } from '@/lib/mailto'
 
 /**
@@ -180,6 +180,27 @@ export default function PortalSteuerungPage() {
       }
       toast.success(`Matching für ${medium.name} freigeschaltet.`)
       setFreischaltMedium(null)
+
+      // Benachrichtigung ans Medium vorbereiten (Entscheid 28.07.2026: Mail
+      // und Slack). Slack übernimmt die Roadmap auf dem Spark automatisch
+      // (matching_freigegeben-Ereignis); hier entsteht die versandfertige
+      // Mail mit einem FRISCHEN Login-Link, damit das Medium mit einem Klick
+      // vor seiner Trefferliste steht.
+      const zugang = daten?.zugaenge.find((z) => z.mediumSlug === medium.slug && z.status !== 'gesperrt')
+      if (zugang) {
+        const { ok, json } = await post({ aktion: 'link', id: zugang.id })
+        if (ok) {
+          setLinkErgebnis({
+            vorlage: MAIL_MATCHING_FREI,
+            link: String(json.link ?? ''),
+            mediumName: medium.name,
+            email: zugang.email,
+          })
+        }
+      } else {
+        toast.info('Kein Portal-Zugang erfasst — zuerst unten einen Zugang anlegen, dann die Treffer-Mail verschicken.')
+      }
+
       await lade()
     } finally {
       setBeschaeftigt(false)
