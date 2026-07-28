@@ -45,7 +45,6 @@ import DnaGenerieren from '@/components/DnaGenerieren'
 import { MediumLogo } from '@/components/MediumLogo'
 import { MailEntwurfButton } from '@/components/MailEntwurfButton'
 import { OnboardingSlackButton } from '@/components/OnboardingSlackButton'
-import { bauWillkommensmail } from '@/lib/mail-vorlagen'
 import { MAIL_EINLADUNG, fuelleVorlage } from '@/lib/portal-texte'
 import type { ArbeitsDnaGespeichert } from '@/pages/api/medium-knowledge/working-dna'
 
@@ -1422,6 +1421,45 @@ export default function OnboardingPage() {
   // Schritt (Entscheid 28.07.2026) — das Panel unten zeigt die versandfertige
   // Einladungsmail mit dem frischen Login-Link.
   const [willkommen, setWillkommen] = useState<{ name: string; slug: string; email: string; link: string } | null>(null)
+  const [willkommenLaedt, setWillkommenLaedt] = useState(false)
+
+  // Willkommensmail MIT Magic-Link auch für bereits angelegte Medien
+  // (Korrektur Jolanda 28.07.2026: das Hallo soll den Link gleich mitbringen,
+  // kein «Link kommt separat»). Bestehender Zugang bekommt einen frischen
+  // Link (macht den alten ungültig); ohne Zugang wird er mit der ersten
+  // Kontakt-E-Mail angelegt. Ohne bekannte E-Mail gibt es nichts zu schicken.
+  async function willkommensmailVorbereiten(medium: FaasMedium) {
+    setWillkommenLaedt(true)
+    try {
+      const uebersicht = await fetch(`/api/zugangsverwaltung?cb=${Date.now()}`, { cache: 'no-store' })
+      const uj = (await uebersicht.json().catch(() => ({}))) as {
+        zugaenge?: Array<{ id: string; email: string; mediumSlug: string; status: string }>
+        error?: string
+      }
+      if (!uebersicht.ok) throw new Error(uj.error ?? `HTTP ${uebersicht.status}`)
+      const zugang = (uj.zugaenge ?? []).find(z => z.mediumSlug === medium.slug && z.status !== 'gesperrt')
+      const email = zugang?.email ?? medium.kontakt_emails?.[0] ?? ''
+      if (!zugang && !email) {
+        toast.info(
+          'Keine Kontakt-E-Mail bekannt. Zuerst im Medien-Tab eine Kontakt-E-Mail erfassen oder in der Portal-Steuerung einen Zugang anlegen.'
+        )
+        return
+      }
+      const body = zugang ? { aktion: 'link', id: zugang.id } : { aktion: 'anlegen', email, medium_slug: medium.slug }
+      const res = await fetch('/api/zugangsverwaltung', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      const json = (await res.json().catch(() => ({}))) as { link?: string; error?: string }
+      if (!res.ok || !json.link) throw new Error(json.error ?? `HTTP ${res.status}`)
+      setWillkommen({ name: medium.name, slug: medium.slug, email, link: json.link })
+    } catch (err) {
+      toast.error(`Login-Link fehlgeschlagen: ${err instanceof Error ? err.message : String(err)}`)
+    } finally {
+      setWillkommenLaedt(false)
+    }
+  }
   async function neuesMediumAnlegen() {
     const n = neuName.trim()
     if (!n) return
@@ -1605,28 +1643,21 @@ export default function OnboardingPage() {
               </SelectContent>
             </Select>
             {ausgewaehltesMedium && (
-              (() => {
-                const mail = bauWillkommensmail({ mediumName: ausgewaehltesMedium.name })
-                return (
-                  <>
-                    <MailEntwurfButton
-                      betreff={mail.betreff}
-                      text={mail.text}
-                      // Erste Adresse aus der Kontakt-Allowlist als Empfänger
-                      // vorbelegen; ist keine erfasst, öffnet das Mail-Programm
-                      // ohne Empfänger.
-                      an={ausgewaehltesMedium.kontakt_emails?.[0]}
-                      label="Willkommensmail"
-                      titel={`Willkommensmail – ${ausgewaehltesMedium.name}`}
-                    />
-                    <OnboardingSlackButton
-                      mediumSlug={ausgewaehltesMedium.slug}
-                      mediumName={ausgewaehltesMedium.name}
-                      website={ausgewaehltesMedium.website}
-                    />
-                  </>
-                )
-              })()
+              <>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={willkommenLaedt}
+                  onClick={() => willkommensmailVorbereiten(ausgewaehltesMedium)}
+                >
+                  {willkommenLaedt ? 'Link wird erzeugt…' : 'Willkommensmail'}
+                </Button>
+                <OnboardingSlackButton
+                  mediumSlug={ausgewaehltesMedium.slug}
+                  mediumName={ausgewaehltesMedium.name}
+                  website={ausgewaehltesMedium.website}
+                />
+              </>
             )}
           </>
         )}
