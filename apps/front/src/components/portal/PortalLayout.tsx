@@ -128,7 +128,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
         <header className="flex items-center justify-between gap-4 border-b border-slate-200 bg-white px-4 py-4 sm:px-8">
           <div className="flex min-w-0 items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/icon-192.png" alt="We.Publish" className="h-8 w-8 shrink-0 rounded-md" />
+            <img src="/api/portal/marke/icon-192.png" alt="We.Publish" className="h-8 w-8 shrink-0 rounded-md" />
             <span className="truncate font-bold text-slate-900">We.Publish</span>
             <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-400">
               · Fundraising
@@ -200,7 +200,7 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
           <div className="mx-auto flex max-w-4xl flex-col items-center justify-between gap-2 text-xs text-slate-400 sm:flex-row">
             <div className="flex items-center gap-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/icon-192.png" alt="We.Publish" className="h-6 w-6 rounded-md" />
+              <img src="/api/portal/marke/icon-192.png" alt="We.Publish" className="h-6 w-6 rounded-md" />
               <span>We.Publish · Fundraising as a Service</span>
             </div>
             <div className="flex items-center gap-3">

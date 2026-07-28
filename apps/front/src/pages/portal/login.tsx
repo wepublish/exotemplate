@@ -48,7 +48,7 @@ export default function PortalLoginSeite() {
       <div className="w-full max-w-sm">
         <div className="mb-8 flex items-center justify-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/icon-192.png" alt="We.Publish" className="h-8 w-8 rounded-md" />
+          <img src="/api/portal/marke/icon-192.png" alt="We.Publish" className="h-8 w-8 rounded-md" />
           <span className="font-bold text-slate-900">We.Publish</span>
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-400">· Fundraising</span>
         </div>
