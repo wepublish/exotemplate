@@ -1,0 +1,9 @@
+[Unit]
+Description=FaaS Web-Enrich Status Server (Port 8899)
+After=network.target
+[Service]
+ExecStart=/usr/bin/python3 -m http.server 8899 --bind 0.0.0.0 --directory /home/dergeraet/faas_classify/status_web
+Restart=always
+RestartSec=5
+[Install]
+WantedBy=default.target

@@ -8,6 +8,7 @@ This repository is a **monorepo** holding the applications side by side:
 | -------------------------------- | --------------------------------------- | --------------------------------- | ---- |
 | [apps/directus/](apps/directus/) | Backend — data store (foundations, media, DNA, matches, grants) | Directus 11, TypeScript, Postgres | 8055 |
 | [apps/front/](apps/front/)       | Frontend — operator dashboard + media self-service portal | Next.js 15, React 19, MUI, Apollo | 3000 |
+| [pipeline/](pipeline/)           | Research/matching/automation pipeline on the GPU host ("Spark") | Python 3, cron + systemd | — |
 
 The two apps are **built and deployed independently** (see [Deployment](#deployment)); this is a monorepo, not an npm workspace. Each app has its own `package.json`, dependencies, and build — you install and run them separately. The root only carries shared pre-commit tooling (Prettier via Husky + lint-staged) and CI.
 
@@ -23,7 +24,7 @@ The two apps are **built and deployed independently** (see [Deployment](#deploym
 - **Onboarding & media portal** — a magic-link self-service portal where each media outlet uploads its material, has its DNA generated, sees its matches, and follows its grants.
 - **Funder sub-databases** — dedicated views for the foundation database, church/special funders, lottery funds, and open funding calls ("Ausschreibungen").
 
-The heavy research and matching computation runs as a **Python pipeline** (see [`apps/front/spark/`](apps/front/spark/)) on a separate GPU host alongside Directus and a local LLM; the frontend is the operator/portal UI on top of the same data. The pipeline produces and maintains the DNA and match data the app reads, and runs the background automations the app's API routes trigger.
+The heavy research and matching computation runs as a **Python pipeline** (see [`pipeline/`](pipeline/) — its [README](pipeline/README.md) and [`MANIFEST.tsv`](pipeline/MANIFEST.tsv) record what runs where, on which schedule) on a separate GPU host alongside a local LLM; the frontend is the operator/portal UI on top of the same data. The pipeline produces and maintains the DNA and match data the app reads, and runs the background automations the app's API routes trigger. Run [`scripts/verify-spark.sh`](scripts/verify-spark.sh) to confirm the GPU host is executing exactly the committed version.
 
 Branding and the tenant's media list live in [`apps/front/config/tenant.ts`](apps/front/config/tenant.ts) — the one file that differs between tenant instances.
 
@@ -138,12 +139,21 @@ faas/
 ├── CLAUDE.md              ← instructions Claude follows
 ├── package.json           ← root tooling only (husky + lint-staged + prettier)
 ├── .github/workflows/     ← CI: path-filtered image builds
-└── apps/
-    ├── directus/          ← Directus 11 backend — the fundraising data store
-    └── front/             ← Next.js 15 frontend (operator dashboard + media portal)
-        ├── src/           ← pages, API routes, GraphQL queries, libs
-        ├── config/        ← tenant.ts (branding + media list)
-        └── spark/         ← Python research/matching/automation pipeline
+├── apps/
+│   ├── directus/          ← Directus 11 backend — the fundraising data store
+│   └── front/             ← Next.js 15 frontend (operator dashboard + media portal)
+│       ├── src/           ← pages, API routes, GraphQL queries, libs
+│       └── config/        ← tenant.ts (branding + media list)
+├── pipeline/              ← Python research/matching/automation pipeline (GPU host)
+│   ├── spark/             ← every script that runs on the GPU host
+│   ├── systemd/           ← unit files of the long-running services
+│   ├── tests/             ← engine + watchdog tests
+│   └── MANIFEST.tsv       ← authoritative: deploy path, schedule and purpose per file
+└── scripts/
+    ├── save.sh            ← commit + push
+    ├── deploy-front.sh    ← build the front image on the Mac, ship it to the VPS
+    ├── ship.sh            ← save + deploy in one step
+    └── verify-spark.sh    ← does the GPU host run exactly the committed pipeline?
 ```
 
 ---

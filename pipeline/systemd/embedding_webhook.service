@@ -1,0 +1,18 @@
+[Unit]
+Description=FaaS Embedding-Pass Webhook Receiver (Base44 -> embedding_pass.py)
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=dergeraet
+Group=dergeraet
+WorkingDirectory=/home/dergeraet/scripts_v2/embedding_webhook
+ExecStart=/usr/bin/python3 /home/dergeraet/scripts_v2/embedding_webhook/server.py
+Restart=on-failure
+RestartSec=5s
+StandardOutput=append:/home/dergeraet/logs/embedding_webhook.stdout.log
+StandardError=append:/home/dergeraet/logs/embedding_webhook.stderr.log
+
+[Install]
+WantedBy=multi-user.target

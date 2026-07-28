@@ -1,0 +1,66 @@
+# FaaS-Pipeline: was laeuft wo auf dem Spark (dergeraet)
+# Diese Datei ist die maschinenlesbare Wahrheit. scripts/verify-spark.sh liest sie
+# und vergleicht die deployten Dateien mit pipeline/spark/ bzw. pipeline/systemd/.
+# Spalten: datei <TAB> deploy_pfad <TAB> takt <TAB> zweck
+# deploy_pfad "-" heisst: liegt nur im Repo, ist auf dem Spark nicht im Einsatz.
+datei	deploy_pfad	takt	zweck
+match_engine.py	/home/dergeraet/faas-matching-wepublish/spark/match_engine.py	via run_rematch.sh	Match-Engine: bewertet Medium x Stiftung, schreibt match_results
+run_rematch.sh	/home/dergeraet/faas-matching-wepublish/spark/run_rematch.sh	cron 20 */6 * * *	Re-Match-Lauf, Medienliste dynamisch aus Directus, flock-gesichert
+scout.py	/home/dergeraet/faas-matching-wepublish/spark/scout.py	cron 0 7 * * 1-5	Sucht neue Ausschreibungen und Stiftungen
+web_enrich_daemon.py	/home/dergeraet/faas-matching-wepublish/spark/web_enrich_daemon.py	via run_web_enrich.sh	Web-Veredelung der Stiftungs-DNA
+run_web_enrich.sh	/home/dergeraet/faas-matching-wepublish/spark/run_web_enrich.sh	cron 35 5 * * * + @reboot	Wrapper fuer die Web-Veredelung
+web_enrich_status.py	/home/dergeraet/faas-matching-wepublish/spark/web_enrich_status.py	cron */3 * * * *	Schreibt den Fortschritt der Veredelung fuer die Status-Seite
+faas_waechter.py	/home/dergeraet/faas-matching-wepublish/spark/faas_waechter.py	cron */12 * * * *	Proaktiver Waechter, legt agent_vorschlaege an
+faas_waechter_push.py	/home/dergeraet/faas-matching-wepublish/spark/faas_waechter_push.py	cron 45 7 * * *	Stellt offene Waechter-Meldungen in #faas-admin zu
+faas_datenfluss_waechter.py	/home/dergeraet/faas-matching-wepublish/spark/faas_datenfluss_waechter.py	cron 12 * * * *	Ueberwacht den Datenfluss der Pipeline
+faas_heartbeat.py	/home/dergeraet/faas-matching-wepublish/spark/faas_heartbeat.py	cron */5 * * * *	Lebenszeichen des FaaS-Stacks
+faas_lern_detektor.py	/home/dergeraet/faas-matching-wepublish/spark/faas_lern_detektor.py	cron 25 * * * *	Erkennt Lernnotizen aus Operator-Verhalten
+faas_kanban_sync.py	/home/dergeraet/faas-matching-wepublish/spark/faas_kanban_sync.py	cron 17 * * * *	Haelt den Slack-Canvas je Medium aktuell
+faas_briefing_push.py	/home/dergeraet/faas-matching-wepublish/spark/faas_briefing_push.py	cron 30 7 * * *	Taegliches Briefing nach Slack
+faas_roadmap_render.py	/home/dergeraet/faas-matching-wepublish/spark/faas_roadmap_render.py	cron */15 * * * *	Rendert die Roadmap-Ansicht
+faas_roadmap_slack.py	/home/dergeraet/faas-matching-wepublish/spark/faas_roadmap_slack.py	cron */15 * * * * (flock)	Haelt je Medium EINE Status-Nachricht im Medien-Channel, Ereignisse als Thread
+paket_builder.py	/home/dergeraet/faas-matching-wepublish/spark/paket_builder.py	cron 15 3 * * *	Baut Gesuchspakete
+faas_chat_adapter.py	/home/dergeraet/faas-matching-wepublish/spark/faas_chat_adapter.py	systemd faas-chat-adapter.service	Status-Chat und gegatete Aktionen, HTTP :9200
+faas_slack_daemon.py	/home/dergeraet/faas-matching-wepublish/spark/faas_slack_daemon.py	systemd faas-slack-daemon.service	Slack Socket-Mode Daemon (Roadmap-Pult)
+projekt_matcher.py	/home/dergeraet/faas-matching-wepublish/spark/projekt_matcher.py	via run_projekt_matcher.sh	Matching fuer Projekt-Zeilen
+faas_actions.py	/home/dergeraet/faas-matching-wepublish/spark/faas_actions.py	Bibliothek	Gemeinsame Aktionen, von Adapter und Daemon genutzt
+faas_mcp.py	/home/dergeraet/faas-matching-wepublish/spark/faas_mcp.py	manuell	MCP-Schnittstelle zur Pipeline
+faas_outbox.py	/home/dergeraet/faas-matching-wepublish/spark/faas_outbox.py	Bibliothek	Ausgangskorb fuer Slack-Nachrichten
+faas_prepare.py	/home/dergeraet/faas-matching-wepublish/spark/faas_prepare.py	manuell	Vorbereitung von Laeufen
+faas_deadman_nas.py	/home/dergeraet/faas-matching-wepublish/spark/faas_deadman_nas.py	manuell	Totmannschalter Richtung NAS
+cleanup_deep_matches.py	/home/dergeraet/faas-matching-wepublish/spark/cleanup_deep_matches.py	manuell	Aufraeumwerkzeug fuer match_results
+reclassify_check.py	/home/dergeraet/faas-matching-wepublish/spark/reclassify_check.py	manuell	Kontrolle der Klassifizierung
+de_ja_stichprobe.py	/home/dergeraet/faas-matching-wepublish/spark/de_ja_stichprobe.py	manuell	Stichprobe DE/JA-Klassifikation
+url_discovery.py	/home/dergeraet/faas-matching-wepublish/spark/url_discovery.py	manuell	Findet Stiftungs-Webseiten
+sonder_dna.py	/home/dergeraet/faas-matching-wepublish/spark/sonder_dna.py	via nachlauf_sonder.sh	DNA fuer Sonderfoerderer (Kirchen, Lotterien)
+sonder_matcher.py	/home/dergeraet/faas-matching-wepublish/spark/sonder_matcher.py	via nachlauf_sonder.sh	Matching fuer Sonderfoerderer
+nachlauf_sonder.sh	/home/dergeraet/faas-matching-wepublish/spark/nachlauf_sonder.sh	manuell	Nachlauf Sonderfoerderer
+scout_quellen.json	/home/dergeraet/faas-matching-wepublish/spark/scout_quellen.json	Daten	Quellenliste fuer scout.py
+setup_medium_events.py	/home/dergeraet/faas-matching-wepublish/spark/setup_medium_events.py	einmalig	Legt die Collection medium_events an
+setup_portal_schema.py	/home/dergeraet/faas-matching-wepublish/spark/setup_portal_schema.py	einmalig	Portal-Schema in Directus
+setup_roadmap.py	/home/dergeraet/faas-matching-wepublish/spark/setup_roadmap.py	einmalig	Roadmap-Felder
+setup_outbox_jobs.py	/home/dergeraet/faas-matching-wepublish/spark/setup_outbox_jobs.py	einmalig	Outbox-Jobs
+setup_phase2_felder.py	/home/dergeraet/faas-matching-wepublish/spark/setup_phase2_felder.py	einmalig	Phase-2-Felder
+setup_sonder_collection.py	/home/dergeraet/faas-matching-wepublish/spark/setup_sonder_collection.py	einmalig	Collection Sonderfoerderer
+setup_sonder_dna_felder.py	/home/dergeraet/faas-matching-wepublish/spark/setup_sonder_dna_felder.py	einmalig	DNA-Felder Sonderfoerderer
+setup_gmail_oauth.py	/home/dergeraet/faas-matching-wepublish/spark/setup_gmail_oauth.py	einmalig	Gmail-OAuth (historisch)
+test_roadmap_slack.py	/home/dergeraet/faas-matching-wepublish/spark/test_roadmap_slack.py	Test	Tests der Slack-Roadmap
+test_slack_roadmap.py	/home/dergeraet/faas-matching-wepublish/spark/test_slack_roadmap.py	Test	aeltere Testdatei derselben Sache
+embedding_pass.py	/home/dergeraet/scripts_v2/embedding_pass.py	cron */2 * * * * (medium_dna) + 15 4 * * * (stiftungs_dna)	Erzeugt die Embeddings, mit denen die Engine rechnet
+embedding_webhook_server.py	/home/dergeraet/scripts_v2/embedding_webhook/server.py	systemd embedding_webhook.service	Webhook, der embedding_pass anstoesst
+duplicate_detector.py	/home/dergeraet/scripts_v2/duplicate_detector.py	cron 0 5 1 * *	Duplikat-Erkennung im Stiftungspool
+faas_directus_forward.py	/home/dergeraet/faas_directus_forward.py	systemd faas-directus-forward.service	Interim-Schreibpfad Spark 127.0.0.1:8055 -> VPS-Directus ueber Tailscale
+faas_health_probe.sh	/home/dergeraet/scripts/faas_health_probe.sh	cron */15 * * * *	Health-Probe Directus/Qdrant/vLLM, Alert per Slack-DM
+faas_spark_liveness.sh	/home/dergeraet/scripts/faas_spark_liveness.sh	cron */5 * * * *	Lebenszeichen des Spark
+faas_stale_detection.sh	/home/dergeraet/scripts/faas_stale_detection.sh	cron 0 4 * * 0	Erkennt veraltete Stiftungsdaten
+kanal_waechter.py	/home/dergeraet/scripts/kanal_waechter.py	cron 8,38 * * * *	Waechter ueber die Slack-Kanaele
+mount_gdrive_faas_datensuppe.sh	/home/dergeraet/scripts/mount_gdrive_faas_datensuppe.sh	cron @reboot	Mountet die Drive-Datensuppe
+run_projekt_matcher.sh	/home/dergeraet/faas_classify/run_projekt_matcher.sh	cron 30 4 * * *	Wrapper fuer projekt_matcher.py
+write_dashboard_snapshot_spark.py	/home/dergeraet/.hermes/data/faas/write_dashboard_snapshot_spark.py	cron 30 7 * * *	Dashboard-Schnappschuss; liegt noch in der Altablage
+classify_runner_vllm.py	-	nicht deployt	Klassifizierungslauf gegen vLLM, nur im Repo
+run_classify.sh	-	nicht deployt	Wrapper fuer classify_runner_vllm.py, nur im Repo
+faas-slack-daemon.service	/home/dergeraet/.config/systemd/user/faas-slack-daemon.service	systemd (user)	Unit fuer den Slack-Daemon
+faas-chat-adapter.service	/home/dergeraet/.config/systemd/user/faas-chat-adapter.service	systemd (user)	Unit fuer den Chat-Adapter
+faas-directus-forward.service	/home/dergeraet/.config/systemd/user/faas-directus-forward.service	systemd (user)	Unit fuer den Interim-Schreibpfad
+faas-status-web.service	/home/dergeraet/.config/systemd/user/faas-status-web.service	systemd (user)	Unit fuer die Status-Seite auf :8899
+embedding_webhook.service	/etc/systemd/system/embedding_webhook.service	systemd (system)	Unit fuer den Embedding-Webhook

@@ -1,0 +1,16 @@
+[Unit]
+Description=FaaS Chat-Adapter (Der Geraet) — HTTP :9200, Sonnet-Status-Chat + gegatete Aktionen
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/dergeraet/faas-matching-wepublish/spark
+ExecStart=/usr/bin/python3 -u /home/dergeraet/faas-matching-wepublish/spark/faas_chat_adapter.py
+Restart=always
+RestartSec=5
+StandardOutput=append:/home/dergeraet/faas_classify/chat_adapter.log
+StandardError=append:/home/dergeraet/faas_classify/chat_adapter.log
+
+[Install]
+WantedBy=default.target

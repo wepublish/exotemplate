@@ -39,10 +39,46 @@ def check_vllm():
     except Exception as e:
         return ("vllm", False, f"nicht erreichbar: {e}")
 
-def check_directus():
+def _directus_token():
+    tok = os.environ.get("DIRECTUS_TOKEN")
+    if tok:
+        return tok
     try:
-        code, _ = _http("http://127.0.0.1:8055/server/health")
-        return ("directus", code == 200, f"http {code}")
+        for l in (Path.home() / ".hermes" / ".env").read_text().splitlines():
+            if l.startswith("DIRECTUS_TOKEN"):
+                return l.split("=", 1)[1].strip()
+    except Exception:
+        pass
+    return None
+
+def check_directus():
+    # SMTP ist bewusst unkonfiguriert; der email:connection-Check des
+    # Health-Endpoints wuerde sonst dauerhaft FAIL melden und echte Ausfaelle
+    # maskieren. Deshalb authentifiziert abfragen und email-Checks ignorieren;
+    # DB- und Storage-Checks bleiben scharf. Unauthentifiziert liefert
+    # Directus keine Check-Details, dann zaehlt nur der Gesamtstatus.
+    url = "http://127.0.0.1:8055/server/health"
+    try:
+        req = urllib.request.Request(url)
+        tok = _directus_token()
+        if tok:
+            req.add_header("Authorization", f"Bearer {tok}")
+        try:
+            r = urllib.request.urlopen(req, timeout=6)
+            code, body = r.getcode(), r.read().decode("utf-8", "replace")
+        except urllib.error.HTTPError as e:
+            code, body = e.code, e.read().decode("utf-8", "replace")
+        d = json.loads(body)
+        checks = d.get("checks")
+        if not checks:
+            ok = d.get("status") == "ok"
+            return ("directus", ok, f"http {code}, status {d.get('status')} (ohne Details)")
+        schlecht = sorted(k for k, v in checks.items()
+                          if not k.startswith("email:")
+                          and any(c.get("status") != "ok" for c in v))
+        if schlecht:
+            return ("directus", False, f"http {code}, fail: {', '.join(schlecht)}")
+        return ("directus", True, f"http {code}, checks ok (email ignoriert)")
     except Exception as e:
         return ("directus", False, f"nicht erreichbar: {e}")
 
