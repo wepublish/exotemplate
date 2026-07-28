@@ -30,6 +30,9 @@ jest.mock('./generate-dna-jobs', () => ({
   getGenerateJob: jest.fn(),
 }))
 
+// Ereignis-Protokoll mocken: geprüft wird nur, DASS und WOMIT geschrieben wird.
+jest.mock('./medium-events', () => ({ schreibeMediumEvent: jest.fn().mockResolvedValue(undefined) }))
+
 import {
   ladePortalMedium,
   ladeAktiveDnaDetails,
@@ -39,6 +42,7 @@ import {
 } from './portal-guard'
 import { starteGenerateDnaJob } from '../pages/api/medium-knowledge/generate-dna'
 import { getGenerateJob } from './generate-dna-jobs'
+import { schreibeMediumEvent } from './medium-events'
 import dnaErzeugen from '../pages/api/portal/dna-erzeugen'
 import dna from '../pages/api/portal/dna'
 
@@ -49,6 +53,7 @@ const setzeFreigabeMock = setzeDnaFreigabe as jest.Mock
 const vorschlagMock = legeAgentVorschlagAn as jest.Mock
 const starteMock = starteGenerateDnaJob as jest.Mock
 const getJobMock = getGenerateJob as jest.Mock
+const eventMock = schreibeMediumEvent as jest.Mock
 
 const SECRET = 'dna-routen-test-geheimnis-4711'
 
@@ -368,5 +373,20 @@ describe('POST /api/portal/dna {aktion:"freigeben"}', () => {
     expect(vorschlag.typ).toBe('portal')
     expect(String(vorschlag.titel)).toBe('DNA freigegeben: bajour')
     expect(String(vorschlag.beschreibung)).toContain('Matching-Freischaltung prüfen')
+
+    // Roadmap-Ereignis wurde protokolliert.
+    expect(eventMock).toHaveBeenCalledWith(
+      expect.objectContaining({ medium_id: 'bajour', typ: 'dna_freigegeben', actor: 'redaktion@bajour.ch' }),
+    )
+  })
+
+  it('keine aktive DNA (409) → KEIN dna_freigegeben-Ereignis', async () => {
+    ladeDnaMock.mockResolvedValue(null)
+    const { res, getStatus } = makeRes()
+
+    await dna(makeReq({ method: 'POST', body: { aktion: 'freigeben' }, cookie: sessionCookie() }), res)
+
+    expect(getStatus()).toBe(409)
+    expect(eventMock).not.toHaveBeenCalled()
   })
 })

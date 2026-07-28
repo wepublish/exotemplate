@@ -28,6 +28,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { holeSecretOderAntworte503, findePortalZugang, loeseZugangEin, ladePortalMedium } from '@/lib/portal-guard'
 import { verifyToken, erzeugeSessionToken, baueSetCookie } from '@/lib/portal-session'
+import { schreibeMediumEvent } from '@/lib/medium-events'
 import { tenant } from '../../../../config/tenant'
 
 const FEHLER_REDIRECT = '/portal/login?fehler=1'
@@ -134,6 +135,15 @@ async function loeseEin(req: NextApiRequest, res: NextApiResponse, secret: strin
     if (!eingeloest) {
       return res.redirect(302, FEHLER_REDIRECT)
     }
+
+    // Roadmap-Ereignis (fire-and-forget): der erfolgreiche Login gehört zur
+    // nachgezeichneten Geschichte des Mediums (Slack-Roadmap im Medien-Channel).
+    void schreibeMediumEvent({
+      medium_id: zugang.mediumSlug,
+      typ: 'portal_login',
+      titel: 'Im Portal angemeldet',
+      actor: zugang.email,
+    })
 
     const sessionToken = erzeugeSessionToken(zugang.email, zugang.mediumSlug, secret)
     const sessionPayload = verifyToken<{ exp: number }>(sessionToken, secret)

@@ -29,6 +29,9 @@ jest.mock('./portal-guard', () => {
   }
 })
 
+// Ereignis-Protokoll mocken: geprüft wird nur, DASS und WOMIT geschrieben wird.
+jest.mock('./medium-events', () => ({ schreibeMediumEvent: jest.fn().mockResolvedValue(undefined) }))
+
 import {
   ladePortalMedium,
   existiertOffeneApplication,
@@ -40,6 +43,7 @@ import {
   existiertVorschlagMitDedupKey,
   legeAgentLessonAn,
 } from './portal-guard'
+import { schreibeMediumEvent } from './medium-events'
 import anschreiben from '../pages/api/portal/anschreiben'
 import nichtRelevant from '../pages/api/portal/nicht-relevant'
 
@@ -52,6 +56,7 @@ const ladeStiftungMock = ladeStiftungName as jest.Mock
 const legeVorschlagMock = legeAgentVorschlagAn as jest.Mock
 const existiertVorschlagMock = existiertVorschlagMitDedupKey as jest.Mock
 const legeLessonMock = legeAgentLessonAn as jest.Mock
+const eventMock = schreibeMediumEvent as jest.Mock
 
 const SECRET = 'anschreiben-routen-test-geheimnis-4711'
 
@@ -222,6 +227,16 @@ describe('/api/portal/anschreiben', () => {
     const [vorschlag] = legeVorschlagMock.mock.calls[0] as [Record<string, unknown>]
     expect(vorschlag.dedup_key).toBe('portal|anschreiben|bajour|8466')
     expect(String(vorschlag.titel)).toContain('Stiftung Convivium')
+
+    // Roadmap-Ereignis wurde protokolliert (mit Stiftungsname im Titel).
+    expect(eventMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        medium_id: 'bajour',
+        typ: 'stiftung_gewaehlt',
+        titel: 'Stiftung ausgewählt: Stiftung Convivium',
+        actor: 'redaktion@bajour.ch',
+      }),
+    )
   })
 
   it('Erfolg (Folge-Gesuch, consent_bestaetigt:true): kontext gesuch:<stiftung_id> (dokumentierte Abweichung vom Brief-gesuch:<app-id>)', async () => {

@@ -63,6 +63,7 @@ import {
   existiertVorschlagMitDedupKey,
 } from '@/lib/portal-guard'
 import { CONSENT_TEXT, CONSENT_TEXT_VERSION, brauchtVollConsent, baueGesuchAuftrag } from '@/lib/consent'
+import { schreibeMediumEvent } from '@/lib/medium-events'
 import { tenant } from '../../../../config/tenant'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -124,6 +125,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const stiftungName = await ladeStiftungName(stiftungId)
     const { applicationDaten, portalJson } = baueGesuchAuftrag(session, stiftungIdStr, String(consentRow.id), jetzt)
     const neueApp = await legeApplicationAn({ ...applicationDaten, stiftung_name: stiftungName, portal: portalJson })
+
+    // Roadmap-Ereignis (fire-and-forget): die Stiftungswahl durchs Medium ist
+    // eine Station der Slack-Roadmap im Medien-Channel.
+    void schreibeMediumEvent({
+      medium_id: session.mediumSlug,
+      typ: 'stiftung_gewaehlt',
+      titel: `Stiftung ausgewählt: ${stiftungName}`,
+      actor: session.email,
+    })
 
     const dedupKey = `portal|anschreiben|${session.mediumSlug}|${stiftungId}`
     if (!(await existiertVorschlagMitDedupKey(dedupKey))) {

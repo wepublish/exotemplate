@@ -39,6 +39,7 @@ import {
   legeAgentVorschlagAn,
 } from '@/lib/portal-guard'
 import { baueDnaAnsicht, bauePdfDaten } from '@/lib/portal-dna'
+import { schreibeMediumEvent } from '@/lib/medium-events'
 
 async function handleGet(req: NextApiRequest, res: NextApiResponse, mediumSlug: string) {
   try {
@@ -77,6 +78,16 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse, mediumSlug:
 
     const jetzt = new Date().toISOString()
     await setzeDnaFreigabe(mediumSlug, email, jetzt)
+
+    // Roadmap-Ereignis (fire-and-forget): die Freigabe durchs Medium ist eine
+    // Station der Slack-Roadmap im Medien-Channel.
+    void schreibeMediumEvent({
+      medium_id: mediumSlug,
+      typ: 'dna_freigegeben',
+      titel: 'Fundraising-DNA vom Medium freigegeben',
+      actor: email,
+    })
+
     await legeAgentVorschlagAn({
       typ: 'portal',
       status: 'offen',

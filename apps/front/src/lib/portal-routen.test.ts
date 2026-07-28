@@ -27,6 +27,10 @@ jest.mock('./portal-guard', () => {
   }
 })
 
+// Ereignis-Protokoll mocken: die Routen schreiben fire-and-forget nach
+// medium_events; hier wird nur geprüft, DASS und WOMIT sie es tun.
+jest.mock('./medium-events', () => ({ schreibeMediumEvent: jest.fn().mockResolvedValue(undefined) }))
+
 import {
   findePortalZugang,
   patchePortalZugang,
@@ -39,6 +43,7 @@ import {
   ladeWissenFuerMedium,
   legeWissensEintragAn,
 } from './portal-guard'
+import { schreibeMediumEvent } from './medium-events'
 import loginAnfordern from '../pages/api/portal/login-anfordern'
 import einloesen from '../pages/api/portal/einloesen'
 import logout from '../pages/api/portal/logout'
@@ -55,6 +60,7 @@ const ladeMock = ladePortalMedium as jest.Mock
 const hatDnaMock = hatAktiveMediumDna as jest.Mock
 const ladeWissenMock = ladeWissenFuerMedium as jest.Mock
 const legeWissenMock = legeWissensEintragAn as jest.Mock
+const eventMock = schreibeMediumEvent as jest.Mock
 
 const SECRET = 'routen-test-geheimnis-4711'
 
@@ -270,6 +276,21 @@ describe('/api/portal/einloesen POST (eigentliche Einlösung)', () => {
     // Ziel ist /portal mit eindeutigem Cache-Buster-Parameter (?e=<ts>), damit
     // der Login an einer evtl. noch gecachten /portal-Seite vorbei frisch startet.
     expect(redirect.url).toMatch(/^\/portal\?e=\d+$/)
+    // Roadmap-Ereignis wurde protokolliert.
+    expect(eventMock).toHaveBeenCalledWith(
+      expect.objectContaining({ medium_id: 'bajour', typ: 'portal_login', actor: 'redaktion@bajour.ch' }),
+    )
+  })
+
+  it('fehlgeschlagene Einlösung schreibt KEIN portal_login-Ereignis', async () => {
+    findeMock.mockResolvedValue(ZUGANG)
+    loeseMock.mockResolvedValue(false)
+    const token = erzeugeLoginToken('redaktion@bajour.ch', 'bajour', 'jti-alt', SECRET)
+
+    const { res } = makeRes()
+    await einloesen(makeReq({ method: 'POST', body: { token } }), res)
+
+    expect(eventMock).not.toHaveBeenCalled()
   })
 
   it('Einlösung schlägt fehl (jti schon verbraucht) → Fehler-Redirect, kein Cookie', async () => {
