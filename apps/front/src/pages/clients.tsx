@@ -257,7 +257,9 @@ function MediumDetailDialog({ mediumId, onClose }: MediumDetailDialogProps) {
       if (!currentJobId) return
 
       try {
-        const res = await fetch(`/api/measure-medium-dna?job_id=${encodeURIComponent(currentJobId)}`)
+        // cb gegen Cloudflare-Edge-Cache: Job-Polling darf nie eine gecachte
+        // Zwischenphase serviert bekommen (Muster wie auf den Portal-Seiten).
+        const res = await fetch(`/api/measure-medium-dna?job_id=${encodeURIComponent(currentJobId)}&cb=${Date.now()}`, { cache: 'no-store' })
 
         if (res.status === 404) {
           // Job nach Container-Neustart verloren

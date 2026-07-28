@@ -78,7 +78,8 @@ export default function RoadmapPage() {
     setLaden(true)
     setFehler(null)
     try {
-      const res = await fetch(`/api/roadmap?medium=${encodeURIComponent(slug)}`)
+      // cb gegen Cloudflare-Edge-Cache (Muster wie auf den Portal-Seiten).
+      const res = await fetch(`/api/roadmap?medium=${encodeURIComponent(slug)}&cb=${Date.now()}`, { cache: 'no-store' })
       const json = await res.json()
       if (!res.ok) {
         throw new Error(json?.error ?? `Fehler ${res.status}`)

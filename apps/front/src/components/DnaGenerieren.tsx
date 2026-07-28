@@ -115,7 +115,9 @@ export default function DnaGenerieren({ slug, name, website, onFertig }: DnaGene
       const id = jobIdRef.current
       if (!id) return
       try {
-        const res = await fetch(`/api/medium-knowledge/generate-dna?job_id=${encodeURIComponent(id)}`)
+        // cb gegen Cloudflare-Edge-Cache: Job-Polling darf nie eine gecachte
+        // Zwischenphase serviert bekommen (Muster wie auf den Portal-Seiten).
+        const res = await fetch(`/api/medium-knowledge/generate-dna?job_id=${encodeURIComponent(id)}&cb=${Date.now()}`, { cache: 'no-store' })
         if (res.status === 404) {
           stopPolling()
           setStatus('fehler')

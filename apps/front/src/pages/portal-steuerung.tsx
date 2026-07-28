@@ -86,7 +86,11 @@ export default function PortalSteuerungPage() {
     setLaden(true)
     setFehler(null)
     try {
-      const res = await fetch('/api/zugangsverwaltung')
+      // Cache-Buster wie auf den Portal-Seiten: Cloudflare hielt gecachte
+      // Antworten dieser Route fest (cf-cache-status HIT, 28.07.2026), neue
+      // Zugaenge erschienen sonst nicht. no-store-Header allein raeumt einen
+      // bereits liegenden Edge-Eintrag nicht weg.
+      const res = await fetch(`/api/zugangsverwaltung?cb=${Date.now()}`, { cache: 'no-store' })
       const json = await res.json()
       if (!res.ok) throw new Error(json?.error ?? `Fehler ${res.status}`)
       setDaten(json as UebersichtAntwort)
