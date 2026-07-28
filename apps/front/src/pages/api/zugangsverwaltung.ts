@@ -43,6 +43,7 @@ import {
   legeZugangAnMitLink,
   patchePortalZugang,
 } from '@/lib/portal-guard'
+import { loginTokenTtlSekunden } from '@/lib/portal-session'
 import { schreibeMediumEvent } from '@/lib/medium-events'
 import { tenant } from '../../../config/tenant'
 
@@ -59,6 +60,8 @@ type PortalSteuerungMedium = {
   dnaFreigabeVon: string | null
   freigeschaltet: string | null
   freigeschaltetVon: string | null
+  /** faas_medien.slack_channel — fuellt {slack} in den Mail-Vorlagen. */
+  slackKanal: string | null
 }
 
 type PortalSteuerungZugang = {
@@ -70,6 +73,8 @@ type PortalSteuerungZugang = {
   letzterLinkTs: string | null
   letzterLogin: string | null
   eingeladenAm: string | null
+  /** Ansprechperson beim Medium; fuellt {name}, leer heisst Rueckfall auf die Redaktion. */
+  kontaktName: string | null
 }
 
 type MediumRow = {
@@ -80,6 +85,7 @@ type MediumRow = {
   dna_medium_freigabe_von?: string | null
   matching_freigeschaltet?: string | null
   matching_freigeschaltet_von?: string | null
+  slack_channel?: string | null
 }
 
 type ZugangRow = {
@@ -91,13 +97,14 @@ type ZugangRow = {
   letzter_link_ts?: string | null
   letzter_login?: string | null
   eingeladen_am?: string | null
+  kontakt_name?: string | null
 }
 
 // ─── Directus-Lesezugriffe (GET) ─────────────────────────────────────────────
 
 async function ladeMedienUebersicht(): Promise<PortalSteuerungMedium[]> {
   const filterMedien = encodeURIComponent(JSON.stringify({ mandant: { _eq: tenant.key }, is_active: { _eq: true } }))
-  const felderMedien = 'id,slug,name,dna_medium_freigabe,dna_medium_freigabe_von,matching_freigeschaltet,matching_freigeschaltet_von'
+  const felderMedien = 'id,slug,name,dna_medium_freigabe,dna_medium_freigabe_von,matching_freigeschaltet,matching_freigeschaltet_von,slack_channel'
   const resMedien = await fetch(`${base()}/items/faas_medien?filter=${filterMedien}&sort=name&limit=-1&fields=${felderMedien}`, {
     headers: authHeaders(),
     signal: AbortSignal.timeout(15_000),
@@ -123,12 +130,13 @@ async function ladeMedienUebersicht(): Promise<PortalSteuerungMedium[]> {
     dnaFreigabeVon: m.dna_medium_freigabe_von ?? null,
     freigeschaltet: m.matching_freigeschaltet ?? null,
     freigeschaltetVon: m.matching_freigeschaltet_von ?? null,
+    slackKanal: m.slack_channel ?? null,
   }))
 }
 
 async function ladeZugaenge(): Promise<PortalSteuerungZugang[]> {
   const filter = encodeURIComponent(JSON.stringify({ mandant: { _eq: tenant.key } }))
-  const felder = 'id,email,medium_slug,status,letzter_link,letzter_link_ts,letzter_login,eingeladen_am'
+  const felder = 'id,email,medium_slug,status,letzter_link,letzter_link_ts,letzter_login,eingeladen_am,kontakt_name'
   const res = await fetch(`${base()}/items/portal_zugaenge?filter=${filter}&limit=-1&sort=-eingeladen_am&fields=${felder}`, {
     headers: authHeaders(),
     signal: AbortSignal.timeout(15_000),
@@ -144,13 +152,16 @@ async function ladeZugaenge(): Promise<PortalSteuerungZugang[]> {
     letzterLinkTs: z.letzter_link_ts ?? null,
     letzterLogin: z.letzter_login ?? null,
     eingeladenAm: z.eingeladen_am ?? null,
+    kontaktName: z.kontakt_name ?? null,
   }))
 }
 
 async function handleGet(res: NextApiResponse) {
   try {
     const [medien, zugaenge] = await Promise.all([ladeMedienUebersicht(), ladeZugaenge()])
-    return res.status(200).json({ medien, zugaenge })
+    // loginTtlStunden geht mit: die Mail-Vorlagen nennen die Gueltigkeit des
+    // Anmeldelinks, und die kennt nur der Server (PORTAL_LOGIN_TTL_STUNDEN).
+    return res.status(200).json({ medien, zugaenge, loginTtlStunden: Math.round(loginTokenTtlSekunden() / 3600) })
   } catch (err: unknown) {
     console.error('zugangsverwaltung GET: Directus nicht erreichbar', err)
     return res.status(502).json({ error: 'Daten momentan nicht verfügbar' })
@@ -227,6 +238,29 @@ async function aktionSperrenEntsperren(req: NextApiRequest, res: NextApiResponse
   }
 }
 
+/**
+ * Merkt die Ansprechperson am Zugang, damit die Anrede beim naechsten Mal
+ * schon steht. Ohne diesen Wert faellt die Anrede auf «Liebe Redaktion von X»
+ * zurueck — ein roher Platzhalter {name} kann nicht mehr rausgehen (Befund
+ * Michael Scheurer, 28.07.2026: genau das war passiert).
+ */
+async function aktionKontakt(req: NextApiRequest, res: NextApiResponse) {
+  const id = typeof req.body?.id === 'string' ? req.body.id.trim() : ''
+  if (!id) return res.status(400).json({ error: 'id erforderlich.' })
+  const roh = typeof req.body?.kontakt_name === 'string' ? req.body.kontakt_name.trim() : ''
+  // Leer heisst bewusst «wieder vergessen»; 120 Zeichen sind fuer einen Namen
+  // reichlich und halten die Spalte in Grenzen.
+  const name = roh.slice(0, 120)
+
+  try {
+    await patchePortalZugang(id, { kontakt_name: name || null })
+    return res.status(200).json({ status: 'ok', kontakt_name: name || null })
+  } catch (err: unknown) {
+    console.error('zugangsverwaltung kontakt: fehlgeschlagen', err)
+    return res.status(502).json({ error: 'Speichern der Ansprechperson fehlgeschlagen.' })
+  }
+}
+
 async function handlePost(req: NextApiRequest, res: NextApiResponse, wer: string) {
   const secret = holeSecretOderAntworte503(res)
   if (!secret) return
@@ -237,6 +271,8 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse, wer: string
       return aktionAnlegen(req, res, secret, wer)
     case 'link':
       return aktionNeuerLink(req, res, secret)
+    case 'kontakt':
+      return aktionKontakt(req, res)
     case 'sperren':
     case 'entsperren':
       return aktionSperrenEntsperren(req, res, aktion)

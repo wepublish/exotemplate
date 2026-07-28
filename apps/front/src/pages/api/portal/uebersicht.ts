@@ -136,7 +136,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       new Date(),
     )
 
-    return res.status(200).json(ergebnis)
+    // slackKanal geht mit: die Uebersichtsseite verweist auf den Slack-Kanal
+    // des Mediums statt auf eine Mailadresse (Wunsch Michael Scheurer,
+    // 28.07.2026: alle Kommunikation an einem Ort).
+    return res.status(200).json({ ...ergebnis, slackKanal: medium.slackKanal })
   } catch (err: unknown) {
     console.error('uebersicht: Directus nicht erreichbar', err)
     return res.status(502).json({ error: 'Daten momentan nicht verfügbar' })

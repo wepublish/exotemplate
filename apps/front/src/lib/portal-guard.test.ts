@@ -203,6 +203,7 @@ describe('ladePortalMedium', () => {
               dna_medium_freigabe: null,
               logo_url: 'file-abc',
               logo_hochgeladen: true,
+              slack_channel: 'C0BFYRBKL9F',
             },
           ],
         }),
@@ -218,6 +219,9 @@ describe('ladePortalMedium', () => {
       dnaFreigabe: null,
       logoUrl: 'file-abc',
       logoHochgeladen: true,
+      // Kontaktblock des Portals verweist auf den Slack-Kanal statt auf eine
+      // Mailadresse (Wunsch Michael Scheurer, 28.07.2026).
+      slackKanal: 'C0BFYRBKL9F',
     })
   })
 

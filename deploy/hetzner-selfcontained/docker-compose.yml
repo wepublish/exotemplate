@@ -159,6 +159,11 @@ services:
       PORTAL_SESSION_SECRET: ${PORTAL_SESSION_SECRET:-}
       PORTAL_BASE_URL: ${PORTAL_BASE_URL:-}
       PORTAL_TREFFER_LIMIT: ${PORTAL_TREFFER_LIMIT:-20}
+      # Gueltigkeit eines Anmeldelinks in Stunden (Sicherheitsvorgabe 28.07.2026,
+      # Michael Scheurer: kurzlebig, nicht dauerhaft). 8 Stunden, weil der Link
+      # solange SMTP fehlt von Hand weitergeleitet wird. Sobald der Versand
+      # automatisch laeuft, hier auf 2 stellen. Grenzen in der App: 1 bis 24.
+      PORTAL_LOGIN_TTL_STUNDEN: ${PORTAL_LOGIN_TTL_STUNDEN:-8}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-opus-4-8}
       # Crawler (interim): Spark-Crawler ueber Tailscale, aus .env uebersteuerbar.

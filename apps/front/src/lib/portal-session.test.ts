@@ -8,6 +8,7 @@ import {
   baueSetCookie,
   baueLoeschCookie,
   PORTAL_COOKIE,
+  loginTokenTtlSekunden,
 } from './portal-session'
 
 const SECRET = 'test-geheimnis-1234'
@@ -59,12 +60,33 @@ describe('erzeugeLoginToken / erzeugeSessionToken', () => {
     expect(payload?.jti).toBe('jti-123')
   })
 
-  it('Login-Token verfällt praktisch nie (Entscheid 28.07.2026: exp weit in der Zukunft)', () => {
+  /**
+   * Sicherheitsvorgabe nach dem Einwand von Michael Scheurer (28.07.2026): ein
+   * Anmeldelink gilt Stunden, nicht Jahre. Am Vormittag desselben Tages stand
+   * hier das Gegenteil (exp 100 Jahre in der Zukunft) — diese Tests sind der
+   * Riegel, damit das nicht unbemerkt zurueckkommt.
+   */
+  it('Login-Token gilt nur wenige Stunden, nicht Tage', () => {
     const token = erzeugeLoginToken('redaktion@bajour.ch', 'bajour', 'jti-123', SECRET)
     const payload = verifyToken<{ exp: number }>(token, SECRET)
     const jetzt = Math.floor(Date.now() / 1000)
-    const fuenfzigJahre = 50 * 365 * 24 * 60 * 60
-    expect(payload!.exp).toBeGreaterThan(jetzt + fuenfzigJahre)
+    const stunde = 60 * 60
+    expect(payload!.exp).toBeGreaterThan(jetzt + stunde)
+    expect(payload!.exp).toBeLessThanOrEqual(jetzt + 24 * stunde)
+  })
+
+  it('loginTokenTtlSekunden: Vorgabe acht Stunden, per Umgebungsvariable stellbar', () => {
+    const stunde = 60 * 60
+    expect(loginTokenTtlSekunden({})).toBe(8 * stunde)
+    expect(loginTokenTtlSekunden({ PORTAL_LOGIN_TTL_STUNDEN: '2' })).toBe(2 * stunde)
+    expect(loginTokenTtlSekunden({ PORTAL_LOGIN_TTL_STUNDEN: '24' })).toBe(24 * stunde)
+  })
+
+  it('loginTokenTtlSekunden: unsinnige Werte fallen auf die Vorgabe zurueck, nie auf unbegrenzt', () => {
+    const stunde = 60 * 60
+    for (const wert of ['0', '-5', '999', 'viel', '', 'Infinity', 'NaN']) {
+      expect(loginTokenTtlSekunden({ PORTAL_LOGIN_TTL_STUNDEN: wert })).toBe(8 * stunde)
+    }
   })
 
   it('Session-Token trägt typ session mit 30-Tage-TTL', () => {

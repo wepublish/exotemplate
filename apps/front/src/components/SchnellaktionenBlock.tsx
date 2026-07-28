@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { MailEntwurfButton } from '@/components/MailEntwurfButton'
 import { GesuchPromptButton } from '@/components/GesuchPromptButton'
 import { bauWillkommensmail } from '@/lib/mail-vorlagen'
+import { baueSlackVerweis } from '@/lib/portal-texte'
 import { tenant } from '../../config/tenant'
 
 const MEDIEN_QUERY = gql`
@@ -23,11 +24,12 @@ const MEDIEN_QUERY = gql`
     ) {
       slug
       name
+      slack_channel
     }
   }
 `
 
-type Medium = { slug: string; name: string }
+type Medium = { slug: string; name: string; slack_channel: string | null }
 
 export function SchnellaktionenBlock() {
   const { data } = useQuery(MEDIEN_QUERY, { errorPolicy: 'all' })
@@ -37,7 +39,16 @@ export function SchnellaktionenBlock() {
   const [stiftungId, setStiftungId] = useState('')
 
   const medium = medien.find((m) => m.slug === slug) ?? null
-  const mail = medium ? bauWillkommensmail({ mediumName: medium.name }) : null
+  // Alle Angaben fuellen, damit kein Platzhalter in der Mail landet: die Anrede
+  // faellt auf «Liebe Redaktion von X» zurueck, der Absender auf Ramona, und der
+  // Weg hinein ist die Login-Seite (kein Link in der Mail, siehe portal-texte.ts).
+  const mail = medium
+    ? bauWillkommensmail({
+        mediumName: medium.name,
+        loginSeite: typeof window !== 'undefined' ? `${window.location.origin}/portal/login` : '',
+        slack: baueSlackVerweis(medium.slack_channel),
+      })
+    : null
 
   return (
     <div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { usePortalMe } from '@/components/portal/PortalLayout'
-import { PORTAL_TEXTE, fuelleText } from '@/lib/portal-texte'
+import { PORTAL_TEXTE, baueSlackVerweis, fuelleText } from '@/lib/portal-texte'
 import { STATION_REIHENFOLGE, STATION_LABEL, type Station, type Reminder } from '@/lib/portal-status'
 
 /**
@@ -15,7 +15,13 @@ import { STATION_REIHENFOLGE, STATION_LABEL, type Station, type Reminder } from 
  * usePortalMe() liest den tatsächlichen Medium-Stand statt immer null.
  */
 
-type UebersichtAntwort = { stationen: Station[]; naechsterSchritt: string; reminder: Reminder[] }
+type UebersichtAntwort = {
+  stationen: Station[]
+  naechsterSchritt: string
+  reminder: Reminder[]
+  /** faas_medien.slack_channel — Ziel des Kontaktblocks (Slack statt Mail). */
+  slackKanal?: string | null
+}
 type LadeStatus = 'laden' | 'bereit' | 'fehler'
 
 function stationStil(status: Station['status']): { kreis: string; label: string } {
@@ -59,6 +65,8 @@ function Fortschrittsleiste({ stationen }: { stationen: Station[] }) {
 export default function PortalUebersichtSeite() {
   const me = usePortalMe()
   const [uebersicht, setUebersicht] = useState<UebersichtAntwort | null>(null)
+  // Slack-Verweis fuer den Kontaktblock; leer, solange kein Kanal hinterlegt ist.
+  const slackVerweis = baueSlackVerweis(uebersicht?.slackKanal)
   const [status, setStatus] = useState<LadeStatus>('laden')
 
   useEffect(() => {
@@ -121,11 +129,26 @@ export default function PortalUebersichtSeite() {
         <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
           Eure Ansprechpartnerinnen bei We.Publish
         </p>
+        {/*
+          Slack statt Mail (Wunsch Michael Scheurer, 28.07.2026): alle
+          Kommunikation an einem Ort, damit niemand am eigenen Postfach klebt
+          und Ferien moeglich sind. Ohne hinterlegten Kanal bleibt der Hinweis
+          allgemein, statt auf einen toten Link zu zeigen.
+        */}
         <p className="mt-1 text-sm text-slate-600">
-          Fragen? Schreibt uns an{' '}
-          <a href="mailto:fundraising@wepublish.ch" className="text-indigo-600 hover:underline">
-            fundraising@wepublish.ch
-          </a>
+          Fragen? Schreibt uns in eurem Slack-Kanal, dort sind wir alle erreichbar
+          {slackVerweis.startsWith('http') ? (
+            <>
+              :{' '}
+              <a href={slackVerweis} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline">
+                Kanal öffnen
+              </a>
+            </>
+          ) : slackVerweis ? (
+            <> ({slackVerweis})</>
+          ) : (
+            <> im We.Publish-Slack</>
+          )}
           .
         </p>
       </div>

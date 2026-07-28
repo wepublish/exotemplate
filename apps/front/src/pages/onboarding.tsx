@@ -33,7 +33,6 @@ import {
   UPDATE_MEDIUM_FELDER,
 } from '@/graphql/onboarding'
 import { slugify } from '@/graphql/projekte'
-import { tenant } from '../../config/tenant'
 import {
   berechneKnowledgeScore,
   kategorieLabelFromKey,
@@ -45,7 +44,8 @@ import DnaGenerieren from '@/components/DnaGenerieren'
 import { MediumLogo } from '@/components/MediumLogo'
 import { MailEntwurfButton } from '@/components/MailEntwurfButton'
 import { OnboardingSlackButton } from '@/components/OnboardingSlackButton'
-import { MAIL_EINLADUNG, fuelleVorlage } from '@/lib/portal-texte'
+import { LOGIN_TTL_STUNDEN_STANDARD, MAIL_EINLADUNG, baueSlackVerweis, fuelleVorlage } from '@/lib/portal-texte'
+import { ABSENDER_STANDARD, baueAnrede } from '@/lib/mail-vorlagen'
 import type { ArbeitsDnaGespeichert } from '@/pages/api/medium-knowledge/working-dna'
 
 // ─── Typen ────────────────────────────────────────────────────────────────────
@@ -1420,7 +1420,13 @@ export default function OnboardingPage() {
   // Nach dem Aufnehmen MIT Kontakt-E-Mail: Hallo und Magic-Link in einem
   // Schritt (Entscheid 28.07.2026) — das Panel unten zeigt die versandfertige
   // Einladungsmail mit dem frischen Login-Link.
-  const [willkommen, setWillkommen] = useState<{ name: string; slug: string; email: string; link: string } | null>(null)
+  const [willkommen, setWillkommen] = useState<{
+    name: string
+    slug: string
+    email: string
+    link: string
+    slack: string | null
+  } | null>(null)
   const [willkommenLaedt, setWillkommenLaedt] = useState(false)
 
   // Willkommensmail MIT Magic-Link auch für bereits angelegte Medien
@@ -1453,7 +1459,7 @@ export default function OnboardingPage() {
       })
       const json = (await res.json().catch(() => ({}))) as { link?: string; error?: string }
       if (!res.ok || !json.link) throw new Error(json.error ?? `HTTP ${res.status}`)
-      setWillkommen({ name: medium.name, slug: medium.slug, email, link: json.link })
+      setWillkommen({ name: medium.name, slug: medium.slug, email, link: json.link, slack: medium.slack_channel ?? null })
     } catch (err) {
       toast.error(`Login-Link fehlgeschlagen: ${err instanceof Error ? err.message : String(err)}`)
     } finally {
@@ -1506,7 +1512,8 @@ export default function OnboardingPage() {
       }
       toast.success(`Medium «${n}» aufgenommen · API-URL vorbelegt — bei Abweichung in den Feldern anpassen`)
       if (json.link) {
-        setWillkommen({ name: n, slug: json.slug ?? slug, email, link: json.link })
+        // Frisch aufgenommenes Medium hat noch keinen Slack-Kanal.
+        setWillkommen({ name: n, slug: json.slug ?? slug, email, link: json.link, slack: null })
       }
       setNeuName('')
       setNeuWebsite('')
@@ -1596,18 +1603,33 @@ export default function OnboardingPage() {
 
       {/* Hallo + Magic-Link: versandfertige Einladungsmail nach dem Aufnehmen */}
       {willkommen && (() => {
-        const einladung = fuelleVorlage(MAIL_EINLADUNG, { medium: willkommen.name, link: willkommen.link })
+        // Alle Platzhalter werden hier gefuellt. Vorher standen {name} und
+        // {absender} roh in der Mail, und genau so ist am 28.07.2026 eine
+        // Einladung an ein Medium rausgegangen (Befund Michael Scheurer).
+        // Die Anrede faellt ohne erfasste Person auf «Liebe Redaktion von X»
+        // zurueck; der Absender auf Ramona. Ein Login-Link steht bewusst NICHT
+        // in dieser Mail, sie verweist auf die Login-Seite.
+        const einladung = fuelleVorlage(MAIL_EINLADUNG, {
+          medium: willkommen.name,
+          anrede: baueAnrede(willkommen.name),
+          absender: ABSENDER_STANDARD,
+          loginseite: typeof window !== 'undefined' ? `${window.location.origin}/portal/login` : '',
+          stunden: String(LOGIN_TTL_STUNDEN_STANDARD),
+          slack: baueSlackVerweis(willkommen.slack),
+        })
         return (
           <div className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm flex flex-wrap items-center gap-2">
             <span className="text-emerald-900">
-              Portal-Zugang für <strong>{willkommen.email}</strong> steht bereit. Willkommensmail mit dem
-              Magic-Link verschicken ({'{name}'} und {'{absender}'} beim Redigieren einsetzen):
+              Portal-Zugang für <strong>{willkommen.email}</strong> steht bereit. Die Willkommensmail
+              ist fertig ausgefüllt und verweist auf die Login-Seite, wo sich das Medium selbst einen
+              Anmeldelink holt. Absender ist Ramona, Anrede «Liebe Redaktion von {willkommen.name}» —
+              beides beim Redigieren anpassbar.
             </span>
             <MailEntwurfButton
               betreff={einladung.betreff}
               text={einladung.text}
               an={willkommen.email}
-              label="Willkommensmail mit Link"
+              label="Willkommensmail"
               titel={`Willkommensmail – ${willkommen.name}`}
             />
             <Button size="sm" variant="ghost" onClick={() => setWillkommen(null)}>

@@ -1,40 +1,103 @@
-import { MAIL_EINLADUNG, MAIL_MATCHING_FREI, MAIL_NEUER_LINK, PORTAL_TEXTE, fuelleText, fuelleVorlage } from './portal-texte'
+import {
+  LOGIN_TTL_STUNDEN_STANDARD,
+  MAIL_EINLADUNG,
+  MAIL_MATCHING_FREI,
+  MAIL_NEUER_LINK,
+  PORTAL_TEXTE,
+  baueSlackVerweis,
+  fuelleText,
+  fuelleVorlage,
+} from './portal-texte'
+
+const LOGINSEITE = 'https://portal.example/portal/login'
+const SLACK = 'https://slack.com/app_redirect?channel=C0BFYRBKL9F'
+
+/** Alles, was die aufrufenden Seiten fuellen — Grundlage der Vollstaendigkeitspruefung. */
+const ALLE_WERTE = {
+  medium: 'Bajour',
+  anrede: 'Liebe Redaktion von Bajour',
+  absender: 'Ramona',
+  loginseite: LOGINSEITE,
+  stunden: '8',
+  slack: SLACK,
+  link: 'https://portal.example/api/portal/einloesen?token=abc.def',
+}
+
+/**
+ * Der Sicherheitsriegel aus dem Einwand von Michael Scheurer (28.07.2026):
+ * ein Login-Link darf NUR in der Mail stehen, die das Medium selbst angefordert
+ * hat. Diese Pruefung sitzt an der Vorlage selbst, nicht am Aufrufer — so kann
+ * niemand versehentlich einen {link} in die Einladung zurueckschreiben.
+ */
+describe('Sicherheit: Login-Link nur in MAIL_NEUER_LINK', () => {
+  it('MAIL_EINLADUNG traegt keinen {link}, sondern die Login-Seite', () => {
+    expect(MAIL_EINLADUNG.text).not.toContain('{link}')
+    expect(MAIL_EINLADUNG.text).toContain('{loginseite}')
+  })
+
+  it('MAIL_MATCHING_FREI traegt keinen {link}, sondern die Login-Seite', () => {
+    expect(MAIL_MATCHING_FREI.text).not.toContain('{link}')
+    expect(MAIL_MATCHING_FREI.text).toContain('{loginseite}')
+  })
+
+  it('MAIL_NEUER_LINK traegt den {link} und nennt die Gueltigkeit', () => {
+    expect(MAIL_NEUER_LINK.text).toContain('{link}')
+    expect(MAIL_NEUER_LINK.text).toContain('{stunden} Stunden')
+  })
+
+  it('keine Vorlage verspricht dauerhafte Gueltigkeit', () => {
+    for (const v of [MAIL_EINLADUNG, MAIL_MATCHING_FREI, MAIL_NEUER_LINK]) {
+      expect(v.text).not.toContain('bleibt gültig')
+      expect(v.text).not.toContain('Lesezeichen')
+    }
+  })
+})
 
 describe('fuelleVorlage', () => {
-  it('MAIL_EINLADUNG: ersetzt {medium} und {link}, lässt {name} unangetastet', () => {
-    const ergebnis = fuelleVorlage(MAIL_EINLADUNG, {
-      medium: 'Bajour',
-      link: 'https://portal.example/api/portal/einloesen?token=abc.def',
-    })
+  it.each([
+    ['MAIL_EINLADUNG', MAIL_EINLADUNG],
+    ['MAIL_MATCHING_FREI', MAIL_MATCHING_FREI],
+    ['MAIL_NEUER_LINK', MAIL_NEUER_LINK],
+  ])('%s: mit allen Werten bleibt kein Platzhalter stehen', (_name, vorlage) => {
+    const ergebnis = fuelleVorlage(vorlage, ALLE_WERTE)
+    expect(ergebnis.text).not.toMatch(/\{[a-z]+\}/)
+    expect(ergebnis.betreff).not.toMatch(/\{[a-z]+\}/)
+  })
+
+  it('MAIL_EINLADUNG: Anrede, Medium, Login-Seite, Gueltigkeit und Slack sind gesetzt', () => {
+    const ergebnis = fuelleVorlage(MAIL_EINLADUNG, ALLE_WERTE)
+    expect(ergebnis.text).toContain('Liebe Redaktion von Bajour')
     expect(ergebnis.text).toContain('Schön, dass Bajour beim Fundraising as a Service von We.Publish dabei ist.')
     expect(ergebnis.text).toContain('So läuft es Schritt für Schritt:')
-    expect(ergebnis.text).toContain('https://portal.example/api/portal/einloesen?token=abc.def')
-    expect(ergebnis.text).toContain('Hallo {name}')
-    expect(ergebnis.text).not.toContain('{medium}')
-    expect(ergebnis.text).not.toContain('{link}')
+    expect(ergebnis.text).toContain(LOGINSEITE)
+    expect(ergebnis.text).toContain('gilt 8 Stunden')
+    expect(ergebnis.text).toContain(SLACK)
+    // Der Anmeldelink selbst darf hier nicht auftauchen, auch nicht wenn ein
+    // Aufrufer versehentlich einen mitgibt.
+    expect(ergebnis.text).not.toContain(ALLE_WERTE.link)
     expect(ergebnis.betreff).toBe(MAIL_EINLADUNG.betreff)
   })
 
-  it('MAIL_NEUER_LINK: ersetzt {link}, lässt {name} unangetastet, ohne {medium}-Erwähnung', () => {
-    const ergebnis = fuelleVorlage(MAIL_NEUER_LINK, { link: 'https://portal.example/api/portal/einloesen?token=xyz.123' })
-    expect(ergebnis.text).toContain('https://portal.example/api/portal/einloesen?token=xyz.123')
-    expect(ergebnis.text).toContain('Hallo {name}')
-    expect(ergebnis.text).not.toContain('{link}')
-    expect(ergebnis.text).not.toContain('{medium}')
+  it('MAIL_NEUER_LINK: enthaelt den Anmeldelink', () => {
+    const ergebnis = fuelleVorlage(MAIL_NEUER_LINK, ALLE_WERTE)
+    expect(ergebnis.text).toContain(ALLE_WERTE.link)
+    expect(ergebnis.text).toContain('gilt 8 Stunden')
   })
 
-  it('MAIL_MATCHING_FREI: ersetzt {medium} und {link}, lässt {name}/{absender} unangetastet', () => {
-    const ergebnis = fuelleVorlage(MAIL_MATCHING_FREI, {
-      medium: 'Bajour',
-      link: 'https://portal.example/api/portal/einloesen?token=frisch.789',
-    })
+  it('MAIL_MATCHING_FREI: nennt das Medium und den Weg über die Login-Seite', () => {
+    const ergebnis = fuelleVorlage(MAIL_MATCHING_FREI, ALLE_WERTE)
     expect(ergebnis.betreff).toBe('Eure Stiftungs-Treffer sind bereit')
     expect(ergebnis.text).toContain('das Matching für Bajour freigeschaltet')
-    expect(ergebnis.text).toContain('https://portal.example/api/portal/einloesen?token=frisch.789')
-    expect(ergebnis.text).toContain('Hallo {name}')
-    expect(ergebnis.text).toContain('{absender}')
-    expect(ergebnis.text).not.toContain('{medium}')
-    expect(ergebnis.text).not.toContain('{link}')
+    expect(ergebnis.text).toContain(LOGINSEITE)
+    expect(ergebnis.text).not.toContain(ALLE_WERTE.link)
+  })
+
+  it('ohne Slack-Kanal bleibt kein Platzhalter und keine leere Zeile stehen', () => {
+    const ergebnis = fuelleVorlage(MAIL_EINLADUNG, { ...ALLE_WERTE, slack: '' })
+    expect(ergebnis.text).not.toContain('{slack}')
+    expect(ergebnis.text).toContain('am besten in eurem Slack-Kanal')
+    // Kein Absatz, der nur aus Leerraum besteht.
+    expect(ergebnis.text.split('\n').some((z) => z.trim() === '' && z.length > 0)).toBe(false)
   })
 
   it('unbekannte Platzhalter bleiben stehen, wenn kein Wert übergeben wird', () => {
@@ -52,6 +115,30 @@ describe('fuelleVorlage', () => {
   it('leerer werte-Wert (leerer String) ersetzt trotzdem, ohne den Platzhalter stehen zu lassen', () => {
     const ergebnis = fuelleVorlage({ betreff: 'x', text: 'Hallo {name}' }, { name: '' })
     expect(ergebnis.text).toBe('Hallo ')
+  })
+})
+
+describe('baueSlackVerweis', () => {
+  it('macht aus einer Channel-ID einen Slack-Link', () => {
+    expect(baueSlackVerweis('C0BFYRBKL9F')).toBe('https://slack.com/app_redirect?channel=C0BFYRBKL9F')
+  })
+
+  it('laesst einen #Namen als Namen stehen (ohne Workspace-Adresse kein Link)', () => {
+    expect(baueSlackVerweis('#faas-zwolf')).toBe('#faas-zwolf')
+    expect(baueSlackVerweis('faas-zwolf')).toBe('#faas-zwolf')
+  })
+
+  it('ohne Kanal leer, damit die Mail den Verweis weglassen kann', () => {
+    expect(baueSlackVerweis(null)).toBe('')
+    expect(baueSlackVerweis(undefined)).toBe('')
+    expect(baueSlackVerweis('   ')).toBe('')
+  })
+})
+
+describe('LOGIN_TTL_STUNDEN_STANDARD', () => {
+  it('liegt bei wenigen Stunden, nicht bei Tagen (Sicherheitsvorgabe 28.07.2026)', () => {
+    expect(LOGIN_TTL_STUNDEN_STANDARD).toBe(8)
+    expect(LOGIN_TTL_STUNDEN_STANDARD).toBeLessThanOrEqual(24)
   })
 })
 

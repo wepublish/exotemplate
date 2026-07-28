@@ -116,6 +116,8 @@ export type PortalMedium = {
    * Provenienz-Marker für den Logo-Pflicht-Erststep.
    */
   logoHochgeladen: boolean
+  /** faas_medien.slack_channel — der Kanal, in dem das Medium uns erreicht. */
+  slackKanal: string | null
 }
 
 /**
@@ -126,7 +128,7 @@ export type PortalMedium = {
  */
 export async function ladePortalMedium(slug: string): Promise<PortalMedium | null> {
   const filter = encodeURIComponent(JSON.stringify({ slug: { _eq: slug } }))
-  const felder = 'id,name,slug,matching_freigeschaltet,dna_medium_freigabe,logo_url,logo_hochgeladen'
+  const felder = 'id,name,slug,matching_freigeschaltet,dna_medium_freigabe,logo_url,logo_hochgeladen,slack_channel'
   const res = await fetch(`${base()}/items/faas_medien?filter=${filter}&limit=1&fields=${felder}`, {
     headers: authHeaders(),
     signal: AbortSignal.timeout(15_000),
@@ -141,6 +143,7 @@ export async function ladePortalMedium(slug: string): Promise<PortalMedium | nul
       dna_medium_freigabe?: string | null
       logo_url?: string | null
       logo_hochgeladen?: boolean | null
+      slack_channel?: string | null
     }>
   }
   const row = json.data?.[0]
@@ -153,6 +156,7 @@ export async function ladePortalMedium(slug: string): Promise<PortalMedium | nul
     dnaFreigabe: row.dna_medium_freigabe ?? null,
     logoUrl: row.logo_url ?? null,
     logoHochgeladen: row.logo_hochgeladen === true,
+    slackKanal: row.slack_channel ?? null,
   }
 }
 

@@ -18,7 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { MAIL_EINLADUNG, MAIL_MATCHING_FREI, MAIL_NEUER_LINK, fuelleVorlage, type MailVorlage } from '@/lib/portal-texte'
+import {
+  MAIL_EINLADUNG,
+  MAIL_MATCHING_FREI,
+  MAIL_NEUER_LINK,
+  baueSlackVerweis,
+  fuelleVorlage,
+  type MailVorlage,
+} from '@/lib/portal-texte'
+import { ABSENDER_STANDARD, baueAnrede } from '@/lib/mail-vorlagen'
 import { baueMailtoUrl, mailtoIstZuLang } from '@/lib/mailto'
 
 /**
@@ -40,6 +48,8 @@ type PortalMedium = {
   dnaFreigabeVon: string | null
   freigeschaltet: string | null
   freigeschaltetVon: string | null
+  /** faas_medien.slack_channel — fuellt den Slack-Verweis in den Mails. */
+  slackKanal: string | null
 }
 
 type PortalZugang = {
@@ -51,11 +61,28 @@ type PortalZugang = {
   letzterLinkTs: string | null
   letzterLogin: string | null
   eingeladenAm: string | null
+  /** Gemerkte Ansprechperson; leer heisst Anrede «Liebe Redaktion von X». */
+  kontaktName: string | null
 }
 
-type UebersichtAntwort = { medien: PortalMedium[]; zugaenge: PortalZugang[] }
+type UebersichtAntwort = { medien: PortalMedium[]; zugaenge: PortalZugang[]; loginTtlStunden?: number }
 
-type LinkErgebnis = { vorlage: MailVorlage; link: string; mediumName: string; email: string }
+/**
+ * Alles, was der Mail-Dialog braucht. `link` ist optional: nur MAIL_NEUER_LINK
+ * traegt einen Anmeldelink, die anderen Vorlagen verweisen auf die Login-Seite
+ * (Sicherheitsentscheid 28.07.2026, siehe portal-texte.ts). `zugangId` erlaubt
+ * es, die eingetippte Ansprechperson am Zugang zu merken.
+ */
+type LinkErgebnis = {
+  vorlage: MailVorlage
+  link?: string
+  mediumName: string
+  email: string
+  slackKanal: string | null
+  kontaktName: string | null
+  zugangId: string | null
+  ttlStunden: number
+}
 
 /**
  * localStorage-Schlüssel für den Vornamen der Bedienerin. Er füllt die
@@ -104,8 +131,10 @@ export default function PortalSteuerungPage() {
       const json = await res.json()
       if (!res.ok) throw new Error(json?.error ?? `Fehler ${res.status}`)
       setDaten(json as UebersichtAntwort)
+      return json as UebersichtAntwort
     } catch (err: unknown) {
       setFehler(err instanceof Error ? err.message : String(err))
+      return null
     } finally {
       setLaden(false)
     }
@@ -136,10 +165,21 @@ export default function PortalSteuerungPage() {
       toast.error(String(json?.error ?? 'Anlegen fehlgeschlagen.'))
       return
     }
-    const medium = daten?.medien.find((m) => m.slug === mediumSlug)
-    setLinkErgebnis({ vorlage: MAIL_EINLADUNG, link: String(json.link ?? ''), mediumName: medium?.name ?? mediumSlug, email })
     toast.success('Zugang angelegt.')
-    await lade()
+    // Erst neu laden, dann den Dialog oeffnen: so kennen wir die id des frisch
+    // angelegten Zugangs und koennen die Ansprechperson daran merken.
+    const frisch = await lade()
+    const medium = (frisch ?? daten)?.medien.find((m) => m.slug === mediumSlug)
+    const zugang = (frisch ?? daten)?.zugaenge.find((z) => z.mediumSlug === mediumSlug && z.email === email)
+    setLinkErgebnis({
+      vorlage: MAIL_EINLADUNG,
+      mediumName: medium?.name ?? mediumSlug,
+      email,
+      slackKanal: medium?.slackKanal ?? null,
+      kontaktName: zugang?.kontaktName ?? null,
+      zugangId: zugang?.id ?? null,
+      ttlStunden: (frisch ?? daten)?.loginTtlStunden ?? 8,
+    })
   }
 
   async function neuerLink(zugang: PortalZugang) {
@@ -149,7 +189,16 @@ export default function PortalSteuerungPage() {
       return
     }
     const medium = daten?.medien.find((m) => m.slug === zugang.mediumSlug)
-    setLinkErgebnis({ vorlage: MAIL_NEUER_LINK, link: String(json.link ?? ''), mediumName: medium?.name ?? zugang.mediumSlug, email: zugang.email })
+    setLinkErgebnis({
+      vorlage: MAIL_NEUER_LINK,
+      link: String(json.link ?? ''),
+      mediumName: medium?.name ?? zugang.mediumSlug,
+      email: zugang.email,
+      slackKanal: medium?.slackKanal ?? null,
+      kontaktName: zugang.kontaktName,
+      zugangId: zugang.id,
+      ttlStunden: daten?.loginTtlStunden ?? 8,
+    })
     toast.success('Neuer Link erzeugt.')
     await lade()
   }
@@ -183,20 +232,23 @@ export default function PortalSteuerungPage() {
 
       // Benachrichtigung ans Medium vorbereiten (Entscheid 28.07.2026: Mail
       // und Slack). Slack übernimmt die Roadmap auf dem Spark automatisch
-      // (matching_freigegeben-Ereignis); hier entsteht die versandfertige
-      // Mail mit einem FRISCHEN Login-Link, damit das Medium mit einem Klick
-      // vor seiner Trefferliste steht.
+      // (matching_freigegeben-Ereignis); hier entsteht die versandfertige Mail.
+      //
+      // Bewusst OHNE frischen Login-Link (Sicherheitsentscheid 28.07.2026): die
+      // Mail geht von Hand raus, oft Stunden später, ein kurzlebiger Link wäre
+      // dann längst abgelaufen. Ausserdem hätte das Erzeugen den Link, den das
+      // Medium eventuell gerade angefordert hat, still ungültig gemacht.
       const zugang = daten?.zugaenge.find((z) => z.mediumSlug === medium.slug && z.status !== 'gesperrt')
       if (zugang) {
-        const { ok, json } = await post({ aktion: 'link', id: zugang.id })
-        if (ok) {
-          setLinkErgebnis({
-            vorlage: MAIL_MATCHING_FREI,
-            link: String(json.link ?? ''),
-            mediumName: medium.name,
-            email: zugang.email,
-          })
-        }
+        setLinkErgebnis({
+          vorlage: MAIL_MATCHING_FREI,
+          mediumName: medium.name,
+          email: zugang.email,
+          slackKanal: medium.slackKanal ?? null,
+          kontaktName: zugang.kontaktName,
+          zugangId: zugang.id,
+          ttlStunden: daten?.loginTtlStunden ?? 8,
+        })
       } else {
         toast.info('Kein Portal-Zugang erfasst — zuerst unten einen Zugang anlegen, dann die Treffer-Mail verschicken.')
       }
@@ -548,13 +600,34 @@ function LinkErgebnisDialog({
   // Ansprechperson ist pro Mail neu und wird bewusst nicht gemerkt.
   useEffect(() => {
     if (!ergebnis) return
-    setAnsprechperson('')
+    // Am Zugang gemerkte Ansprechperson vorbelegen (Feld kontakt_name).
+    setAnsprechperson(ergebnis.kontaktName ?? '')
     try {
-      setAbsender(window.localStorage.getItem(ABSENDER_KEY) ?? '')
+      // Vorbelegung Ramona (Entscheid 28.07.2026), pro Mail überschreibbar.
+      setAbsender(window.localStorage.getItem(ABSENDER_KEY) ?? ABSENDER_STANDARD)
     } catch {
-      // localStorage kann blockiert sein — dann bleibt das Feld leer.
+      setAbsender(ABSENDER_STANDARD)
     }
   }, [ergebnis])
+
+  /**
+   * Merkt die Ansprechperson am Zugang, sobald das Feld verlassen wird. Beim
+   * nächsten Mal steht die Anrede damit schon. Fehler bleiben still: die Mail
+   * ist auch ohne gemerkten Namen vollständig.
+   */
+  async function merkeAnsprechperson() {
+    if (!ergebnis?.zugangId) return
+    if ((ergebnis.kontaktName ?? '') === ansprechperson.trim()) return
+    try {
+      await fetch('/api/zugangsverwaltung', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ aktion: 'kontakt', id: ergebnis.zugangId, kontakt_name: ansprechperson.trim() }),
+      })
+    } catch {
+      // nicht gemerkt, kein Beinbruch
+    }
+  }
 
   function merkeAbsender(wert: string) {
     setAbsender(wert)
@@ -565,21 +638,26 @@ function LinkErgebnisDialog({
     }
   }
 
+  // Die Login-Seite ist immer dieselbe Adresse wie das Cockpit; im Browser
+  // ableiten statt konfigurieren, dann stimmt sie auch auf einer Testinstanz.
+  const loginSeite = typeof window !== 'undefined' ? `${window.location.origin}/portal/login` : ''
+
   const gefuellt = ergebnis
     ? fuelleVorlage(ergebnis.vorlage, {
         medium: ergebnis.mediumName,
-        link: ergebnis.link,
-        ...(ansprechperson.trim() ? { name: ansprechperson.trim() } : {}),
-        ...(absender.trim() ? { absender: absender.trim() } : {}),
+        // Anrede immer gefüllt: mit Name, sonst «Liebe Redaktion von X».
+        anrede: baueAnrede(ergebnis.mediumName, ansprechperson),
+        absender: absender.trim() || ABSENDER_STANDARD,
+        loginseite: loginSeite,
+        stunden: String(ergebnis.ttlStunden),
+        slack: baueSlackVerweis(ergebnis.slackKanal),
+        ...(ergebnis.link ? { link: ergebnis.link } : {}),
       })
     : null
 
-  const offenePlatzhalter = gefuellt
-    ? [
-        ...(gefuellt.text.includes('{name}') ? ['Ansprechperson'] : []),
-        ...(gefuellt.text.includes('{absender}') ? ['dein Vorname'] : []),
-      ]
-    : []
+  // Netz für den Fall, dass eine Vorlage einen Platzhalter bekommt, den hier
+  // niemand füllt. Alle heute bekannten sind oben abgedeckt.
+  const offenePlatzhalter = gefuellt ? Array.from(gefuellt.text.matchAll(/\{([a-z]+)\}/g)).map((m) => m[1]) : []
 
   const mailtoUrl = gefuellt
     ? baueMailtoUrl({ an: ergebnis?.email, betreff: gefuellt.betreff, text: gefuellt.text })
@@ -601,9 +679,10 @@ function LinkErgebnisDialog({
         <DialogHeader>
           <DialogTitle>Mail an {ergebnis?.mediumName} vorbereiten</DialogTitle>
           <DialogDescription>
-            Der Link bleibt gültig, bis ein neuer erzeugt wird; das Medium soll ihn bei sich
-            speichern. Du schickst die Mail aus deinem eigenen Postfach — so kommt die
-            Antwort direkt zu dir zurück.
+            Die Mail verweist auf die Login-Seite; das Medium holt sich dort selbst einen
+            Anmeldelink. Ein Anmeldelink gilt {ergebnis?.ttlStunden ?? 8} Stunden, darum steht
+            er nur in der Mail «neuer Link» — und die gehört zügig weitergeleitet. Du schickst
+            aus deinem eigenen Postfach, so kommt die Antwort direkt zu dir zurück.
           </DialogDescription>
         </DialogHeader>
 
@@ -613,7 +692,8 @@ function LinkErgebnisDialog({
             <Input
               value={ansprechperson}
               onChange={(e) => setAnsprechperson(e.target.value)}
-              placeholder="Vorname, z.B. Simon"
+              onBlur={merkeAnsprechperson}
+              placeholder="leer = «Liebe Redaktion von …»"
               className="text-sm"
             />
           </div>

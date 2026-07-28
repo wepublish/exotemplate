@@ -1,4 +1,5 @@
 import crypto from 'node:crypto'
+import { LOGIN_TTL_STUNDEN_STANDARD } from './portal-texte'
 
 // Grundlage des Medien-Portals: signierte Login-Tokens (Magic Link) und
 // langlebige Session-Cookies. HMAC-signiert mit node:crypto, ohne
@@ -7,21 +8,46 @@ import crypto from 'node:crypto'
 // Format: base64url(JSON-Payload) + '.' + HMAC-SHA256(base64url-Teil, secret)
 // Der Payload trägt immer `exp` (Unix-Sekunden) und `typ`.
 //
-// ENTSCHEID (28.07.2026, Jolanda): der Login-Link VERFÄLLT NICHT. Die Medien
-// speichern ihn bei sich (z. B. als Lesezeichen) und melden sich, wenn er
-// verloren geht. Widerruf läuft nicht über die Zeit, sondern über Daten:
-// ein neu erzeugter Link ersetzt das gespeicherte login_jti (der alte passt
-// dann nicht mehr), und ein gesperrter Zugang wird beim Einlösen abgewiesen.
-// Technisch bleibt `exp` im Token (verifyToken verlangt es als Riegel gegen
-// nie ablaufende SESSION-Tokens), steht beim Login-Token aber 100 Jahre in
-// der Zukunft.
+// ENTSCHEID (28.07.2026, nach Sicherheitseinwand von Michael Scheurer): der
+// Login-Link ist KURZLEBIG. Am Vormittag desselben Tages galt kurz das
+// Gegenteil (dauerhaft gültiger Link, in der Einladungsmail mitgeschickt) —
+// das ist zurückgenommen, aus zwei Gründen:
+//   1. Ein dauerhaft gültiger Link in einer Mail ist ein Dauerschlüssel. Mails
+//      werden weitergeleitet, landen in Archiven, Postfächer werden übernommen.
+//   2. Die Einladungsmail trägt gar keinen Link mehr (siehe mail-vorlagen.ts):
+//      sie verweist auf die Login-Seite, wo das Medium sich selbst einen Link
+//      anfordert. Ein Link entsteht damit nur auf aktive Anforderung.
+// Widerruf läuft zusätzlich über Daten: ein neu erzeugter Link ersetzt das
+// gespeicherte login_jti, und ein gesperrter Zugang wird beim Einlösen
+// abgewiesen. Die Session nach dem Einlösen bleibt 30 Tage bestehen, das
+// Medium muss also nicht bei jedem Besuch einen neuen Link holen.
 
 export type PortalSession = { email: string; mediumSlug: string; rolle: 'medium' }
 
 export const PORTAL_COOKIE = 'faas_portal_session'
 
 const DREISSIG_TAGE_SEKUNDEN = 30 * 24 * 60 * 60
-const LOGIN_TOKEN_TTL_SEKUNDEN = 100 * 365 * 24 * 60 * 60 // praktisch unbegrenzt (Entscheid oben)
+
+/**
+ * Gültigkeit des Login-Links in Sekunden, aus `PORTAL_LOGIN_TTL_STUNDEN`.
+ *
+ * Warum 8 Stunden und nicht 2: solange SMTP fehlt, wird ein angeforderter Link
+ * nicht gemailt, sondern von einer Person aus dem Cockpit weitergeleitet. Ein
+ * 2-Stunden-Link ist dann oft schon tot, bevor ihn jemand sieht. 8 Stunden
+ * deckt einen Arbeitstag ab. Sobald der Versand automatisch läuft, gehört der
+ * Wert auf 2 gestellt — dafür genügt die Umgebungsvariable, kein Code.
+ *
+ * Grenzen: mindestens 1 Stunde, höchstens 24. Ein unsinniger oder fehlender
+ * Wert fällt auf die Vorgabe zurück, statt eine unbegrenzte Gültigkeit zu
+ * erzeugen.
+ */
+// Record statt NodeJS.ProcessEnv, damit Tests ein kleines Objekt uebergeben
+// koennen, ohne NODE_ENV mitzuschleppen; process.env erfuellt den Typ.
+export function loginTokenTtlSekunden(env: Record<string, string | undefined> = process.env): number {
+  const roh = Number(env.PORTAL_LOGIN_TTL_STUNDEN)
+  const stunden = Number.isFinite(roh) && roh >= 1 && roh <= 24 ? roh : LOGIN_TTL_STUNDEN_STANDARD
+  return Math.round(stunden * 60 * 60)
+}
 
 function erzeugeSignatur(payloadB64: string, secret: string): string {
   return crypto.createHmac('sha256', secret).update(payloadB64).digest('base64url')
@@ -77,9 +103,9 @@ export function verifyToken<T = Record<string, unknown>>(token: string, secret: 
   return payload as T
 }
 
-/** Magic-Link-Login-Token: verfällt nicht (siehe Entscheid oben), typ 'login'. */
+/** Magic-Link-Login-Token: kurzlebig (siehe Entscheid oben), typ 'login'. */
 export function erzeugeLoginToken(email: string, mediumSlug: string, jti: string, secret: string): string {
-  return signToken({ email, mediumSlug, jti, typ: 'login' }, secret, LOGIN_TOKEN_TTL_SEKUNDEN)
+  return signToken({ email, mediumSlug, jti, typ: 'login' }, secret, loginTokenTtlSekunden())
 }
 
 /** Session-Token: langlebig (30 Tage), typ 'session'. */
