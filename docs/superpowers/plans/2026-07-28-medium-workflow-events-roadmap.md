@@ -94,7 +94,7 @@
 
 - [x] `setup_medium_events.py` auf den Spark kopieren und mit `--apply` ausführen (Collection additiv anlegen, via Tailscale-Forwarder localhost:8055 → VPS-Directus).
 - [x] `faas_roadmap_slack.py` + Test auf den Spark kopieren (`spark:~/faas-matching-wepublish/spark/`), `--dry-run` ausführen und Ausgabe prüfen.
-- [ ] **NACH Bestätigung «soll ich live?»:** `deploy-front.sh` (Front mit Ereignis-Schicht) + Cron auf dem Spark: `*/15 * * * * flock -n ~/faas_classify/roadmap_slack.lock python3 ~/faas-matching-wepublish/spark/faas_roadmap_slack.py --apply`.
+- [x] **Nach Bestätigung («Komplett live», 28.07.):** `deploy-front.sh` → Image `faas-front:ba276c9` live; Cron auf dem Spark installiert (`*/15`, flock `/tmp/faas_roadmap_slack.lock`, Log `~/logs/faas_roadmap_slack.log`); erster Lauf: 8 Medien-Channels gepostet, 0 Fehler; Payload-Smoke-Test gegen die Live-Collection bestanden.
 
 ## Self-Review
 
