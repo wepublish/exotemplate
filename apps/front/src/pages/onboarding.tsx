@@ -1422,6 +1422,23 @@ export default function OnboardingPage() {
     const n = neuName.trim()
     if (!n) return
     const slug = slugify(n)
+    // Duplikat-Schutz: der Slug ist in Directus nicht unique. Ohne diesen
+    // Check entstuende beim erneuten «Aufnehmen» eines bestehenden Namens
+    // eine zweite Zeile mit demselben Slug (Engine, Portal und Waechter
+    // wuerden dann auf zwei Medien schreiben). Stattdessen das bestehende
+    // Medium auswaehlen.
+    const bestehend = medien.find(m => m.slug === slug)
+    if (bestehend) {
+      setAusgewaehltesMediumSlug(slug)
+      setNeuName('')
+      setNeuWebsite('')
+      toast.info(
+        dnaSlugs.has(slug)
+          ? `«${bestehend.name}» existiert schon und ist bereits onboardet (siehe Medien-Tab).`
+          : `«${bestehend.name}» existiert schon — unten ausgewählt, du kannst direkt weitermachen.`
+      )
+      return
+    }
     // We.Publish-API nach dem Standard-Muster vorbelegen (editierbar in den
     // Onboarding-Feldern). Abweichungen wie «cultur» (cueltuer) oder «eenews»
     // (ee-news, ohne /v1) korrigiert man dort von Hand.
