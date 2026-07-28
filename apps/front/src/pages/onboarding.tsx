@@ -1397,15 +1397,21 @@ export default function OnboardingPage() {
 
   // Onboarding ist NUR für neue Medien: Medien mit aktiver gemessener DNA sind
   // bereits onboardet (→ Medien-Tab) und erscheinen hier NICHT.
-  const { data: dnaData } = useQuery(MEDIEN_MIT_DNA, { fetchPolicy: 'cache-and-network' })
+  const { data: dnaData, loading: dnaLaden } = useQuery(MEDIEN_MIT_DNA, { fetchPolicy: 'cache-and-network' })
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const dnaSlugs = new Set<string>(((dnaData as any)?.medium_dna ?? []).map((d: any) => d.medium_id))
   const inOnboarding = medien.filter(m => !dnaSlugs.has(m.slug))
   const ausgewaehltesMedium = medien.find(m => m.slug === ausgewaehltesMediumSlug) ?? null
 
   // Automatisch erstes IN-ONBOARDING-Medium vorauswählen (nicht die etablierten).
-  if (!ausgewaehltesMediumSlug && inOnboarding.length > 0) {
-    setAusgewaehltesMediumSlug(inOnboarding[0].slug)
+  // Erst wenn BEIDE Abfragen da sind: beim Erst-Render ist dnaSlugs sonst noch
+  // leer, inOnboarding enthält dann alle Medien und die Auswahl fällt auf ein
+  // bereits onboardetes Medium (z.B. bajour), das gar nicht im Dropdown steht.
+  if (!medienLaden && !dnaLaden && inOnboarding.length > 0) {
+    const auswahlImOnboarding = inOnboarding.some(m => m.slug === ausgewaehltesMediumSlug)
+    if (!auswahlImOnboarding) {
+      setAusgewaehltesMediumSlug(inOnboarding[0].slug)
+    }
   }
 
   // ── Neues Medium aufnehmen ────────────────────────────────────────────────
@@ -1574,6 +1580,10 @@ export default function OnboardingPage() {
             <KnowledgeScoreBlock items={wissensItems} />
 
             <OnboardingFelder
+              // key erzwingt Remount beim Medienwechsel: die Feld-States werden
+              // per useState aus dem Medium initialisiert und würden sonst die
+              // Werte des vorherigen Mediums behalten (Gefahr: Fremddaten-Save).
+              key={ausgewaehltesMedium.slug}
               medium={ausgewaehltesMedium}
               onAktualisiert={handleAktualisiert}
             />
