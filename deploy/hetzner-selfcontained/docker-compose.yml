@@ -105,6 +105,11 @@ services:
       EMAIL_SMTP_USER: ${EMAIL_SMTP_USER:-}
       EMAIL_SMTP_PASSWORD: ${EMAIL_SMTP_PASSWORD:-}
       EMAIL_SMTP_SECURE: ${EMAIL_SMTP_SECURE:-false}
+      # Unterdrueckt nur die SMTP-Pruefung beim Start (Host ist bewusst leer).
+      # Der email:connection-Check im /server/health-Endpoint laeuft trotzdem;
+      # der Spark-Heartbeat ignoriert ihn deshalb gezielt (faas_heartbeat.py).
+      # Beim Einrichten von SMTP wieder auf true stellen.
+      EMAIL_VERIFY_SETUP: ${EMAIL_VERIFY_SETUP:-false}
       # --- Invite-/Reset-Links: Frontend-URLs der VPS auf die Allow-List ---
       PASSWORD_RESET_URL_ALLOW_LIST: ${PASSWORD_RESET_URL_ALLOW_LIST:-}
       USER_INVITE_URL_ALLOW_LIST: ${USER_INVITE_URL_ALLOW_LIST:-}
