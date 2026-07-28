@@ -10,14 +10,22 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { baueMailtoUrl } from '@/lib/mailto'
 
 /**
- * Zeigt einen Mail-Entwurf (Betreff + Text) in einem Dialog zum Kopieren.
- * Copy-paste in Gmail; die Nutzerin passt vor dem Versand an. Kein Auto-Versand.
+ * Zeigt einen Mail-Entwurf (Betreff + Text) in einem Dialog zum Kopieren oder
+ * zum Öffnen im eigenen Mail-Programm. Kein automatischer Versand (Entscheid
+ * 28.07.2026): die Mail geht aus dem persönlichen Postfach der Bedienerin
+ * raus, damit die Antwort des Mediums bei ihr landet.
+ *
+ * `an` ist optional — beim Onboarding-Willkommensgruss kennt die App die
+ * Adresse der Redaktion nicht zwingend; dann öffnet das Mail-Programm ohne
+ * Empfänger.
  */
 export function MailEntwurfButton({
   betreff,
   text,
+  an,
   label = 'Willkommensmail',
   titel = 'Mail-Entwurf',
   size = 'sm',
@@ -25,6 +33,7 @@ export function MailEntwurfButton({
 }: {
   betreff: string
   text: string
+  an?: string
   label?: string
   titel?: string
   size?: 'sm' | 'default'
@@ -51,7 +60,8 @@ export function MailEntwurfButton({
           <DialogHeader>
             <DialogTitle>{titel}</DialogTitle>
             <DialogDescription>
-              Copy-paste in Gmail. Vor dem Versand anpassen — kein automatischer Versand.
+              Im Mail-Programm öffnen oder kopieren. Du schickst die Mail selbst — so kommt
+              die Antwort direkt zu dir zurück.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-1">
@@ -67,8 +77,13 @@ export function MailEntwurfButton({
             <p className="text-xs font-medium text-slate-500">Text</p>
             <Textarea readOnly value={text} className="h-72 text-sm" />
           </div>
-          <div className="flex justify-end">
-            <Button onClick={() => kopieren(text, 'Mailtext')}>Text kopieren</Button>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => kopieren(text, 'Mailtext')}>
+              Text kopieren
+            </Button>
+            <Button asChild>
+              <a href={baueMailtoUrl({ an, betreff, text })}>Im Mail-Programm öffnen</a>
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

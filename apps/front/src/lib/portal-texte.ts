@@ -4,15 +4,20 @@
  * PORTAL_TEXTE ist die kanonische Textquelle für die Portal-Seiten (Medium-
  * Ansicht, kommende Tasks), 1:1 übernommen aus
  * .superpowers/sdd/portal-wording-final.md. MAIL_EINLADUNG / MAIL_NEUER_LINK
- * sind die Vorlagen für den manuellen Link-Versand: solange kein
- * automatischer Mail-Versand existiert, kopiert der Operator sie in der
- * Portal-Steuerung fertig ausgefüllt in sein Mail-Programm.
+ * sind die Vorlagen für den Link-Versand aus dem eigenen Mail-Programm.
  *
- * Platzhalter in den Mail-Vorlagen: {name}, {medium}, {link}. fuelleVorlage
- * ersetzt NUR die im werte-Objekt übergebenen Schlüssel: {name} bleibt
- * absichtlich stehen, wenn es nicht mitgegeben wird: den Namen der
- * Ansprechperson trägt der Operator von Hand ein, bevor er die Mail
- * abschickt (die App kennt ihn nicht, portal_zugaenge hat nur die E-Mail).
+ * ENTSCHEID (28.07.2026, Jolanda): Es gibt bewusst KEINEN automatischen
+ * Mail-Versand. Die entscheidenden Handlungen bleiben bei We.Publish, und die
+ * Mail geht aus dem persönlichen Postfach der Bedienerin raus (Ramona, Michi
+ * oder Jolanda) — dann landet auch die Antwort des Mediums direkt bei ihr,
+ * statt in einem unbeaufsichtigten no-reply-Kasten. Die Portal-Steuerung
+ * liefert dafür die fertige Mail (Empfänger, Betreff, Text) zum Kopieren oder
+ * zum Öffnen im Mail-Programm.
+ *
+ * Platzhalter in den Mail-Vorlagen: {name} (Ansprechperson beim Medium),
+ * {medium}, {link}, {absender} (Vorname der Bedienerin). fuelleVorlage
+ * ersetzt NUR die im werte-Objekt übergebenen Schlüssel; nicht übergebene
+ * Platzhalter bleiben wörtlich stehen und fallen so beim Korrekturlesen auf.
  */
 
 export type MailVorlage = { betreff: string; text: string }
@@ -39,7 +44,7 @@ So läuft es Schritt für Schritt:
 Wenn etwas nicht klappt oder du Fragen hast, antworte einfach auf diese Mail.
 
 Herzlich
-Ramona, Fundraising-Team We.Publish`,
+{absender}, Fundraising-Team We.Publish`,
 }
 
 export const MAIL_NEUER_LINK: MailVorlage = {
@@ -55,7 +60,7 @@ Damit kommst du wieder rein. Dein alter Link ist ab jetzt ungültig.
 Wenn du den Link nicht selbst angefordert hast oder etwas nicht stimmt, melde dich kurz bei uns. Antworte dazu einfach auf diese Mail.
 
 Herzlich
-Ramona, Fundraising-Team We.Publish`,
+{absender}, Fundraising-Team We.Publish`,
 }
 
 /**

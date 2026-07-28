@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { MAIL_EINLADUNG, MAIL_NEUER_LINK, fuelleVorlage, type MailVorlage } from '@/lib/portal-texte'
+import { baueMailtoUrl, mailtoIstZuLang } from '@/lib/mailto'
 
 /**
  * /portal-steuerung: Operator-Seite (hinter Cloudflare Access): Zugänge
@@ -54,7 +55,16 @@ type PortalZugang = {
 
 type UebersichtAntwort = { medien: PortalMedium[]; zugaenge: PortalZugang[] }
 
-type LinkErgebnis = { vorlage: MailVorlage; link: string; mediumName: string }
+type LinkErgebnis = { vorlage: MailVorlage; link: string; mediumName: string; email: string }
+
+/**
+ * localStorage-Schlüssel für den Vornamen der Bedienerin. Er füllt die
+ * Signatur ({absender}) der Mail-Vorlagen und wird pro Browser gemerkt, damit
+ * Ramona, Michi und Jolanda ihn nur einmal eintragen müssen. Absichtlich
+ * localStorage und kein Directus-Feld: das ist eine Bequemlichkeit am Gerät,
+ * keine Systemwahrheit.
+ */
+const ABSENDER_KEY = 'faas.absenderVorname'
 
 const STATUS_LABEL: Record<string, string> = {
   eingeladen: 'Eingeladen',
@@ -127,7 +137,7 @@ export default function PortalSteuerungPage() {
       return
     }
     const medium = daten?.medien.find((m) => m.slug === mediumSlug)
-    setLinkErgebnis({ vorlage: MAIL_EINLADUNG, link: String(json.link ?? ''), mediumName: medium?.name ?? mediumSlug })
+    setLinkErgebnis({ vorlage: MAIL_EINLADUNG, link: String(json.link ?? ''), mediumName: medium?.name ?? mediumSlug, email })
     toast.success('Zugang angelegt.')
     await lade()
   }
@@ -139,7 +149,7 @@ export default function PortalSteuerungPage() {
       return
     }
     const medium = daten?.medien.find((m) => m.slug === zugang.mediumSlug)
-    setLinkErgebnis({ vorlage: MAIL_NEUER_LINK, link: String(json.link ?? ''), mediumName: medium?.name ?? zugang.mediumSlug })
+    setLinkErgebnis({ vorlage: MAIL_NEUER_LINK, link: String(json.link ?? ''), mediumName: medium?.name ?? zugang.mediumSlug, email: zugang.email })
     toast.success('Neuer Link erzeugt.')
     await lade()
   }
@@ -489,6 +499,20 @@ function ZugangAnlegenFormular({
 
 // ─── Link-Ergebnis-Dialog ─────────────────────────────────────────────────────
 
+/**
+ * Zeigt den erzeugten Zugangslink als versandfertige Mail. Bewusst ohne
+ * automatischen Versand (Entscheid 28.07.2026, siehe portal-texte.ts): die
+ * Bedienerin schickt sie aus ihrem eigenen Postfach, damit die Antwort des
+ * Mediums bei ihr landet. Zwei Wege: «Im Mail-Programm öffnen» (mailto, alles
+ * vorbefüllt) oder Betreff und Text einzeln kopieren, etwa für Gmail im
+ * Browser.
+ *
+ * Die zwei Namen, die die App nicht kennt, sind Eingabefelder: die
+ * Ansprechperson beim Medium ({name}) und der eigene Vorname für die Signatur
+ * ({absender}, wird pro Browser gemerkt). Erst wenn beide gesetzt sind, ist
+ * die Mail wirklich fertig — offene Platzhalter bleiben sichtbar stehen und
+ * werden gewarnt, damit kein «Hallo {name}» rausgeht.
+ */
 function LinkErgebnisDialog({
   ergebnis,
   onSchliessen,
@@ -496,47 +520,160 @@ function LinkErgebnisDialog({
   ergebnis: LinkErgebnis | null
   onSchliessen: () => void
 }) {
-  function kopiereLink() {
+  const [ansprechperson, setAnsprechperson] = useState('')
+  const [absender, setAbsender] = useState('')
+
+  // Gemerkten Absender-Vornamen laden, sobald der Dialog aufgeht; die
+  // Ansprechperson ist pro Mail neu und wird bewusst nicht gemerkt.
+  useEffect(() => {
     if (!ergebnis) return
-    navigator.clipboard?.writeText(ergebnis.link)
-    toast.success('Link kopiert.')
+    setAnsprechperson('')
+    try {
+      setAbsender(window.localStorage.getItem(ABSENDER_KEY) ?? '')
+    } catch {
+      // localStorage kann blockiert sein — dann bleibt das Feld leer.
+    }
+  }, [ergebnis])
+
+  function merkeAbsender(wert: string) {
+    setAbsender(wert)
+    try {
+      window.localStorage.setItem(ABSENDER_KEY, wert)
+    } catch {
+      // ohne localStorage einfach nicht merken
+    }
   }
 
-  function kopiereMailVorlage() {
-    if (!ergebnis) return
-    const gefuellt = fuelleVorlage(ergebnis.vorlage, { medium: ergebnis.mediumName, link: ergebnis.link })
-    navigator.clipboard?.writeText(`Betreff: ${gefuellt.betreff}\n\n${gefuellt.text}`)
-    toast.success('Mail-Vorlage kopiert. {name} noch von Hand ersetzen.')
+  const gefuellt = ergebnis
+    ? fuelleVorlage(ergebnis.vorlage, {
+        medium: ergebnis.mediumName,
+        link: ergebnis.link,
+        ...(ansprechperson.trim() ? { name: ansprechperson.trim() } : {}),
+        ...(absender.trim() ? { absender: absender.trim() } : {}),
+      })
+    : null
+
+  const offenePlatzhalter = gefuellt
+    ? [
+        ...(gefuellt.text.includes('{name}') ? ['Ansprechperson'] : []),
+        ...(gefuellt.text.includes('{absender}') ? ['dein Vorname'] : []),
+      ]
+    : []
+
+  const mailtoUrl = gefuellt
+    ? baueMailtoUrl({ an: ergebnis?.email, betreff: gefuellt.betreff, text: gefuellt.text })
+    : ''
+  const zuLang = !!mailtoUrl && mailtoIstZuLang(mailtoUrl)
+
+  async function kopiere(was: string, label: string) {
+    try {
+      await navigator.clipboard.writeText(was)
+      toast.success(`${label} kopiert.`)
+    } catch {
+      toast.error('Kopieren nicht möglich — Text markieren und mit Cmd+C kopieren.')
+    }
   }
 
   return (
     <Dialog open={!!ergebnis} onOpenChange={(open) => { if (!open) onSchliessen() }}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Zugangslink erzeugt</DialogTitle>
+          <DialogTitle>Mail an {ergebnis?.mediumName} vorbereiten</DialogTitle>
           <DialogDescription>
-            Für {ergebnis?.mediumName}. Der Link ist einmal gültig, 24 Stunden lang.
+            Der Link ist einmal gültig, 24 Stunden lang. Du schickst die Mail aus deinem
+            eigenen Postfach — so kommt die Antwort direkt zu dir zurück.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex items-center gap-2">
-          <Input
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <label className="block text-[11px] font-medium text-slate-500">Ansprechperson beim Medium</label>
+            <Input
+              value={ansprechperson}
+              onChange={(e) => setAnsprechperson(e.target.value)}
+              placeholder="Vorname, z.B. Simon"
+              className="text-sm"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="block text-[11px] font-medium text-slate-500">Dein Vorname (Signatur)</label>
+            <Input
+              value={absender}
+              onChange={(e) => merkeAbsender(e.target.value)}
+              placeholder="z.B. Ramona"
+              className="text-sm"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <p className="text-[11px] font-medium text-slate-500">An</p>
+          <div className="flex gap-2">
+            <Input readOnly value={ergebnis?.email ?? ''} className="text-sm" />
+            <Button size="sm" variant="outline" onClick={() => kopiere(ergebnis?.email ?? '', 'Adresse')}>
+              Kopieren
+            </Button>
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <p className="text-[11px] font-medium text-slate-500">Betreff</p>
+          <div className="flex gap-2">
+            <Input readOnly value={gefuellt?.betreff ?? ''} className="text-sm" />
+            <Button size="sm" variant="outline" onClick={() => kopiere(gefuellt?.betreff ?? '', 'Betreff')}>
+              Kopieren
+            </Button>
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <div className="flex items-baseline justify-between">
+            <p className="text-[11px] font-medium text-slate-500">Text</p>
+            <Button size="sm" variant="ghost" onClick={() => kopiere(gefuellt?.text ?? '', 'Mailtext')}>
+              Text kopieren
+            </Button>
+          </div>
+          <textarea
             readOnly
-            value={ergebnis?.link ?? ''}
-            className="text-xs font-mono"
-            onFocus={(e) => e.currentTarget.select()}
+            value={gefuellt?.text ?? ''}
+            className="w-full h-64 rounded-md border border-slate-200 bg-slate-50 p-2 text-xs font-mono"
           />
-          <Button size="sm" variant="outline" onClick={kopiereLink}>
-            Kopieren
-          </Button>
+        </div>
+
+        {offenePlatzhalter.length > 0 && (
+          <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5">
+            Noch offen: {offenePlatzhalter.join(' und ')} — oben eintragen, sonst steht der
+            Platzhalter in der Mail.
+          </p>
+        )}
+        {zuLang && (
+          <p className="text-xs text-slate-500">
+            Der Text ist für ein direktes Öffnen recht lang; manche Mail-Programme kürzen ihn.
+            Prüfe die geöffnete Mail, oder kopiere Betreff und Text einzeln.
+          </p>
+        )}
+
+        <div className="space-y-1">
+          <p className="text-[11px] font-medium text-slate-500">Nur der Link</p>
+          <div className="flex gap-2">
+            <Input
+              readOnly
+              value={ergebnis?.link ?? ''}
+              className="text-xs font-mono"
+              onFocus={(e) => e.currentTarget.select()}
+            />
+            <Button size="sm" variant="outline" onClick={() => kopiere(ergebnis?.link ?? '', 'Link')}>
+              Kopieren
+            </Button>
+          </div>
         </div>
 
         <DialogFooter className="mt-2 gap-2">
-          <Button size="sm" variant="outline" onClick={kopiereMailVorlage}>
-            Mail-Vorlage kopieren
-          </Button>
-          <Button size="sm" onClick={onSchliessen}>
+          <Button size="sm" variant="outline" onClick={onSchliessen}>
             Schliessen
+          </Button>
+          <Button size="sm" asChild>
+            <a href={mailtoUrl}>Im Mail-Programm öffnen</a>
           </Button>
         </DialogFooter>
       </DialogContent>

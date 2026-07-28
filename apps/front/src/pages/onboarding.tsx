@@ -1549,6 +1549,10 @@ export default function OnboardingPage() {
                     <MailEntwurfButton
                       betreff={mail.betreff}
                       text={mail.text}
+                      // Erste Adresse aus der Kontakt-Allowlist als Empfänger
+                      // vorbelegen; ist keine erfasst, öffnet das Mail-Programm
+                      // ohne Empfänger.
+                      an={ausgewaehltesMedium.kontakt_emails?.[0]}
                       label="Willkommensmail"
                       titel={`Willkommensmail – ${ausgewaehltesMedium.name}`}
                     />
