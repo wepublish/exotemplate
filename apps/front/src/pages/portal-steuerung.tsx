@@ -601,8 +601,9 @@ function LinkErgebnisDialog({
         <DialogHeader>
           <DialogTitle>Mail an {ergebnis?.mediumName} vorbereiten</DialogTitle>
           <DialogDescription>
-            Der Link ist einmal gültig, 24 Stunden lang. Du schickst die Mail aus deinem
-            eigenen Postfach — so kommt die Antwort direkt zu dir zurück.
+            Der Link bleibt gültig, bis ein neuer erzeugt wird; das Medium soll ihn bei sich
+            speichern. Du schickst die Mail aus deinem eigenen Postfach — so kommt die
+            Antwort direkt zu dir zurück.
           </DialogDescription>
         </DialogHeader>
 

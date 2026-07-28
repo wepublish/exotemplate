@@ -30,7 +30,7 @@ Schön, dass {medium} beim Fundraising as a Service von We.Publish dabei ist. Ü
 
 {link}
 
-Der Link ist persönlich, einmal verwendbar und 24 Stunden gültig. Öffne ihn am besten bald. Falls er abgelaufen ist, melde dich kurz, dann schicken wir dir einen neuen.
+Der Link ist persönlich und bleibt gültig. Speichert ihn gut ab, am besten als Lesezeichen: er ist euer Zugang ins Portal. Geht er verloren, meldet euch kurz, dann schicken wir euch einen neuen (der alte wird damit ungültig).
 
 So läuft es Schritt für Schritt:
 
@@ -66,7 +66,7 @@ So geht ihr vor:
 2. Schaut die Treffer in Ruhe durch. Zuoberst steht, was am besten zu euch passt.
 3. Mit «Anschreiben» sagt ihr uns, für welche Stiftungen wir die Gesuche vorbereiten sollen.
 
-Der Link ist persönlich, einmal verwendbar und 24 Stunden gültig. Falls er abgelaufen ist, melde dich kurz, dann schicken wir dir einen neuen.
+Der Link ist persönlich und bleibt gültig. Speichert ihn gut ab, am besten als Lesezeichen. Geht er verloren, meldet euch kurz, dann schicken wir euch einen neuen (der alte wird damit ungültig).
 
 Wenn etwas unklar ist, antworte einfach auf diese Mail.
 
@@ -82,7 +82,7 @@ Hier ist dein neuer Zugangslink zum Portal:
 
 {link}
 
-Damit kommst du wieder rein. Dein alter Link ist ab jetzt ungültig.
+Damit kommst du wieder rein. Dein alter Link ist ab jetzt ungültig. Der neue bleibt gültig: speichere ihn am besten als Lesezeichen.
 
 Wenn du den Link nicht selbst angefordert hast oder etwas nicht stimmt, melde dich kurz bei uns. Antworte dazu einfach auf diese Mail.
 

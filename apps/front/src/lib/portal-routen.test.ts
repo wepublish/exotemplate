@@ -176,7 +176,7 @@ describe('/api/portal/login-anfordern', () => {
     const [vorschlag] = vorschlagMock.mock.calls[0] as [Record<string, unknown>]
     expect(vorschlag.typ).toBe('portal')
     expect(vorschlag.artefakt_link).toBeNull()
-    expect(String(vorschlag.beschreibung)).toContain('Einmal-Link')
+    expect(String(vorschlag.beschreibung)).toContain('Login-Link')
     expect(String(vorschlag.beschreibung)).toContain('https://portal.example/api/portal/einloesen?token=abc.def')
   })
 

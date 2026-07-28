@@ -183,7 +183,7 @@ describe('baueLoginVorschlag', () => {
       dedup_key: 'portal|login|redaktion@bajour.ch|2026-07-09',
     })
     expect(String(v.beschreibung)).toContain('https://portal.example/api/portal/einloesen?token=abc.def')
-    expect(String(v.beschreibung)).toContain('Einmal-Link')
+    expect(String(v.beschreibung)).toContain('Login-Link')
     expect(String(v.beschreibung)).toContain('nur ans Medium weitergeben')
   })
 })
@@ -464,10 +464,12 @@ describe('loeseZugangEin (atomare jti-Einlösung)', () => {
     expect(opts.method).toBe('PATCH')
     const body = JSON.parse(opts.body as string)
     expect(body.query.filter).toEqual({ id: { _eq: 'uuid-1' }, login_jti: { _eq: 'jti-1' } })
-    expect(body.data).toEqual({ login_jti: null, letzter_login: '2026-07-09T10:00:00.000Z', status: 'aktiv' })
+    // login_jti bleibt STEHEN (Entscheid 28.07.2026: der Link verfällt nicht
+    // und ist mehrfach verwendbar; Widerruf über neuen Link oder Sperren).
+    expect(body.data).toEqual({ letzter_login: '2026-07-09T10:00:00.000Z', status: 'aktiv' })
   })
 
-  it('0 aktualisierte Zeilen (jti schon verbraucht) → false', async () => {
+  it('0 aktualisierte Zeilen (jti durch neueren Link ersetzt) → false', async () => {
     const mockFetch = jest.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({ data: [] }) })
     global.fetch = mockFetch as unknown as typeof fetch
     expect(await loeseZugangEin('uuid-1', 'jti-alt', '2026-07-09T10:00:00.000Z')).toBe(false)

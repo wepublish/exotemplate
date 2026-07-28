@@ -24,7 +24,7 @@ export function bauWillkommensmail(d: WillkommensmailDaten): { betreff: string; 
 
 schön, dass ${name} beim Fundraising as a Service von We.Publish dabei ist. So läuft es:
 
-1. Ihr bekommt einen persönlichen Zugang zu unserem Portal. Der Anmeldelink kommt separat, er ist einmal verwendbar und 24 Stunden gültig.
+1. Ihr bekommt einen persönlichen Zugang zu unserem Portal. Der Anmeldelink kommt separat. Er bleibt gültig: speichert ihn am besten als Lesezeichen, und meldet euch kurz, falls er verloren geht.
 2. Im Portal ladet ihr euer Logo und eure Unterlagen hoch: Artikel, Newsletter, frühere Gesuche, Budgets, Selbstbeschriebe. Je mehr wir von euch sehen, desto genauer wird euer Profil. Unvollständig ist völlig ok.
 3. Aus euren Unterlagen entsteht eure Fundraising-DNA, euer Profil in unseren Worten. Ihr lest sie in Ruhe durch und gebt sie frei, wenn sie euch trifft.
 4. Wir schauen nochmals darüber und schalten das Matching für euch frei. Ihr seht dann die Stiftungen, die am besten zu euch passen.

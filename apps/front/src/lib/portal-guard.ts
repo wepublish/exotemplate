@@ -334,12 +334,15 @@ export async function findePortalZugang(email: string, mandant: string): Promise
  */
 export async function loeseZugangEin(id: string, jti: string, jetztIso: string): Promise<boolean> {
   try {
+    // login_jti bleibt beim Einlösen STEHEN (Entscheid 28.07.2026): der Link
+    // ist dauerhaft und mehrfach verwendbar. Ungültig wird er nur, wenn ein
+    // neuer Link erzeugt (jti rotiert) oder der Zugang gesperrt wird.
     const res = await fetch(`${base()}/items/portal_zugaenge`, {
       method: 'PATCH',
       headers: schreibHeaders(),
       body: JSON.stringify({
         query: { filter: { id: { _eq: id }, login_jti: { _eq: jti } } },
-        data: { login_jti: null, letzter_login: jetztIso, status: 'aktiv' },
+        data: { letzter_login: jetztIso, status: 'aktiv' },
       }),
       signal: AbortSignal.timeout(15_000),
     })
@@ -363,11 +366,12 @@ export async function patchePortalZugang(id: string, patch: Record<string, unkno
 }
 
 /**
- * Erzeugt einen neuen Einmal-Login-Link für einen Zugang UND persistiert ihn
- * sofort (login_jti + letzter_link + letzter_link_ts). Ein vorher
- * ausgestellter Link wird dadurch ungültig: einloesen.ts prüft das
+ * Erzeugt einen neuen, dauerhaft gültigen Login-Link für einen Zugang UND
+ * persistiert ihn sofort (login_jti + letzter_link + letzter_link_ts). Ein
+ * vorher ausgestellter Link wird dadurch ungültig: einloesen.ts prüft das
  * gespeicherte login_jti atomar gegen das jti im Token (loeseZugangEin). Nur
- * der zuletzt erzeugte Link passt noch.
+ * der zuletzt erzeugte Link passt, dieser aber beliebig oft (Entscheid
+ * 28.07.2026: kein Verfall, die Medien speichern ihren Link).
  *
  * Gemeinsame Basis für login-anfordern.ts (das Medium fordert selbst einen
  * Link an) und die Operator-Zugangsverwaltung (Zugang anlegen / neuer Link):
@@ -825,7 +829,7 @@ export async function legeAgentLessonAn(data: Record<string, unknown>): Promise<
  * artefakt_link: die VorschlagCard rendert artefakt_link als klickbaren
  * «Vorbereitetes Artefakt öffnen»-Anker, und ein Operator-Klick (oder ein
  * Link-Prefetcher) würde die Login-Seite fälschlich selbst öffnen. Der
- * Einmal-Link gehört ausschliesslich ans Medium.
+ * Login-Link gehört ausschliesslich ans Medium.
  */
 export function baueLoginVorschlag(params: {
   email: string
@@ -842,8 +846,8 @@ export function baueLoginVorschlag(params: {
     stiftung_id: null,
     titel: `Login-Link angefordert: ${params.email}`,
     beschreibung:
-      `Medium ${params.mediumSlug} hat über das Portal einen neuen Login-Link angefordert (gültig 24 Stunden).\n\n` +
-      `Einmal-Link, nur ans Medium weitergeben (nicht selbst öffnen):\n${params.link}`,
+      `Medium ${params.mediumSlug} hat über das Portal einen neuen Login-Link angefordert (bleibt gültig, der vorherige Link ist damit ungültig).\n\n` +
+      `Login-Link, nur ans Medium weitergeben (nicht selbst öffnen):\n${params.link}`,
     begruendung: '',
     frist: null,
     artefakt_link: null,

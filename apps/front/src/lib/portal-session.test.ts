@@ -59,6 +59,14 @@ describe('erzeugeLoginToken / erzeugeSessionToken', () => {
     expect(payload?.jti).toBe('jti-123')
   })
 
+  it('Login-Token verfällt praktisch nie (Entscheid 28.07.2026: exp weit in der Zukunft)', () => {
+    const token = erzeugeLoginToken('redaktion@bajour.ch', 'bajour', 'jti-123', SECRET)
+    const payload = verifyToken<{ exp: number }>(token, SECRET)
+    const jetzt = Math.floor(Date.now() / 1000)
+    const fuenfzigJahre = 50 * 365 * 24 * 60 * 60
+    expect(payload!.exp).toBeGreaterThan(jetzt + fuenfzigJahre)
+  })
+
   it('Session-Token trägt typ session mit 30-Tage-TTL', () => {
     const token = erzeugeSessionToken('redaktion@bajour.ch', 'bajour', SECRET)
     const payload = verifyToken<{ typ: string; exp: number }>(token, SECRET)

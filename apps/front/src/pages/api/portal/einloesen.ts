@@ -1,9 +1,9 @@
 /**
  * /api/portal/einloesen: Magic-Link-Login einlösen (Schritt 2 von 2).
  *
- * Zwei-Schritt-Einlösung, damit ein GET den Einmal-Link NIE verbrennt: Mail-
+ * Zwei-Schritt-Einlösung, damit ein GET NIE eine Anmeldung auslöst: Mail-
  * Vorschau-Bots, Link-Prefetcher oder ein versehentlicher Operator-Klick auf
- * den Link lösen nichts aus. Erst der bewusste Formular-POST meldet an.
+ * den Link bleiben folgenlos. Erst der bewusste Formular-POST meldet an.
  *
  * GET ?token=<login-token>
  *   → 200 HTML-Bestätigungsseite («Anmelden im FaaS-Portal», Medium-Name,
@@ -14,16 +14,19 @@
  * POST { token } (Formular der Bestätigungsseite)
  *   → 302 /portal                 bei Erfolg (Session-Cookie gesetzt)
  *   → 302 /portal/login?fehler=1  bei JEDEM Fehler (ungültiges Token,
- *     jti-Mismatch/schon eingelöst, Zugang nicht gefunden), bewusst ohne
- *     Detail, damit nichts über einzelne Zugänge preisgegeben wird
+ *     jti-Mismatch nach einem neueren Link, Zugang gesperrt oder nicht
+ *     gefunden), bewusst ohne Detail, damit nichts über einzelne Zugänge
+ *     preisgegeben wird
  *
  * Beide: 503 { error } wenn PORTAL_SESSION_SECRET fehlt, 405 bei anderer Methode.
  *
  * Die Einlösung selbst ist ATOMAR (loeseZugangEin): ein bedingter Directus-
  * PATCH mit Filter auf id UND login_jti aktualisiert genau dann eine Zeile,
- * wenn das jti noch gültig ist; 0 Zeilen heisst «schon eingelöst oder durch
- * einen neueren Link überschrieben» und führt zum Fehler-Redirect. Pro Zugang
- * ist immer nur der zuletzt ausgestellte Link gültig.
+ * wenn das jti noch gültig ist; 0 Zeilen heisst «durch einen neueren Link
+ * ersetzt» und führt zum Fehler-Redirect. Pro Zugang ist immer nur der
+ * zuletzt ausgestellte Link gültig — dieser aber DAUERHAFT und beliebig oft
+ * (Entscheid 28.07.2026: der Link verfällt nicht, die Medien speichern ihn;
+ * Widerruf über neuen Link oder Zugang sperren).
  */
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { holeSecretOderAntworte503, findePortalZugang, loeseZugangEin, ladePortalMedium } from '@/lib/portal-guard'

@@ -1,18 +1,27 @@
 import crypto from 'node:crypto'
 
-// Grundlage des Medien-Portals: signierte, kurzlebige Login-Tokens (Magic Link)
-// und langlebige Session-Cookies. HMAC-signiert mit node:crypto, ohne
+// Grundlage des Medien-Portals: signierte Login-Tokens (Magic Link) und
+// langlebige Session-Cookies. HMAC-signiert mit node:crypto, ohne
 // zusätzliche Abhängigkeit (kein jose, kein jsonwebtoken).
 //
 // Format: base64url(JSON-Payload) + '.' + HMAC-SHA256(base64url-Teil, secret)
 // Der Payload trägt immer `exp` (Unix-Sekunden) und `typ`.
+//
+// ENTSCHEID (28.07.2026, Jolanda): der Login-Link VERFÄLLT NICHT. Die Medien
+// speichern ihn bei sich (z. B. als Lesezeichen) und melden sich, wenn er
+// verloren geht. Widerruf läuft nicht über die Zeit, sondern über Daten:
+// ein neu erzeugter Link ersetzt das gespeicherte login_jti (der alte passt
+// dann nicht mehr), und ein gesperrter Zugang wird beim Einlösen abgewiesen.
+// Technisch bleibt `exp` im Token (verifyToken verlangt es als Riegel gegen
+// nie ablaufende SESSION-Tokens), steht beim Login-Token aber 100 Jahre in
+// der Zukunft.
 
 export type PortalSession = { email: string; mediumSlug: string; rolle: 'medium' }
 
 export const PORTAL_COOKIE = 'faas_portal_session'
 
 const DREISSIG_TAGE_SEKUNDEN = 30 * 24 * 60 * 60
-const LOGIN_TOKEN_TTL_SEKUNDEN = 24 * 60 * 60 // 24 Stunden
+const LOGIN_TOKEN_TTL_SEKUNDEN = 100 * 365 * 24 * 60 * 60 // praktisch unbegrenzt (Entscheid oben)
 
 function erzeugeSignatur(payloadB64: string, secret: string): string {
   return crypto.createHmac('sha256', secret).update(payloadB64).digest('base64url')
@@ -68,7 +77,7 @@ export function verifyToken<T = Record<string, unknown>>(token: string, secret: 
   return payload as T
 }
 
-/** Magic-Link-Login-Token: gültig 24 Stunden, typ 'login'. */
+/** Magic-Link-Login-Token: verfällt nicht (siehe Entscheid oben), typ 'login'. */
 export function erzeugeLoginToken(email: string, mediumSlug: string, jti: string, secret: string): string {
   return signToken({ email, mediumSlug, jti, typ: 'login' }, secret, LOGIN_TOKEN_TTL_SEKUNDEN)
 }

@@ -5,7 +5,7 @@
  * Bindung), darum gehört zum Ablauf immer auch der PATCH auf den Zugang
  * (login_jti + letzter_link).
  */
-import { legeZugangAnMitLink } from './portal-guard'
+import { legeZugangAnMitLink, loeseZugangEin } from './portal-guard'
 
 const SECRET = 'zugang-helfer-test-geheimnis-4711'
 
@@ -90,5 +90,38 @@ describe('legeZugangAnMitLink', () => {
       .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ data: {} }) })
 
     await expect(legeZugangAnMitLink('x@y.ch', 'bajour', 'wepublish', 'team', SECRET)).rejects.toThrow('keine id')
+  })
+})
+
+describe('loeseZugangEin (dauerhafter Link, Entscheid 28.07.2026)', () => {
+  const fetchMock = jest.fn()
+  const originalFetch = global.fetch
+
+  beforeEach(() => {
+    fetchMock.mockReset()
+    global.fetch = fetchMock as unknown as typeof fetch
+  })
+
+  afterAll(() => {
+    global.fetch = originalFetch
+  })
+
+  it('löscht das login_jti beim Einlösen NICHT (Link bleibt mehrfach verwendbar), stempelt letzter_login', async () => {
+    fetchMock.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ data: [{ id: 'z-1' }] }) })
+
+    const ok = await loeseZugangEin('z-1', 'jti-123', '2026-07-28T12:00:00.000Z')
+
+    expect(ok).toBe(true)
+    const [, opts] = fetchMock.mock.calls[0] as [string, RequestInit]
+    const body = JSON.parse(opts.body as string)
+    expect(body.query.filter).toEqual({ id: { _eq: 'z-1' }, login_jti: { _eq: 'jti-123' } })
+    expect(body.data).toEqual({ letzter_login: '2026-07-28T12:00:00.000Z', status: 'aktiv' })
+    expect('login_jti' in body.data).toBe(false)
+  })
+
+  it('0 getroffene Zeilen (jti durch neueren Link ersetzt) → false', async () => {
+    fetchMock.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ data: [] }) })
+
+    expect(await loeseZugangEin('z-1', 'jti-alt', '2026-07-28T12:00:00.000Z')).toBe(false)
   })
 })
