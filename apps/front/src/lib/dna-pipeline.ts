@@ -202,8 +202,12 @@ export async function erzeugeArbeitsDnaAusKorpus(params: {
     system: WORKING_DNA_SYSTEM,
     user: reduceUser,
     temperature: 0.3,
-    max_tokens: 2000,
+    // 4000 statt 2000: Claude formuliert das Profil ausfuehrlicher als das
+    // fruehere qwen; bei 2000 wurde das JSON abgeschnitten (Job-Fehler
+    // «parseJsonLoose: kein parsebares JSON-Objekt», zwolf 28.07.2026).
+    max_tokens: 4000,
     timeoutMs: 600_000,
+    expectJson: true,
   })
 
   const roh = parseJsonLoose(rawContent) as Partial<ArbeitsDnaDimensionen>
@@ -373,9 +377,12 @@ export async function messeFinaleDna(params: {
     system: SYSTEM_PROMPT,
     user: userPrompt,
     temperature: 0,
-    max_tokens: 2400,
+    // 4000 statt 2400: gleicher Truncation-Schutz wie beim Profil-Schritt
+    // (Claude schreibt laenger als das fruehere qwen, Limit stammt von dort).
+    max_tokens: 4000,
     timeoutMs: 1_200_000,
     stream: true,
+    expectJson: true,
   })
 
   const rohAntwort = parseOllamaAntwort(rawContent)

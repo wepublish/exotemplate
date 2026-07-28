@@ -382,8 +382,12 @@ async function runWorkingDna(jobId: string, medium_id: string): Promise<void> {
     system: WORKING_DNA_SYSTEM,
     user: reduceUser,
     temperature: 0.3,
-    max_tokens: 2000,
+    // 4000 statt 2000: das alte Limit stammt aus der vLLM-8192-Aera (Kommentar
+    // oben); Claude hat kein solches Kontextlimit, schreibt aber laenger und
+    // wurde bei 2000 abgeschnitten (Truncation -> parseJsonLoose-Fehler).
+    max_tokens: 4000,
     timeoutMs: 600_000,
+    expectJson: true,
   })
 
   // ── 7. JSON parsen (robust) ───────────────────────────────────────────────────

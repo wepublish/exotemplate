@@ -44,6 +44,14 @@ export interface LlmCallParams {
    * (siehe Kopf). Bleibt im Interface, damit bestehende Aufrufer unverändert bleiben.
    */
   stream?: boolean
+  /**
+   * true = der Aufrufer parst die Antwort als JSON: bei stop_reason
+   * max_tokens (abgeschnittenes Objekt) wird ein klarer Fehler geworfen,
+   * statt dass weiter oben ein irrefuehrender Parse-Fehler entsteht.
+   * Prosa-Aufrufer (Map-Zusammenfassungen) lassen das aus — dort ist eine
+   * abgeschnittene Antwort brauchbarer als gar keine.
+   */
+  expectJson?: boolean
 }
 
 // ─── Claude-Call ────────────────────────────────────────────────────────────────
@@ -86,6 +94,13 @@ export async function callLLM(params: LlmCallParams): Promise<string> {
   if (!text) {
     throw new Error(
       `LLM: leere Antwort (stop_reason=${message.stop_reason ?? 'unbekannt'})`
+    )
+  }
+  if (params.expectJson && message.stop_reason === 'max_tokens') {
+    // Abgeschnittenes JSON fuehrt sonst zu irrefuehrenden Parse-Fehlern
+    // weiter oben (parseJsonLoose findet kein schliessendes Objekt).
+    throw new Error(
+      `LLM: Antwort bei max_tokens abgeschnitten – Limit des Aufrufers erhoehen (${params.max_tokens})`
     )
   }
   return text
