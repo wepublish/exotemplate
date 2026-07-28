@@ -1394,22 +1394,34 @@ export default function OnboardingPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const medien: FaasMedium[] = (medienData as any)?.faas_medien ?? []
 
-  // Onboarding ist NUR für neue Medien: Medien mit aktiver gemessener DNA sind
-  // bereits onboardet (→ Medien-Tab) und erscheinen hier NICHT.
+  // ALLE aktiven Medien stehen hier zur Wahl (Entscheid Jolanda 28.07.2026).
+  // Vorher waren Medien mit gemessener DNA ausgeblendet, weil die Seite als
+  // reine Aufnahme-Strecke für Neue gedacht war. Das hat einen echten Bedarf
+  // blockiert: Ramona will auch für ein etabliertes Medium Unterlagen
+  // nachliefern und die DNA neu messen lassen. Die Medien selbst können das im
+  // Portal längst, und zwar über genau denselben Code
+  // (/api/portal/upload → verarbeiteUpload, /api/portal/dna-erzeugen →
+  // starteGenerateDnaJob). Es war also nur die Operator-Sicht, die zu war.
   const { data: dnaData, loading: dnaLaden } = useQuery(MEDIEN_MIT_DNA, { fetchPolicy: 'cache-and-network' })
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const dnaSlugs = new Set<string>(((dnaData as any)?.medium_dna ?? []).map((d: any) => d.medium_id))
   const inOnboarding = medien.filter(m => !dnaSlugs.has(m.slug))
+  const etabliert = medien.filter(m => dnaSlugs.has(m.slug))
+  // Reihenfolge im Auswahlmenü: erst die noch offenen, dann die gemessenen.
+  const waehlbar = [...inOnboarding, ...etabliert]
   const ausgewaehltesMedium = medien.find(m => m.slug === ausgewaehltesMediumSlug) ?? null
+  const ausgewaehltesIstEtabliert = !!ausgewaehltesMedium && dnaSlugs.has(ausgewaehltesMedium.slug)
 
-  // Automatisch erstes IN-ONBOARDING-Medium vorauswählen (nicht die etablierten).
+  // Vorauswahl: bevorzugt ein Medium, das noch in Onboarding ist, weil das der
+  // häufigste Fall auf dieser Seite bleibt. Sie greift aber NUR, wenn die
+  // aktuelle Auswahl gar kein Medium trifft — sonst würde sie eine bewusste
+  // Wahl (etwa bajour, um Unterlagen nachzuliefern) sofort überschreiben.
   // Erst wenn BEIDE Abfragen da sind: beim Erst-Render ist dnaSlugs sonst noch
-  // leer, inOnboarding enthält dann alle Medien und die Auswahl fällt auf ein
-  // bereits onboardetes Medium (z.B. bajour), das gar nicht im Dropdown steht.
-  if (!medienLaden && !dnaLaden && inOnboarding.length > 0) {
-    const auswahlImOnboarding = inOnboarding.some(m => m.slug === ausgewaehltesMediumSlug)
-    if (!auswahlImOnboarding) {
-      setAusgewaehltesMediumSlug(inOnboarding[0].slug)
+  // leer und die Unterscheidung offen/etabliert wäre falsch.
+  if (!medienLaden && !dnaLaden && medien.length > 0) {
+    const auswahlGueltig = medien.some(m => m.slug === ausgewaehltesMediumSlug)
+    if (!auswahlGueltig) {
+      setAusgewaehltesMediumSlug((inOnboarding[0] ?? medien[0]).slug)
     }
   }
 
@@ -1567,8 +1579,10 @@ export default function OnboardingPage() {
           Neue Medien aufnehmen
         </h2>
         <p className="text-xs text-slate-400 mt-1">
-          Hier nimmst du NEUE Medien auf: Material erfassen → Arbeits-DNA → finale DNA messen.
-          Bereits onboardete Medien (mit gemessener DNA) findest du im Medien-Tab.
+          Hier nimmst du neue Medien auf: Material erfassen → Arbeits-DNA → finale DNA messen.
+          Zur Auswahl stehen alle aktiven Medien: du kannst auch für ein bereits gemessenes
+          Medium Unterlagen nachliefern und die DNA neu messen lassen. Dasselbe können die
+          Medien selbst in ihrem Portal, beides schreibt auf denselben Stapel.
         </p>
       </div>
 
@@ -1639,31 +1653,41 @@ export default function OnboardingPage() {
         )
       })()}
 
-      {/* Auswahl der Medien IN Onboarding (ohne gemessene DNA) */}
+      {/* Auswahl über ALLE aktiven Medien; gemessene sind markiert. */}
       <div className="mb-6 flex items-center gap-3">
         {medienLaden && medien.length === 0 ? (
           <div className="h-9 w-64 bg-slate-100 rounded-md animate-pulse" />
-        ) : inOnboarding.length === 0 ? (
-          <p className="text-sm text-slate-400">
-            Kein Medium in Onboarding. Alle aktiven Medien haben eine gemessene DNA — neue oben aufnehmen.
-          </p>
+        ) : waehlbar.length === 0 ? (
+          <p className="text-sm text-slate-400">Noch kein aktives Medium. Oben eines aufnehmen.</p>
         ) : (
           <>
             {ausgewaehltesMedium && (
               <MediumLogo slug={ausgewaehltesMedium.slug} name={ausgewaehltesMedium.name} size={36} />
             )}
             <Select value={ausgewaehltesMediumSlug} onValueChange={setAusgewaehltesMediumSlug}>
-              <SelectTrigger className="w-64 text-sm">
-                <SelectValue placeholder="Medium in Onboarding…" />
+              <SelectTrigger className="w-72 text-sm">
+                <SelectValue placeholder="Medium wählen…" />
               </SelectTrigger>
               <SelectContent>
-                {inOnboarding.map(m => (
+                {waehlbar.map(m => (
                   <SelectItem key={m.slug} value={m.slug} className="text-sm">
                     {m.name}
+                    {dnaSlugs.has(m.slug) && <span className="ml-2 text-[11px] text-slate-400">DNA gemessen</span>}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {/*
+              Hinweis bei einem schon gemessenen Medium: eine neue Messung legt
+              eine weitere medium_dna-Version an und setzt die bisherige inaktiv.
+              Gewollt beim Nachliefern von Material, aber nichts, was man
+              versehentlich anstossen soll.
+            */}
+            {ausgewaehltesIstEtabliert && (
+              <span className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] text-amber-700">
+                hat schon eine gemessene DNA — eine neue Messung legt eine weitere Version an
+              </span>
+            )}
             {ausgewaehltesMedium && (
               <>
                 <Button
