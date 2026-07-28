@@ -42,12 +42,24 @@
  *                  `bemerkung = bauAbsageBemerkung(alt, grund)` +
  *                  `entschieden_am` via bauStatusPatch. Vorbedingung: Status
  *                  'abgeschickt'.
+ *
+ * Jede erfolgreiche Aktion schreibt zusätzlich ein Roadmap-Ereignis
+ * (medium_events, fire-and-forget); die Zusage legt ausserdem best effort
+ * einen Abrechnungs-Vorschlag (agent_vorschlaege, prioritaet hoch) an.
  */
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { requirePortalSession, ladeApplicationFuerPortal, patchApplication } from '@/lib/portal-guard'
+import {
+  requirePortalSession,
+  ladeApplicationFuerPortal,
+  patchApplication,
+  legeAgentVorschlagAn,
+  existiertVorschlagMitDedupKey,
+} from '@/lib/portal-guard'
 import { gesuchPortalStatus, type GesuchPortalStatus } from '@/lib/portal-status'
 import { bauStatusPatch, bauAbsageBemerkung } from '@/lib/vorschlaege'
+import { schreibeMediumEvent } from '@/lib/medium-events'
 import { STATUS_STATION } from '@/graphql/applications.mutations'
+import { tenant } from '../../../../config/tenant'
 
 type Aktion = 'final' | 'abgeschickt' | 'zusage' | 'absage'
 const AKTIONEN: ReadonlySet<string> = new Set(['final', 'abgeschickt', 'zusage', 'absage'])
@@ -122,12 +134,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const jetzt = new Date()
     const jetztIso = jetzt.toISOString()
     const statusZeitstempel = { eingereicht_am: app.eingereichtAm, entschieden_am: app.entschiedenAm }
+    const stiftungName = app.stiftungName || (app.stiftungId ? `Stiftung ${app.stiftungId}` : 'Stiftung')
 
     if (aktion === 'final') {
       await patchApplication(id, {
         portal: { ...app.portal, final_am: jetztIso },
         verantwortung: session.email,
         zuletzt_geaendert_quelle: 'portal',
+      })
+      void schreibeMediumEvent({
+        medium_id: session.mediumSlug,
+        typ: 'gesuch_final',
+        titel: `Gesuch final: ${stiftungName}`,
+        actor: session.email,
       })
       return res.status(200).json({ status: 'ok' })
     }
@@ -144,6 +163,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         zuletzt_geaendert_quelle: 'portal',
         ...statusPatch,
       })
+      void schreibeMediumEvent({
+        medium_id: session.mediumSlug,
+        typ: 'gesuch_eingereicht',
+        titel: `Gesuch eingereicht: ${stiftungName}`,
+        detail: betrag != null ? `Eingereichter Betrag: CHF ${betrag}` : undefined,
+        actor: session.email,
+      })
       return res.status(200).json({ status: 'ok' })
     }
 
@@ -158,6 +184,44 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         zuletzt_geaendert_quelle: 'portal',
         ...statusPatch,
       })
+      void schreibeMediumEvent({
+        medium_id: session.mediumSlug,
+        typ: 'zusage',
+        titel: `Zusage: ${stiftungName}`,
+        detail: betrag != null ? `Zugesagter Betrag: CHF ${betrag}` : undefined,
+        actor: session.email,
+      })
+      // Abrechnungs-Hinweis für den Operator (best effort, nach dem PATCH:
+      // ein Fehler hier darf die gemeldete Zusage nicht mehr scheitern lassen).
+      // Die Zusage löst die Provision aus (siehe /abrechnung, lib/provision.ts).
+      void (async () => {
+        try {
+          const dedupKey = `portal|zusage|${id}`
+          if (await existiertVorschlagMitDedupKey(dedupKey)) return
+          await legeAgentVorschlagAn({
+            typ: 'portal',
+            status: 'offen',
+            prioritaet: 'hoch',
+            medium_id: session.mediumSlug,
+            stiftung_id: app.stiftungId,
+            stiftung_name: app.stiftungName,
+            titel: `Zusage eingegangen: ${session.mediumSlug} × ${stiftungName}`,
+            beschreibung:
+              `${session.mediumSlug} meldet eine Zusage von «${stiftungName}»` +
+              (betrag != null ? ` über CHF ${betrag}` : '') +
+              '. Abrechnung prüfen (siehe /abrechnung).',
+            begruendung: '',
+            frist: null,
+            artefakt_link: null,
+            quelle_modell: 'portal',
+            erstellt_von: 'portal',
+            mandant: tenant.key,
+            dedup_key: dedupKey,
+          })
+        } catch (err: unknown) {
+          console.error('gesuch-aktion zusage: Abrechnungs-Vorschlag fehlgeschlagen', err)
+        }
+      })()
       return res.status(200).json({ status: 'ok' })
     }
 
@@ -172,6 +236,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       verantwortung: session.email,
       zuletzt_geaendert_quelle: 'portal',
       ...statusPatch,
+    })
+    void schreibeMediumEvent({
+      medium_id: session.mediumSlug,
+      typ: 'absage',
+      titel: `Absage: ${stiftungName}`,
+      actor: session.email,
     })
     return res.status(200).json({ status: 'ok' })
   } catch (err: unknown) {

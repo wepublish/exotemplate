@@ -33,6 +33,7 @@ import {
   triggerErstMatch,
   type KnowledgeItem,
 } from '@/lib/dna-pipeline'
+import { schreibeMediumEvent } from '@/lib/medium-events'
 import {
   createGenerateJob,
   getGenerateJob,
@@ -170,6 +171,13 @@ async function runGenerate(jobId: string, medium_id: string): Promise<void> {
   try {
     await aktiviereDna(base, token, gemessen.id)
     aktivGeschaltet = true
+    // Roadmap-Ereignis (fire-and-forget): DNA erstellt und scharf geschaltet.
+    void schreibeMediumEvent({
+      medium_id,
+      typ: 'dna_aktiv',
+      titel: `Fundraising-DNA erstellt und aktiv (Version ${gemessen.version})`,
+      detail: `Schärfe ${gemessen.schaerfe_prozent}%`,
+    })
     // Erst-Match sofort anstossen, statt auf den 6h-Cron zu warten (best effort)
     await triggerErstMatch(medium_id)
   } catch (e: unknown) {

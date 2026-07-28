@@ -37,6 +37,7 @@
  */
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { holeSecretOderAntworte503, istPortalZugriffAufProxy, erzeugeZugangsLink, patchePortalZugang } from '@/lib/portal-guard'
+import { schreibeMediumEvent } from '@/lib/medium-events'
 import { tenant } from '../../../config/tenant'
 
 const base = () => (process.env.DIRECTUS_URL || 'http://localhost:8055').replace(/\/$/, '')
@@ -207,6 +208,17 @@ async function aktionAnlegen(req: NextApiRequest, res: NextApiResponse, secret: 
     if (!id) return res.status(502).json({ error: 'Zugang angelegt, aber keine id erhalten.' })
 
     const link = await erzeugeZugangsLink(id, email, mediumSlug, secret)
+
+    // Roadmap-Ereignis (fire-and-forget): nur beim ECHTEN Neu-Anlegen, ein
+    // neuer Link für einen bestehenden Zugang ist kein Meilenstein.
+    void schreibeMediumEvent({
+      medium_id: mediumSlug,
+      typ: 'zugang_erstellt',
+      titel: 'Portal-Zugang angelegt',
+      detail: email,
+      actor: wer,
+    })
+
     return res.status(200).json({ link })
   } catch (err: unknown) {
     console.error('zugangsverwaltung anlegen: fehlgeschlagen', err)

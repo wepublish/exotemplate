@@ -20,14 +20,21 @@ jest.mock('./dna-pipeline', () => ({
   triggerErstMatch: jest.fn(),
 }))
 
+// Ereignis-Protokoll mocken: die Routen schreiben fire-and-forget nach
+// medium_events (würde sonst über global.fetch mitlaufen und die
+// fetch-Zählungen unten verfälschen).
+jest.mock('./medium-events', () => ({ schreibeMediumEvent: jest.fn().mockResolvedValue(undefined) }))
+
 import { ladePortalMedium, erzeugeZugangsLink } from './portal-guard'
 import { triggerErstMatch } from './dna-pipeline'
+import { schreibeMediumEvent } from './medium-events'
 import matchingFreischalten from '../pages/api/matching-freischalten'
 import zugangsverwaltung from '../pages/api/zugangsverwaltung'
 
 const ladeMock = ladePortalMedium as jest.Mock
 const erzeugeLinkMock = erzeugeZugangsLink as jest.Mock
 const erstMatchMock = triggerErstMatch as jest.Mock
+const eventMock = schreibeMediumEvent as jest.Mock
 
 const SECRET = 'steuerung-test-geheimnis-0815'
 
@@ -117,6 +124,11 @@ describe('/api/matching-freischalten (DNA-Freigabe-Gate)', () => {
     expect(body.data.matching_freigeschaltet_von).toBe('team')
 
     expect(erstMatchMock).toHaveBeenCalledWith('bajour')
+
+    // Roadmap-Ereignis wurde protokolliert.
+    expect(eventMock).toHaveBeenCalledWith(
+      expect.objectContaining({ medium_id: 'bajour', typ: 'matching_freigegeben' }),
+    )
   })
 })
 
@@ -146,6 +158,9 @@ describe('/api/zugangsverwaltung aktion=anlegen (Dedup)', () => {
     expect(decoded).toContain('redaktion@bajour.ch')
     expect(decoded).toContain('bajour')
     expect(erzeugeLinkMock).toHaveBeenCalledWith('z-alt', 'redaktion@bajour.ch', 'bajour', SECRET)
+
+    // Nur ein neuer Link, kein neuer Zugang → KEIN zugang_erstellt-Ereignis.
+    expect(eventMock).not.toHaveBeenCalled()
   })
 
   it('kein bestehender Zugang → Create (lowercase-E-Mail, status eingeladen) + Link, {link} ohne bestehend', async () => {
@@ -174,5 +189,10 @@ describe('/api/zugangsverwaltung aktion=anlegen (Dedup)', () => {
     expect(createBody.email).toBe('neu@bajour.ch')
     expect(createBody.status).toBe('eingeladen')
     expect(erzeugeLinkMock).toHaveBeenCalledWith('z-neu', 'neu@bajour.ch', 'bajour', SECRET)
+
+    // Echtes Neu-Anlegen → zugang_erstellt-Ereignis mit E-Mail im Detail.
+    expect(eventMock).toHaveBeenCalledWith(
+      expect.objectContaining({ medium_id: 'bajour', typ: 'zugang_erstellt', detail: 'neu@bajour.ch' }),
+    )
   })
 })

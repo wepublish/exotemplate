@@ -11,6 +11,7 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { triggerErstMatch } from '@/lib/dna-pipeline'
+import { schreibeMediumEvent } from '@/lib/medium-events'
 
 interface ActivateResult {
   ok: true
@@ -215,6 +216,14 @@ export default async function handler(
     })
     return
   }
+
+  // Roadmap-Ereignis (fire-and-forget): eine manuell aktivierte Version zählt
+  // genauso als «DNA aktiv» wie die Ein-Knopf-Pipeline.
+  void schreibeMediumEvent({
+    medium_id: mediumId,
+    typ: 'dna_aktiv',
+    titel: `Fundraising-DNA aktiv (Version ${zielVersion.version})`,
+  })
 
   // Erst-Match sofort anstossen, statt auf den 6h-Cron zu warten (best effort)
   await triggerErstMatch(mediumId)

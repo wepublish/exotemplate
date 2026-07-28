@@ -22,6 +22,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { istPortalZugriffAufProxy } from '@/lib/portal-guard'
 import { parsePortal } from '@/lib/portal-status'
+import { schreibeMediumEvent } from '@/lib/medium-events'
 
 const base = () => (process.env.DIRECTUS_URL || 'http://localhost:8055').replace(/\/$/, '')
 const authHeaders = () => ({ Authorization: `Bearer ${process.env.DIRECTUS_TOKEN || ''}` })
@@ -51,17 +52,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const appRes = await fetch(`${base()}/items/applications/${encodeURIComponent(id)}?fields=id,portal`, {
-      headers: authHeaders(),
-      signal: AbortSignal.timeout(15_000),
-    })
+    const appRes = await fetch(
+      `${base()}/items/applications/${encodeURIComponent(id)}?fields=id,portal,medium_id,stiftung_name`,
+      {
+        headers: authHeaders(),
+        signal: AbortSignal.timeout(15_000),
+      },
+    )
     if (appRes.status === 404) {
       return res.status(404).json({ error: 'Antrag nicht gefunden.' })
     }
     if (!appRes.ok) {
       throw new Error(`applications/${id}: Directus antwortete ${appRes.status}`)
     }
-    const appJson = (await appRes.json()) as { data?: { portal?: unknown } | null }
+    const appJson = (await appRes.json()) as {
+      data?: { portal?: unknown; medium_id?: string | null; stiftung_name?: string | null } | null
+    }
     if (!appJson.data) {
       return res.status(404).json({ error: 'Antrag nicht gefunden.' })
     }
@@ -87,6 +93,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!patchRes.ok) {
       const text = await patchRes.text().catch(() => '')
       return res.status(502).json({ error: `Freigabe fehlgeschlagen (${patchRes.status}): ${text.slice(0, 200)}` })
+    }
+
+    // Roadmap-Ereignis (fire-and-forget): ab jetzt sieht das Medium den
+    // Gesuchtext im Portal.
+    if (appJson.data.medium_id) {
+      void schreibeMediumEvent({
+        medium_id: appJson.data.medium_id,
+        typ: 'gesuch_freigegeben',
+        titel: `Gesuch bereit: ${appJson.data.stiftung_name || 'Stiftung'}`,
+        actor: wer,
+      })
     }
 
     return res.status(200).json({ status: 'ok' })

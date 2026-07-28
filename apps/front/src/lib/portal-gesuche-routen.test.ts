@@ -19,15 +19,32 @@ jest.mock('./portal-guard', () => {
     ...actual,
     ladeApplicationFuerPortal: jest.fn(),
     patchApplication: jest.fn(),
+    legeAgentVorschlagAn: jest.fn(),
+    existiertVorschlagMitDedupKey: jest.fn(),
   }
 })
 
-import { ladeApplicationFuerPortal, patchApplication } from './portal-guard'
+// Ereignis-Protokoll mocken: geprüft wird nur, DASS und WOMIT geschrieben wird.
+jest.mock('./medium-events', () => ({ schreibeMediumEvent: jest.fn().mockResolvedValue(undefined) }))
+
+import {
+  ladeApplicationFuerPortal,
+  patchApplication,
+  legeAgentVorschlagAn,
+  existiertVorschlagMitDedupKey,
+} from './portal-guard'
+import { schreibeMediumEvent } from './medium-events'
 import gesuchAktion from '../pages/api/portal/gesuch-aktion'
 import gesucheListe from '../pages/api/portal/gesuche'
 
 const ladeAppMock = ladeApplicationFuerPortal as jest.Mock
 const patchMock = patchApplication as jest.Mock
+const legeVorschlagMock = legeAgentVorschlagAn as jest.Mock
+const existiertVorschlagMock = existiertVorschlagMitDedupKey as jest.Mock
+const eventMock = schreibeMediumEvent as jest.Mock
+
+/** Lässt die fire-and-forget-Nachbearbeitung (Zusage-Vorschlag) durchlaufen. */
+const flush = () => new Promise((resolve) => setTimeout(resolve, 0))
 
 const SECRET = 'gesuche-routen-test-geheimnis-4711'
 
@@ -110,6 +127,9 @@ describe('/api/portal/gesuch-aktion (Status-Sequenz-Gate)', () => {
     expect(getStatus()).toBe(200)
     expect(getJson()).toEqual({ status: 'ok' })
     expect(patchMock).toHaveBeenCalledTimes(1)
+    expect(eventMock).toHaveBeenCalledWith(
+      expect.objectContaining({ medium_id: 'bajour', typ: 'gesuch_final', titel: 'Gesuch final: Stiftung Test' }),
+    )
   })
 
   it('final bei Status "abgeschickt" (bereits weiter fortgeschritten) → 409, kein Schreibzugriff', async () => {
@@ -150,6 +170,13 @@ describe('/api/portal/gesuch-aktion (Status-Sequenz-Gate)', () => {
     )
     expect(getStatus()).toBe(200)
     expect(patchMock).toHaveBeenCalledTimes(1)
+    expect(eventMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        typ: 'gesuch_eingereicht',
+        titel: 'Gesuch eingereicht: Stiftung Test',
+        detail: 'Eingereichter Betrag: CHF 15000',
+      }),
+    )
   })
 
   it('abgeschickt bei Status "final" → 200 (final ODER bereit erlaubt)', async () => {
@@ -200,6 +227,36 @@ describe('/api/portal/gesuch-aktion (Status-Sequenz-Gate)', () => {
     expect(getStatus()).toBe(200)
     const [, patchData] = patchMock.mock.calls[0] as [string, Record<string, unknown>]
     expect(patchData.betrag_zugesagt_chf).toBe(20000)
+
+    // Roadmap-Ereignis + Abrechnungs-Vorschlag (fire-and-forget, darum flush).
+    await flush()
+    expect(eventMock).toHaveBeenCalledWith(
+      expect.objectContaining({ typ: 'zusage', titel: 'Zusage: Stiftung Test', detail: 'Zugesagter Betrag: CHF 20000' }),
+    )
+    expect(legeVorschlagMock).toHaveBeenCalledTimes(1)
+    const [vorschlag] = legeVorschlagMock.mock.calls[0] as [Record<string, unknown>]
+    expect(vorschlag.dedup_key).toBe('portal|zusage|app-1')
+    expect(vorschlag.prioritaet).toBe('hoch')
+    expect(String(vorschlag.beschreibung)).toContain('Abrechnung')
+  })
+
+  it('zusage: Dedup greift, bestehender Vorschlag verhindert einen zweiten', async () => {
+    ladeAppMock.mockResolvedValue(
+      baueApp({
+        status: 'in_arbeit',
+        portal: { freigegeben_am: '2026-07-01T00:00:00Z', abgeschickt_am: '2026-07-03T00:00:00Z' },
+      }),
+    )
+    patchMock.mockResolvedValue(undefined)
+    existiertVorschlagMock.mockResolvedValue(true)
+    const { res, getStatus } = makeRes()
+    await gesuchAktion(
+      makeReq({ method: 'POST', body: { id: 'app-1', aktion: 'zusage', betrag: 20000 }, cookie: sessionCookie() }),
+      res,
+    )
+    expect(getStatus()).toBe(200)
+    await flush()
+    expect(legeVorschlagMock).not.toHaveBeenCalled()
   })
 
   it('zusage ohne Betrag im Body: Fallback auf bereits gesetzten betrag_zugesagt_chf statt Nullen (Fix-Runde 1, Minor 3)', async () => {
@@ -253,6 +310,9 @@ describe('/api/portal/gesuch-aktion (Status-Sequenz-Gate)', () => {
     expect(patchMock).toHaveBeenCalledTimes(1)
     const [, patchData] = patchMock.mock.calls[0] as [string, Record<string, unknown>]
     expect(String(patchData.bemerkung)).toContain('Kein Budget mehr frei.')
+    expect(eventMock).toHaveBeenCalledWith(
+      expect.objectContaining({ typ: 'absage', titel: 'Absage: Stiftung Test' }),
+    )
   })
 
   it('zusage/absage bei Status "zugesagt"/"abgelehnt" (bereits entschieden) → 409, kein erneuter Schreibzugriff', async () => {
