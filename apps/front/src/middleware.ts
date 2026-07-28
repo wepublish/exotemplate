@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
 /**
- * Portal-API-Cache-Schutz.
+ * Cache-Schutz für alles Sitzungs- und Zustandsabhängige.
  *
  * Alle /api/portal/*-Antworten sind sitzungsspezifisch (an die Magic-Link-
  * Session eines einzelnen Mediums gebunden) und dürfen NIE in einen Edge-
@@ -10,21 +10,31 @@ import { NextResponse } from 'next/server'
  * leere Listen (frische Uploads erschienen nicht), und eingeloggte Daten
  * (z. B. /api/portal/me mit E-Mail und Medium) wurden öffentlich ausgeliefert.
  *
- * Die Middleware setzt den Header an EINER Stelle für alle bestehenden und
- * künftigen Portal-Routen, damit keine vergessen werden kann. Die eigentliche,
- * vollständige Absicherung ist zusätzlich eine Cloudflare-Cache-Regel, die
- * /api/* vom Edge-Cache ausnimmt; dieser Header ist die origin-seitige
- * Rückversicherung (Cloudflare respektiert no-store, verifiziert).
+ * Seit 28.07.2026 gilt dasselbe für die Operator-SEITEN: gemessen sendeten
+ * alle 17 Cockpit-HTML-Seiten gar keinen Cache-Control-Header, und die Zone
+ * hat eine Cache-Everything-Regel (nachgewiesen an cf-cache-status HIT auf
+ * endungslosen Pfaden). Nach einem Deploy konnte eine eingeloggte Operatorin
+ * so altes HTML mit alten JS-Chunk-Hashes bekommen — derselbe Fehler, der
+ * fürs Portal längst behoben war.
+ *
+ * Cloudflare-CDN-Cache-Control wirkt NUR auf den Cloudflare-Edge (höchste
+ * Prioritaet, Browser ignorieren ihn) und hält den Edge auch dann draussen,
+ * wenn im Dashboard eine Cache-Regel steht oder später eine Route ihren
+ * Cache-Control-Header lockert. Wer im Dashboard je einen Cache für diese
+ * Pfade einrichten will, muss diesen Header zuerst hier entfernen.
  */
 export function middleware() {
   const res = NextResponse.next()
   res.headers.set('Cache-Control', 'no-store, must-revalidate')
+  res.headers.set('Cloudflare-CDN-Cache-Control', 'no-store')
   return res
 }
 
 export const config = {
-  // Deckt sowohl die Portal-API (/api/portal/*) als auch die Portal-Seiten
-  // (/portal, /portal/*) ab. Auch die Seiten-HTML wurde von Cloudflare
-  // gecacht, wodurch der Browser altes JavaScript ohne Cache-Buster lud.
-  matcher: ['/api/portal/:path*', '/portal', '/portal/:path*'],
+  // Vier Muster: Portal-API, Portal-Seiten, und als letztes alle Seiten-HTMLs
+  // (jeder Pfad ohne Punkt, ohne /api- und ohne /_next-Präfix — trifft also
+  // auch «/»). BEWUSST NICHT dabei: /api/:path* pauschal — die Operator-API
+  // deckt next.config.ts ab, und /api/medium-logo hat einen gewollten
+  // 24-Stunden-Cache, den ein pauschales no-store hier töten würde.
+  matcher: ['/api/portal/:path*', '/portal', '/portal/:path*', '/((?!api|_next|.*\\.).*)'],
 }

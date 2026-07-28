@@ -167,6 +167,16 @@ services:
       HERMES_API_KEY: ${HERMES_API_KEY:-}
       FAAS_AGENT_ENABLED: ${FAAS_AGENT_ENABLED:-false}
       DATENSUPPE_BASE: ${DATENSUPPE_BASE:-}
+    # Healthcheck, damit cloudflared erst startet, wenn die App wirklich
+    # antwortet. Ohne ihn zeigte der Tunnel beim Stack-Start auf einen toten
+    # Port (cloudflared-Log 27.07.: «connection refused» auf :3009, Nutzer
+    # sahen Fehlerseiten). /portal/login ist ungeschuetzt und leichtgewichtig.
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/portal/login || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
 
   # cloudflared – Cloudflare-Tunnel-Connector (B7-Cutover).
   # network_mode: host, damit das token-managed Ingress-Ziel http://localhost:3009
@@ -174,14 +184,19 @@ services:
   # publizierten Front erreicht. Gleicher TUNNEL_TOKEN wie der Spark = zweiter
   # Connector desselben Tunnels; nach Verifikation wird der Spark-Connector gestoppt.
   cloudflared:
-    image: cloudflare/cloudflared:latest
+    # Gepinnt statt :latest (28.07.2026): bei latest genuegt ein fehlerhafter
+    # Upstream-Release plus ein `docker compose pull`, um das Portal offline
+    # zu nehmen. Version = der am 28.07. laufende Stand. Bewusst anheben.
+    image: cloudflare/cloudflared:2026.7.3
     restart: unless-stopped
     network_mode: host
     command: tunnel --no-autoupdate run
     environment:
       TUNNEL_TOKEN: ${TUNNEL_TOKEN:?TUNNEL_TOKEN fehlt – 1:1 vom Spark uebernehmen}
     depends_on:
-      - front
+      # Erst verbinden, wenn die App antwortet (siehe front-Healthcheck).
+      front:
+        condition: service_healthy
 
   # ---------------------------------------------------------------------------
   # OPTIONAL: Drive read-only Mount (Datensuppe) fuer DATENSUPPE_BASE.
