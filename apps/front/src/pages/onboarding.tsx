@@ -27,7 +27,6 @@ import {
 import {
   MEDIEN_REGISTER,
   MEDIEN_MIT_DNA,
-  CREATE_MEDIUM,
   KNOWLEDGE_FOR_MEDIUM,
   CREATE_KNOWLEDGE,
   DELETE_KNOWLEDGE,
@@ -47,6 +46,7 @@ import { MediumLogo } from '@/components/MediumLogo'
 import { MailEntwurfButton } from '@/components/MailEntwurfButton'
 import { OnboardingSlackButton } from '@/components/OnboardingSlackButton'
 import { bauWillkommensmail } from '@/lib/mail-vorlagen'
+import { MAIL_EINLADUNG, fuelleVorlage } from '@/lib/portal-texte'
 import type { ArbeitsDnaGespeichert } from '@/pages/api/medium-knowledge/working-dna'
 
 // ─── Typen ────────────────────────────────────────────────────────────────────
@@ -1415,9 +1415,13 @@ export default function OnboardingPage() {
   }
 
   // ── Neues Medium aufnehmen ────────────────────────────────────────────────
-  const [createMedium] = useMutation(CREATE_MEDIUM)
   const [neuName, setNeuName] = useState('')
   const [neuWebsite, setNeuWebsite] = useState('')
+  const [neuEmail, setNeuEmail] = useState('')
+  // Nach dem Aufnehmen MIT Kontakt-E-Mail: Hallo und Magic-Link in einem
+  // Schritt (Entscheid 28.07.2026) — das Panel unten zeigt die versandfertige
+  // Einladungsmail mit dem frischen Login-Link.
+  const [willkommen, setWillkommen] = useState<{ name: string; slug: string; email: string; link: string } | null>(null)
   async function neuesMediumAnlegen() {
     const n = neuName.trim()
     if (!n) return
@@ -1426,7 +1430,7 @@ export default function OnboardingPage() {
     // Check entstuende beim erneuten «Aufnehmen» eines bestehenden Namens
     // eine zweite Zeile mit demselben Slug (Engine, Portal und Waechter
     // wuerden dann auf zwei Medien schreiben). Stattdessen das bestehende
-    // Medium auswaehlen.
+    // Medium auswaehlen. (Die Route prueft serverseitig nochmals.)
     const bestehend = medien.find(m => m.slug === slug)
     if (bestehend) {
       setAusgewaehltesMediumSlug(slug)
@@ -1439,28 +1443,38 @@ export default function OnboardingPage() {
       )
       return
     }
-    // We.Publish-API nach dem Standard-Muster vorbelegen (editierbar in den
-    // Onboarding-Feldern). Abweichungen wie «cultur» (cueltuer) oder «eenews»
-    // (ee-news, ohne /v1) korrigiert man dort von Hand.
-    const apiUrlVorschlag = `https://api-${slug}.wepublish.cloud/v1`
+    const email = neuEmail.trim().toLowerCase()
     try {
-      await createMedium({
-        variables: {
-          data: {
-            name: n,
-            slug,
-            mandant: tenant.key,
-            is_active: true,
-            website: neuWebsite.trim() || null,
-            wepublish_api_url: apiUrlVorschlag,
-          },
-        },
+      const res = await fetch('/api/medium-aufnehmen', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: n, website: neuWebsite.trim() || undefined, email: email || undefined }),
       })
-      toast.success(`Medium «${n}» aufgenommen · API-URL vorbelegt (${apiUrlVorschlag}) — bei Abweichung in den Feldern anpassen`)
+      const json = (await res.json().catch(() => ({}))) as {
+        slug?: string
+        link?: string
+        zugangBestehend?: boolean
+        bereits_vorhanden?: boolean
+        error?: string
+      }
+      if (res.status === 409 && json.bereits_vorhanden) {
+        setAusgewaehltesMediumSlug(json.slug ?? slug)
+        toast.info(`«${n}» existiert schon — unten ausgewählt, du kannst direkt weitermachen.`)
+        return
+      }
+      if (!res.ok) {
+        toast.error(`Fehler: ${json.error ?? `HTTP ${res.status}`}`)
+        return
+      }
+      toast.success(`Medium «${n}» aufgenommen · API-URL vorbelegt — bei Abweichung in den Feldern anpassen`)
+      if (json.link) {
+        setWillkommen({ name: n, slug: json.slug ?? slug, email, link: json.link })
+      }
       setNeuName('')
       setNeuWebsite('')
+      setNeuEmail('')
       await apolloClient.refetchQueries({ include: [MEDIEN_REGISTER, MEDIEN_MIT_DNA] })
-      setAusgewaehltesMediumSlug(slug)
+      setAusgewaehltesMediumSlug(json.slug ?? slug)
     } catch (err) {
       toast.error(`Fehler: ${err instanceof Error ? err.message : String(err)}`)
     }
@@ -1528,10 +1542,42 @@ export default function OnboardingPage() {
           onChange={e => setNeuWebsite(e.target.value)}
           className="w-56 text-sm"
         />
+        <Input
+          placeholder="Kontakt-E-Mail (optional, für Portal-Zugang)"
+          value={neuEmail}
+          onChange={e => setNeuEmail(e.target.value)}
+          className="w-72 text-sm"
+        />
         <Button size="sm" onClick={neuesMediumAnlegen} disabled={!neuName.trim()}>
           Aufnehmen
         </Button>
+        <span className="text-xs text-slate-400 basis-full">
+          Mit E-Mail entsteht sofort der Portal-Zugang samt Magic-Link — das Hallo und der Zugang in einem Schritt.
+        </span>
       </div>
+
+      {/* Hallo + Magic-Link: versandfertige Einladungsmail nach dem Aufnehmen */}
+      {willkommen && (() => {
+        const einladung = fuelleVorlage(MAIL_EINLADUNG, { medium: willkommen.name, link: willkommen.link })
+        return (
+          <div className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm flex flex-wrap items-center gap-2">
+            <span className="text-emerald-900">
+              Portal-Zugang für <strong>{willkommen.email}</strong> steht bereit. Willkommensmail mit dem
+              Magic-Link verschicken ({'{name}'} und {'{absender}'} beim Redigieren einsetzen):
+            </span>
+            <MailEntwurfButton
+              betreff={einladung.betreff}
+              text={einladung.text}
+              an={willkommen.email}
+              label="Willkommensmail mit Link"
+              titel={`Willkommensmail – ${willkommen.name}`}
+            />
+            <Button size="sm" variant="ghost" onClick={() => setWillkommen(null)}>
+              Ausblenden
+            </Button>
+          </div>
+        )
+      })()}
 
       {/* Auswahl der Medien IN Onboarding (ohne gemessene DNA) */}
       <div className="mb-6 flex items-center gap-3">

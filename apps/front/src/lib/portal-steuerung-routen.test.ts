@@ -13,6 +13,7 @@ jest.mock('./portal-guard', () => {
     ...actual,
     ladePortalMedium: jest.fn(),
     erzeugeZugangsLink: jest.fn(),
+    legeZugangAnMitLink: jest.fn(),
   }
 })
 
@@ -25,14 +26,14 @@ jest.mock('./dna-pipeline', () => ({
 // fetch-Zählungen unten verfälschen).
 jest.mock('./medium-events', () => ({ schreibeMediumEvent: jest.fn().mockResolvedValue(undefined) }))
 
-import { ladePortalMedium, erzeugeZugangsLink } from './portal-guard'
+import { ladePortalMedium, legeZugangAnMitLink } from './portal-guard'
 import { triggerErstMatch } from './dna-pipeline'
 import { schreibeMediumEvent } from './medium-events'
 import matchingFreischalten from '../pages/api/matching-freischalten'
 import zugangsverwaltung from '../pages/api/zugangsverwaltung'
 
 const ladeMock = ladePortalMedium as jest.Mock
-const erzeugeLinkMock = erzeugeZugangsLink as jest.Mock
+const legeZugangMock = legeZugangAnMitLink as jest.Mock
 const erstMatchMock = triggerErstMatch as jest.Mock
 const eventMock = schreibeMediumEvent as jest.Mock
 
@@ -132,15 +133,9 @@ describe('/api/matching-freischalten (DNA-Freigabe-Gate)', () => {
   })
 })
 
-describe('/api/zugangsverwaltung aktion=anlegen (Dedup)', () => {
-  it('bestehender Zugang (email+medium+mandant) → KEIN Create, neuer Link für den bestehenden, {link, bestehend:true}', async () => {
-    // Erster fetch-Aufruf der Route ist der Dedup-Lookup → liefert einen Treffer.
-    const fetchMock = jest.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ data: [{ id: 'z-alt', email: 'redaktion@bajour.ch', medium_slug: 'bajour' }] }),
-    })
-    global.fetch = fetchMock as unknown as typeof fetch
-    erzeugeLinkMock.mockResolvedValue('/api/portal/einloesen?token=neu.link')
+describe('/api/zugangsverwaltung aktion=anlegen (Dedup via legeZugangAnMitLink)', () => {
+  it('bestehender Zugang → {link, bestehend:true}, KEIN zugang_erstellt-Ereignis, E-Mail normalisiert', async () => {
+    legeZugangMock.mockResolvedValue({ link: '/api/portal/einloesen?token=neu.link', bestehend: true })
 
     const { res, getStatus, getJson } = makeRes()
     await zugangsverwaltung(
@@ -150,28 +145,14 @@ describe('/api/zugangsverwaltung aktion=anlegen (Dedup)', () => {
 
     expect(getStatus()).toBe(200)
     expect(getJson()).toEqual({ link: '/api/portal/einloesen?token=neu.link', bestehend: true })
-
-    // Genau EIN fetch (der Lookup), kein zweiter (Create).
-    expect(fetchMock).toHaveBeenCalledTimes(1)
-    const [lookupUrl] = fetchMock.mock.calls[0] as [string]
-    const decoded = decodeURIComponent(lookupUrl)
-    expect(decoded).toContain('redaktion@bajour.ch')
-    expect(decoded).toContain('bajour')
-    expect(erzeugeLinkMock).toHaveBeenCalledWith('z-alt', 'redaktion@bajour.ch', 'bajour', SECRET)
+    expect(legeZugangMock).toHaveBeenCalledWith('redaktion@bajour.ch', 'bajour', 'wepublish', 'team', SECRET)
 
     // Nur ein neuer Link, kein neuer Zugang → KEIN zugang_erstellt-Ereignis.
     expect(eventMock).not.toHaveBeenCalled()
   })
 
-  it('kein bestehender Zugang → Create (lowercase-E-Mail, status eingeladen) + Link, {link} ohne bestehend', async () => {
-    const fetchMock = jest
-      .fn()
-      // 1. Aufruf: Dedup-Lookup, leer.
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ data: [] }) })
-      // 2. Aufruf: Create.
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ data: { id: 'z-neu' } }) })
-    global.fetch = fetchMock as unknown as typeof fetch
-    erzeugeLinkMock.mockResolvedValue('/api/portal/einloesen?token=frisch.link')
+  it('kein bestehender Zugang → {link} ohne bestehend + zugang_erstellt-Ereignis', async () => {
+    legeZugangMock.mockResolvedValue({ link: '/api/portal/einloesen?token=frisch.link', bestehend: false })
 
     const { res, getStatus, getJson } = makeRes()
     await zugangsverwaltung(
@@ -182,17 +163,24 @@ describe('/api/zugangsverwaltung aktion=anlegen (Dedup)', () => {
     expect(getStatus()).toBe(200)
     expect(getJson()).toEqual({ link: '/api/portal/einloesen?token=frisch.link' })
 
-    expect(fetchMock).toHaveBeenCalledTimes(2)
-    const [, createOpts] = fetchMock.mock.calls[1] as [string, RequestInit]
-    expect(createOpts.method).toBe('POST')
-    const createBody = JSON.parse(createOpts.body as string)
-    expect(createBody.email).toBe('neu@bajour.ch')
-    expect(createBody.status).toBe('eingeladen')
-    expect(erzeugeLinkMock).toHaveBeenCalledWith('z-neu', 'neu@bajour.ch', 'bajour', SECRET)
-
     // Echtes Neu-Anlegen → zugang_erstellt-Ereignis mit E-Mail im Detail.
     expect(eventMock).toHaveBeenCalledWith(
       expect.objectContaining({ medium_id: 'bajour', typ: 'zugang_erstellt', detail: 'neu@bajour.ch' }),
     )
+  })
+
+  it('Helfer wirft (Directus-Fehler) → 502, kein Ereignis', async () => {
+    legeZugangMock.mockRejectedValue(new Error('Directus down'))
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+
+    const { res, getStatus } = makeRes()
+    await zugangsverwaltung(
+      makeReq({ method: 'POST', body: { aktion: 'anlegen', email: 'neu@bajour.ch', medium_slug: 'bajour' } }),
+      res,
+    )
+
+    expect(getStatus()).toBe(502)
+    expect(eventMock).not.toHaveBeenCalled()
+    consoleSpy.mockRestore()
   })
 })

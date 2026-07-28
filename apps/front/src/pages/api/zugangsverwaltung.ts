@@ -36,13 +36,18 @@
  * 405 bei anderer Methode als GET/POST.
  */
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { holeSecretOderAntworte503, istPortalZugriffAufProxy, erzeugeZugangsLink, patchePortalZugang } from '@/lib/portal-guard'
+import {
+  holeSecretOderAntworte503,
+  istPortalZugriffAufProxy,
+  erzeugeZugangsLink,
+  legeZugangAnMitLink,
+  patchePortalZugang,
+} from '@/lib/portal-guard'
 import { schreibeMediumEvent } from '@/lib/medium-events'
 import { tenant } from '../../../config/tenant'
 
 const base = () => (process.env.DIRECTUS_URL || 'http://localhost:8055').replace(/\/$/, '')
 const authHeaders = () => ({ Authorization: `Bearer ${process.env.DIRECTUS_TOKEN || ''}` })
-const schreibHeaders = () => ({ ...authHeaders(), 'Content-Type': 'application/json' })
 
 // ─── Typen der Antwort ────────────────────────────────────────────────────────
 
@@ -162,52 +167,12 @@ async function aktionAnlegen(req: NextApiRequest, res: NextApiResponse, secret: 
   }
 
   try {
-    // Dedup: existiert für (email, medium_slug, mandant) schon ein Zugang
-    // (Status egal, auch gesperrte zählen), wird KEIN zweiter angelegt.
-    // Stattdessen bekommt der bestehende einen neuen Link. Ein Link auf einen
-    // gesperrten Zugang ist beim Einlösen ohnehin wirkungslos, weil
-    // findePortalZugang gesperrte ausfiltert.
-    const filterBestehend = encodeURIComponent(
-      JSON.stringify({
-        _and: [{ email: { _eq: email } }, { medium_slug: { _eq: mediumSlug } }, { mandant: { _eq: tenant.key } }],
-      }),
-    )
-    const resBestehend = await fetch(
-      `${base()}/items/portal_zugaenge?filter=${filterBestehend}&limit=1&fields=id,email,medium_slug`,
-      { headers: authHeaders(), signal: AbortSignal.timeout(15_000) },
-    )
-    if (!resBestehend.ok) {
-      return res.status(502).json({ error: `Directus antwortete ${resBestehend.status}` })
-    }
-    const bestehendJson = (await resBestehend.json()) as { data?: Array<{ id: string }> }
-    const bestehend = bestehendJson.data?.[0]
+    // Dedup-Logik lebt in legeZugangAnMitLink (portal-guard), geteilt mit
+    // /api/medium-aufnehmen: bestehender Zugang bekommt nur einen neuen Link.
+    const { link, bestehend } = await legeZugangAnMitLink(email, mediumSlug, tenant.key, wer, secret)
     if (bestehend) {
-      const link = await erzeugeZugangsLink(bestehend.id, email, mediumSlug, secret)
       return res.status(200).json({ link, bestehend: true })
     }
-
-    const resCreate = await fetch(`${base()}/items/portal_zugaenge`, {
-      method: 'POST',
-      headers: schreibHeaders(),
-      body: JSON.stringify({
-        email,
-        medium_slug: mediumSlug,
-        mandant: tenant.key,
-        status: 'eingeladen',
-        eingeladen_am: new Date().toISOString(),
-        erstellt_von: wer,
-      }),
-      signal: AbortSignal.timeout(15_000),
-    })
-    if (!resCreate.ok) {
-      const text = await resCreate.text().catch(() => '')
-      return res.status(502).json({ error: `Zugang konnte nicht angelegt werden (${resCreate.status}): ${text.slice(0, 200)}` })
-    }
-    const createdJson = (await resCreate.json()) as { data?: { id?: string } }
-    const id = createdJson.data?.id
-    if (!id) return res.status(502).json({ error: 'Zugang angelegt, aber keine id erhalten.' })
-
-    const link = await erzeugeZugangsLink(id, email, mediumSlug, secret)
 
     // Roadmap-Ereignis (fire-and-forget): nur beim ECHTEN Neu-Anlegen, ein
     // neuer Link für einen bestehenden Zugang ist kein Meilenstein.

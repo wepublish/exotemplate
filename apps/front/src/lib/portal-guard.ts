@@ -388,6 +388,74 @@ export async function erzeugeZugangsLink(zugangId: string, email: string, medium
   return link
 }
 
+/**
+ * Legt einen Portal-Zugang an (E-Mail muss bereits normalisiert sein:
+ * trim+lowercase) und erzeugt sofort den ersten Einladungs-Link. Existiert
+ * für (email, mediumSlug, mandant) schon ein Zugang (Status egal, auch
+ * gesperrte zählen), wird KEIN zweiter angelegt, sondern für den bestehenden
+ * ein neuer Link erzeugt (`bestehend: true`). Ein Link auf einen gesperrten
+ * Zugang ist beim Einlösen ohnehin wirkungslos (findePortalZugang filtert
+ * gesperrte aus).
+ *
+ * Extrahiert aus /api/zugangsverwaltung aktion=anlegen, damit
+ * /api/medium-aufnehmen den Hallo-plus-Magic-Link-Schritt wiederverwendet
+ * (Entscheid Jolanda 28.07.2026: ein neues Medium bekommt das Hallo und den
+ * Magic-Link in EINEM Schritt). Wirft bei Directus-Fehlern; die Routen
+ * fangen das ab und antworten mit 502.
+ */
+export async function legeZugangAnMitLink(
+  email: string,
+  mediumSlug: string,
+  mandant: string,
+  wer: string,
+  secret: string,
+): Promise<{ link: string; bestehend: boolean }> {
+  const filterBestehend = encodeURIComponent(
+    JSON.stringify({
+      _and: [{ email: { _eq: email } }, { medium_slug: { _eq: mediumSlug } }, { mandant: { _eq: mandant } }],
+    }),
+  )
+  const resBestehend = await fetch(
+    `${base()}/items/portal_zugaenge?filter=${filterBestehend}&limit=1&fields=id,email,medium_slug`,
+    { headers: authHeaders(), signal: AbortSignal.timeout(15_000) },
+  )
+  if (!resBestehend.ok) {
+    throw new Error(`portal_zugaenge-Lookup: Directus antwortete ${resBestehend.status}`)
+  }
+  const bestehendJson = (await resBestehend.json()) as { data?: Array<{ id: string }> }
+  const bestehend = bestehendJson.data?.[0]
+  if (bestehend) {
+    const link = await erzeugeZugangsLink(bestehend.id, email, mediumSlug, secret)
+    return { link, bestehend: true }
+  }
+
+  const resCreate = await fetch(`${base()}/items/portal_zugaenge`, {
+    method: 'POST',
+    headers: schreibHeaders(),
+    body: JSON.stringify({
+      email,
+      medium_slug: mediumSlug,
+      mandant,
+      status: 'eingeladen',
+      eingeladen_am: new Date().toISOString(),
+      erstellt_von: wer,
+    }),
+    signal: AbortSignal.timeout(15_000),
+  })
+  if (!resCreate.ok) {
+    const text = await resCreate.text().catch(() => '')
+    throw new Error(`Zugang konnte nicht angelegt werden (${resCreate.status}): ${text.slice(0, 200)}`)
+  }
+  const createdJson = (await resCreate.json()) as { data?: { id?: string } }
+  const id = createdJson.data?.id
+  if (!id) {
+    throw new Error('Zugang angelegt, aber keine id erhalten.')
+  }
+
+  const link = await erzeugeZugangsLink(id, email, mediumSlug, secret)
+  return { link, bestehend: false }
+}
+
 // ─── Directus-REST-Helfer: medium_knowledge (Portal-Unterlagen) ──────────────
 
 export type PortalWissenEintrag = {
