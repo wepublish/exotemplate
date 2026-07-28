@@ -338,9 +338,14 @@ export async function findePortalZugang(email: string, mandant: string): Promise
  */
 export async function loeseZugangEin(id: string, jti: string, jetztIso: string): Promise<boolean> {
   try {
-    // login_jti bleibt beim Einlösen STEHEN (Entscheid 28.07.2026): der Link
-    // ist dauerhaft und mehrfach verwendbar. Ungültig wird er nur, wenn ein
-    // neuer Link erzeugt (jti rotiert) oder der Zugang gesperrt wird.
+    // login_jti bleibt beim Einlösen STEHEN: der Link ist innerhalb seiner
+    // Laufzeit mehrfach verwendbar (ein Doppelklick oder ein zweiter Versuch
+    // aus demselben Postfach soll nicht ins Leere laufen). Begrenzt wird er
+    // über die Zeit — wenige Stunden, siehe loginTokenTtlSekunden — und über
+    // Daten: ein neu erzeugter Link rotiert das jti, ein gesperrter Zugang
+    // wird schon von findePortalZugang nicht mehr gefunden.
+    // Korrektur 28.07.2026: hier stand «dauerhaft», das galt nur für die
+    // wenigen Stunden zwischen den zwei Entscheiden desselben Tages.
     const res = await fetch(`${base()}/items/portal_zugaenge`, {
       method: 'PATCH',
       headers: schreibHeaders(),

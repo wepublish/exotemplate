@@ -11,7 +11,16 @@ export const tenant = {
   name: 'We.Publish',
   brandColor: '#1a1a2e',
   accent: '#4ade80',
-  clients: ['wepublish', 'cueltuer', 'neue_wege', 'ganzgraz', 'ee-news', 'bajour'],
+  // ACHTUNG, Wartungsfalle: der Onboarding-Weg durch die App traegt hier NICHTS
+  // ein. Ein neu onboardetes Medium bleibt im Dashboard, im Filter, in der
+  // Roadmap und in der DNA-Detailansicht unsichtbar, bis es hier steht — auch
+  // wenn seine DNA laengst gemessen und aktiv ist. Am 28.07.2026 aufgefallen:
+  // factuel hatte eine aktive DNA (56% Schaerfe, 52 Treffer), war aber nirgends
+  // zu sehen, weil der Eintrag fehlte. Dasselbe Muster hielt laut Statusnotiz
+  // schon drei Medien monatelang unsichtbar. Richtige Loesung ist, die Liste aus
+  // Directus abzuleiten; das braucht einen Umbau der pro Medium vorkompilierten
+  // Detail-Queries in graphql/medien.ts.
+  clients: ['wepublish', 'cueltuer', 'neue_wege', 'ganzgraz', 'ee-news', 'bajour', 'factuel', 'vmz', 'zwolf'],
   locale: 'de',
 } as const
 

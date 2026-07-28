@@ -115,7 +115,7 @@ hier ist dein Anmeldelink zum Portal:
 
 {link}
 
-Der Link gilt {stunden} Stunden und lässt sich einmal verwenden; danach bist du einen Monat lang angemeldet. Ein vorher angeforderter Link ist damit ungültig.
+Der Link gilt {stunden} Stunden; nach dem Anmelden bleibst du einen Monat lang eingeloggt. Ein vorher angeforderter Link ist damit ungültig.
 
 Ist der Link abgelaufen, hol dir hier einfach einen neuen:
 
