@@ -22,7 +22,7 @@ describe('berechneKnowledgeScore', () => {
     ]
     const result = berechneKnowledgeScore(items)
     expect(result.punkte).toBe(1)
-    expect(result.abgedeckt).toContain('Budget')
+    expect(result.abgedeckt).toContain('Budget / Jahresrechnung')
   })
 
   it('gibt 5/5 bei allen Kern-Kategorien', () => {
@@ -85,5 +85,53 @@ describe('kategorieLabelFromKey', () => {
 
   it('gibt den Rohwert für unbekannte Schlüssel zurück', () => {
     expect(kategorieLabelFromKey('unbekannte_kategorie')).toBe('unbekannte_kategorie')
+  })
+})
+
+/**
+ * Fachentscheid Jolanda 29.07.2026: «statuten ist gemeinnützigkeitsnachweis und
+ * budget/jahresrechnung reicht auch eines davon». Anlass war zwölf: die Statuten
+ * lagen unter «Allgemeine Infos», der Balken zeigte trotzdem eine Lücke.
+ */
+describe('berechneKnowledgeScore: Titel-Erkennung', () => {
+  it('erkennt Statuten als Gemeinnützigkeitsnachweis, auch unter allgemeinen Infos', () => {
+    const r = berechneKnowledgeScore([
+      { category: 'general_info', title: 'Statuten 2026 unterschrieben.pdf' },
+    ])
+    expect(r.abgedeckt).toContain('Gemeinnützigkeitsnachweis')
+    expect(r.fehlend).not.toContain('Gemeinnützigkeitsnachweis')
+    // Die Kategorie selbst zählt weiterhin auch: zwei Dimensionen, ein Dokument.
+    expect(r.abgedeckt).toContain('Allgemeine Infos')
+    expect(r.punkte).toBe(2)
+  })
+
+  it('lässt eine Jahresrechnung für die Budget-Dimension genügen', () => {
+    const r = berechneKnowledgeScore([{ category: 'general_info', title: 'Jahresrechnung_2025.pdf' }])
+    expect(r.abgedeckt).toContain('Budget / Jahresrechnung')
+  })
+
+  it('erkennt die gängigen Finanz-Belege', () => {
+    for (const titel of ['Jahresabschluss 2025', 'Erfolgsrechnung.xlsx', 'Bilanz_2024.pdf', 'Finanzplan 2026', 'Budget_2026.xlsx']) {
+      const r = berechneKnowledgeScore([{ category: 'general_info', title: titel }])
+      expect(r.abgedeckt).toContain('Budget / Jahresrechnung')
+    }
+  })
+
+  it('erkennt die gängigen Gemeinnützigkeits-Belege', () => {
+    for (const titel of ['Statuten.pdf', 'Gemeinnützigkeit_Verfügung.pdf', 'Steuerbefreiung Kanton Zug.pdf']) {
+      const r = berechneKnowledgeScore([{ category: 'general_info', title: titel }])
+      expect(r.abgedeckt).toContain('Gemeinnützigkeitsnachweis')
+    }
+  })
+
+  it('erfindet nichts: ein beliebiger Titel füllt keine Dimension', () => {
+    const r = berechneKnowledgeScore([{ category: 'general_info', title: 'Kurzbiografien.docx' }])
+    expect(r.abgedeckt).toEqual(['Allgemeine Infos'])
+    expect(r.punkte).toBe(1)
+  })
+
+  it('verkraftet Einträge ohne Titel (Altbestand)', () => {
+    const r = berechneKnowledgeScore([{ category: 'budget' }, { category: 'tax_exemption', title: null }])
+    expect(r.punkte).toBe(2)
   })
 })

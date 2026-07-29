@@ -13,9 +13,9 @@
 export const PORTAL_KATEGORIEN = [
   { key: 'published_article', label: 'Artikel' },
   { key: 'newsletter', label: 'Newsletter' },
-  { key: 'budget', label: 'Budget / Finanzplan' },
+  { key: 'budget', label: 'Budget / Jahresrechnung' },
   { key: 'previous_application', label: 'Früheres Gesuch' },
-  { key: 'tax_exemption', label: 'Gemeinnützigkeit' },
+  { key: 'tax_exemption', label: 'Gemeinnützigkeit / Statuten' },
   { key: 'general_info', label: 'Allgemeine Infos' },
 ] as const
 

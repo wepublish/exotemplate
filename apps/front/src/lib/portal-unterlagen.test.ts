@@ -29,7 +29,7 @@ describe('PORTAL_KATEGORIEN', () => {
   })
 
   it('portalKategorieLabel fällt auf den Rohwert zurück (Altbestand bleibt sichtbar)', () => {
-    expect(portalKategorieLabel('budget')).toBe('Budget / Finanzplan')
+    expect(portalKategorieLabel('budget')).toBe('Budget / Jahresrechnung')
     expect(portalKategorieLabel('alt_irgendwas')).toBe('alt_irgendwas')
   })
 })
