@@ -212,9 +212,9 @@ export const PORTAL_TEXTE: Record<string, string> = {
 
   // Feinere Wording-Schlüssel der Unterlagen-Seite (Task 6, im Wording-
   // Dokument nicht vorgegeben, darum hier ergänzt, siehe Task-6-Report).
-  'unterlagen.upload_titel': 'Dokument hochladen',
+  'unterlagen.upload_titel': 'Dokumente hochladen',
   'unterlagen.upload_hinweis':
-    'Zieht eine Datei hierhin oder klickt, um sie auszuwählen. Word, Excel, PDF, Text oder Markdown, bis 50 MB.',
+    'Zieht eine oder mehrere Dateien hierhin oder klickt, um sie auszuwählen. Word, Excel, PDF, Text oder Markdown, bis 50 MB pro Datei.',
   'unterlagen.url_titel': 'URL hinzufügen',
   'unterlagen.url_hinweis':
     'Ein Link zu einem Artikel, eurer Website oder etwas anderem, das euch beschreibt. Wir lesen die Seite für euch ein.',
@@ -229,6 +229,14 @@ export const PORTAL_TEXTE: Record<string, string> = {
   'unterlagen.dna_knopf_gesperrt': 'Ladet zuerst eine Unterlage hoch, dann könnt ihr eure DNA erstellen lassen.',
   // Logo-Gate für denselben Knopf (Pflicht-Erststep, siehe Modul-Kommentar Logo-Block oben).
   'unterlagen.dna_knopf_gesperrt_logo': 'Ladet zuerst euer Logo hoch, dann könnt ihr eure DNA erstellen lassen.',
+
+  // Rückmeldung zur DNA-Neu-Erzeugung (Wunsch 29.07.2026): wenn die DNA dem
+  // Medium «zu fern» ist, beschreibt es hier, was fehlt, und stösst damit
+  // direkt einen neuen Erzeugungslauf an (dna.tsx, /api/portal/dna-erzeugen).
+  'dna.rueckmeldung_titel': 'Trifft es euch noch nicht?',
+  'dna.rueckmeldung_hinweis':
+    'Sagt uns in ein, zwei Sätzen, was nicht stimmt: zu breit, falscher Schwerpunkt, fehlende Themen. Wir erstellen eure DNA damit neu, eure Rückmeldung fliesst direkt ein.',
+  'dna.rueckmeldung_knopf': 'DNA mit dieser Rückmeldung neu erstellen',
 
   // Förderhistorie + Ausschlüsse (Design 2026-07-29, docs/superpowers/specs/
   // 2026-07-29-foerderhistorie-und-ausschluesse-design.md).

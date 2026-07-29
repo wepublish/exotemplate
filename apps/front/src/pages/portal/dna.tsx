@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import DnaPdf from '@/components/DnaPdf'
 import { usePortalMe } from '@/components/portal/PortalLayout'
@@ -92,6 +93,7 @@ export default function PortalDnaSeite() {
 
   const [freigebenOffen, setFreigebenOffen] = useState(false)
   const [freigebenLaedt, setFreigebenLaedt] = useState(false)
+  const [rueckmeldung, setRueckmeldung] = useState('')
 
   const stopPoll = useCallback(() => {
     if (pollRef.current) {
@@ -139,23 +141,32 @@ export default function PortalDnaSeite() {
     [ladeDna, stopPoll],
   )
 
-  const starteErzeugung = useCallback(() => {
-    setJobZustand('laeuft')
-    setJobFehler(null)
-    setJobPhase('sammeln')
-    fetch('/api/portal/dna-erzeugen', { method: 'POST' })
-      .then(async (res) => {
-        const json = (await res.json()) as { job_id?: string; error?: string }
-        if (!res.ok || !json.job_id) throw new Error(json.error ?? `Status ${res.status}`)
-        stopPoll()
-        pollRef.current = setInterval(() => pollJob(json.job_id as string), POLL_MS)
-        pollJob(json.job_id)
+  const starteErzeugung = useCallback(
+    (mitRueckmeldung?: string) => {
+      setJobZustand('laeuft')
+      setJobFehler(null)
+      setJobPhase('sammeln')
+      fetch('/api/portal/dna-erzeugen', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(mitRueckmeldung ? { rueckmeldung: mitRueckmeldung } : {}),
       })
-      .catch((err: unknown) => {
-        setJobZustand('fehlgeschlagen')
-        setJobFehler(err instanceof Error ? err.message : String(err))
-      })
-  }, [pollJob, stopPoll])
+        .then(async (res) => {
+          const json = (await res.json()) as { job_id?: string; error?: string; hinweis?: string }
+          if (!res.ok || !json.job_id) throw new Error(json.error ?? `Status ${res.status}`)
+          if (json.hinweis) toast.info(json.hinweis)
+          if (mitRueckmeldung) setRueckmeldung('')
+          stopPoll()
+          pollRef.current = setInterval(() => pollJob(json.job_id as string), POLL_MS)
+          pollJob(json.job_id)
+        })
+        .catch((err: unknown) => {
+          setJobZustand('fehlgeschlagen')
+          setJobFehler(err instanceof Error ? err.message : String(err))
+        })
+    },
+    [pollJob, stopPoll],
+  )
 
   useEffect(() => {
     let abgebrochen = false
@@ -245,7 +256,7 @@ export default function PortalDnaSeite() {
             {PORTAL_TEXTE['dna.fehlgeschlagen']}
             {jobFehler ? ` (${jobFehler})` : ''}
           </p>
-          <Button size="sm" onClick={starteErzeugung}>
+          <Button size="sm" onClick={() => starteErzeugung()}>
             Erneut versuchen
           </Button>
         </div>
@@ -253,6 +264,27 @@ export default function PortalDnaSeite() {
 
       {!logoFehlt && dna && (
         <div className="space-y-5">
+          {/* Eine Neu-Erzeugung über einer bestehenden DNA (z.B. nach einer
+              Rückmeldung) zeigt ihren Fortschritt hier, die alte DNA bleibt
+              solange sichtbar. */}
+          {jobZustand === 'laeuft' && (
+            <div className="space-y-5 rounded-xl border border-indigo-200 bg-indigo-50 p-6">
+              <div className="flex items-center gap-2 text-sm font-semibold text-indigo-900">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {PORTAL_TEXTE['dna.wird_erstellt']}
+              </div>
+              <FortschrittsStepper aktuellePhase={jobPhase} />
+            </div>
+          )}
+          {jobZustand === 'fehlgeschlagen' && (
+            <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50 p-6">
+              <p className="text-sm text-amber-900">
+                {PORTAL_TEXTE['dna.fehlgeschlagen']}
+                {jobFehler ? ` (${jobFehler})` : ''}
+              </p>
+            </div>
+          )}
+
           <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-6">
             <p className="text-base italic leading-relaxed text-slate-800">«{dna.soundFeeling}»</p>
 
@@ -287,10 +319,39 @@ export default function PortalDnaSeite() {
               <p className="text-sm text-indigo-900">{PORTAL_TEXTE['dna.warten_auf_freischaltung']}</p>
             </div>
           ) : (
-            <div className="space-y-3 rounded-xl border border-indigo-200 bg-indigo-50 p-5">
-              <p className="text-sm text-indigo-900">{PORTAL_TEXTE['dna.freigabe_hinweis']}</p>
-              <Button onClick={() => setFreigebenOffen(true)}>{PORTAL_TEXTE['dna.freigeben_knopf']}</Button>
-            </div>
+            <>
+              <div className="space-y-3 rounded-xl border border-indigo-200 bg-indigo-50 p-5">
+                <p className="text-sm text-indigo-900">{PORTAL_TEXTE['dna.freigabe_hinweis']}</p>
+                <Button onClick={() => setFreigebenOffen(true)} disabled={jobZustand === 'laeuft'}>
+                  {PORTAL_TEXTE['dna.freigeben_knopf']}
+                </Button>
+              </div>
+
+              {/* Rückmeldung zur Neu-Erzeugung (Wunsch 29.07.2026): wenn die
+                  DNA nicht trifft, beschreibt das Medium hier, was fehlt, und
+                  stösst damit direkt einen neuen Lauf an. */}
+              <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-5">
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-900">{PORTAL_TEXTE['dna.rueckmeldung_titel']}</h2>
+                  <p className="mt-1 text-sm text-slate-500">{PORTAL_TEXTE['dna.rueckmeldung_hinweis']}</p>
+                </div>
+                <Textarea
+                  value={rueckmeldung}
+                  onChange={(e) => setRueckmeldung(e.target.value)}
+                  className="min-h-[80px]"
+                  maxLength={1000}
+                  disabled={jobZustand === 'laeuft'}
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => starteErzeugung(rueckmeldung.trim())}
+                  disabled={jobZustand === 'laeuft' || rueckmeldung.trim().length < 5}
+                >
+                  {jobZustand === 'laeuft' ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
+                  {PORTAL_TEXTE['dna.rueckmeldung_knopf']}
+                </Button>
+              </div>
+            </>
           )}
 
           <div className="flex flex-wrap items-center gap-3">

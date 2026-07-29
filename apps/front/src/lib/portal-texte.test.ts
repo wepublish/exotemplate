@@ -231,6 +231,10 @@ describe('PORTAL_TEXTE', () => {
     'gesuche.antwort_knopf',
     // Gemeinsamer Fehlertext der Portal-Seiten (Task 5, siehe Task-5-Report).
     'fehler.daten_nicht_verfuegbar',
+    // Rückmeldung zur DNA-Neu-Erzeugung (29.07.2026).
+    'dna.rueckmeldung_titel',
+    'dna.rueckmeldung_hinweis',
+    'dna.rueckmeldung_knopf',
     // Förderhistorie + Ausschlüsse (Design 2026-07-29).
     'uebersicht.naechster_schritt.foerderhistorie_hinweis',
     'foerderhistorie.titel',

@@ -117,6 +117,13 @@ async function runGenerate(jobId: string, medium_id: string): Promise<void> {
     warnungen.push('Kein We.Publish-API-Schlüssel hinterlegt — Artikel und Newsletter wurden nicht geladen.')
   } else if (wp.fehler) {
     warnungen.push(`We.Publish-Abruf teilweise fehlgeschlagen: ${wp.fehler}`)
+  } else if (wp.artikelNeu === 0 && wp.newsletterNeu === 0 && wp.uebersprungen === 0) {
+    // Befund 29.07.2026: bei 4 von 6 Medien mit hinterlegtem Schlüssel lieferte
+    // die URL zwar eine Antwort, aber null Artikel (falscher Endpoint oder
+    // leere Instanz) — bisher OHNE jede Warnung. `uebersprungen === 0`
+    // unterscheidet die echte Null-Antwort vom Normalfall «alles schon
+    // importiert» (dann zählt der Dedup-Skip hoch und alles ist gut).
+    warnungen.push('We.Publish-API erreichbar, aber keine Artikel oder Newsletter abrufbar — stimmt die hinterlegte API-URL?')
   }
 
   const ds = await ingestDatensuppe(base, token, medium_id, medium_id, dedup)

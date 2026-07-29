@@ -142,25 +142,42 @@ function LogoBlock({ hatLogo, slug, name, onErfolg }: LogoBlockProps) {
 function UploadBlock({ onErfolg }: { onErfolg: () => void }) {
   const [dragOver, setDragOver] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [fortschritt, setFortschritt] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
-  async function uploadDatei(datei: File) {
+  // Mehrere Dateien in einem Vorgang (Wunsch 29.07.2026): die Route nimmt
+  // eine Datei pro Request, der Client lädt sequenziell hoch — ein Fehler
+  // bei Datei 3 lässt Datei 1 und 2 gespeichert und wird einzeln gemeldet.
+  async function uploadDateien(dateien: File[]) {
+    if (dateien.length === 0) return
     setUploading(true)
+    let gespeichert = 0
     try {
-      const form = new FormData()
-      form.append('file', datei)
-      const res = await fetch('/api/portal/upload', { method: 'POST', body: form })
-      const json = (await res.json()) as { title?: string; chars?: number; error?: string }
-      if (!res.ok || json.error) {
-        toast.error(json.error ?? `Hochladen fehlgeschlagen (${res.status})`)
-        return
+      for (const [index, datei] of dateien.entries()) {
+        setFortschritt(dateien.length > 1 ? `${index + 1}/${dateien.length}` : '')
+        try {
+          const form = new FormData()
+          form.append('file', datei)
+          const res = await fetch('/api/portal/upload', { method: 'POST', body: form })
+          const json = (await res.json()) as { title?: string; chars?: number; error?: string }
+          if (!res.ok || json.error) {
+            toast.error(`${datei.name}: ${json.error ?? `Hochladen fehlgeschlagen (${res.status})`}`)
+            continue
+          }
+          gespeichert++
+        } catch (err) {
+          toast.error(`${datei.name}: ${err instanceof Error ? err.message : String(err)}`)
+        }
       }
-      toast.success(`«${json.title}» gespeichert.`)
-      onErfolg()
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : String(err))
+      if (gespeichert === 1 && dateien.length === 1) {
+        toast.success(`«${dateien[0].name}» gespeichert.`)
+      } else if (gespeichert > 0) {
+        toast.success(`${gespeichert} von ${dateien.length} Dateien gespeichert.`)
+      }
+      if (gespeichert > 0) onErfolg()
     } finally {
       setUploading(false)
+      setFortschritt('')
       if (fileRef.current) fileRef.current.value = ''
     }
   }
@@ -168,13 +185,11 @@ function UploadBlock({ onErfolg }: { onErfolg: () => void }) {
   function handleDrop(e: React.DragEvent) {
     e.preventDefault()
     setDragOver(false)
-    const datei = e.dataTransfer.files[0]
-    if (datei) void uploadDatei(datei)
+    void uploadDateien(Array.from(e.dataTransfer.files))
   }
 
   function handleDateiWahl(e: React.ChangeEvent<HTMLInputElement>) {
-    const datei = e.target.files?.[0]
-    if (datei) void uploadDatei(datei)
+    void uploadDateien(Array.from(e.target.files ?? []))
   }
 
   return (
@@ -199,12 +214,12 @@ function UploadBlock({ onErfolg }: { onErfolg: () => void }) {
         {uploading ? (
           <div className="flex flex-col items-center gap-2 text-slate-500">
             <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
-            <span className="text-xs">Wird hochgeladen …</span>
+            <span className="text-xs">Wird hochgeladen {fortschritt ? `(${fortschritt}) ` : ''}…</span>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2 text-slate-400">
             <UploadCloud className="h-7 w-7" />
-            <span className="text-xs font-medium">Datei hier ablegen oder klicken</span>
+            <span className="text-xs font-medium">Dateien hier ablegen oder klicken</span>
           </div>
         )}
       </div>
@@ -212,6 +227,7 @@ function UploadBlock({ onErfolg }: { onErfolg: () => void }) {
       <input
         ref={fileRef}
         type="file"
+        multiple
         accept=".docx,.xlsx,.xls,.pdf,.txt,.csv,.md"
         className="hidden"
         onChange={handleDateiWahl}

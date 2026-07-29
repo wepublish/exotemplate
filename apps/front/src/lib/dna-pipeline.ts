@@ -79,6 +79,39 @@ export interface ArbeitsDnaErgebnis {
   batchAnzahl: number
 }
 
+// ─── DNA-Rückmeldungen (Wunsch 29.07.2026) ─────────────────────────────────────
+// Das Medium kann auf der Portal-DNA-Seite eine Rückmeldung hinterlassen
+// («zu breit», «falscher Schwerpunkt»). Sie wird als medium_knowledge-Eintrag
+// mit diesem Titel-Präfix gespeichert (sichtbar in der Wissens-Liste, für
+// Medium UND Operator) und hier NICHT als Berichterstattung in die Batches
+// gemischt, sondern als eigener, ausdrücklicher Abschnitt in den
+// Reduce-Prompt gestellt — sonst ginge eine Zwei-Sätze-Anweisung zwischen
+// hunderten Artikeln unter.
+
+export const DNA_RUECKMELDUNG_TITEL_PREFIX = 'Rückmeldung zur DNA'
+
+export function istDnaRueckmeldung(item: Pick<KnowledgeItem, 'title'>): boolean {
+  return (item.title ?? '').startsWith(DNA_RUECKMELDUNG_TITEL_PREFIX)
+}
+
+const RUECKMELDUNG_MAX_EINTRAEGE = 3
+const RUECKMELDUNG_MAX_ZEICHEN = 2000
+
+/**
+ * Baut den Prompt-Abschnitt aus den jüngsten Rückmeldungen (Eingabe muss
+ * bereits neueste-zuerst sortiert sein, wie KNOWLEDGE_QUERY liefert).
+ * Leere Eingabe → leerer String (kein Abschnitt).
+ */
+export function baueRueckmeldungsAbschnitt(rueckmeldungen: Pick<KnowledgeItem, 'content'>[]): string {
+  const texte = rueckmeldungen
+    .map((r) => (r.content ?? '').trim())
+    .filter((t) => t.length > 0)
+    .slice(0, RUECKMELDUNG_MAX_EINTRAEGE)
+  if (texte.length === 0) return ''
+  const block = texte.map((t) => `- ${t}`).join('\n').slice(0, RUECKMELDUNG_MAX_ZEICHEN)
+  return `\nRÜCKMELDUNGEN DES MEDIUMS ZU FRÜHEREN DNA-FASSUNGEN (neueste zuerst — ausdrücklich berücksichtigen und die DNA entsprechend anpassen):\n${block}`
+}
+
 export const KNOWLEDGE_QUERY = `
   query KnowledgeForDna($medium: String!) {
     medium_knowledge(filter: { medium_id: { _eq: $medium } }, sort: ["-date_created"], limit: -1) {
@@ -110,7 +143,12 @@ export async function erzeugeArbeitsDnaAusKorpus(params: {
   knowledge: KnowledgeItem[]
   onProgress?: (phase: string) => void
 }): Promise<ArbeitsDnaErgebnis> {
-  const { base, token, mediumNumericId, mediumName, website, knowledge, onProgress } = params
+  const { base, token, mediumNumericId, mediumName, website, knowledge: knowledgeRoh, onProgress } = params
+
+  // Rückmeldungen zur DNA sind Steuer-Anweisungen, keine Berichterstattung:
+  // raus aus dem Batch-Korpus, rein in den eigenen Reduce-Abschnitt (unten).
+  const rueckmeldungen = knowledgeRoh.filter(istDnaRueckmeldung)
+  const knowledge = knowledgeRoh.filter(i => !istDnaRueckmeldung(i))
 
   const manuell = knowledge.filter(i => !i.auto_scraped)
   const auto = knowledge.filter(i => i.auto_scraped)
@@ -196,6 +234,7 @@ export async function erzeugeArbeitsDnaAusKorpus(params: {
       .filter(Boolean)
       .join('\n')
   }
+  reduceUser += baueRueckmeldungsAbschnitt(rueckmeldungen)
 
   onProgress?.('profil')
   const rawContent = await callLLM({

@@ -186,32 +186,49 @@ function UploadDropzone({ mediumId, onErfolg }: UploadDropzoneProps) {
   const [titel, setTitel] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
-  async function uploadDatei(datei: File) {
+  // Mehrere Dateien in einem Vorgang (Wunsch 29.07.2026, wie der Portal-
+  // UploadBlock): sequenziell, Fehler je Datei einzeln, Sammel-Erfolgsmeldung.
+  // Der optionale Titel gilt nur bei GENAU einer Datei — sonst hiessen alle
+  // Einträge gleich; bei mehreren zählt der Dateiname.
+  async function uploadDateien(dateien: File[]) {
+    if (dateien.length === 0) return
     setUploading(true)
+    let gespeichert = 0
     try {
-      const form = new FormData()
-      form.append('file', datei)
-      form.append('medium_id', mediumId)
-      form.append('category', kategorie)
-      if (titel.trim()) form.append('title', titel.trim())
+      for (const datei of dateien) {
+        try {
+          const form = new FormData()
+          form.append('file', datei)
+          form.append('medium_id', mediumId)
+          form.append('category', kategorie)
+          if (dateien.length === 1 && titel.trim()) form.append('title', titel.trim())
 
-      const res = await fetch('/api/medium-knowledge/upload', {
-        method: 'POST',
-        body: form,
-      })
-      const json = await res.json() as { id?: number; category?: string; title?: string; chars?: number; error?: string }
+          const res = await fetch('/api/medium-knowledge/upload', {
+            method: 'POST',
+            body: form,
+          })
+          const json = await res.json() as { id?: number; category?: string; title?: string; chars?: number; error?: string }
 
-      if (!res.ok || json.error) {
-        toast.error(`Upload fehlgeschlagen: ${json.error ?? `HTTP ${res.status}`}`)
-        return
+          if (!res.ok || json.error) {
+            toast.error(`${datei.name}: ${json.error ?? `HTTP ${res.status}`}`)
+            continue
+          }
+          gespeichert++
+          if (dateien.length === 1) {
+            toast.success(`«${json.title}» gespeichert (${(json.chars ?? 0).toLocaleString('de-CH')} Zeichen)`)
+          }
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err)
+          toast.error(`${datei.name}: ${msg}`)
+        }
       }
-
-      toast.success(`«${json.title}» gespeichert (${(json.chars ?? 0).toLocaleString('de-CH')} Zeichen)`)
-      setTitel('')
-      onErfolg()
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err)
-      toast.error(`Upload fehlgeschlagen: ${msg}`)
+      if (dateien.length > 1 && gespeichert > 0) {
+        toast.success(`${gespeichert} von ${dateien.length} Dateien gespeichert.`)
+      }
+      if (gespeichert > 0) {
+        setTitel('')
+        onErfolg()
+      }
     } finally {
       setUploading(false)
       if (fileRef.current) fileRef.current.value = ''
@@ -221,13 +238,11 @@ function UploadDropzone({ mediumId, onErfolg }: UploadDropzoneProps) {
   function handleDrop(e: React.DragEvent) {
     e.preventDefault()
     setDragOver(false)
-    const datei = e.dataTransfer.files[0]
-    if (datei) uploadDatei(datei)
+    void uploadDateien(Array.from(e.dataTransfer.files))
   }
 
   function handleDateiWahl(e: React.ChangeEvent<HTMLInputElement>) {
-    const datei = e.target.files?.[0]
-    if (datei) uploadDatei(datei)
+    void uploadDateien(Array.from(e.target.files ?? []))
   }
 
   return (
@@ -293,6 +308,7 @@ function UploadDropzone({ mediumId, onErfolg }: UploadDropzoneProps) {
       <input
         ref={fileRef}
         type="file"
+        multiple
         accept=".docx,.xlsx,.xls,.pdf,.txt,.csv,.md"
         className="hidden"
         onChange={handleDateiWahl}
