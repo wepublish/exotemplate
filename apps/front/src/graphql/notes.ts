@@ -14,6 +14,8 @@ export interface NoteFields {
   body: string | null
   status: string
   ai_summary: string | null
+  /** A `cast-csv` column in Directus, so GraphQL hands it over as a list. */
+  ai_summary_tags: string[] | null
   ai_summary_generated_at: string | null
   date_created: string | null
 }
@@ -30,6 +32,7 @@ export const NOTES_QUERY = gql`
       body
       status
       ai_summary
+      ai_summary_tags
       ai_summary_generated_at
       date_created
     }

@@ -11,7 +11,7 @@
     "test": "npm test --prefix extensions/app",
     "typecheck": "tsc --noEmit -p migrations && npm run typecheck --prefix extensions/app",
     "build:migrations": "tsc -p migrations",
-    "build:extensions": "for d in extensions/*; do [ -f \"$d/package.json\" ] && (cd \"$d\" && npm install && npm run build); done",
+    "build:extensions": "for d in extensions/*; do [ -f \"$d/package.json\" ] || continue; [ -f \"$d/package-lock.json\" ] || { echo \"✖ $d has no package-lock.json — run 'npm install' in it once and commit the lockfile\"; exit 1; }; (cd \"$d\" && npm ci --no-audit --no-fund && npm run build); done",
     "build": "npm run build:migrations && npm run build:extensions",
     "database:migrate": "npm run build:migrations && npx directus database migrate:latest",
     "schema:dump": "directus-sync pull",

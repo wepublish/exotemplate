@@ -2,9 +2,9 @@ import { defineOperationApi } from '@directus/extensions-sdk'
 import { completeJson } from '../../shared/claude'
 import {
   buildSummaryPrompt,
-  formatSummaryForStorage,
   parseSummary,
-  SUMMARY_SYSTEM_PROMPT
+  SUMMARY_SYSTEM_PROMPT,
+  summaryFields
 } from '../../endpoints/notes-summary/prompt'
 import type { Note } from '../../types/schema'
 import { selectPendingNotes } from './pending'
@@ -54,10 +54,10 @@ export default defineOperationApi<Options>({
           ...(model ? { model } : {})
         })
 
-        await notes.updateOne(note.id, {
-          ai_summary: formatSummaryForStorage(parseSummary(answer)),
-          ai_summary_generated_at: new Date().toISOString()
-        })
+        await notes.updateOne(
+          note.id,
+          summaryFields(parseSummary(answer), new Date())
+        )
 
         summarized.push(note.id)
       } catch (error) {

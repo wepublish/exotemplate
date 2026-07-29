@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 import {
   buildSummaryPrompt,
   EmptyNoteError,
-  formatSummaryForStorage,
-  parseSummary
+  parseSummary,
+  summaryFields
 } from './prompt'
 
 describe('buildSummaryPrompt', () => {
@@ -69,16 +69,22 @@ describe('parseSummary', () => {
   })
 })
 
-describe('formatSummaryForStorage', () => {
-  it('appends tags as hashtags', () => {
+describe('summaryFields', () => {
+  const generatedAt = new Date('2026-07-29T10:00:00.000Z')
+
+  it('writes summary, tags and timestamp to their own fields', () => {
     expect(
-      formatSummaryForStorage({ summary: 'Kurz.', tags: ['a', 'b'] })
-    ).toBe('Kurz.\n\n#a #b')
+      summaryFields({ summary: 'Kurz.', tags: ['a', 'b'] }, generatedAt)
+    ).toEqual({
+      ai_summary: 'Kurz.',
+      ai_summary_tags: ['a', 'b'],
+      ai_summary_generated_at: '2026-07-29T10:00:00.000Z'
+    })
   })
 
-  it('stores the summary alone when there are no tags', () => {
-    expect(formatSummaryForStorage({ summary: 'Kurz.', tags: [] })).toBe(
-      'Kurz.'
-    )
+  it('keeps the tag list empty rather than absent', () => {
+    expect(
+      summaryFields({ summary: 'Kurz.', tags: [] }, generatedAt).ai_summary_tags
+    ).toEqual([])
   })
 })

@@ -179,7 +179,9 @@ proxy in front for TLS.
   `apps/directus` or `apps/front` first. The root `npm install` only installs the
   pre-commit tooling — never add app dependencies to the root `package.json`.
 - The extension bundle is a **third** npm package with its own `node_modules`:
-  `apps/directus/extensions/app`.
+  `apps/directus/extensions/app`. Its `package-lock.json` is committed and
+  `npm run build` installs it with `npm ci` — so a dependency change means running
+  `npm install` inside the bundle and committing the lockfile, or the build fails.
 - Directus is pinned to **11.x** on purpose. `directus-sync` (schema-as-code) has no
   Directus 12 release, and the bundled `ts-typegen` module declares
   `host: ">= 10.10.0 < 12.0.0"`. Check both before bumping the major.

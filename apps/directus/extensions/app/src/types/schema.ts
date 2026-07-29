@@ -16,8 +16,13 @@ export interface Note {
   status: NoteStatus
   title: string
   body: string | null
-  /** Written only by the notes-summary endpoint and the notes-digest operation. */
+  /**
+   * Written only by the notes-summary endpoint and the notes-summarize-pending
+   * operation. `ai_summary_tags` is a `cast-csv` column, so it is a string array
+   * on the way in and out — never a joined string.
+   */
   ai_summary: string | null
+  ai_summary_tags: string[] | null
   ai_summary_generated_at: string | null
   date_created: string | null
   date_updated: string | null

@@ -78,9 +78,30 @@ export function parseSummary(value: unknown): NoteSummary {
   }
 }
 
-/** How the summary is stored in `notes.ai_summary` — one column, human readable. */
-export function formatSummaryForStorage(summary: NoteSummary): string {
-  return summary.tags.length === 0
-    ? summary.summary
-    : `${summary.summary}\n\n#${summary.tags.join(' #')}`
+/** The columns a generated summary writes. */
+export interface SummaryFields {
+  ai_summary: string
+  ai_summary_tags: string[]
+  ai_summary_generated_at: string
+}
+
+/**
+ * Maps a validated summary onto the collection's fields — one place, so the
+ * endpoint and the scheduled operation cannot drift apart.
+ *
+ * Each part of the answer goes into its own field. Packing structured data into
+ * one text column ("summary\n\n#tag #tag") means the UI has to parse it back
+ * apart, which is the same format written twice in two packages; the copies
+ * always drift. `ai_summary_tags` is `cast-csv`, so passing a string array is
+ * exactly right — Directus does the joining.
+ */
+export function summaryFields(
+  summary: NoteSummary,
+  generatedAt: Date
+): SummaryFields {
+  return {
+    ai_summary: summary.summary,
+    ai_summary_tags: summary.tags,
+    ai_summary_generated_at: generatedAt.toISOString()
+  }
 }

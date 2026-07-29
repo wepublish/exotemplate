@@ -34,7 +34,7 @@ apps/directus/
 | `npm run db:start`         | Postgres in Docker (detached)                                             |
 | `npm run directus:init`    | Bootstrap a fresh database, migrate, apply the schema. **First run only** |
 | `npm run dev`              | Postgres + Directus on the host                                           |
-| `npm run build`            | Compile migrations and every extension bundle                             |
+| `npm run build`            | Compile migrations and every extension bundle (`npm ci` per bundle)       |
 | `npm test`                 | Vitest in the extension bundle                                            |
 | `npm run typecheck`        | `tsc --noEmit` for migrations and the bundle                              |
 | `npm run database:migrate` | Compile `*.mts`, then `directus database migrate:latest`                  |
@@ -119,8 +119,19 @@ export default defineEndpoint((router, { services, getSchema, logger }) => {
   where the code must deliberately act as the system, and say why in a comment.
 - Read and write through `services.ItemsService`, not raw `database` — services run
   hooks, validation and permissions. Use knex only for reporting-style queries.
+- **`readOne` never returns `null`.** It throws `ForbiddenError` for an item that is
+  missing _or_ not readable by the caller, and for a malformed key. Do not write a
+  `=== null` check — it is dead code. Match on it with
+  `isDirectusError(error, ErrorCode.Forbidden)` and answer **403**, never your own
+  404: the ambiguity is deliberate, because two different answers let a caller probe
+  which ids exist. Re-wrap it only to get a German message, and let anything else
+  from the read fall through to a logged 500 instead of being mislabelled.
 - Return errors via `createError` from `@directus/errors` and `next(err)`. Log the
   cause; never return a raw provider error to the browser (it can contain the prompt).
+- Wrap only the part that can genuinely fail. A single `try` around the whole
+  handler turns every bad request into the same 502: give the caller's mistakes
+  their own 4xx (see `EmptyNoteBodyError` in `notes-summary`) and keep the generic
+  5xx for what really is a fault.
 - Working example: `src/endpoints/notes-summary/`.
 
 ### Hook — react to a write, from any source
@@ -179,6 +190,13 @@ const validated = parseSummary(answer) // never trust the shape
 - Keep prompts in their own module next to the handler
   (`endpoints/notes-summary/prompt.ts`) so prompt building and answer validation are
   unit-testable without a network call. Do this for every AI feature.
+- **Store each part of an answer in its own field.** Packing structured output into
+  one text column (`summary\n\n#tag #tag`) forces the frontend to parse it back
+  apart, which is the same format written twice in two packages — they drift. Use a
+  `cast-csv` column for a list (`notes.ai_summary_tags`; Directus exposes it as
+  `[String]` in GraphQL) or `cast-json` for anything nested. The mapping from
+  validated answer to columns is one pure function (`summaryFields`), shared by the
+  endpoint and the Flow operation so the two cannot diverge.
 - Model: `ANTHROPIC_MODEL`, default `claude-sonnet-5`. Reach for `claude-opus-5` for
   genuinely hard reasoning, not by default.
 - `ANTHROPIC_API_KEY` lives **here**, never in the frontend.

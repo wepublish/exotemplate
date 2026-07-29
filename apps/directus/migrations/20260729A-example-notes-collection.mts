@@ -31,7 +31,14 @@ export async function up(knex: Knex): Promise<void> {
     table.text('body')
     // Written by the notes-summary endpoint and the notes-summarize-pending
     // operation, never by hand — see extensions/app/src/endpoints/notes-summary.
+    //
+    // The tags get their own column rather than being packed into the summary
+    // text: a derived value that the UI has to parse back apart is a
+    // serialisation format implemented twice, and the two copies drift. Directus
+    // exposes a text column with `special: cast-csv` as a real `[String]` in
+    // REST and GraphQL, so both sides see a list without any parsing.
     table.text('ai_summary')
+    table.text('ai_summary_tags')
     table.timestamp('ai_summary_generated_at', { useTz: true })
     table.timestamp('date_created', { useTz: true }).defaultTo(knex.fn.now())
     table.timestamp('date_updated', { useTz: true })
@@ -136,12 +143,26 @@ export async function up(knex: Knex): Promise<void> {
     },
     {
       collection: 'notes',
+      field: 'ai_summary_tags',
+      // `cast-csv` is what turns the text column into a string array everywhere:
+      // admin UI, REST, GraphQL and the ItemsService all see string[].
+      special: 'cast-csv',
+      interface: 'tags',
+      options: JSON.stringify({ allowCustom: false }),
+      display: 'labels',
+      note: 'Von der Claude-Zusammenfassung vergeben.',
+      readonly: true,
+      sort: 6,
+      width: 'full'
+    },
+    {
+      collection: 'notes',
       field: 'ai_summary_generated_at',
       interface: 'datetime',
       display: 'datetime',
       display_options: JSON.stringify({ relative: true }),
       readonly: true,
-      sort: 6,
+      sort: 7,
       width: 'half'
     },
     {
@@ -155,7 +176,7 @@ export async function up(knex: Knex): Promise<void> {
       display_options: JSON.stringify({ relative: true }),
       readonly: true,
       hidden: true,
-      sort: 7,
+      sort: 8,
       width: 'half'
     },
     {
@@ -167,7 +188,7 @@ export async function up(knex: Knex): Promise<void> {
       display_options: JSON.stringify({ relative: true }),
       readonly: true,
       hidden: true,
-      sort: 8,
+      sort: 9,
       width: 'half'
     }
   ])

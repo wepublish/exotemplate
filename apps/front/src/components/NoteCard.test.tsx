@@ -10,6 +10,7 @@ function note(overrides: Partial<NoteFields> = {}): NoteFields {
     body: 'Wir haben das Vorgehen besprochen.',
     status: 'published',
     ai_summary: null,
+    ai_summary_tags: null,
     ai_summary_generated_at: null,
     date_created: '2026-07-29T08:30:00Z',
     ...overrides
@@ -28,7 +29,10 @@ describe('NoteCard', () => {
   it('renders the summary with its tags', () => {
     render(
       <NoteCard
-        note={note({ ai_summary: 'Vorgehen besprochen.\n\n#sitzung #team' })}
+        note={note({
+          ai_summary: 'Vorgehen besprochen.',
+          ai_summary_tags: ['sitzung', 'team']
+        })}
         busy={false}
         onSummarize={jest.fn()}
         onDelete={jest.fn()}

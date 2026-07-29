@@ -10,7 +10,7 @@ import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import type { NoteFields } from '@/graphql/notes'
-import { formatDateTime, parseStoredSummary, statusLabel } from '@/lib/notes'
+import { formatDateTime, statusLabel } from '@/lib/notes'
 
 export interface NoteCardProps {
   note: NoteFields
@@ -22,7 +22,10 @@ export interface NoteCardProps {
 // A presentational component: props in, callbacks out, no data fetching. Keeping
 // components dumb is what makes them testable — see NoteCard.test.tsx.
 export function NoteCard({ note, busy, onSummarize, onDelete }: NoteCardProps) {
-  const summary = parseStoredSummary(note.ai_summary)
+  // The backend keeps the summary and its tags in separate fields, so there is
+  // nothing to parse here — render what the API returned.
+  const summary = note.ai_summary === null || note.ai_summary.trim() === '' ? null : note.ai_summary
+  const tags = note.ai_summary_tags ?? []
 
   return (
     <Paper sx={{ p: 2 }}>
@@ -69,10 +72,10 @@ export function NoteCard({ note, busy, onSummarize, onDelete }: NoteCardProps) {
           <Typography variant="overline" color="text.secondary">
             Zusammenfassung durch Claude
           </Typography>
-          <Typography variant="body2">{summary.text}</Typography>
-          {summary.tags.length > 0 && (
+          <Typography variant="body2">{summary}</Typography>
+          {tags.length > 0 && (
             <Stack direction="row" sx={{ mt: 1, flexWrap: 'wrap', gap: 0.5 }}>
-              {summary.tags.map((tag) => (
+              {tags.map((tag) => (
                 <Chip key={tag} label={tag} size="small" />
               ))}
             </Stack>

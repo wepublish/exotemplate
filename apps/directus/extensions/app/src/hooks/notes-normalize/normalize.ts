@@ -4,13 +4,14 @@ export interface NotePayload {
   title?: string | null
   body?: string | null
   ai_summary?: string | null
+  ai_summary_tags?: string[] | null
   ai_summary_generated_at?: string | null
   status?: string | null
 }
 
 /**
- * Trims the title and, when the source text changes, clears the generated
- * summary so a stale AI artefact can never outlive the text it describes.
+ * Trims the title and, when the source text changes, clears every generated
+ * summary field so a stale AI artefact can never outlive the text it describes.
  *
  * Anything an LLM derived from a record is a cache. Invalidate it in a hook
  * (one place, every write path) rather than in each endpoint that edits data.
@@ -28,6 +29,7 @@ export function normalizeNotePayload(payload: NotePayload): NotePayload {
 
   if (bodyChanged && !summaryWrittenExplicitly) {
     next.ai_summary = null
+    next.ai_summary_tags = null
     next.ai_summary_generated_at = null
   }
 
