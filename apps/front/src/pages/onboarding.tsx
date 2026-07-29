@@ -715,7 +715,7 @@ function OnboardingFelder({ medium, onAktualisiert }: OnboardingFelderProps) {
             className="text-xs h-8 font-mono"
           />
           <p className="text-[9px] text-slate-400 mt-0.5">
-            Ziel für Slack-Entwürfe (Nachfassen, Datensuppe-Erinnerung).
+            Ziel für Slack-Entwürfe (Nachfassen, Unterlagen-Erinnerung).
           </p>
         </div>
       </div>
