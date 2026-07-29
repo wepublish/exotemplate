@@ -9,9 +9,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import DnaPdf from '@/components/DnaPdf'
 import { usePortalMe } from '@/components/portal/PortalLayout'
 import { SchrittInfo } from '@/components/portal/SchrittInfo'
+import { DnaBearbeiten } from '@/components/portal/DnaBearbeiten'
 import { PORTAL_TEXTE } from '@/lib/portal-texte'
 import { DNA_JOB_STUFEN, DNA_JOB_STUFE_LABEL, stufeAusPhase } from '@/lib/portal-dna'
 import type { GenerateDnaResult } from '@/lib/generate-dna-jobs'
+import type { DnaTagEingabe } from '@/lib/portal-dna-bearbeiten'
 
 /**
  * /portal/dna: DNA erstellen lassen, prüfen, freigeben (Task 7).
@@ -31,6 +33,7 @@ import type { GenerateDnaResult } from '@/lib/generate-dna-jobs'
 
 type PortalDnaTag = { slug: string; label: string }
 type PortalDnaAnsicht = { soundFeeling: string; tags: PortalDnaTag[]; schaerfe: number; aktivSeit: string }
+type VokabularTag = { slug: string; label: string; bereich: string }
 type PortalDnaAntwort = {
   dna: PortalDnaAnsicht | null
   freigegeben: boolean
@@ -81,7 +84,17 @@ function FortschrittsStepper({ aktuellePhase }: { aktuellePhase: string }) {
 
 // ─── Hauptseite ───────────────────────────────────────────────────────────────
 
-export default function PortalDnaSeite() {
+/**
+ * Das Vokabular (rund 200 Themen-Slugs) kommt serverseitig herein: es steckt in
+ * einer JSON-Datei, die nur der Server liest (dna-mess-kern). Der Client
+ * bekommt daraus die schlanke Liste für die Themen-Auswahl.
+ */
+export async function getServerSideProps() {
+  const { alleVokabularTags } = await import('@/lib/dna-mess-kern')
+  return { props: { vokabular: alleVokabularTags() } }
+}
+
+export default function PortalDnaSeite({ vokabular }: { vokabular: VokabularTag[] }) {
   const me = usePortalMe()
 
   const [daten, setDaten] = useState<PortalDnaAntwort | null>(null)
@@ -95,6 +108,7 @@ export default function PortalDnaSeite() {
   const [freigebenOffen, setFreigebenOffen] = useState(false)
   const [freigebenLaedt, setFreigebenLaedt] = useState(false)
   const [rueckmeldung, setRueckmeldung] = useState('')
+  const [bearbeiten, setBearbeiten] = useState(false)
 
   const stopPoll = useCallback(() => {
     if (pollRef.current) {
@@ -267,7 +281,29 @@ export default function PortalDnaSeite() {
         </div>
       )}
 
-      {!logoFehlt && dna && (
+      {/* Bearbeiten-Ansicht (Wunsch Ramona 29.07.2026): ersetzt die Anzeige,
+          solange sie offen ist. Die Tags kommen aus pdfDaten (dort stehen die
+          rohen Slugs mit Gewicht), nicht aus der Anzeige-Form. */}
+      {!logoFehlt && dna && bearbeiten && (
+        <DnaBearbeiten
+          soundFeelingStart={dna.soundFeeling}
+          tagsStart={
+            (daten?.pdfDaten?.tags ?? []).map((t) => ({
+              tag_slug: t.tag_slug,
+              gewicht: (t.gewicht === 1 || t.gewicht === 2 || t.gewicht === 3 ? t.gewicht : 2) as DnaTagEingabe['gewicht'],
+              begruendung: t.begruendung ?? '',
+            })) as DnaTagEingabe[]
+          }
+          vokabular={vokabular}
+          onAbbrechen={() => setBearbeiten(false)}
+          onGespeichert={() => {
+            setBearbeiten(false)
+            void ladeDna()
+          }}
+        />
+      )}
+
+      {!logoFehlt && dna && !bearbeiten && (
         <div className="space-y-5">
           {/* Eine Neu-Erzeugung über einer bestehenden DNA (z.B. nach einer
               Rückmeldung) zeigt ihren Fortschritt hier, die alte DNA bleibt
@@ -360,6 +396,9 @@ export default function PortalDnaSeite() {
           )}
 
           <div className="flex flex-wrap items-center gap-3">
+            <Button variant="outline" size="sm" onClick={() => setBearbeiten(true)} disabled={jobZustand === 'laeuft'}>
+              {PORTAL_TEXTE['dna.bearbeiten_knopf']}
+            </Button>
             {daten?.pdfDaten && me && <DnaPdf mediumName={me.medium.name} website={null} slug={me.medium.slug} result={daten.pdfDaten} />}
             <Link href="/portal/onboarding">
               <Button variant="outline" size="sm">

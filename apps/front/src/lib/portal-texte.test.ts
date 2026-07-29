@@ -259,6 +259,10 @@ describe('PORTAL_TEXTE', () => {
     'treffer.rueckmeldung_knopf',
     'treffer.rueckmeldung_hinweis',
     'treffer.rueckmeldung_gesendet',
+    // DNA selbst anpassen (Ramona-Feedback 29.07.2026).
+    'dna.bearbeiten_knopf', 'dna.bearbeiten_titel', 'dna.bearbeiten_hinweis',
+    'dna.bearbeiten_text_label', 'dna.bearbeiten_tags_label', 'dna.bearbeiten_tags_leer',
+    'dna.bearbeiten_tag_suche', 'dna.bearbeiten_speichern', 'dna.bearbeiten_gespeichert',
     // Rückmeldung zur DNA-Neu-Erzeugung (29.07.2026).
     'dna.rueckmeldung_titel',
     'dna.rueckmeldung_hinweis',

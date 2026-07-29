@@ -1106,3 +1106,85 @@ export async function ladeWissensEintragFuerPortal(
     autoScraped: !!row.auto_scraped,
   }
 }
+
+// ─── Directus-REST-Helfer: DNA-Bearbeitung durchs Medium (29.07.2026) ──────────
+
+/**
+ * Lädt die Felder der aktiven DNA, die eine neue Version übernimmt
+ * (baueNeueDnaVersion in portal-dna-bearbeiten.ts). Getrennt von
+ * ladeAktiveDnaDetails, weil dort nur die Anzeige-Felder stehen — hier braucht
+ * es die Vorlage inklusive der json-Blöcke, die unverändert mitwandern.
+ */
+export async function ladeDnaVorlage(slug: string): Promise<(import('./portal-dna-bearbeiten').DnaVorlage & { id: number }) | null> {
+  const filter = encodeURIComponent(JSON.stringify({ medium_id: { _eq: slug }, is_active: { _eq: true } }))
+  const felder =
+    'id,medium_id,medium_name,version,version_id,schaerfe_prozent,sektionen,exclusion_tags,quellen,foerderpraxis,vocabulary_version_at_creation,antragsteller_typ'
+  const res = await fetch(`${base()}/items/medium_dna?filter=${filter}&limit=1&fields=${felder}`, {
+    headers: authHeaders(),
+    signal: AbortSignal.timeout(15_000),
+  })
+  if (!res.ok) throw new Error(`medium_dna (Vorlage): Directus antwortete ${res.status}`)
+  const json = (await res.json()) as { data?: Array<Record<string, unknown>> }
+  const row = json.data?.[0]
+  if (!row) return null
+  return {
+    id: Number(row.id),
+    medium_id: String(row.medium_id ?? slug),
+    medium_name: typeof row.medium_name === 'string' ? row.medium_name : null,
+    version: typeof row.version === 'number' ? row.version : 1,
+    version_id: String(row.version_id ?? ''),
+    schaerfe_prozent: typeof row.schaerfe_prozent === 'number' ? row.schaerfe_prozent : null,
+    sektionen: row.sektionen ?? null,
+    exclusion_tags: row.exclusion_tags ?? null,
+    quellen: row.quellen ?? null,
+    foerderpraxis: row.foerderpraxis ?? null,
+    vocabulary_version_at_creation:
+      typeof row.vocabulary_version_at_creation === 'number' ? row.vocabulary_version_at_creation : null,
+    antragsteller_typ: typeof row.antragsteller_typ === 'string' ? row.antragsteller_typ : null,
+  }
+}
+
+/**
+ * Schaltet die vom Medium bearbeitete DNA scharf: neue Zeile anlegen, DANACH
+ * die alte deaktivieren.
+ *
+ * Reihenfolge ist bewusst so: entstünde die neue Zeile nicht, bleibt die alte
+ * aktiv und das Medium hat weiter eine gültige DNA. Umgekehrt (erst
+ * deaktivieren) stünde das Medium bei einem Fehler ohne aktive DNA da — die
+ * Match-Engine würde es beim nächsten Lauf komplett überspringen.
+ *
+ * Ein kurzer Moment mit ZWEI aktiven Zeilen ist unkritisch: ladeAktiveDnaDetails
+ * nimmt die erste, und die Engine liest ohnehin je Medium eine.
+ */
+export async function schalteBearbeiteteDnaScharf(
+  neueVersion: Record<string, unknown>,
+  alteId: number,
+): Promise<{ id: number; versionId: string }> {
+  const anlage = await fetch(`${base()}/items/medium_dna`, {
+    method: 'POST',
+    headers: schreibHeaders(),
+    body: JSON.stringify(neueVersion),
+    signal: AbortSignal.timeout(20_000),
+  })
+  if (!anlage.ok) {
+    const text = await anlage.text().catch(() => '')
+    throw new Error(`Neue DNA-Version anlegen fehlgeschlagen (${anlage.status}): ${text.slice(0, 200)}`)
+  }
+  const json = (await anlage.json()) as { data?: { id?: number; version_id?: string } }
+  const neueId = json.data?.id
+  if (!neueId) throw new Error('Directus: keine id nach DNA-Anlage')
+
+  const patch = await fetch(`${base()}/items/medium_dna/${alteId}`, {
+    method: 'PATCH',
+    headers: schreibHeaders(),
+    body: JSON.stringify({ is_active: false }),
+    signal: AbortSignal.timeout(15_000),
+  })
+  if (!patch.ok) {
+    // Die neue Version steht und ist aktiv — das ist der wichtige Teil. Die
+    // alte Zeile bleibt aktiv liegen; das Aufräumen macht der nächste
+    // Engine-Lauf (cleanup_stale_match_results) bzw. ein Operator.
+    console.error(`Alte DNA-Version ${alteId} konnte nicht deaktiviert werden (${patch.status})`)
+  }
+  return { id: Number(neueId), versionId: String(json.data?.version_id ?? neueVersion.version_id ?? '') }
+}

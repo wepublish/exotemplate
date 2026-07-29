@@ -329,6 +329,17 @@ export const PORTAL_TEXTE: Record<string, string> = {
   // Rückmeldung zur DNA-Neu-Erzeugung (Wunsch 29.07.2026): wenn die DNA dem
   // Medium «zu fern» ist, beschreibt es hier, was fehlt, und stösst damit
   // direkt einen neuen Erzeugungslauf an (dna.tsx, /api/portal/dna-erzeugen).
+  // DNA selbst anpassen (Wunsch Ramona 29.07.2026).
+  'dna.bearbeiten_knopf': 'DNA selbst anpassen',
+  'dna.bearbeiten_titel': 'Eure DNA anpassen',
+  'dna.bearbeiten_hinweis':
+    'Ändert den Beschreibungstext und die Themen so, wie ihr euch selbst sehen würdet. Beim Speichern entsteht eine neue Fassung, und unser Matching rechnet damit neu — die alten Vorschläge werden also ersetzt.',
+  'dna.bearbeiten_text_label': 'Wie wir euch beschreiben',
+  'dna.bearbeiten_tags_label': 'Eure Themen (mit Gewicht)',
+  'dna.bearbeiten_tags_leer': 'Mindestens ein Thema muss bleiben, sonst findet das Matching nichts.',
+  'dna.bearbeiten_tag_suche': 'Thema suchen und hinzufügen …',
+  'dna.bearbeiten_speichern': 'Angepasste DNA speichern',
+  'dna.bearbeiten_gespeichert': 'Eure angepasste DNA ist gespeichert und gilt ab jetzt.',
   'dna.rueckmeldung_titel': 'Trifft es euch noch nicht?',
   'dna.rueckmeldung_hinweis':
     'Sagt uns in ein, zwei Sätzen, was nicht stimmt: zu breit, falscher Schwerpunkt, fehlende Themen. Wir erstellen eure DNA damit neu, eure Rückmeldung fliesst direkt ein.',

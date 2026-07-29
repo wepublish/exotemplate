@@ -60,6 +60,27 @@ export function labelFuerSlug(slug: string): string {
   return LABEL_BY_SLUG[slug] ?? slug
 }
 
+/**
+ * true, wenn der Slug im aktuellen Vokabular steht. Die Portal-DNA-Bearbeitung
+ * (Wunsch Ramona 29.07.2026) prüft damit die vom Medium gewählten Themen: ein
+ * erfundener Slug würde sich mit keiner Stiftung überschneiden und die DNA
+ * still entwerten.
+ */
+export function istBekannterSlug(slug: string): boolean {
+  return VOCAB_SET.has(slug)
+}
+
+/** Alle Vokabular-Slugs mit Label und Bereich, für die Themen-Auswahl im Portal. */
+export function alleVokabularTags(): Array<{ slug: string; label: string; bereich: string }> {
+  const liste: Array<{ slug: string; label: string; bereich: string }> = []
+  for (const [bereich, slugs] of Object.entries(VOCAB_BY_AREA)) {
+    for (const slug of slugs) {
+      liste.push({ slug, label: labelFuerSlug(slug), bereich })
+    }
+  }
+  return liste.sort((a, b) => a.label.localeCompare(b.label, 'de-CH'))
+}
+
 // ─── Typen ────────────────────────────────────────────────────────────────────
 
 export interface DnaTag {

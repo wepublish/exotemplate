@@ -37,8 +37,12 @@ import {
   ladeArbeitsDnaProfil,
   setzeDnaFreigabe,
   legeAgentVorschlagAn,
+  ladeDnaVorlage,
+  schalteBearbeiteteDnaScharf,
 } from '@/lib/portal-guard'
 import { baueDnaAnsicht, bauePdfDaten } from '@/lib/portal-dna'
+import { parseDnaBearbeitung, baueNeueDnaVersion } from '@/lib/portal-dna-bearbeiten'
+import { istBekannterSlug } from '@/lib/dna-mess-kern'
 import { schreibeMediumEvent } from '@/lib/medium-events'
 
 async function handleGet(req: NextApiRequest, res: NextApiResponse, mediumSlug: string) {
@@ -64,10 +68,50 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse, mediumSlug: 
   }
 }
 
+/**
+ * aktion 'anpassen': das Medium ändert Text und Themen seiner DNA selbst
+ * (Wunsch Ramona 29.07.2026). Es entsteht eine NEUE, sofort aktive Version —
+ * nie ein Patch auf die laufende Zeile, sonst behielte der LLM-Score-Cache der
+ * Match-Engine die Werte der alten Selbstbeschreibung (siehe
+ * portal-dna-bearbeiten.ts, Modul-Kommentar).
+ */
+async function handleAnpassen(req: NextApiRequest, res: NextApiResponse, mediumSlug: string, email: string) {
+  const geprueft = parseDnaBearbeitung(req.body, istBekannterSlug)
+  if (!geprueft.ok) {
+    return res.status(422).json({ error: geprueft.fehler })
+  }
+
+  try {
+    const vorlage = await ladeDnaVorlage(mediumSlug)
+    if (!vorlage) {
+      return res.status(409).json({ error: 'Keine aktive DNA vorhanden, es gibt nichts anzupassen.' })
+    }
+
+    const neu = baueNeueDnaVersion(vorlage, geprueft.eingabe, new Date())
+    const { versionId } = await schalteBearbeiteteDnaScharf(neu, vorlage.id)
+
+    void schreibeMediumEvent({
+      medium_id: mediumSlug,
+      typ: 'dna_aktiv',
+      titel: `Fundraising-DNA vom Medium angepasst (Version ${neu.version as number})`,
+      detail: `${geprueft.eingabe.tags.length} Themen`,
+      actor: email,
+    })
+
+    return res.status(200).json({ status: 'ok', version: neu.version, versionId })
+  } catch (err: unknown) {
+    console.error('portal/dna (anpassen): Directus nicht erreichbar', err)
+    return res.status(502).json({ error: 'Daten momentan nicht verfügbar' })
+  }
+}
+
 async function handlePost(req: NextApiRequest, res: NextApiResponse, mediumSlug: string, email: string) {
   const aktion = (req.body as { aktion?: unknown } | null)?.aktion
+  if (aktion === 'anpassen') {
+    return handleAnpassen(req, res, mediumSlug, email)
+  }
   if (aktion !== 'freigeben') {
-    return res.status(422).json({ error: 'aktion muss "freigeben" sein.' })
+    return res.status(422).json({ error: 'aktion muss "freigeben" oder "anpassen" sein.' })
   }
 
   try {
