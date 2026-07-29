@@ -117,24 +117,38 @@ export interface DnaVorlage {
   antragsteller_typ: string | null
 }
 
+/** Wer die Fassung geschrieben hat — steht in version_id und veredelt_by. */
+export type DnaHerkunft = 'portal' | 'cockpit'
+
+const HERKUNFT_VEREDELT_BY: Record<DnaHerkunft, string> = {
+  portal: 'portal-medium',
+  cockpit: 'cockpit-operator',
+}
+
 /**
  * Baut den Datensatz der neuen, sofort aktiven DNA-Version.
  *
  * `version_id`-Muster wie die App-Messung (`v<N>-app-<ISO>`), hier mit der
- * Herkunft `portal`: an der id ist damit ablesbar, dass diese Fassung vom
- * Medium selbst kommt. `embedding` wird bewusst NICHT übernommen — es gehört
+ * Herkunft `portal` (Medium selbst) oder `cockpit` (Jolanda/Ramona ergänzen für
+ * ein Medium — Wunsch Jolanda 29.07.2026): an der id ist ablesbar, woher die
+ * Fassung kommt. `embedding` wird bewusst NICHT übernommen — es gehört
  * zum alten Text; der Embedding-Pass auf dem Spark (Cron alle zwei Minuten,
  * nur `--only-missing`) berechnet es für die neue Version selbst nach, bis
  * dahin fehlt der Embedding-Anteil im Score (Math- und LLM-Teil tragen).
  */
-export function baueNeueDnaVersion(vorlage: DnaVorlage, eingabe: BearbeitenEingabe, jetzt: Date): Record<string, unknown> {
+export function baueNeueDnaVersion(
+  vorlage: DnaVorlage,
+  eingabe: BearbeitenEingabe,
+  jetzt: Date,
+  herkunft: DnaHerkunft = 'portal',
+): Record<string, unknown> {
   const neueVersion = (vorlage.version ?? 1) + 1
   const stempel = jetzt.toISOString().replace(/[:.]/g, '-')
   return {
     medium_id: vorlage.medium_id,
     medium_name: vorlage.medium_name,
     version: neueVersion,
-    version_id: `v${neueVersion}-portal-${stempel}`,
+    version_id: `v${neueVersion}-${herkunft}-${stempel}`,
     vorgaenger_version_id: vorlage.version_id,
     is_active: true,
     sound_feeling: eingabe.soundFeeling,
@@ -146,7 +160,7 @@ export function baueNeueDnaVersion(vorlage: DnaVorlage, eingabe: BearbeitenEinga
     foerderpraxis: vorlage.foerderpraxis ?? null,
     vocabulary_version_at_creation: vorlage.vocabulary_version_at_creation,
     antragsteller_typ: vorlage.antragsteller_typ,
-    veredelt_by: 'portal-medium',
+    veredelt_by: HERKUNFT_VEREDELT_BY[herkunft],
     veredelt_at: jetzt.toISOString(),
   }
 }

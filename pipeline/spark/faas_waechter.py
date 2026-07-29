@@ -238,11 +238,16 @@ def sammle_outbox_entwuerfe(aktive_media: list[dict], applications: list[dict],
             "typ": "slack", "anlass": "datensuppe_erinnerung", "status": "entwurf",
             "medium_id": slug, "application_id": None, "stiftung_id": None,
             "empfaenger": kanal,
-            "inhalt": ("Erinnerung aus dem FaaS: in eurem Datensuppe-Ordner "
-                       "(Drive, 01_datensuppe) fehlt noch Material. Je mehr Artikel, "
-                       "Newsletter und frühere Gesuche dort liegen, desto schärfer "
-                       "wird eure DNA und desto besser die Stiftungs-Treffer. "
-                       "Der Gerät, FaaS"),
+            # Text am 29.07.2026 umgestellt: der Drive-Ordner 01_datensuppe ist
+            # keine Quelle mehr, die Medien liefern ihre Unterlagen im Portal
+            # ein. Der anlass-Schlüssel bleibt "datensuppe_erinnerung", damit
+            # bestehende dedup_keys und Outbox-Zeilen weiter greifen.
+            "inhalt": ("Erinnerung aus dem FaaS: eure DNA ist noch nicht aktiv. "
+                       "Im Portal unter «Unterlagen» könnt ihr Dokumente und Links "
+                       "hochladen (Leitbild, Jahresbericht, frühere Gesuche, "
+                       "Beispielartikel) und die drei Fragen beantworten. Je mehr "
+                       "dort liegt, desto schärfer wird eure DNA und desto besser "
+                       "die Stiftungs-Treffer. Der Gerät, FaaS"),
             "erstellt_von": "waechter", "dedup_key": key, "mandant": MANDANT,
         })
     return entwuerfe

@@ -137,4 +137,29 @@ describe('baueNeueDnaVersion', () => {
     const neu = baueNeueDnaVersion(vorlage({ version: undefined as unknown as number }), eingabe, jetzt)
     expect(neu.version).toBe(2)
   })
+
+  // Cockpit-Weg (Jolanda/Ramona ergänzen für ein Medium, 29.07.2026): dieselbe
+  // Wirkung, aber an version_id und veredelt_by muss ablesbar bleiben, wer die
+  // Fassung geschrieben hat — sonst ist später nicht mehr unterscheidbar, ob
+  // ein Medium sich selbst beschrieben hat oder wir für es.
+  it('markiert die Herkunft cockpit in version_id und veredelt_by', () => {
+    const neu = baueNeueDnaVersion(vorlage(), eingabe, jetzt, 'cockpit')
+    expect(neu.veredelt_by).toBe('cockpit-operator')
+    expect(String(neu.version_id)).toContain('-cockpit-')
+    expect(String(neu.version_id)).not.toContain('-portal-')
+  })
+
+  it('bleibt ohne Angabe beim Portal-Weg (bestehende Aufrufe unverändert)', () => {
+    const neu = baueNeueDnaVersion(vorlage(), eingabe, jetzt)
+    expect(String(neu.version_id)).toContain('-portal-')
+  })
+
+  it('ändert am Inhalt nichts, egal woher die Fassung kommt', () => {
+    const ausPortal = baueNeueDnaVersion(vorlage(), eingabe, jetzt, 'portal')
+    const ausCockpit = baueNeueDnaVersion(vorlage(), eingabe, jetzt, 'cockpit')
+    expect(ausCockpit.sound_feeling).toBe(ausPortal.sound_feeling)
+    expect(ausCockpit.tags).toEqual(ausPortal.tags)
+    expect(ausCockpit.schaerfe_prozent).toBe(ausPortal.schaerfe_prozent)
+    expect(ausCockpit.is_active).toBe(true)
+  })
 })

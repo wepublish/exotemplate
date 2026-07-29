@@ -16,9 +16,6 @@ export interface QuellenStatistik {
   wepublish_api_vorhanden: boolean
   wepublish_artikel_neu: number
   wepublish_newsletter_neu: number
-  datensuppe_ordner_gefunden: boolean
-  datensuppe_ordner_name: string | null
-  datensuppe_dateien_neu: number
   web_crawl_ok: boolean
   korpus_eintraege_gesamt: number
 }

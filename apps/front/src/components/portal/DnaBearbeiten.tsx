@@ -28,12 +28,26 @@ export function DnaBearbeiten({
   soundFeelingStart,
   tagsStart,
   vokabular,
+  speicherPfad = '/api/portal/dna',
+  zusatzFelder,
+  erfolgsMeldung,
   onAbbrechen,
   onGespeichert,
 }: {
   soundFeelingStart: string
   tagsStart: DnaTagEingabe[]
   vokabular: Array<{ slug: string; label: string; bereich: string }>
+  /**
+   * Wohin gespeichert wird. Standard ist die Portal-Route (Medium bearbeitet
+   * die eigene DNA, Slug kommt aus der Session). Das Cockpit setzt hier
+   * /api/medium-dna-anpassen und schickt den Slug in `zusatzFelder` mit —
+   * dieselbe Oberfläche, anderer Weg zum Medium.
+   */
+  speicherPfad?: string
+  /** Felder, die zusätzlich in den POST-Body gehören (z.B. { medium: slug }). */
+  zusatzFelder?: Record<string, string>
+  /** Überschreibt die Erfolgsmeldung (das Cockpit meldet aus Operator-Sicht). */
+  erfolgsMeldung?: string
   onAbbrechen: () => void
   onGespeichert: () => void
 }) {
@@ -69,17 +83,17 @@ export function DnaBearbeiten({
   async function speichere() {
     setSpeichert(true)
     try {
-      const res = await fetch('/api/portal/dna', {
+      const res = await fetch(speicherPfad, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ aktion: 'anpassen', sound_feeling: soundFeeling, tags }),
+        body: JSON.stringify({ aktion: 'anpassen', sound_feeling: soundFeeling, tags, ...zusatzFelder }),
       })
       const json = (await res.json().catch(() => ({}))) as { error?: string; version?: number }
       if (!res.ok) {
         toast.error(json.error ?? `Fehlgeschlagen (${res.status})`)
         return
       }
-      toast.success(PORTAL_TEXTE['dna.bearbeiten_gespeichert'])
+      toast.success(erfolgsMeldung ?? PORTAL_TEXTE['dna.bearbeiten_gespeichert'])
       onGespeichert()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : String(err))

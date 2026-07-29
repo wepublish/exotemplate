@@ -239,11 +239,6 @@ async function generierePdf(props: DnaPdfProps): Promise<void> {
         ? `We.Publish: ${q.wepublish_artikel_neu} neue Artikel, ${q.wepublish_newsletter_neu} neue Newsletter`
         : 'We.Publish: kein API-Schlüssel hinterlegt (übersprungen)'
     )
-    zeilen.push(
-      q.datensuppe_ordner_gefunden
-        ? `Datensuppe-Ordner «${q.datensuppe_ordner_name}»: ${q.datensuppe_dateien_neu} neue Dateien`
-        : 'Datensuppe-Ordner: nicht gefunden'
-    )
     zeilen.push(q.web_crawl_ok ? 'Web-Crawl der Website: erfolgreich' : 'Web-Crawl: nicht durchgeführt')
     zeilen.push(`Korpus gesamt: ${q.korpus_eintraege_gesamt} Wissens-Einträge`)
     bulletListe(zeilen)

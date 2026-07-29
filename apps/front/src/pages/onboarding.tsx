@@ -41,6 +41,7 @@ import {
 } from '@/lib/knowledge-score'
 import ArbeitsDnaPdf from '@/components/ArbeitsDnaPdf'
 import DnaGenerieren from '@/components/DnaGenerieren'
+import DnaErgaenzen from '@/components/DnaErgaenzen'
 import { MediumLogo } from '@/components/MediumLogo'
 import { MailEntwurfButton } from '@/components/MailEntwurfButton'
 import { OnboardingSlackButton } from '@/components/OnboardingSlackButton'
@@ -1850,6 +1851,9 @@ export default function OnboardingPage() {
               onFertig={() => { void refetchWissen(); handleAktualisiert() }}
             />
 
+            {/* Aktive DNA von Hand ergänzen (Jolanda/Ramona für ein Medium). */}
+            <DnaErgaenzen key={ausgewaehltesMediumSlug} mediumSlug={ausgewaehltesMediumSlug} />
+
             {/* Manuell ergänzen (optional) — einzelne Quellen + Schritte von Hand. */}
             <details className="group rounded-xl border border-slate-200 bg-slate-50/50">
               <summary className="cursor-pointer list-none px-4 py-2.5 text-xs font-semibold text-slate-600 flex items-center justify-between">
@@ -1858,7 +1862,7 @@ export default function OnboardingPage() {
               </summary>
               <div className="px-3 pb-3 space-y-4">
                 <p className="text-[11px] text-slate-400 px-1">
-                  Normalerweise nicht nötig — der Knopf oben sammelt We.Publish, Datensuppe und Web-Crawl
+                  Normalerweise nicht nötig — der Knopf oben sammelt We.Publish und den Web-Crawl
                   automatisch. Hier kannst du einzelne Quellen von Hand hinzufügen oder die Schritte separat ausführen.
                 </p>
 

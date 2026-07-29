@@ -6,7 +6,7 @@
  * Drei Quellen, je idempotent (Dedup über source_url ODER title):
  *   1. ingestWepublish  — Artikel + Newsletter über die We.Publish-API.
  *      WARNT (statt still zu überspringen), wenn kein wepublish_api_url hinterlegt.
- *   2. ingestDatensuppe — Dateien aus dem gemounteten Drive-Ordner 01_datensuppe.
+ *   (Drive/datensuppe war bis 29.07.2026 Quelle 2 — entfernt, siehe generate-dna.ts.)
  *   3. ingestCrawl      — frischer Web-Crawl der Medien-Website.
  *
  * Bewusst eigenständig (spiegelt die Logik der Einzel-Endpoints upload/scrape/
@@ -14,7 +14,6 @@
  */
 
 import { flattenRichText } from '@/pages/api/medium-knowledge/wepublish-ingest'
-import { leseDatensuppe } from './datensuppe'
 
 // ─── Directus-Helfer ──────────────────────────────────────────────────────────
 
@@ -106,6 +105,20 @@ const ARTIKEL_QUERY = `
     }
   }
 `
+/**
+ * true, wenn die Fehlermeldung sagt: DIESE We.Publish-Instanz kennt das Feld
+ * `mails` nicht — sie führt also keine Newsletter (Befund 29.07.2026 bei zwölf,
+ * von Michi bestätigt: Newsletter laufen dort über Mailchimp). Das ist eine
+ * Eigenschaft der Instanz, kein Fehler, und darf im Cockpit nicht als Warnung
+ * erscheinen; sonst übertönt es die Hinweise, die man beheben kann.
+ */
+export function istNewsletterUnbekannt(fehlertext: string): boolean {
+  // Zwischen «field» und «mails» liegen je nach Instanz und Verschachtelung
+  // unterschiedliche Zeichen: bei zwölf steht die Meldung escaped im JSON-Body
+  // (\\"mails\\"), roh wären es einfache oder doppelte Anführungszeichen.
+  return /cannot query field[^a-z0-9]{0,4}mails/i.test(fehlertext ?? '')
+}
+
 const NEWSLETTER_QUERY = `
   query FaasNewsletter {
     mails(take: 50, sort: CreatedAt, order: Descending) {
@@ -245,74 +258,20 @@ export async function ingestWepublish(
       }
     }
   } catch (e: unknown) {
-    // Newsletter-Fehler an einen evtl. bestehenden Artikel-Fehler anhängen.
-    const msg = `Newsletter: ${e instanceof Error ? e.message : String(e)}`
-    fehler = fehler ? `${fehler}; ${msg}` : msg
+    const rohtext = e instanceof Error ? e.message : String(e)
+    // «Cannot query field "mails"» heisst: DIESE We.Publish-Instanz führt keine
+    // Newsletter (Befund 29.07.2026 bei zwölf; Michi bestätigt, dass Newsletter
+    // über Mailchimp laufen). Das ist kein Fehler, sondern eine Eigenschaft der
+    // Instanz — als Warnung im Cockpit war es nur Rauschen, das die echten
+    // Hinweise übertönte. Artikel sind davon unberührt und kommen weiter.
+    const kennKeineNewsletter = istNewsletterUnbekannt(rohtext)
+    if (!kennKeineNewsletter) {
+      const msg = `Newsletter: ${rohtext}`
+      fehler = fehler ? `${fehler}; ${msg}` : msg
+    }
   }
 
   return { hatApi: true, artikelNeu, newsletterNeu, uebersprungen, fehler }
-}
-
-// ─── 2. datensuppe ────────────────────────────────────────────────────────────
-
-export interface DatensuppeIngestErgebnis {
-  ordnerGefunden: boolean
-  ordnerName: string | null
-  dateienNeu: number
-  uebersprungen: number
-  gekappt: boolean
-}
-
-/**
- * Liest den gemounteten datensuppe-Ordner und schreibt neue Dateien in
- * medium_knowledge. Dedup-Schlüssel ist die pseudo-source_url «datensuppe:<relPfad>».
- */
-export async function ingestDatensuppe(
-  base: string,
-  token: string,
-  medium_id: string,
-  slug: string,
-  dedup: DedupSets
-): Promise<DatensuppeIngestErgebnis> {
-  const gelesen = await leseDatensuppe(slug)
-  if (!gelesen.ordnerGefunden) {
-    return { ordnerGefunden: false, ordnerName: null, dateienNeu: 0, uebersprungen: gelesen.uebersprungen, gekappt: false }
-  }
-
-  let dateienNeu = 0
-  let uebersprungen = gelesen.uebersprungen
-
-  for (const e of gelesen.eintraege) {
-    const sourceUrl = `datensuppe:${gelesen.ordnerName}/${e.relPfad}`
-    if (dedup.urls.has(sourceUrl) || dedup.titel.has(e.title)) {
-      uebersprungen++
-      continue
-    }
-    const ok = await createKnowledge(base, token, {
-      medium_id,
-      category: e.category,
-      title: e.title,
-      content: e.content.slice(0, 20_000),
-      source_url: sourceUrl,
-      file_id: null,
-      auto_scraped: true,
-    })
-    if (ok) {
-      dedup.urls.add(sourceUrl)
-      dedup.titel.add(e.title)
-      dateienNeu++
-    } else {
-      uebersprungen++
-    }
-  }
-
-  return {
-    ordnerGefunden: true,
-    ordnerName: gelesen.ordnerName,
-    dateienNeu,
-    uebersprungen,
-    gekappt: gelesen.gekappt,
-  }
 }
 
 // ─── 3. Web-Crawl ───────────────────────────────────────────────────────────────

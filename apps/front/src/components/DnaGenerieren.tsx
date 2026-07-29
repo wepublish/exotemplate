@@ -2,7 +2,7 @@
  * DnaGenerieren.tsx — Der EIN-KNOPF für die Medien-DNA.
  *
  * Ein Klick → der Server sammelt automatisch alle Quellen (We.Publish-Artikel +
- * Newsletter, datensuppe-Ordner, Web-Crawl), verdichtet sie, misst die v3-DNA und
+ * Newsletter, Web-Crawl, eingelieferte Unterlagen), verdichtet sie, misst die v3-DNA und
  * schaltet sie sofort aktiv. Ersetzt die getrennten Schritte Arbeits-DNA / finale
  * v3-DNA. Wiederholbar bei neuen Daten.
  *
@@ -39,7 +39,7 @@ function phaseLabel(phase: string): string {
   if (phase.startsWith('verdichten')) return `Quellen verdichten (${phase.replace('verdichten ', '')})`
   switch (phase) {
     case 'sammeln':
-      return 'Quellen einsammeln (We.Publish, Datensuppe, Web-Crawl)'
+      return 'Quellen einsammeln (We.Publish, Web-Crawl)'
     case 'profil':
       return 'Profil erstellen'
     case 'messen':
@@ -161,7 +161,7 @@ export default function DnaGenerieren({ slug, name, website, onFertig }: DnaGene
         <div className="min-w-0">
           <div className="text-sm font-semibold text-slate-800">DNA generieren</div>
           <div className="text-xs text-slate-500">
-            Sammelt automatisch We.Publish-Artikel, Datensuppe und Web-Crawl → eine aktive DNA.
+            Sammelt automatisch We.Publish-Artikel und den Web-Crawl, dazu die eingelieferten Unterlagen → eine aktive DNA.
           </div>
         </div>
         <Button
@@ -214,21 +214,13 @@ export default function DnaGenerieren({ slug, name, website, onFertig }: DnaGene
               Portal-DNA-Seite denselben Typ auch für rekonstruierte, ältere
               Ergebnisse ohne Quellen-Schnappschuss nutzt, siehe portal-dna.ts). */}
           {result.quellen && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+            <div className="grid grid-cols-3 gap-2 text-[11px]">
               <div className="rounded-lg bg-slate-50 px-2.5 py-1.5">
                 <div className="text-slate-400">We.Publish</div>
                 <div className="font-medium text-slate-700">
                   {result.quellen.wepublish_api_vorhanden
                     ? `${result.quellen.wepublish_artikel_neu} Artikel · ${result.quellen.wepublish_newsletter_neu} NL`
                     : 'kein Schlüssel'}
-                </div>
-              </div>
-              <div className="rounded-lg bg-slate-50 px-2.5 py-1.5">
-                <div className="text-slate-400">Datensuppe</div>
-                <div className="font-medium text-slate-700">
-                  {result.quellen.datensuppe_ordner_gefunden
-                    ? `${result.quellen.datensuppe_dateien_neu} neue Dateien`
-                    : 'nicht gefunden'}
                 </div>
               </div>
               <div className="rounded-lg bg-slate-50 px-2.5 py-1.5">

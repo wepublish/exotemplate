@@ -25,7 +25,7 @@ export interface OutboxEintrag {
 
 export const ANLASS_LABEL: Record<string, string> = {
   matching_liste: 'Matching-Liste',
-  datensuppe_erinnerung: 'Datensuppe-Erinnerung',
+  datensuppe_erinnerung: 'Unterlagen-Erinnerung',
   willkommensmail: 'Willkommensmail',
   nachfassen: 'Nachfassen',
   gesuch: 'Gesuch',

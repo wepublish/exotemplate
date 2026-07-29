@@ -2,7 +2,9 @@
  * /api/medium-knowledge/generate-dna — EIN-KNOPF-DNA-Flow.
  *
  * Verkettet die gesamte DNA-Pipeline in einem asynchronen Hintergrundlauf:
- *   1. SAMMELN    — We.Publish (Artikel+Newsletter), datensuppe-Ordner, Web-Crawl
+ *   1. SAMMELN    — We.Publish (Artikel, Newsletter falls die Instanz sie führt)
+ *                   und Web-Crawl. Drive/datensuppe ist seit 29.07.2026 KEINE
+ *                   Quelle mehr (Entscheid Jolanda), die Medien liefern selbst.
  *                   → alles in medium_knowledge. Warnt bei fehlendem We.Publish-Schlüssel.
  *   2. VERDICHTEN — Map-Reduce über den Korpus → faas_medien.arbeits_dna (PDF-Profil).
  *   3. MESSEN     — v3-Mess-Kern → neue medium_dna-Version.
@@ -22,7 +24,6 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import {
   ladeDedup,
   ingestWepublish,
-  ingestDatensuppe,
   ingestCrawl,
 } from '@/lib/medium-quellen'
 import {
@@ -126,12 +127,12 @@ async function runGenerate(jobId: string, medium_id: string): Promise<void> {
     warnungen.push('We.Publish-API erreichbar, aber keine Artikel oder Newsletter abrufbar — stimmt die hinterlegte API-URL?')
   }
 
-  const ds = await ingestDatensuppe(base, token, medium_id, medium_id, dedup)
-  if (!ds.ordnerGefunden) {
-    warnungen.push(`Kein datensuppe-Ordner für «${medium_id}» gefunden (erwartet: …/${medium_id}/01_datensuppe). Drive-Mount aktiv?`)
-  } else if (ds.gekappt) {
-    warnungen.push('datensuppe-Ordner enthält sehr viele Dateien — es wurden nur die ersten 200 berücksichtigt.')
-  }
+  // Drive/datensuppe ist KEINE Quelle mehr (Entscheid Jolanda 29.07.2026: «die
+  // drive-verbindung muss weg»). Der Mount existiert nicht mehr, der Lauf warnte
+  // darum bei jedem Medium «Kein datensuppe-Ordner gefunden. Drive-Mount aktiv?»
+  // — eine Warnung, die niemand beheben konnte und die die echten Hinweise
+  // (fehlende We.Publish-Artikel) untergehen liess. Die Medien liefern ihre
+  // Unterlagen selbst über das Portal, das ist der Weg.
 
   const cr = await ingestCrawl(base, token, medium_id, medium.website, dedup)
   if (websiteUrl && !cr.gecrawlt && cr.fehler) {
@@ -143,7 +144,7 @@ async function runGenerate(jobId: string, medium_id: string): Promise<void> {
   if (knowR.errors?.length) throw new Error('Directus (medium_knowledge): ' + knowR.errors[0]?.message)
   const knowledge = (knowR.data?.medium_knowledge ?? []) as KnowledgeItem[]
   if (knowledge.length === 0) {
-    warnungen.push('Korpus ist leer — keine Artikel, datensuppe-Dateien oder Crawl-Inhalte gefunden.')
+    warnungen.push('Korpus ist leer — keine Artikel, Unterlagen oder Crawl-Inhalte gefunden.')
   }
 
   // ── 2. VERDICHTEN (Map-Reduce → Arbeits-DNA/PDF-Profil) ─────────────────────
@@ -195,9 +196,6 @@ async function runGenerate(jobId: string, medium_id: string): Promise<void> {
     wepublish_api_vorhanden: wp.hatApi,
     wepublish_artikel_neu: wp.artikelNeu,
     wepublish_newsletter_neu: wp.newsletterNeu,
-    datensuppe_ordner_gefunden: ds.ordnerGefunden,
-    datensuppe_ordner_name: ds.ordnerName,
-    datensuppe_dateien_neu: ds.dateienNeu,
     web_crawl_ok: cr.gecrawlt,
     korpus_eintraege_gesamt: knowledge.length,
   }
