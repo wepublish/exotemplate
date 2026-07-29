@@ -220,10 +220,17 @@ export default function PortalTrefferSeite() {
         <h1 className="text-xl font-bold text-slate-900">3. Treffer</h1>
       </div>
 
-      <SchrittInfo schritt="3" titel={PORTAL_TEXTE['schritt3.titel']}>
-        <p>{PORTAL_TEXTE['schritt3.text']}</p>
-        <p>{PORTAL_TEXTE['schritt3.wozu']}</p>
-      </SchrittInfo>
+      {/* Im Wartezustand NICHT anzeigen (Befund beim Durchklicken 29.07.2026):
+          die Box sagt «Hier stehen die Stiftungen, die zu eurem Profil passen»,
+          direkt darunter stand «Wir stellen eure Trefferliste zusammen» — ein
+          Medium liest zwei Sätze, die sich widersprechen. Solange gewartet
+          wird, erklärt die Wartebox alles Nötige. */}
+      {status !== 'gesperrt' && (
+        <SchrittInfo schritt="3" titel={PORTAL_TEXTE['schritt3.titel']}>
+          <p>{PORTAL_TEXTE['schritt3.text']}</p>
+          <p>{PORTAL_TEXTE['schritt3.wozu']}</p>
+        </SchrittInfo>
+      )}
 
       {status === 'laden' && <p className="text-sm text-slate-400">Wird geladen …</p>}
       {status === 'fehler' && <p className="text-sm text-slate-500">{PORTAL_TEXTE['fehler.daten_nicht_verfuegbar']}</p>}
