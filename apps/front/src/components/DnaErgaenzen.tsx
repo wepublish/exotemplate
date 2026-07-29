@@ -25,7 +25,7 @@ interface AktiveDna {
   schaerfe: number | null
 }
 
-export default function DnaErgaenzen({ mediumSlug }: { mediumSlug: string }) {
+export default function DnaErgaenzen({ mediumSlug, mediumName }: { mediumSlug: string; mediumName?: string }) {
   const [dna, setDna] = useState<AktiveDna | null>(null)
   const [vokabular, setVokabular] = useState<Array<{ slug: string; label: string; bereich: string }>>([])
   const [laedt, setLaedt] = useState(false)
@@ -108,6 +108,14 @@ export default function DnaErgaenzen({ mediumSlug }: { mediumSlug: string }) {
         speicherPfad="/api/medium-dna-anpassen"
         zusatzFelder={{ medium: mediumSlug }}
         erfolgsMeldung="DNA ergänzt — die neue Version ist aktiv."
+        texte={{
+          titel: `DNA von ${mediumName || mediumSlug} ergänzen`,
+          hinweis:
+            'Beschreibungstext und Themen für das Medium anpassen. Beim Speichern entsteht eine neue Fassung; das Matching rechnet beim nächsten Lauf damit neu, die bisherigen Treffer werden also ersetzt.',
+          textLabel: 'Beschreibung des Mediums',
+          tagsLabel: 'Themen des Mediums (mit Gewicht)',
+          speichern: 'Ergänzte DNA speichern',
+        }}
         onAbbrechen={() => setOffen(false)}
         onGespeichert={() => {
           setOffen(false)

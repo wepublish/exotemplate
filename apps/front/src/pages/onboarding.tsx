@@ -1852,7 +1852,11 @@ export default function OnboardingPage() {
             />
 
             {/* Aktive DNA von Hand ergänzen (Jolanda/Ramona für ein Medium). */}
-            <DnaErgaenzen key={ausgewaehltesMediumSlug} mediumSlug={ausgewaehltesMediumSlug} />
+            <DnaErgaenzen
+              key={ausgewaehltesMediumSlug}
+              mediumSlug={ausgewaehltesMediumSlug}
+              mediumName={ausgewaehltesMedium.name}
+            />
 
             {/* Manuell ergänzen (optional) — einzelne Quellen + Schritte von Hand. */}
             <details className="group rounded-xl border border-slate-200 bg-slate-50/50">

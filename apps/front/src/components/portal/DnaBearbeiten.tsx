@@ -31,6 +31,7 @@ export function DnaBearbeiten({
   speicherPfad = '/api/portal/dna',
   zusatzFelder,
   erfolgsMeldung,
+  texte,
   onAbbrechen,
   onGespeichert,
 }: {
@@ -48,6 +49,13 @@ export function DnaBearbeiten({
   zusatzFelder?: Record<string, string>
   /** Überschreibt die Erfolgsmeldung (das Cockpit meldet aus Operator-Sicht). */
   erfolgsMeldung?: string
+  /**
+   * Überschreibt die Anrede-Texte. Die Portal-Fassung spricht das Medium
+   * direkt an («Eure DNA», «wie ihr euch selbst sehen würdet») — im
+   * Operator-Cockpit ist das falsch, dort arbeitet Jolanda oder Ramona FÜR ein
+   * Medium. Nicht gesetzte Felder bleiben bei der Portal-Formulierung.
+   */
+  texte?: Partial<{ titel: string; hinweis: string; textLabel: string; tagsLabel: string; speichern: string }>
   onAbbrechen: () => void
   onGespeichert: () => void
 }) {
@@ -105,12 +113,12 @@ export function DnaBearbeiten({
   return (
     <div className="space-y-5 rounded-xl border border-indigo-200 bg-white p-6">
       <div>
-        <h2 className="text-sm font-semibold text-slate-900">{PORTAL_TEXTE['dna.bearbeiten_titel']}</h2>
-        <p className="mt-1 text-sm text-slate-500">{PORTAL_TEXTE['dna.bearbeiten_hinweis']}</p>
+        <h2 className="text-sm font-semibold text-slate-900">{texte?.titel ?? PORTAL_TEXTE['dna.bearbeiten_titel']}</h2>
+        <p className="mt-1 text-sm text-slate-500">{texte?.hinweis ?? PORTAL_TEXTE['dna.bearbeiten_hinweis']}</p>
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-medium text-slate-600">{PORTAL_TEXTE['dna.bearbeiten_text_label']}</label>
+        <label className="mb-1 block text-xs font-medium text-slate-600">{texte?.textLabel ?? PORTAL_TEXTE['dna.bearbeiten_text_label']}</label>
         <Textarea
           value={soundFeeling}
           onChange={(e) => setSoundFeeling(e.target.value)}
@@ -123,7 +131,7 @@ export function DnaBearbeiten({
       </div>
 
       <div className="space-y-2">
-        <label className="block text-xs font-medium text-slate-600">{PORTAL_TEXTE['dna.bearbeiten_tags_label']}</label>
+        <label className="block text-xs font-medium text-slate-600">{texte?.tagsLabel ?? PORTAL_TEXTE['dna.bearbeiten_tags_label']}</label>
         {tags.length === 0 && <p className="text-sm text-amber-700">{PORTAL_TEXTE['dna.bearbeiten_tags_leer']}</p>}
         <ul className="space-y-1.5">
           {tags.map((t) => (
@@ -190,7 +198,7 @@ export function DnaBearbeiten({
       <div className="flex flex-wrap items-center gap-2">
         <Button onClick={() => void speichere()} disabled={speichert || tags.length === 0 || soundFeeling.trim().length < 20}>
           {speichert ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Plus className="mr-1.5 h-4 w-4" />}
-          {PORTAL_TEXTE['dna.bearbeiten_speichern']}
+          {texte?.speichern ?? PORTAL_TEXTE['dna.bearbeiten_speichern']}
         </Button>
         <Button variant="ghost" onClick={onAbbrechen} disabled={speichert}>
           Abbrechen
