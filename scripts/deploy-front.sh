@@ -54,8 +54,25 @@ echo ">> Verifikation (auf Front-Readiness warten)"
 ssh "$VPS" 'c=000; for i in $(seq 1 30); do c=$(curl -sS -o /dev/null -w "%{http_code}" http://127.0.0.1:3000 2>/dev/null); [ "$c" = "200" ] && break; sleep 2; done; echo "VPS  front 127.0.0.1:3000 -> $c"'
 curl -sS -o /dev/null -w 'PUBLIC /portal/login -> %{http_code}\n' --max-time 20 https://fundraising.wepublish.cloud/portal/login
 
-echo ">> Alte, unbenutzte faas-front-Images aufraeumen (behaelt latest + laufendes)"
-ssh "$VPS" "docker image prune -f >/dev/null; docker images '$IMAGE' --format '  {{.Repository}}:{{.Tag}} {{.Size}}'"
+# Aufraeumen: jeder Deploy hinterlaesst ein getaggtes Image von ~1,5 GB.
+# `docker image prune -f` erwischt die NICHT (es loescht nur unbenannte Layer) —
+# darum lief die VPS-Platte am 29.07.2026 von 56 % auf 80 %, mit 16 Front-Tags.
+# Jetzt: die BEHALTEN jungsten Tags bleiben (Rollback-Ziele), dazu `latest` und
+# alles, was `rollback-` heisst; der Rest fliegt. Ein Image, das ein Container
+# benutzt, laesst sich ohnehin nicht loeschen — docker rmi scheitert dann still.
+BEHALTEN=3
+echo ">> Alte faas-front-Images aufraeumen (behaelt latest, rollback-*, die $BEHALTEN jungsten)"
+ssh "$VPS" "
+  docker image prune -f >/dev/null
+  JUNG=\$(docker images '$IMAGE' --format '{{.Tag}}' | grep -vE '^(latest|rollback-)' | head -$BEHALTEN | paste -sd'|' -)
+  for T in \$(docker images '$IMAGE' --format '{{.Tag}}' | grep -vE \"^(latest|rollback-|\$JUNG)\$\"); do
+    docker rmi '$IMAGE':\$T >/dev/null 2>&1 && echo \"  entfernt: \$T\"
+  done
+  echo '  --- verbleibend:'
+  docker images '$IMAGE' --format '  {{.Repository}}:{{.Tag}} {{.Size}}'
+  echo '  --- Platte:'
+  df -h / | tail -1 | awk '{print \"  \" \$5 \" belegt, \" \$4 \" frei\"}'
+"
 
 echo "OK -> Deploy fertig (Image $IMAGE:$TAG)."
 echo "   Build-Marke in der App (Sidebar unten): build $TAG"

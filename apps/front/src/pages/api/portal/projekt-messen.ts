@@ -29,7 +29,7 @@ async function ladeEigenesProjekt(id: number, mediumSlug: string): Promise<{ slu
     headers: authHeaders(),
     signal: AbortSignal.timeout(15_000),
   })
-  if (res.status === 404) return null
+  if (res.status === 404 || res.status === 403) return null
   if (!res.ok) throw new Error(`projekte/${id}: Directus antwortete ${res.status}`)
   const json = (await res.json()) as {
     data?: { slug?: string | null; name?: string | null; medium_id?: string | null; mandant?: string | null; status?: string | null }

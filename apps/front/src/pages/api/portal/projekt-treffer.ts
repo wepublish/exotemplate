@@ -38,7 +38,7 @@ async function gehoertZumMedium(projektId: number, mediumSlug: string): Promise<
     headers: authHeaders(),
     signal: AbortSignal.timeout(15_000),
   })
-  if (res.status === 404) return false
+  if (res.status === 404 || res.status === 403) return false
   if (!res.ok) throw new Error(`projekte/${projektId}: Directus antwortete ${res.status}`)
   const json = (await res.json()) as { data?: { medium_id?: string | null; mandant?: string | null } }
   const row = json.data

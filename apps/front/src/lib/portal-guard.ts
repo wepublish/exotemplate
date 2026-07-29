@@ -1218,7 +1218,11 @@ export async function ladeEigenesProjektFuerPortal(
     headers: authHeaders(),
     signal: AbortSignal.timeout(15_000),
   })
-  if (res.status === 404) return null
+  // 403 wie 404 behandeln: Directus antwortet auf eine id, die es nicht gibt,
+  // je nach Fall mit 403 statt 404 (live belegt 29.07.2026 mit projekt_id 99999
+  // — die Route meldete «Daten momentan nicht verfügbar» statt «nicht
+  // gefunden»). Der Guard griff, die Meldung war nur irreführend.
+  if (res.status === 404 || res.status === 403) return null
   if (!res.ok) throw new Error(`projekte/${id}: Directus antwortete ${res.status}`)
   const json = (await res.json()) as {
     data?: { id: number; name?: string | null; medium_id?: string | null; status?: string | null }
