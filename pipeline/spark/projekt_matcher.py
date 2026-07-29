@@ -26,7 +26,11 @@ sys.path.insert(0, os.path.expanduser("~/.hermes/data/faas"))
 import run_pilot_nothink as rp   # VOCAB, VOCAB_BY_AREA, ollama_chat, parse_json
 import match_engine as me        # compute_math_score, check_exclusion, loaders, directus helpers
 
-MODEL = os.environ.get("FAAS_DNA_MODEL", "qwen3.6:27b")
+# Default bewusst der vLLM-Name: der Aufrufer (run_projekt_matcher.sh, Adapter)
+# setzt FAAS_DNA_MODEL explizit; erbt das Skript versehentlich einen Wert aus
+# ~/.hermes/.env, der dort nicht existiert, bricht jede Messung mit 404 ab
+# (Befund 29.07.2026: nemotron-3-super war eingetragen und nirgends verfuegbar).
+MODEL = os.environ.get("FAAS_DNA_MODEL", "qwen3.6-27b")
 TOP_N = int(os.environ.get("PROJEKT_TOP_N", "25"))
 MANDANT = os.environ.get("WAECHTER_MANDANT", "wepublish")
 

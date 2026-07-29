@@ -393,6 +393,10 @@ def starte_messung(slug: str) -> str:
     env["DIRECTUS_URL"] = "http://localhost:8055"
     env["DIRECTUS_TOKEN"] = DIRECTUS_TOKEN
     env["FAAS_VLLM_URL"] = os.environ.get("FAAS_VLLM_URL", "http://127.0.0.1:8001/v1")
+    # Mess-Modell explizit: ~/.hermes/.env trug bis 29.07.2026 ein Modell, das
+    # der Dienst nicht kennt (HTTP 404 in jeder Messung). qwen ist zugleich die
+    # Mess-Elle, die der Matcher als dna_quality_tier "qwen_v3" protokolliert.
+    env["FAAS_DNA_MODEL"] = os.environ.get("FAAS_DNA_MODEL_PROJEKT", "qwen3.6-27b")
     script = os.path.expanduser("~/faas-matching-wepublish/spark/projekt_matcher.py")
     log = open(os.path.expanduser("~/faas_classify/projekt_matcher.log"), "a")
     p = subprocess.Popen(["/usr/bin/python3", script, "--apply", "--projekt", slug],
