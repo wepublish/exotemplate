@@ -20,6 +20,22 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 // ─── Konfiguration ────────────────────────────────────────────────────────────
 
 /** Maximale Wartezeit pro Favicon-Fetch-Versuch in ms. */
+/**
+ * Cache-Vorgabe für die Logo-Bytes.
+ *
+ * Vorher stand hier `max-age=86400`: nach einem Logo-Wechsel zeigten Browser
+ * UND Cloudflare einen ganzen Tag weiter das alte Bild — was wie ein falsch
+ * gespeichertes Logo aussieht, obwohl in Directus das richtige liegt (Befund
+ * Jolanda 29.07.2026 bei zwolf: zwei byte-identische Dateien, weil sie das
+ * Logo mehrfach hochgeladen hat, ohne dass sich die Anzeige änderte).
+ *
+ * Jetzt: eine Minute frisch, danach MUSS revalidiert werden. Listen mit vielen
+ * Logos bleiben schnell (60 Sekunden decken einen Seitenaufbau bequem ab), ein
+ * Wechsel ist aber nach spätestens einer Minute überall sichtbar — und mit dem
+ * Cache-Buster, den MediumLogo nach einem Upload setzt, sofort.
+ */
+const LOGO_CACHE_CONTROL = 'public, max-age=60, must-revalidate'
+
 const FETCH_TIMEOUT_MS = 8_000
 
 /** Minimale Dateigrösse — unter diesem Wert (Bytes) gilt das Icon als ungültig. */
@@ -327,7 +343,7 @@ export default async function handler(
         res
           .status(200)
           .setHeader('Content-Type', asset.contentType)
-          .setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=3600')
+          .setHeader('Cache-Control', LOGO_CACHE_CONTROL)
           .setHeader('Content-Length', String(asset.buffer.length))
           .send(asset.buffer)
         return
@@ -376,7 +392,7 @@ export default async function handler(
     res
       .status(200)
       .setHeader('Content-Type', favicon.contentType)
-      .setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=3600')
+      .setHeader('Cache-Control', LOGO_CACHE_CONTROL)
       .setHeader('Content-Length', String(favicon.buffer.length))
       .send(favicon.buffer)
   } catch (err) {

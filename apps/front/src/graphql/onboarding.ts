@@ -60,6 +60,7 @@ export const MEDIEN_REGISTER = gql`
       antragsteller_typ
       arbeits_dna
       arbeits_dna_stand
+      logo_url
     }
   }
 `

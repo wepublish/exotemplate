@@ -45,6 +45,7 @@ import { MediumLogo } from '@/components/MediumLogo'
 import { MailEntwurfButton } from '@/components/MailEntwurfButton'
 import { OnboardingSlackButton } from '@/components/OnboardingSlackButton'
 import { EinladungSlackButton } from '@/components/EinladungSlackButton'
+import { LogoSetzenButton } from '@/components/LogoSetzenButton'
 import { LOGIN_TTL_STUNDEN_STANDARD, MAIL_EINLADUNG, baueSlackVerweis, fuelleVorlage } from '@/lib/portal-texte'
 import { ABSENDER_STANDARD, baueAnrede } from '@/lib/mail-vorlagen'
 import type { ArbeitsDnaGespeichert } from '@/pages/api/medium-knowledge/working-dna'
@@ -63,6 +64,8 @@ interface FaasMedium {
   antragsteller_typ: string | null
   arbeits_dna: ArbeitsDnaGespeichert | null
   arbeits_dna_stand: string | null
+  /** Directus-Datei-id des Logos; null, solange keins gesetzt ist. */
+  logo_url: string | null
 }
 
 interface KnowledgeItem {
@@ -1467,6 +1470,9 @@ function FoerderhistorieOperatorBlock({ mediumSlug }: { mediumSlug: string }) {
 
 export default function OnboardingPage() {
   const [ausgewaehltesMediumSlug, setAusgewaehltesMediumSlug] = useState<string>('')
+  // Cache-Buster fuer die Logo-Vorschau nach einem Wechsel (Befund 29.07.2026:
+  // die Bytes werden gecacht, sonst bliebe das alte Logo stehen).
+  const [logoStand, setLogoStand] = useState<string | null>(null)
   const [loescheId, setLoescheId] = useState<number | null>(null)
 
   const apolloClient = useApolloClient()
@@ -1752,7 +1758,7 @@ export default function OnboardingPage() {
         ) : (
           <>
             {ausgewaehltesMedium && (
-              <MediumLogo slug={ausgewaehltesMedium.slug} name={ausgewaehltesMedium.name} size={36} />
+              <MediumLogo slug={ausgewaehltesMedium.slug} name={ausgewaehltesMedium.name} size={36} version={logoStand} />
             )}
             <Select value={ausgewaehltesMediumSlug} onValueChange={setAusgewaehltesMediumSlug}>
               <SelectTrigger className="w-72 text-sm">
@@ -1788,6 +1794,14 @@ export default function OnboardingPage() {
                 >
                   {willkommenLaedt ? 'Link wird erzeugt…' : 'Willkommensmail'}
                 </Button>
+                <LogoSetzenButton
+                  mediumSlug={ausgewaehltesMedium.slug}
+                  hatLogo={!!ausgewaehltesMedium.logo_url}
+                  onGesetzt={(logoUrl) => {
+                    setLogoStand(logoUrl)
+                    handleAktualisiert()
+                  }}
+                />
                 <EinladungSlackButton
                   mediumSlug={ausgewaehltesMedium.slug}
                   mediumName={ausgewaehltesMedium.name}

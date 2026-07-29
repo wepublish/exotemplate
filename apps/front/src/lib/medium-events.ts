@@ -31,6 +31,8 @@ export type MediumEventTyp =
   | 'absage'
   | 'foerderhistorie_erfasst'
   | 'match_rueckmeldung'
+  | 'projekt_eroeffnet'
+  | 'projekt_messung_gestartet'
 
 export interface MediumEvent {
   medium_id: string

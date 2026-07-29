@@ -35,7 +35,7 @@ export type PortalMe = {
 
 type LadeStatus = 'laden' | 'bereit' | 'fehler'
 
-type NavItem = { key: 'uebersicht' | 'unterlagen' | 'dna' | 'treffer' | 'gesuche'; name: string; href: string }
+type NavItem = { key: 'uebersicht' | 'unterlagen' | 'dna' | 'treffer' | 'gesuche' | 'projekte'; name: string; href: string }
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 
@@ -58,6 +58,9 @@ const NAV_ITEMS: NavItem[] = [
   { key: 'dna', name: '2. DNA', href: '/portal/dna' },
   { key: 'treffer', name: '3. Treffer', href: '/portal/treffer' },
   { key: 'gesuche', name: '4. Gesuche', href: '/portal/gesuche' },
+  // Projekte stehen NEBEN der Vier-Schritte-Kette (ohne Nummer): sie sind ein
+  // eigener Weg, den ein Medium jederzeit gehen kann, kein Onboarding-Schritt.
+  { key: 'projekte', name: 'Projekte', href: '/portal/projekte' },
 ]
 
 function istAktiv(pathname: string, href: string): boolean {

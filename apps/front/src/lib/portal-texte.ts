@@ -231,6 +231,11 @@ export const PORTAL_TEXTE: Record<string, string> = {
   'logo.hinweis': 'Ladet als Allererstes euer Logo hoch, als PNG oder JPG. Es erscheint dann auf eurem Gesuch und hier im Portal.',
   'logo.hochladen_knopf': 'Logo hochladen',
   'logo.kein_logo': 'Noch kein Logo hochgeladen.',
+  // Wechsel-Fall (Befund Jolanda 29.07.2026): der Knopf hiess auch bei
+  // vorhandenem Logo «Logo hochladen», und die Vorschau blieb wegen des
+  // Bild-Caches gleich — das sah aus wie ein falsch gespeichertes Logo.
+  'logo.ersetzen_knopf': 'Anderes Logo hochladen',
+  'logo.ersetzt': 'Neues Logo gespeichert, es ersetzt das bisherige.',
   // Brief-/Dokumentvorlage neben dem Logo (Wunsch Ramona 29.07.2026).
   'vorlage.titel': 'Textvorlage (optional)',
   'vorlage.hinweis':
@@ -318,6 +323,31 @@ export const PORTAL_TEXTE: Record<string, string> = {
   'dna.warten_titel': 'Eure DNA entsteht aus euren Unterlagen',
   'dna.warten_text':
     'Sobald ihr im Schritt «1. Unterlagen» euer Logo und erste Dokumente hochgeladen habt, erstellen wir hier euer Profil. Das dauert etwa zehn bis zwanzig Minuten.',
+
+  // ─── Projekte (Wunsch Jolanda 29.07.2026: autonom eröffnen und matchen) ────
+  'projekte.info_titel': 'Eigene Projekte, eigene Stiftungen',
+  'projekte.info_text':
+    'Neben eurem Medium als Ganzes könnt ihr einzelne Vorhaben als Projekt anlegen: eine Recherchereihe, einen Podcast, einen thematischen Schwerpunkt. Wir erstellen dafür ein eigenes Profil und suchen die Stiftungen, die zu genau diesem Vorhaben passen.',
+  'projekte.info_wozu':
+    'Das lohnt sich, weil viele Stiftungen keine Medien im Allgemeinen fördern, sondern konkrete Projekte. Ein gut beschriebenes Projekt findet darum oft Förderer, die für euer Medium als Ganzes nicht in Frage kämen.',
+  'projekte.neu_titel': 'Neues Projekt anlegen',
+  'projekte.name_label': 'Projektname',
+  'projekte.beschreibung_label': 'Worum geht es?',
+  'projekte.anlegen_knopf': 'Projekt anlegen',
+  'projekte.angelegt': 'Projekt angelegt. Jetzt könnt ihr das Profil erstellen lassen.',
+  'projekte.liste_leer': 'Noch keine Projekte. Legt oben eines an, wenn ihr ein konkretes Vorhaben finanzieren wollt.',
+  'projekte.messen_knopf': 'Profil erstellen und Stiftungen suchen',
+  'projekte.neu_messen_knopf': 'Profil neu erstellen',
+  'projekte.messung_gestartet': 'Wir sind dran. Das dauert einige Minuten, ihr könnt die Seite verlassen.',
+  'projekte.laeuft_hinweis':
+    'Wir lesen die Beschreibung, erstellen das Profil und vergleichen es mit den Stiftungen. Das dauert etwa fünf bis zehn Minuten — diese Seite aktualisiert sich selbst.',
+  'projekte.treffer_auf': 'Treffer ansehen',
+  'projekte.treffer_zu': 'Treffer zuklappen',
+  'projekte.treffer_leer': 'Für dieses Projekt sind noch keine Treffer da.',
+  'projekte.anschreiben_hinweis':
+    'Für Projekt-Treffer läuft die Gesuchs-Anfrage über euren Slack-Kanal — schreibt uns, welche Stiftung ihr anschreiben wollt.',
+  'projekte.entfernen_knopf': 'Projekt entfernen',
+  'projekte.entfernt': 'Projekt entfernt.',
 
   // Rückmeldung zu EINEM Treffer (29.07.2026): beschreibt der Match-Engine,
   // warum die Stiftung nicht passt. Wirkt nach der Freigabe durch We.Publish.

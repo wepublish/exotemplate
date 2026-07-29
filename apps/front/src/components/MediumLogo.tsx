@@ -15,6 +15,13 @@ interface MediumLogoProps {
   name: string
   /** Seiten-/Pixelgrösse des Containers (Default 40px). */
   size?: number
+  /**
+   * Cache-Buster: ändert sich der Wert, lädt der Browser das Bild neu. Nach
+   * einem Logo-Wechsel übergeben die Aufrufer hier die neue Datei-id (oder
+   * einen Zeitstempel) — sonst zeigt der Browser-Cache weiter das alte Logo
+   * (Befund 29.07.2026, siehe LOGO_CACHE_CONTROL in api/medium-logo.ts).
+   */
+  version?: string | null
 }
 
 // ─── Hilfsfunktionen ──────────────────────────────────────────────────────────
@@ -30,11 +37,13 @@ function initialenAus(name: string): string {
  * Rendert das Medien-Logo über die server-seitige Route.
  * Fallback bei Fehler oder während des Ladens: Initialen-Avatar.
  */
-export function MediumLogo({ slug, name, size = 40 }: MediumLogoProps) {
+export function MediumLogo({ slug, name, size = 40, version }: MediumLogoProps) {
   const [gescheitert, setGescheitert] = useState(false)
   const [geladen, setGeladen] = useState(false)
 
-  const url = `/api/medium-logo?medium=${encodeURIComponent(slug)}`
+  const url = version
+    ? `/api/medium-logo?medium=${encodeURIComponent(slug)}&v=${encodeURIComponent(version)}`
+    : `/api/medium-logo?medium=${encodeURIComponent(slug)}`
 
   // Grössen-Klassen für den Container
   const containerStyle: React.CSSProperties = {

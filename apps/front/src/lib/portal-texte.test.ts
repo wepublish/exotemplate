@@ -238,6 +238,8 @@ describe('PORTAL_TEXTE', () => {
     'unterlagen.fragebogen_knopf_aendern',
     'unterlagen.fragebogen_gespeichert',
     'unterlagen.fragebogen_aktualisiert',
+    'logo.ersetzen_knopf',
+    'logo.ersetzt',
     // Textvorlage neben dem Logo (Ramona-Feedback 29.07.2026).
     'vorlage.titel', 'vorlage.hinweis', 'vorlage.hochladen_knopf', 'vorlage.keine',
     'vorlage.ersetzen_knopf', 'vorlage.entfernen_knopf', 'vorlage.gespeichert', 'vorlage.entfernt',
@@ -255,6 +257,14 @@ describe('PORTAL_TEXTE', () => {
     'uebersicht.info_titel', 'uebersicht.info_text',
     'treffer.warten_titel', 'treffer.warten_text',
     'dna.warten_titel', 'dna.warten_text',
+    // Projekte im Portal (29.07.2026).
+    'projekte.info_titel', 'projekte.info_text', 'projekte.info_wozu',
+    'projekte.neu_titel', 'projekte.name_label', 'projekte.beschreibung_label',
+    'projekte.anlegen_knopf', 'projekte.angelegt', 'projekte.liste_leer',
+    'projekte.messen_knopf', 'projekte.neu_messen_knopf', 'projekte.messung_gestartet',
+    'projekte.laeuft_hinweis', 'projekte.treffer_auf', 'projekte.treffer_zu',
+    'projekte.treffer_leer', 'projekte.anschreiben_hinweis',
+    'projekte.entfernen_knopf', 'projekte.entfernt',
     // Rückmeldung zu einem Treffer (29.07.2026).
     'treffer.rueckmeldung_knopf',
     'treffer.rueckmeldung_hinweis',

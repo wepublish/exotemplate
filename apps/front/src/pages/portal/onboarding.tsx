@@ -92,6 +92,9 @@ interface LogoBlockProps {
 
 function LogoBlock({ hatLogo, slug, name, onErfolg }: LogoBlockProps) {
   const [uploading, setUploading] = useState(false)
+  // Cache-Buster: nach einem Wechsel muss die Vorschau sofort das neue Logo
+  // zeigen, nicht das gecachte alte (Befund 29.07.2026).
+  const [logoStand, setLogoStand] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   async function uploadLogo(datei: File) {
@@ -105,7 +108,8 @@ function LogoBlock({ hatLogo, slug, name, onErfolg }: LogoBlockProps) {
         toast.error(json.error ?? `Hochladen fehlgeschlagen (${res.status})`)
         return
       }
-      toast.success('Logo gespeichert.')
+      toast.success(hatLogo ? PORTAL_TEXTE['logo.ersetzt'] : 'Logo gespeichert.')
+      setLogoStand(json.logoUrl ?? String(Date.now()))
       onErfolg()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : String(err))
@@ -127,7 +131,7 @@ function LogoBlock({ hatLogo, slug, name, onErfolg }: LogoBlockProps) {
 
       <div className="flex items-center gap-4">
         {hatLogo && slug ? (
-          <MediumLogo slug={slug} name={name} size={64} />
+          <MediumLogo slug={slug} name={name} size={64} version={logoStand} />
         ) : (
           <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-dashed border-slate-200 px-1 text-center text-[10px] leading-tight text-slate-400">
             {PORTAL_TEXTE['logo.kein_logo']}
@@ -136,7 +140,7 @@ function LogoBlock({ hatLogo, slug, name, onErfolg }: LogoBlockProps) {
 
         <Button onClick={() => fileRef.current?.click()} disabled={uploading} variant={hatLogo ? 'outline' : 'default'} size="sm">
           {uploading ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
-          {PORTAL_TEXTE['logo.hochladen_knopf']}
+          {hatLogo ? PORTAL_TEXTE['logo.ersetzen_knopf'] : PORTAL_TEXTE['logo.hochladen_knopf']}
         </Button>
       </div>
 
