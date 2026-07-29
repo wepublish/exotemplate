@@ -1038,20 +1038,27 @@ export async function ladeFragebogenEintrag(
   const filter = encodeURIComponent(
     JSON.stringify({ medium_id: { _eq: slug }, title: { _starts_with: FRAGEBOGEN_TITEL_PREFIX } }),
   )
+  // NUR Felder anfragen, die die Collection wirklich hat: `medium_knowledge`
+  // trägt kein `date_updated`, und Directus antwortet auf ein unbekanntes Feld
+  // mit 403 (live belegt 29.07.2026) — die Route wäre dann dauerhaft 502.
+  // Der Titel trägt das Datum des letzten Speichervorgangs (baueFragebogenEintrag
+  // schreibt es beim Überschreiben neu), darum kommt der Stand von dort und
+  // fällt auf date_created zurück.
   const res = await fetch(
-    `${base()}/items/medium_knowledge?filter=${filter}&sort=-date_created&limit=1&fields=id,content,date_created,date_updated`,
+    `${base()}/items/medium_knowledge?filter=${filter}&sort=-date_created&limit=1&fields=id,title,content,date_created`,
     { headers: authHeaders(), signal: AbortSignal.timeout(15_000) },
   )
   if (!res.ok) throw new Error(`medium_knowledge (Fragebogen): Directus antwortete ${res.status}`)
   const json = (await res.json()) as {
-    data?: Array<{ id: number; content?: string | null; date_created?: string | null; date_updated?: string | null }>
+    data?: Array<{ id: number; title?: string | null; content?: string | null; date_created?: string | null }>
   }
   const row = json.data?.[0]
   if (!row) return null
+  const datumAusTitel = /(\d{4}-\d{2}-\d{2})/.exec(row.title ?? '')?.[1]
   return {
     id: row.id,
     content: row.content ?? '',
-    dateUpdated: row.date_updated ?? row.date_created ?? '',
+    dateUpdated: datumAusTitel ?? row.date_created ?? '',
   }
 }
 
