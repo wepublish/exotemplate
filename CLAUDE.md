@@ -1,146 +1,188 @@
-# We.Publish FaaS — Monorepo Entry Point
+# Application Template — Monorepo Entry Point
 
-This repository is the **We.Publish FaaS** platform: a billing, time-tracking, and onboarding system for media clients in the We.Publish network. It is a **monorepo** — both applications live here, side by side, under `apps/`. It is **not** an npm workspace: each app is independently versioned, installed, built, and deployed, and has its own lockfile. The root only carries shared pre-commit tooling and CI.
+This repository is a **template** for standalone AI applications. A new project
+starts by copying it and deleting the example feature (see
+[Starting a new project](#starting-a-new-project)).
 
-## Apps
+It is a **monorepo** — both apps live side by side under `apps/`. It is **not** an
+npm workspace: each app is installed, built and deployed independently and has its
+own lockfile. The root carries the shared pre-commit tooling, CI, and the
+docker-compose file that runs the whole stack.
 
-Each app has its own `CLAUDE.md` with detailed instructions. Load the relevant one based on the task:
+## The stack — fixed, not a suggestion
 
-| Path                             | Purpose                                                                                                          | Stack                             | Detailed Instructions                              |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------------------- | -------------------------------------------------- |
-| [apps/directus/](apps/directus/) | Backend — Directus 11 headless CMS. Manages clients, billing periods, time entries, invoices. Custom extensions. | Directus 11, TypeScript, Postgres | [apps/directus/CLAUDE.md](apps/directus/CLAUDE.md) |
-| [apps/front/](apps/front/)       | Frontend — client dashboard (matching list & self-service portal).                                               | Next.js 15, React 19, MUI, Apollo | [apps/front/README.md](apps/front/README.md)       |
+| Path                             | Purpose                                                        | Stack                                 | Port |
+| -------------------------------- | -------------------------------------------------------------- | ------------------------------------- | ---- |
+| [apps/directus/](apps/directus/) | Backend: data model, **all** server-side logic, scheduled work | Directus 11, TypeScript, Postgres 16  | 8055 |
+| [apps/front/](apps/front/)       | Frontend: UI only                                              | Next 16 (App Router), React 19, MUI 9 | 3000 |
 
-A third We.Publish project, [`infrastructure-configurator`](https://github.com/wepublish/infrastructure-configurator) (NestJS; onboards new media via GitHub PRs), is **operationally separate** and lives in its **own repository** — it is not part of this monorepo.
-
-## How the pieces fit together
+Data flows one way through one door:
 
 ```
-                ┌─────────────────────┐
-                │      apps/front     │  Next.js app, port 3000 (dev)
-                │    (dashboard UI)   │
-                └──────────┬──────────┘
-                           │ Apollo Client (GraphQL) + /api proxy routes
-                           ▼
-                ┌─────────────────────┐
-                │    apps/directus    │  Directus, port 8055
-                │   (CMS + billing)   │──► Clockodo, Jira, Bexio
-                └─────────────────────┘
+   browser
+      │  same-origin /api/* only (httpOnly session cookies, no tokens in JS)
+      ▼
+┌─────────────────────┐   Apollo Client → /api/graphql → Directus GraphQL
+│     apps/front      │   fetch        → /api/…        → extension endpoint
+│  Next 16 · MUI 9    │
+└──────────┬──────────┘
+           │ server-side only, with the user's access token
+           ▼
+┌─────────────────────┐
+│    apps/directus    │  Directus 11 + one extension bundle
+│  data + all logic   │──► Claude API (https, CPU only)
+└──────────┬──────────┘
+           ▼
+      Postgres 16
 ```
 
-## Deciding where to work
+## Hard constraints
 
-- **"Add a field / collection / endpoint" → backend** → [apps/directus/](apps/directus/)
-- **"Change the dashboard / a page / UI behavior" → frontend** → [apps/front/](apps/front/)
-- **"Add an integration with Clockodo / Jira / Bexio" → backend** (extensions) → [apps/directus/extensions/wepublish/](apps/directus/extensions/wepublish/)
-- **A change spans frontend and backend** — start in `apps/directus` (data model first), then update the affected GraphQL queries in `apps/front/src/graphql/`.
+These are requirements of the platform, not preferences. A change that breaks one of
+them is wrong even if it works.
+
+1. **Runs on a machine without a GPU.** No local inference, no CUDA, no model
+   weights, no vector database that needs a GPU. If a feature seems to need a local
+   model, it needs the Claude API instead.
+2. **Claude API for every LLM call.** One client:
+   `apps/directus/extensions/app/src/shared/claude.ts`. Never add a second provider,
+   a second SDK, or a direct `fetch` to an inference endpoint.
+3. **Runs with Docker.** `cp .env.example .env && docker compose up --build` starts
+   the entire application. Anything a feature needs at runtime is a service or an
+   environment variable in [docker-compose.yml](docker-compose.yml).
+4. **Self-contained.** Postgres, Directus and the frontend are the only services. No
+   Redis, no queue broker, no external cron host, no side-car. The Claude API is the
+   single outbound dependency; a new one needs a deliberate decision, not a commit.
+5. **No persistent file storage outside Directus.** Application code never writes to
+   the filesystem — no temp caches, no JSON state files, no log files, no
+   `./data`. State goes into a Directus collection; binaries go through Directus
+   Files (one named volume). Containers are disposable: anything written outside a
+   volume is gone on the next deploy.
+6. **TypeScript only.** All logic — backend, frontend, migrations, scripts. No
+   Python, no shell scripts carrying business rules. `apps/directus/docker/entrypoint.sh`
+   is the one exception and it only orchestrates commands.
+7. **Server-side code lives in the Directus extension bundle.**
+   `apps/directus/extensions/app` — endpoints, hooks and Flow operations.
+   [Extension docs](https://directus.com/docs/guides/extensions/overview). Next
+   route handlers are proxies only: they forward a request and never contain a rule,
+   a prompt or a calculation.
+8. **Scheduled work is a Directus Flow with a Schedule (cron) trigger.**
+   [Trigger docs](https://directus.com/docs/guides/flows/triggers). No system cron,
+   no `setInterval` in a hook, no scheduler container. The Flow calls a custom
+   operation from the bundle; the Flow itself is committed via `schema:dump`.
+
+## Where does this feature go?
+
+| The change is…                             | Goes to                                                                             |
+| ------------------------------------------ | ----------------------------------------------------------------------------------- |
+| a new collection or field                  | Directus admin UI, then `npm run schema:dump` — [apps/directus](apps/directus/)     |
+| a calculation, validation or business rule | extension bundle (endpoint or hook)                                                 |
+| anything that calls Claude                 | extension bundle, via `shared/claude.ts`                                            |
+| something that must run nightly/hourly     | Flow with a Schedule trigger + a custom operation in the bundle                     |
+| a screen, a form, a list, a chart          | [apps/front](apps/front/) — MUI components, Apollo for data                         |
+| a new query the UI needs                   | `apps/front/src/graphql/*.ts`                                                       |
+| a one-off data repair or backfill          | `apps/directus/migrations/*.mts`                                                    |
+| a new environment variable                 | `apps/directus/.env.example` **and** root `.env.example` **and** docker-compose.yml |
+
+A change that spans both apps starts in `apps/directus` — data model first, then the
+GraphQL documents in the frontend.
 
 ## Cross-cutting conventions
 
-These apply across both apps unless the local CLAUDE.md says otherwise:
+- **Formatter**: Prettier — no semicolons, single quotes, no trailing commas, 2-space
+  indent, 110 columns. Enforced by a **root** Husky + lint-staged pre-commit hook
+  across the whole tree.
+- **No ESLint.** Prettier plus `tsc --noEmit` (`npm run typecheck`) is the gate.
+- **TypeScript strict mode** everywhere, plus `noUncheckedIndexedAccess`.
+- **UI labels in German, code and comments in English.** Error messages that reach a
+  browser are UI labels — German.
+- **Node 22.x**, package manager `npm`, in both apps.
+- **Tests by default for new logic.** Vitest in the extension bundle, Jest +
+  Testing Library in the frontend. Both are wired and run in CI. Skip only with a
+  concrete reason (thin glue, framework plumbing, purely cosmetic). Put the rule in
+  a pure function next to the wiring and test that — the pattern is everywhere in
+  the example feature.
+- **Secrets live in the backend.** The frontend holds no API key and no service
+  token; it acts as the signed-in user. See [apps/front/CLAUDE.md](apps/front/CLAUDE.md).
+- **Keep the CLAUDE.md files current.** After landing a change, update this file
+  and/or the app's when the change affects something a future agent would rely on —
+  new endpoint, collection, command, env var, pattern, or a fact that is now wrong.
+  Skip it for routine fixes, refactors that don't change shape, dependency bumps and
+  copy tweaks. When in doubt: would the next agent be misled by the current text?
 
-- **Formatter**: Prettier — no semicolons, single quotes, no trailing commas, 2-space indent.
-- **No ESLint** — Prettier only, enforced via a single **root** Husky + lint-staged pre-commit hook that runs across the whole tree.
-- **TypeScript strict mode** everywhere.
-- **UI labels in German**, code/identifiers/comments in English.
-- **Node 22.x**; package manager is `npm` in both apps.
-- **Tests**: Write tests by default for new logic — skip only with a concrete reason (thin glue code, framework plumbing not meaningfully testable in isolation, one-off scripts, or the change is purely cosmetic). Each app's CLAUDE.md says what framework is set up; if none is configured for the area you're touching, ask the user before introducing one rather than silently leaving the code untested.
-- **Keep CLAUDE.md files current**: After landing a change, update the relevant CLAUDE.md (this one and/or the app's) when the change affects something a future agent would rely on — new endpoint, collection, command, env var, architectural pattern, convention, or a fact that's now wrong (paths renamed, frameworks added/removed, integrations swapped). Skip the update for routine bug fixes, refactors that don't change shape, dependency bumps, copy/UI tweaks, and any change already obvious from reading the code. When in doubt: would the next agent be misled by the current text? If yes, fix it in the same change.
+## Running it
+
+**Everything in Docker** (what deploys, one command):
+
+```bash
+cp .env.example .env         # then put your ANTHROPIC_API_KEY in it
+docker compose up --build    # or: npm run up
+```
+
+**Local development** (fast feedback, three terminals):
+
+```bash
+cd apps/directus/extensions/app && npm run dev   # 1. watch-rebuild the bundle — start first
+cd apps/directus && npm run dev                  # 2. Postgres in Docker + Directus on the host
+cd apps/front && npm run dev                     # 3. Next dev server
+```
+
+Start the extension watcher **before** Directus: Directus refuses to start without a
+built bundle, and without the watcher your changes are never picked up.
+
+- Frontend: http://localhost:3000
+- Directus admin: http://localhost:8055 — `admin@wepublish.ch` / `admin123`
+
+## Starting a new project from this template
+
+The example feature is one collection (`notes`) plus everything that touches it. It
+exists to show the patterns end to end. To make the repo yours:
+
+1. Read this file and both app `CLAUDE.md` files.
+2. Rename the images/description: root `package.json` (name, description). CI image
+   names derive from the repo name automatically.
+3. Delete the example, in this order:
+   - `apps/front/src/components/Note*.tsx`, `apps/front/src/graphql/notes.ts`,
+     `apps/front/src/lib/notes.ts` (+ tests), `apps/front/src/app/api/notes/`
+   - `apps/directus/extensions/app/src/endpoints/notes-summary/`,
+     `.../hooks/notes-normalize/`, `.../operations/notes-summarize-pending/`, and
+     their entries in `apps/directus/extensions/app/package.json`
+   - `apps/directus/migrations/20260729A-example-notes-collection.mts`
+   - `notes` from `apps/directus/extensions/app/src/types/schema.ts`
+4. Keep `shared/claude.ts`, `shared/env.ts`, `shared/http.ts`, the auth/session and
+   proxy code in `apps/front/src/lib`, and `AppShell`/`LoginForm` — that is the
+   scaffolding, not the example.
+5. Build your first feature by copying the shape of what you deleted.
 
 ## Deployment
 
-Docker images are published to GitHub Container Registry, built by the workflows in [.github/workflows/](.github/workflows/):
+Images are published to GHCR, named after the repository:
 
-- **Staging** — a push to `main` rebuilds only the app whose `apps/<app>/**` changed (path-filtered):
-  - backend → `ghcr.io/wepublish/faas-backend:main` (+ `:main-<ts>-<sha>`)
-  - frontend → `ghcr.io/wepublish/faas-front:main` (+ `:main-<ts>-<sha>`)
-- **Production** — a `v*` tag builds **both** production images together (lockstep release):
-  - `ghcr.io/wepublish/faas-backend:production` and `ghcr.io/wepublish/faas-front:production`
+- **Staging** — a push to `main` rebuilds only the app whose `apps/<app>/**` changed:
+  `ghcr.io/<owner>/<repo>-backend:main`, `ghcr.io/<owner>/<repo>-front:main`.
+- **Production** — a `v*` tag builds **both** images in lockstep:
+  `…-backend:production` and `…-front:production`.
 
-CI structure: one reusable builder ([publish-docker-image.yml](.github/workflows/publish-docker-image.yml)) takes a build `context` (the app subfolder) + image `tags`; [build-backend-main.yml](.github/workflows/build-backend-main.yml) / [build-front-main.yml](.github/workflows/build-front-main.yml) call it with path filters; [build-production.yml](.github/workflows/build-production.yml) calls it twice on a `v*` tag. GitHub only reads workflows at the **repo root**, so both apps' pipelines live in the root `.github/workflows/`.
+One reusable builder ([publish-docker-image.yml](.github/workflows/publish-docker-image.yml))
+takes a build `context` and image `tags`; the per-app workflows call it with path
+filters. [verify.yml](.github/workflows/verify.yml) typechecks, tests and builds both
+apps on every push and PR. GitHub only reads workflows at the repo root, so both
+apps' pipelines live in `.github/workflows/`.
 
-## Shared data model
-
-The canonical schema lives in [apps/directus/extensions/wepublish/src/DirectusTypes.ts](apps/directus/extensions/wepublish/src/DirectusTypes.ts). The frontend consumes Directus over **GraphQL via Apollo Client** (queries under [apps/front/src/graphql/](apps/front/src/graphql/)); it does not keep a hand-maintained type copy. GraphQL type generation is available but optional — see [apps/front/codegen.ts](apps/front/codegen.ts) and `npm run codegen`. When changing collections in the backend, update the affected GraphQL queries in the frontend accordingly.
+On a server, deploy the same `docker-compose.yml` with real values in `.env`
+(`KEY`, `SECRET`, `DB_PASSWORD`, `ADMIN_PASSWORD`, the public URLs) and a reverse
+proxy in front for TLS.
 
 ## Things to know before editing
 
-- This is **not** an npm workspace — there is no dependency hoisting and no shared `node_modules` for the apps. Always `cd` into `apps/directus` or `apps/front` before running that app's commands. Never run `npm install` at the repo root expecting it to install app deps — the root `npm install` only installs the shared pre-commit tooling.
-- The root `package.json` exists solely for Husky + lint-staged + Prettier. Don't add app dependencies to it.
-- The pre-commit hook is installed at the git root (`.husky/`). The apps no longer have their own Husky setup.
-
-## Initial setup
-
-New contributor, fresh clone? Get both apps installed and verifiable in one go. Show progress as you work; only stop for genuine human decisions (missing GitHub access, Docker not running, a token to paste, a destructive choice).
-
-### 1 · Preflight checks (run in parallel)
-
-| Check            | Pass criterion             | If it fails                                                                                     |
-| ---------------- | -------------------------- | ----------------------------------------------------------------------------------------------- |
-| `node --version` | starts with `v22.`         | Tell the user to install Node 22 (`nvm install 22 && nvm use 22`, or https://nodejs.org). Stop. |
-| `npm --version`  | any version prints         | Reinstall Node 22 (npm ships with it). Stop.                                                    |
-| `docker info`    | exits 0 (daemon reachable) | Tell the user to start Docker Desktop / the docker daemon. Stop.                                |
-
-### 2 · Root tooling
-
-From the repo root: `npm install` — installs Husky + lint-staged + Prettier and wires the pre-commit hook. Quick and safe.
-
-### 3 · Backend setup (apps/directus)
-
-From `apps/directus/`, in this order:
-
-1. `npm run setup` — copies `.env.example` → `.env`, runs `npm install`, and seeds. If `.env` already exists it's left as-is.
-2. Sanity-check `.env`:
-   - **Do not** fill in third-party API keys (`CLOCKODO_*`, `JIRA_*`, `BEXIO_*`). The user obtains those from a teammate — see the README's "Get the missing secrets" section.
-   - If `KEY` or `SECRET` are still placeholder strings, generate fresh random values (`openssl rand -hex 32` each) and write them in. Default placeholders make Directus refuse to boot in some setups.
-3. `npm run db:start` — boots Postgres via Docker Compose. Wait for the container to be healthy before continuing.
-4. Detect first-run vs. already-initialised: if the Postgres volume already has a populated `directus` schema, skip steps 5–6 and just confirm. Otherwise:
-5. `npm run directus:init` — bootstraps Directus.
-6. `npm run schema:load` — applies the version-controlled schema.
-7. **Build the custom extensions bundle** (mandatory — Directus will not start without it):
-   ```bash
-   npm run build:extensions
-   ```
-   This builds each subfolder of `extensions/`, producing `extensions/wepublish/dist/{api.js,app.js}`, which Directus loads at startup. Skip it and `npm run dev` fails or boots without the custom endpoints (`/aggregatedHours`, `/networkContribution`, `/invoice-with-topup`, `/clientsOverview`, etc.) — the dashboard then 404s on every billing screen.
-
-**Do not** start the long-running `npm run dev` for Directus during setup — that's the explicit "start the local dev environment" follow-up. Setup must terminate.
-
-### 4 · Frontend setup (apps/front)
-
-From `apps/front/`:
-
-1. If `.env.local` doesn't exist, copy `.env.local.example` to `.env.local` (local Directus URL + token, portal secret — see `apps/front/README.md`).
-2. `npm install` — installs dependencies (Next.js).
-3. Verify: `npm install` exits 0 (there is no `typecheck` script; `npm run build` or `npm test` can additionally sanity-check).
-
-Do not start `npm run dev` during setup.
-
-### 5 · Wrap up
-
-Print a short, scannable summary:
-
-- ✅ what was installed (both apps)
-- ⚠️ which `.env` values still need filling in — name the variables (`CLOCKODO_USER`, `CLOCKODO_API_KEY`, `JIRA_HOST`, `JIRA_EMAIL`, `JIRA_API_TOKEN`, `BEXIO_API_KEY`) and point at the README's "Get the missing secrets" section
-- ▶️ how to start next: ask Claude "start the local dev environment", or open three terminals (extensions watcher → backend → frontend)
-- 🔑 the local admin login: `admin@wepublish.ch` / `admin123` at http://localhost:8055
-
-### Guardrails for setup
-
-- **Never** commit any `.env` file anywhere.
-- The `directus:init` step is not idempotent in all cases — detect existing state before running it again. When in doubt, ask before running anything destructive.
-- If preflight fails midway, hand back to the user with a clear "do X, then ask me to resume setup". Don't silently work around missing Node / Docker.
-- The user is likely a low-coder following the README. Default to explaining what's happening in plain language; prefer short, complete sentences over jargon.
-
-### Common follow-up requests
-
-- _"Start the backend"_ → **two** long-running processes, in this order:
-  1. `cd apps/directus/extensions/wepublish && npm run dev` (watch-rebuilds the custom extensions). Wait until the first build completes.
-  2. `cd apps/directus && npm run dev` (Postgres + Directus). Leave both streaming.
-
-  Skipping the extensions watcher means Directus boots without the custom endpoints, and changes to extension source won't be picked up. Never start the Directus process alone unless you've just run `npm run build:extensions`.
-
-- _"Start the frontend"_ → `cd apps/front && npm run dev` (long-running).
-- _"Start everything"_ → all three above (extensions watcher → backend → frontend), in parallel background processes; report the URLs once up.
-- _"Stop the local database"_ → `cd apps/directus && npm run db:reset` (or `docker compose down`).
-- _"Reset my local DB"_ → `npm run db:reset` in `apps/directus/`. **Destructive** — confirm first, then re-run init + schema:load.
-- _"What's the status of my local setup?"_ → check: `docker ps` (Postgres up?), `lsof -i :8055` / `:3000` (services up?), that `apps/directus` and `apps/front` are installed. Summarise.
+- **Not an npm workspace.** No hoisting, no shared `node_modules`. Always `cd` into
+  `apps/directus` or `apps/front` first. The root `npm install` only installs the
+  pre-commit tooling — never add app dependencies to the root `package.json`.
+- The extension bundle is a **third** npm package with its own `node_modules`:
+  `apps/directus/extensions/app`.
+- Directus is pinned to **11.x** on purpose. `directus-sync` (schema-as-code) has no
+  Directus 12 release, and the bundled `ts-typegen` module declares
+  `host: ">= 10.10.0 < 12.0.0"`. Check both before bumping the major.
+- The pre-commit hook is installed at the git root (`.husky/`).
+- Never commit any `.env`. The root `.env` configures Docker; `apps/directus/.env`
+  and `apps/front/.env.local` configure local development.

@@ -1,4 +1,11 @@
+# Secrets must never enter an image.
+.env
+.env.*
+!.env.local.example
+
 node_modules
 .next
-.env.local
+coverage
 .git
+.idea
+.vscode

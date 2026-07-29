@@ -6,13 +6,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="x-apple-disable-message-reformatting" />
     <meta name="color-scheme" content="light" />
-    <title>Willkommen bei We.Publish ONE</title>
+    <title>Willkommen bei {{ projectName }}</title>
     <!--
       Custom override of Directus' built-in user-invitation template.
       Standalone (no Liquid layout) so it doesn't depend on / alter the shared
       built-in base template. Variables provided by Directus: url (tokenized
       accept-invite link to the frontend /auth/accept-invite), email, and the
-      project settings projectLogo / projectUrl. German, We.Publish-branded.
+      project settings projectLogo / projectUrl. German. Branding comes from the Directus project settings.
     -->
     <style>
       body,
@@ -87,7 +87,7 @@
                 {% if projectLogo %}
                 <img
                   src="{{ projectLogo }}"
-                  alt="We.Publish ONE"
+                  alt="{{ projectName }}"
                   height="32"
                   style="height: 32px; display: block"
                 />
@@ -100,7 +100,7 @@
                     font-weight: 700;
                     color: #111827;
                   "
-                  >We.Publish <span style="color: #00a155">ONE</span></span
+                  >{{ projectName }}</span
                 >
                 {% endif %}
               </td>
@@ -126,11 +126,11 @@
                     color: #111827;
                   "
                 >
-                  Willkommen bei We.Publish ONE
+                  Willkommen bei {{ projectName }}
                 </h1>
 
                 <p style="margin: 0 0 24px 0">
-                  Du wurdest zu We.Publish ONE eingeladen. Klicke auf den Button,
+                  Du wurdest zu {{ projectName }} eingeladen. Klicke auf den Button,
                   um dein Konto zu aktivieren und dein persönliches Passwort
                   festzulegen:
                 </p>
@@ -175,7 +175,7 @@
                 </p>
 
                 <p style="margin: 32px 0 0 0; color: #374151">
-                  Herzliche Grüsse<br />Dein We.Publish-Team
+                  Herzliche Grüsse<br />Dein Team
                 </p>
               </td>
             </tr>
@@ -192,7 +192,7 @@
                   color: #9ca3af;
                 "
               >
-                Diese E-Mail wurde automatisch von We.Publish ONE gesendet.{% if
+                Diese E-Mail wurde automatisch von {{ projectName }} gesendet.{% if
                 projectUrl %}
                 <a
                   href="{{ projectUrl }}"

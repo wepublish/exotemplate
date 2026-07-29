@@ -1,20 +1,33 @@
-FROM node:24-alpine AS build
+# Multi-stage: the runtime image contains no source, no dev dependencies and no
+# package manager — only Next's standalone output (see `output: 'standalone'` in
+# next.config.ts).
+FROM node:22.22.0-alpine AS deps
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+
+FROM node:22.22.0-alpine AS build
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# Build-Marke: NEXT_PUBLIC_* muss WAEHREND `next build` gesetzt sein, damit der
-# Wert in das Client-Bundle eingebacken wird. Wird von scripts/deploy-front.sh
-# als --build-arg BUILD_SHA=<commit> uebergeben; ohne Angabe bleibt es "dev".
-ARG BUILD_SHA=dev
-ENV NEXT_PUBLIC_BUILD_SHA=$BUILD_SHA
+# No NEXT_PUBLIC_* build args on purpose: everything this app needs is read at
+# runtime on the server. A NEXT_PUBLIC_ value would be baked into the browser
+# bundle at build time, which is how a "config change" silently does nothing.
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-FROM node:24-alpine
+FROM node:22.22.0-alpine AS runtime
 WORKDIR /app
-COPY --from=build /app/.next ./.next
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/package.json ./package.json
-COPY --from=build /app/public ./public
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+# Run as the unprivileged user that ships with the image.
+COPY --from=build --chown=node:node /app/public ./public
+COPY --from=build --chown=node:node /app/.next/standalone ./
+COPY --from=build --chown=node:node /app/.next/static ./.next/static
+USER node
+
 EXPOSE 3000
-CMD ["npm","start"]
+CMD ["node", "server.js"]
