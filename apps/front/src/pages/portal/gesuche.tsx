@@ -39,6 +39,8 @@ import type { GesuchPortalStatus, GesuchVersion } from '@/lib/portal-status'
 type PortalGesuch = {
   id: string
   stiftungName: string
+  /** Projekt, zu dem das Gesuch gehört; null = fürs Medium als Ganzes. */
+  projektName?: string | null
   status: GesuchPortalStatus
   angefordertAm: string | null
   freigegebenAm: string | null
@@ -311,6 +313,11 @@ export default function PortalGesucheSeite() {
               <Card key={g.id} className="space-y-4 p-5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-slate-900">{g.stiftungName}</p>
+                  {g.projektName && (
+                    <Badge variant="outline" className="border-indigo-200 bg-indigo-50 text-[10px] text-indigo-700">
+                      Projekt: {g.projektName}
+                    </Badge>
+                  )}
                   <Badge variant="outline" className={`text-[11px] ${STATUS_FARBE[g.status]}`}>
                     {STATUS_LABEL[g.status]}
                   </Badge>

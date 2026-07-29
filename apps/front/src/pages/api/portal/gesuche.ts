@@ -41,6 +41,8 @@ type RohApplication = {
   stiftung_id: string | number | null
   stiftung_name: string | null
   status: string | null
+  /** Gehört der Antrag zu einem Projekt des Mediums? (29.07.2026) */
+  projekt_id: number | null
   portal: PortalGesuchApplicationPortalRoh | null
 }
 
@@ -57,7 +59,7 @@ async function ladeApplications(mediumSlug: string): Promise<RohApplication[]> {
   const filter = encodeURIComponent(
     JSON.stringify({ medium_id: { _eq: mediumSlug }, mandant: { _eq: tenant.key }, status: { _neq: 'ausgeblendet' } }),
   )
-  const felder = 'id,stiftung_id,stiftung_name,status,portal'
+  const felder = 'id,stiftung_id,stiftung_name,status,projekt_id,portal'
   const res = await fetch(`${base()}/items/applications?filter=${filter}&sort=-date_updated&limit=-1&fields=${felder}`, {
     headers: authHeaders(),
     signal: AbortSignal.timeout(15_000),
@@ -92,6 +94,27 @@ async function ladeFehlendeStiftungsnamen(ids: number[]): Promise<Map<number, st
   return namen
 }
 
+/** Namen der Projekte, zu denen Anträge gehören (best effort, leere Map bei Fehlern). */
+async function ladeProjektNamen(ids: number[]): Promise<Map<number, string>> {
+  const namen = new Map<number, string>()
+  if (ids.length === 0) return namen
+  try {
+    const filter = encodeURIComponent(JSON.stringify({ id: { _in: ids } }))
+    const res = await fetch(`${base()}/items/projekte?filter=${filter}&limit=-1&fields=id,name`, {
+      headers: authHeaders(),
+      signal: AbortSignal.timeout(15_000),
+    })
+    if (!res.ok) return namen
+    const json = (await res.json()) as { data?: Array<{ id: number | string; name?: string | null }> }
+    for (const row of json.data ?? []) {
+      if (row.name) namen.set(Number(row.id), row.name)
+    }
+  } catch (err: unknown) {
+    console.error('gesuche: Projektnamen nicht nachladbar', err)
+  }
+  return namen
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET')
@@ -113,6 +136,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ),
     ]
     const nachgeladeneNamen = await ladeFehlendeStiftungsnamen(fehlendeIds)
+    const projektNamen = await ladeProjektNamen(
+      [...new Set(applications.map((a) => a.projekt_id).filter((n): n is number => typeof n === 'number'))],
+    )
 
     const gesuche = applications.map((a) => {
       const portal = a.portal ?? {}
@@ -134,6 +160,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           : [],
         abgeschicktAm: portal.abgeschickt_am ?? null,
         betragEingereicht: typeof portal.betrag_eingereicht_chf === 'number' ? portal.betrag_eingereicht_chf : null,
+        // Name des Projekts, wenn der Antrag zu einem gehört (sonst null):
+        // ein Medium mit mehreren Vorhaben muss sehen, WOFÜR ein Gesuch läuft.
+        projektName: a.projekt_id ? projektNamen.get(a.projekt_id) ?? null : null,
       }
     })
 

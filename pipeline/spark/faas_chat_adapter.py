@@ -479,7 +479,7 @@ def starte_gesuch_entwurf(app_id: str) -> str:
     rows = _dget(
         f"/items/applications?limit=1"
         f"&filter[id][_eq]={urllib.parse.quote(app_id)}"
-        f"&fields=id,medium_id,stiftung_id,paket"
+        f"&fields=id,medium_id,stiftung_id,projekt_id,paket"
     )
     app = rows[0] if rows else None
     if not app or not app.get("medium_id"):
@@ -496,10 +496,18 @@ def starte_gesuch_entwurf(app_id: str) -> str:
     def _lauf():
         try:
             import paket_builder as pb
+            # projekt_id mitgeben, wenn der Antrag zu einem Projekt gehoert
+            # (29.07.2026): sonst bekaeme ein Projekt-Gesuch den Prompt des
+            # Mediums als Ganzes - falsche DNA, falsche Match-Begruendung,
+            # falscher Antragsgegenstand. /api/gesuch-prompt kennt den
+            # Parameter und zieht dann Projekt-Profil und Projekt-Treffer.
+            _projekt = app.get("projekt_id")
+            _projekt_param = f"&projekt_id={urllib.parse.quote(str(_projekt))}" if _projekt else ""
             r = urllib.request.Request(
                 "http://localhost:3009/api/gesuch-prompt?"
                 f"medium={urllib.parse.quote(str(app.get('medium_id')))}"
                 f"&stiftung_id={stiftung_id}"
+                f"{_projekt_param}"
             )
             with urllib.request.urlopen(r, timeout=30) as x:
                 prompt = (json.loads(x.read().decode()) or {}).get("prompt") or ""

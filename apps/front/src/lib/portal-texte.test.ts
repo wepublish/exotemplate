@@ -263,7 +263,7 @@ describe('PORTAL_TEXTE', () => {
     'projekte.anlegen_knopf', 'projekte.angelegt', 'projekte.liste_leer',
     'projekte.messen_knopf', 'projekte.neu_messen_knopf', 'projekte.messung_gestartet',
     'projekte.laeuft_hinweis', 'projekte.treffer_auf', 'projekte.treffer_zu',
-    'projekte.treffer_leer', 'projekte.anschreiben_hinweis',
+    'projekte.treffer_leer', 'projekte.gesuch_angefordert', 'projekte.gesuch_bereits_vorhanden',
     'projekte.entfernen_knopf', 'projekte.entfernt',
     // Rückmeldung zu einem Treffer (29.07.2026).
     'treffer.rueckmeldung_knopf',

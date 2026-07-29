@@ -59,6 +59,7 @@ import {
   legeConsentLogAn,
   ladeStiftungName,
   leseStiftungIdAusBody,
+  ladeEigenesProjektFuerPortal,
   legeAgentVorschlagAn,
   existiertVorschlagMitDedupKey,
 } from '@/lib/portal-guard'
@@ -81,17 +82,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
   const stiftungIdStr = String(stiftungId)
   const consentBestaetigt = (req.body as { consent_bestaetigt?: unknown } | null)?.consent_bestaetigt === true
+  // Optionales Projekt (29.07.2026): ein Gesuch kann für das Medium als Ganzes
+  // ODER für ein Projekt des Mediums angefordert werden. Ohne projekt_id
+  // bleibt alles wie bisher.
+  const projektIdRoh = (req.body as { projekt_id?: unknown } | null)?.projekt_id
+  const projektId =
+    typeof projektIdRoh === 'number'
+      ? projektIdRoh
+      : typeof projektIdRoh === 'string' && projektIdRoh.trim()
+        ? parseInt(projektIdRoh, 10)
+        : null
+  if (projektIdRoh != null && (!Number.isFinite(projektId) || (projektId as number) <= 0)) {
+    return res.status(400).json({ error: 'projekt_id muss eine gültige Nummer sein.' })
+  }
 
   try {
     const medium = await ladePortalMedium(session.mediumSlug)
     if (!medium) {
       return res.status(404).json({ error: 'Medium nicht gefunden.' })
     }
-    if (!medium.matchingFreigeschaltet) {
+
+    // Projekt-Gesuche brauchen KEINE Matching-Freischaltung: die Projekt-Treffer
+    // entstehen erst, wenn das Medium den Mess-Lauf selbst angestossen hat
+    // (siehe /api/portal/projekt-treffer). Für Medium-Gesuche bleibt das Gate.
+    let projekt: { id: number; name: string } | null = null
+    if (projektId) {
+      projekt = await ladeEigenesProjektFuerPortal(projektId, session.mediumSlug)
+      if (!projekt) {
+        return res.status(404).json({ error: 'Projekt nicht gefunden.' })
+      }
+    } else if (!medium.matchingFreigeschaltet) {
       return res.status(403).json({ grund: 'noch_nicht_freigeschaltet' })
     }
 
-    if (await existiertOffeneApplication(session.mediumSlug, stiftungId)) {
+    if (await existiertOffeneApplication(session.mediumSlug, stiftungId, projektId)) {
       return res.status(409).json({ bereits_vorhanden: true })
     }
 
@@ -124,14 +148,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // reine Funktion kennt den Namen nicht) und wird hier ergänzt.
     const stiftungName = await ladeStiftungName(stiftungId)
     const { applicationDaten, portalJson } = baueGesuchAuftrag(session, stiftungIdStr, String(consentRow.id), jetzt)
-    const neueApp = await legeApplicationAn({ ...applicationDaten, stiftung_name: stiftungName, portal: portalJson })
+    const neueApp = await legeApplicationAn({
+      ...applicationDaten,
+      stiftung_name: stiftungName,
+      portal: portalJson,
+      ...(projektId ? { projekt_id: projektId } : {}),
+    })
 
     // Roadmap-Ereignis (fire-and-forget): die Stiftungswahl durchs Medium ist
     // eine Station der Slack-Roadmap im Medien-Channel.
     void schreibeMediumEvent({
       medium_id: session.mediumSlug,
       typ: 'stiftung_gewaehlt',
-      titel: `Stiftung ausgewählt: ${stiftungName}`,
+      titel: projekt
+        ? `Stiftung ausgewählt für Projekt «${projekt.name}»: ${stiftungName}`
+        : `Stiftung ausgewählt: ${stiftungName}`,
       actor: session.email,
     })
 

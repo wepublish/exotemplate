@@ -636,9 +636,24 @@ export async function ladeStiftungName(stiftungId: number): Promise<string> {
  * Application existiert (Doppel-Schutz für anschreiben.ts: verhindert, dass
  * dieselbe Stiftung zweimal als Gesuchsanfrage angelegt wird).
  */
-export async function existiertOffeneApplication(mediumSlug: string, stiftungId: number): Promise<boolean> {
+export async function existiertOffeneApplication(
+  mediumSlug: string,
+  stiftungId: number,
+  projektId?: number | null,
+): Promise<boolean> {
+  // Der Doppel-Schutz gilt je ANTRAGSGEGENSTAND, nicht je Stiftung: dieselbe
+  // Stiftung darf einmal fürs Medium als Ganzes und einmal für ein Projekt
+  // angeschrieben werden (Anlass 29.07.2026: bajour fundraist regelmässig für
+  // dorfkoenig — ein Gesuch fürs Medium darf das Projekt-Gesuch nicht
+  // blockieren). Ohne projektId prüft die Funktion die Medium-Anträge
+  // (projekt_id leer), mit projektId genau die dieses Projekts.
   const filter = encodeURIComponent(
-    JSON.stringify({ medium_id: { _eq: mediumSlug }, stiftung_id: { _eq: stiftungId }, status: { _neq: 'ausgeblendet' } }),
+    JSON.stringify({
+      medium_id: { _eq: mediumSlug },
+      stiftung_id: { _eq: stiftungId },
+      status: { _neq: 'ausgeblendet' },
+      projekt_id: projektId ? { _eq: projektId } : { _null: true },
+    }),
   )
   const res = await fetch(`${base()}/items/applications?filter=${filter}&limit=1&fields=id`, {
     headers: authHeaders(),
@@ -1187,4 +1202,28 @@ export async function schalteBearbeiteteDnaScharf(
     console.error(`Alte DNA-Version ${alteId} konnte nicht deaktiviert werden (${patch.status})`)
   }
   return { id: Number(neueId), versionId: String(json.data?.version_id ?? neueVersion.version_id ?? '') }
+}
+
+/**
+ * Lädt id + Name eines Projekts, aber NUR wenn es dem Session-Medium gehört
+ * und nicht archiviert ist. Grundlage für Projekt-Gesuche (anschreiben.ts) und
+ * dieselbe Prüfung, die /api/portal/projekt-messen macht — ein Medium darf nie
+ * ein fremdes Projekt anfassen, auch nicht mit geratener id.
+ */
+export async function ladeEigenesProjektFuerPortal(
+  id: number,
+  mediumSlug: string,
+): Promise<{ id: number; name: string } | null> {
+  const res = await fetch(`${base()}/items/projekte/${id}?fields=id,name,medium_id,status`, {
+    headers: authHeaders(),
+    signal: AbortSignal.timeout(15_000),
+  })
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(`projekte/${id}: Directus antwortete ${res.status}`)
+  const json = (await res.json()) as {
+    data?: { id: number; name?: string | null; medium_id?: string | null; status?: string | null }
+  }
+  const row = json.data
+  if (!row || (row.medium_id ?? '') !== mediumSlug || row.status === 'archiviert') return null
+  return { id: Number(row.id), name: row.name ?? String(row.id) }
 }

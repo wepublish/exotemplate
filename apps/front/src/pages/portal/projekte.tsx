@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { SchrittInfo } from '@/components/portal/SchrittInfo'
 import { TrefferKarte } from '@/components/portal/TrefferKarte'
+import { ConsentDialog } from '@/components/portal/ConsentDialog'
+import { RueckmeldungDialog } from '@/components/RueckmeldungDialog'
 import { PORTAL_TEXTE } from '@/lib/portal-texte'
 import {
   PROJEKT_ZUSTAND_LABEL,
@@ -47,6 +49,16 @@ export default function PortalProjekteSeite() {
   const [offenesProjekt, setOffenesProjekt] = useState<number | null>(null)
   const [treffer, setTreffer] = useState<PortalTreffer[]>([])
   const [trefferLaedt, setTrefferLaedt] = useState(false)
+
+  // Gesuch für einen Projekt-Treffer anfordern (29.07.2026): identischer
+  // Consent-Weg wie bei den Medium-Treffern, nur mit projekt_id im Body.
+  const [aktionLaeuft, setAktionLaeuft] = useState(false)
+  const [consentTreffer, setConsentTreffer] = useState<PortalTreffer | null>(null)
+  const [consentText, setConsentText] = useState('')
+  const [consentVoll, setConsentVoll] = useState(true)
+  const [bestaetigenLaeuft, setBestaetigenLaeuft] = useState(false)
+  const [rueckmeldungTreffer, setRueckmeldungTreffer] = useState<PortalTreffer | null>(null)
+  const [rueckmeldungLaeuft, setRueckmeldungLaeuft] = useState(false)
 
   const laden = useCallback(() => {
     fetch(`/api/portal/projekte?cb=${Date.now()}`, { cache: 'no-store' })
@@ -166,6 +178,86 @@ export default function PortalProjekteSeite() {
       .finally(() => setTrefferLaedt(false))
   }
 
+  function schliesseConsentDialog() {
+    setConsentTreffer(null)
+    setConsentText('')
+    setAktionLaeuft(false)
+  }
+
+  async function handleAnschreiben(t: PortalTreffer, consentBestaetigt = false) {
+    if (offenesProjekt === null) return
+    setAktionLaeuft(true)
+    setBestaetigenLaeuft(true)
+    try {
+      const res = await fetch('/api/portal/anschreiben', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          stiftung_id: t.stiftungId,
+          projekt_id: offenesProjekt,
+          ...(consentBestaetigt ? { consent_bestaetigt: true } : {}),
+        }),
+      })
+      const json = (await res.json().catch(() => ({}))) as {
+        error?: string
+        consent_noetig?: boolean
+        consent_kurz?: boolean
+        text?: string
+        bereits_vorhanden?: boolean
+      }
+      if (res.status === 409 && (json.consent_noetig || json.consent_kurz)) {
+        setConsentTreffer(t)
+        setConsentVoll(!!json.consent_noetig)
+        setConsentText(json.text ?? '')
+        return
+      }
+      if (res.status === 409 && json.bereits_vorhanden) {
+        toast.error(PORTAL_TEXTE['projekte.gesuch_bereits_vorhanden'])
+        setAktionLaeuft(false)
+        return
+      }
+      if (!res.ok) {
+        toast.error(json.error ?? `Fehlgeschlagen (${res.status})`)
+        setAktionLaeuft(false)
+        return
+      }
+      toast.success(PORTAL_TEXTE['projekte.gesuch_angefordert'])
+      schliesseConsentDialog()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : String(err))
+      setAktionLaeuft(false)
+    } finally {
+      setBestaetigenLaeuft(false)
+    }
+  }
+
+  async function handleRueckmeldung(notiz: string) {
+    if (!rueckmeldungTreffer) return
+    setRueckmeldungLaeuft(true)
+    try {
+      const res = await fetch('/api/portal/match-rueckmeldung', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          stiftung_id: rueckmeldungTreffer.stiftungId,
+          stiftung_name: rueckmeldungTreffer.name,
+          notiz,
+        }),
+      })
+      const json = (await res.json().catch(() => ({}))) as { error?: string }
+      if (!res.ok) {
+        toast.error(json.error ?? `Fehlgeschlagen (${res.status})`)
+        return
+      }
+      toast.success(PORTAL_TEXTE['treffer.rueckmeldung_gesendet'])
+      setRueckmeldungTreffer(null)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : String(err))
+    } finally {
+      setRueckmeldungLaeuft(false)
+    }
+  }
+
   const kannAnlegen = name.trim().length >= PROJEKT_NAME_MIN && beschreibung.trim().length >= PROJEKT_BESCHREIBUNG_MIN
 
   return (
@@ -265,9 +357,13 @@ export default function PortalProjekteSeite() {
                     <TrefferKarte
                       key={t.stiftungId}
                       treffer={t}
-                      onAnschreiben={() => toast.info(PORTAL_TEXTE['projekte.anschreiben_hinweis'])}
-                      onNichtRelevant={() => toast.info(PORTAL_TEXTE['projekte.anschreiben_hinweis'])}
-                      onRueckmeldung={() => toast.info(PORTAL_TEXTE['projekte.anschreiben_hinweis'])}
+                      disabled={aktionLaeuft}
+                      onAnschreiben={(gewaehlt) => void handleAnschreiben(gewaehlt)}
+                      // «Nicht relevant» blendet einen MEDIUM-Treffer aus; für
+                      // Projekt-Treffer ist die Rückmeldung der richtige Weg,
+                      // weil sie das Matching verbessert statt nur zu verbergen.
+                      onNichtRelevant={setRueckmeldungTreffer}
+                      onRueckmeldung={setRueckmeldungTreffer}
                     />
                   ))}
                 </div>
@@ -276,6 +372,26 @@ export default function PortalProjekteSeite() {
           )
         })}
       </div>
+
+      <ConsentDialog
+        open={!!consentTreffer}
+        onOpenChange={(open) => !open && schliesseConsentDialog()}
+        voll={consentVoll}
+        text={consentText}
+        bestaetigenLaeuft={bestaetigenLaeuft}
+        onBestaetigen={() => {
+          if (consentTreffer) void handleAnschreiben(consentTreffer, true)
+        }}
+      />
+
+      <RueckmeldungDialog
+        offen={!!rueckmeldungTreffer}
+        stiftungName={rueckmeldungTreffer?.name ?? ''}
+        hinweis={PORTAL_TEXTE['treffer.rueckmeldung_hinweis']}
+        beschaeftigt={rueckmeldungLaeuft}
+        onAbbrechen={() => setRueckmeldungTreffer(null)}
+        onBestaetigen={(notiz) => void handleRueckmeldung(notiz)}
+      />
     </div>
   )
 }

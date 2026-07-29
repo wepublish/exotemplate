@@ -344,8 +344,9 @@ export const PORTAL_TEXTE: Record<string, string> = {
   'projekte.treffer_auf': 'Treffer ansehen',
   'projekte.treffer_zu': 'Treffer zuklappen',
   'projekte.treffer_leer': 'Für dieses Projekt sind noch keine Treffer da.',
-  'projekte.anschreiben_hinweis':
-    'Für Projekt-Treffer läuft die Gesuchs-Anfrage über euren Slack-Kanal — schreibt uns, welche Stiftung ihr anschreiben wollt.',
+  'projekte.gesuch_angefordert': 'Danke, wir bereiten das Gesuch für dieses Projekt vor.',
+  'projekte.gesuch_bereits_vorhanden':
+    'Für diese Stiftung und dieses Projekt läuft schon ein Gesuch. Den Stand seht ihr unter «4. Gesuche».',
   'projekte.entfernen_knopf': 'Projekt entfernen',
   'projekte.entfernt': 'Projekt entfernt.',
 
