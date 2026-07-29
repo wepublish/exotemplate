@@ -238,6 +238,20 @@ describe('PORTAL_TEXTE', () => {
     'unterlagen.fragebogen_knopf_aendern',
     'unterlagen.fragebogen_gespeichert',
     'unterlagen.fragebogen_aktualisiert',
+    // Unterlagen-Verwaltung (Ramona-Feedback 29.07.2026).
+    'unterlagen.eintrag_bearbeiten',
+    'unterlagen.eintrag_entfernen',
+    'unterlagen.eintrag_gespeichert',
+    'unterlagen.eintrag_entfernt',
+    'unterlagen.automatisch',
+    // Schritt-Infoboxen + Wartezustände (Ramona-Feedback 29.07.2026).
+    'schritt1.titel', 'schritt1.text', 'schritt1.wozu',
+    'schritt2.titel', 'schritt2.text', 'schritt2.wozu',
+    'schritt3.titel', 'schritt3.text', 'schritt3.wozu',
+    'schritt4.titel', 'schritt4.text', 'schritt4.wozu',
+    'uebersicht.info_titel', 'uebersicht.info_text',
+    'treffer.warten_titel', 'treffer.warten_text',
+    'dna.warten_titel', 'dna.warten_text',
     // Rückmeldung zu einem Treffer (29.07.2026).
     'treffer.rueckmeldung_knopf',
     'treffer.rueckmeldung_hinweis',

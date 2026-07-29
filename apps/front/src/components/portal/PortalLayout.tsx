@@ -48,12 +48,16 @@ export function usePortalMe(): PortalMe | null {
 
 // ─── Nav ──────────────────────────────────────────────────────────────────────
 
+// Die Reiter SIND die Onboarding-Schritte (Wunsch Ramona 29.07.2026): keine
+// separate Checkliste, die neben dem Portal lebt — die Nummer steht am Reiter,
+// und jede Seite erklärt oben selbst, was hier zu tun ist und wozu. Die
+// Übersicht bleibt ohne Nummer: sie ist die Landkarte, kein Schritt.
 const NAV_ITEMS: NavItem[] = [
   { key: 'uebersicht', name: 'Übersicht', href: '/portal' },
-  { key: 'unterlagen', name: 'Unterlagen', href: '/portal/onboarding' },
-  { key: 'dna', name: 'DNA', href: '/portal/dna' },
-  { key: 'treffer', name: 'Treffer', href: '/portal/treffer' },
-  { key: 'gesuche', name: 'Gesuche', href: '/portal/gesuche' },
+  { key: 'unterlagen', name: '1. Unterlagen', href: '/portal/onboarding' },
+  { key: 'dna', name: '2. DNA', href: '/portal/dna' },
+  { key: 'treffer', name: '3. Treffer', href: '/portal/treffer' },
+  { key: 'gesuche', name: '4. Gesuche', href: '/portal/gesuche' },
 ]
 
 function istAktiv(pathname: string, href: string): boolean {
@@ -154,35 +158,33 @@ export default function PortalLayout({ children }: PortalLayoutProps) {
               // Schloss-Zustände: Treffer bis zur Matching-Freischaltung,
               // DNA bis eine aktive medium_dna existiert (NICHT dnaFreigabe:
               // während der Prüfphase bleibt die Seite zugänglich).
+              // Noch nicht freigeschaltete Schritte sind ANKLICKBAR (Wunsch
+              // Ramona 29.07.2026): vorher war der Reiter toter Text, und man
+              // sah nicht, was dort kommt. Jetzt führt er auf die Seite, die
+              // ihren Wartezustand selbst erklärt (gedämpfte Vorschau plus
+              // Hinweis, was wir gerade tun). Das Schloss bleibt als Signal.
               const sperrGrund =
                 item.key === 'treffer' && !me.freigeschaltet
-                  ? 'Erst nach der Freischaltung verfügbar'
+                  ? 'Wir prüfen und schalten eure Treffer frei'
                   : item.key === 'dna' && !me.hatDna
-                    ? 'Erst verfügbar, wenn eure DNA erstellt ist'
+                    ? 'Entsteht, sobald eure Unterlagen da sind'
                     : null
-              if (sperrGrund) {
-                return (
-                  <span
-                    key={item.key}
-                    title={sperrGrund}
-                    aria-disabled="true"
-                    className="flex select-none items-center gap-1.5 whitespace-nowrap px-3 py-3 text-sm text-slate-300"
-                  >
-                    <Lock className="h-3.5 w-3.5" />
-                    {item.name}
-                  </span>
-                )
-              }
               const aktiv = istAktiv(router.pathname, item.href)
               return (
                 <Link
                   key={item.key}
                   href={item.href}
+                  title={sperrGrund ?? undefined}
                   className={[
-                    '-mb-px whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium transition-colors',
-                    aktiv ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800',
+                    '-mb-px flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium transition-colors',
+                    aktiv
+                      ? 'border-indigo-500 text-indigo-600'
+                      : sperrGrund
+                        ? 'border-transparent text-slate-400 hover:text-slate-600'
+                        : 'border-transparent text-slate-500 hover:text-slate-800',
                   ].join(' ')}
                 >
+                  {sperrGrund && <Lock className="h-3.5 w-3.5 shrink-0" />}
                   {item.name}
                 </Link>
               )

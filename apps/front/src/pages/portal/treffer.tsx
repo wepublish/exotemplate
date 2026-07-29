@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { TrefferKarte } from '@/components/portal/TrefferKarte'
+import { SchrittInfo } from '@/components/portal/SchrittInfo'
 import { ConsentDialog } from '@/components/portal/ConsentDialog'
 import { PORTAL_TEXTE } from '@/lib/portal-texte'
 import { AUSBLENDE_GRUENDE, type AusblendeGrund } from '@/lib/ausblenden'
@@ -216,18 +217,49 @@ export default function PortalTrefferSeite() {
     <div className="space-y-6">
       <div>
         {/* Kurzes Seiten-Label, kein Fliesstext-Satz: analog STATION_LABEL bewusst nicht in PORTAL_TEXTE. */}
-        <h1 className="text-xl font-bold text-slate-900">Treffer</h1>
-        <p className="mt-1 text-sm text-slate-500">{PORTAL_TEXTE['treffer.intro']}</p>
-        <p className="mt-1 text-xs text-slate-400">{PORTAL_TEXTE['treffer.anschreiben_hinweis']}</p>
+        <h1 className="text-xl font-bold text-slate-900">3. Treffer</h1>
       </div>
+
+      <SchrittInfo schritt="3" titel={PORTAL_TEXTE['schritt3.titel']}>
+        <p>{PORTAL_TEXTE['schritt3.text']}</p>
+        <p>{PORTAL_TEXTE['schritt3.wozu']}</p>
+      </SchrittInfo>
 
       {status === 'laden' && <p className="text-sm text-slate-400">Wird geladen …</p>}
       {status === 'fehler' && <p className="text-sm text-slate-500">{PORTAL_TEXTE['fehler.daten_nicht_verfuegbar']}</p>}
 
+      {/* Wartezustand mit gedämpfter Vorschau (Wunsch Ramona 29.07.2026): der
+          Reiter ist anklickbar, also muss hier sichtbar werden, WAS kommt und
+          WARUM es noch nicht da ist. Die Platzhalter tragen keine echten Daten
+          — die Trefferliste ist vor der Freischaltung bewusst nicht sichtbar. */}
       {status === 'gesperrt' && (
-        <div className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-6">
-          <Lock className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
-          <p className="text-sm text-slate-500">{PORTAL_TEXTE['uebersicht.naechster_schritt.freischaltung']}</p>
+        <div className="space-y-4">
+          <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-6">
+            <Lock className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-amber-900">{PORTAL_TEXTE['treffer.warten_titel']}</p>
+              <p className="text-sm leading-relaxed text-amber-900/80">{PORTAL_TEXTE['treffer.warten_text']}</p>
+            </div>
+          </div>
+
+          <div aria-hidden className="pointer-events-none select-none space-y-3 opacity-40 blur-[2px]">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="rounded-xl border border-slate-200 bg-white p-5">
+                <div className="flex items-center gap-2">
+                  <div className="h-3.5 w-40 rounded bg-slate-300" />
+                  <div className="h-4 w-16 rounded-full bg-emerald-200" />
+                </div>
+                <div className="mt-3 space-y-1.5">
+                  <div className="h-2.5 w-full rounded bg-slate-200" />
+                  <div className="h-2.5 w-4/5 rounded bg-slate-200" />
+                </div>
+                <div className="mt-3 flex gap-1.5">
+                  <div className="h-4 w-20 rounded-full bg-slate-200" />
+                  <div className="h-4 w-24 rounded-full bg-slate-200" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

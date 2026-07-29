@@ -73,6 +73,35 @@ Herzlich
 }
 
 /**
+ * Einladung als SLACK-Nachricht (Wunsch Ramona 29.07.2026: «via Slack
+ * verschicken, damit die Kommunikation von Anfang an dort ist»). Inhaltlich
+ * dieselbe Einladung wie MAIL_EINLADUNG, aber im Slack-Ton: kein Betreff,
+ * keine Anrede-Zeile mit Namen (im Channel sitzt die Redaktion, nicht eine
+ * Person), Slack-Markdown für Fettung.
+ *
+ * SICHERHEIT: wie in der Mail steht hier KEIN Login-Link. Ein Slack-Channel
+ * ist persistent und durchsuchbar; ein Link wäre genauso ein liegender
+ * Schlüssel wie in einem Postfach. Der Weg bleibt: Login-Seite öffnen, Link
+ * selbst anfordern.
+ *
+ * Platzhalter: {medium}, {loginseite}, {stunden}, {absender}.
+ */
+export const SLACK_EINLADUNG = `*Willkommen beim Fundraising as a Service von We.Publish, {medium}.* Euer Portal-Zugang ist bereit.
+
+So kommt ihr hinein: {loginseite}
+Dort gebt ihr eure Kontakt-E-Mail-Adresse ein und bekommt einen Anmeldelink. Kein Passwort nötig. Der Link gilt {stunden} Stunden, danach fordert ihr auf derselben Seite einfach einen neuen an.
+
+*So läuft es Schritt für Schritt:*
+1. *Unterlagen* — Logo, Artikel, Newsletter, frühere Gesuche, Budgets, Selbstbeschriebe. Je mehr wir von euch sehen, desto genauer wird euer Profil. Unvollständig ist völlig ok.
+2. *Fundraising-DNA* — euer Profil entsteht aus euren Unterlagen. Ihr lest es durch, passt es an und gebt es frei.
+3. *Treffer* — nach eurer Freigabe prüfen wir und schalten die passenden Stiftungen frei.
+4. *Gesuche* — ihr prüft die Entwürfe und meldet uns, wenn sie eingereicht sind.
+
+Fragen und Rückmeldungen am besten hier im Kanal, dann sind wir alle erreichbar.
+
+— {absender}, Fundraising-Team We.Publish`
+
+/**
  * Benachrichtigung nach der Matching-Freischaltung (Entscheid 28.07.2026:
  * «wenn wir sie freigeben, soll das medium wiederum eine meldung bekommen
  * (mail und slack) und die liste erstmals sehen»). Die Slack-Meldung übernimmt
@@ -214,10 +243,10 @@ export const PORTAL_TEXTE: Record<string, string> = {
   // Dokument nicht vorgegeben, darum hier ergänzt, siehe Task-6-Report).
   'unterlagen.upload_titel': 'Dokumente hochladen',
   'unterlagen.upload_hinweis':
-    'Zieht eine oder mehrere Dateien hierhin oder klickt, um sie auszuwählen. Word, Excel, PDF, Text oder Markdown, bis 50 MB pro Datei.',
+    'Zum Beispiel: Jahresbericht, Budget oder Finanzplan, Medienkonzept, Statuten, Gemeinnützigkeits-Nachweis, ein früheres Gesuch, ein Selbstbeschrieb. Zieht eine oder mehrere Dateien hierhin oder klickt, um sie auszuwählen. Word, Excel, PDF, Text oder Markdown, bis 50 MB pro Datei.',
   'unterlagen.url_titel': 'URL hinzufügen',
   'unterlagen.url_hinweis':
-    'Ein Link zu einem Artikel, eurer Website oder etwas anderem, das euch beschreibt. Wir lesen die Seite für euch ein.',
+    'Zum Beispiel: eine Recherche, die für euch typisch ist, eure «Über uns»-Seite, ein Porträt über euch, eine Newsletter-Ausgabe im Archiv. Wir lesen die Seite für euch ein.',
   'unterlagen.fragebogen_titel': 'Fragebogen',
   // Sichtbarer Speicher-Zustand + Bearbeiten (Wunsch 29.07.2026): vorher war
   // nicht erkennbar, dass die Antworten liegen und einfliessen.
@@ -230,13 +259,55 @@ export const PORTAL_TEXTE: Record<string, string> = {
   'unterlagen.fragebogen_selbstbeschrieb_label': 'Wie beschreibt ihr euch selbst?',
   'unterlagen.fragebogen_fokus_label': 'Fokus, was ihr erreichen wollt',
   'unterlagen.fragebogen_nogos_label': 'No-Gos',
-  'unterlagen.liste_titel': 'Eure Unterlagen',
-  'unterlagen.liste_leer': 'Noch keine Unterlagen. Ladet oben etwas hoch, das den Anfang macht.',
+  'unterlagen.liste_titel': 'Das haben wir von euch',
+  'unterlagen.liste_leer': 'Noch nichts da. Ladet unten etwas hoch, das den Anfang macht — ein Artikel oder ein Jahresbericht genügt.',
+  // Verwaltung der einzelnen Einträge (Wunsch Ramona 29.07.2026).
+  'unterlagen.eintrag_bearbeiten': 'Titel und Kategorie ändern',
+  'unterlagen.eintrag_entfernen': 'Entfernen',
+  'unterlagen.eintrag_gespeichert': 'Änderung gespeichert.',
+  'unterlagen.eintrag_entfernt': 'Eintrag entfernt.',
+  'unterlagen.automatisch': 'automatisch',
   'unterlagen.wepublish_titel': 'Von We.Publish bereitgestellt',
   'unterlagen.dna_knopf': 'DNA erstellen lassen',
   'unterlagen.dna_knopf_gesperrt': 'Ladet zuerst eine Unterlage hoch, dann könnt ihr eure DNA erstellen lassen.',
   // Logo-Gate für denselben Knopf (Pflicht-Erststep, siehe Modul-Kommentar Logo-Block oben).
   'unterlagen.dna_knopf_gesperrt_logo': 'Ladet zuerst euer Logo hoch, dann könnt ihr eure DNA erstellen lassen.',
+
+  // ─── Schritt-Infoboxen (Wunsch Ramona 29.07.2026) ──────────────────────────
+  // Jede Seite erklärt oben, was hier zu tun ist und WOZU. Bewusst konkret mit
+  // Beispielen: «eure Unterlagen» und «Dokument hochladen» waren unklar.
+  'schritt1.titel': 'Erzählt uns, wer ihr seid',
+  'schritt1.text':
+    'Hier sammelt ihr alles, was euer Medium ausmacht: euer Logo, veröffentlichte Artikel, Newsletter, frühere Gesuche und Absagen, Jahresberichte, Budgets, Medienkonzepte, Selbstbeschriebe, Statuten. Auch Links zu Beiträgen genügen, wir lesen die Seiten für euch ein.',
+  'schritt1.wozu':
+    'Daraus entsteht im nächsten Schritt eure Fundraising-DNA — das Profil, mit dem wir passende Stiftungen für euch finden. Je mehr wir von euch sehen, desto treffsicherer werden die Vorschläge. Unvollständig ist völlig in Ordnung, ihr könnt jederzeit nachliefern.',
+  'schritt2.titel': 'Prüft euer Profil',
+  'schritt2.text':
+    'Wir haben eure Unterlagen gelesen und daraus eure Fundraising-DNA erstellt: ein kurzer Charakter-Text und die Themen, für die ihr steht. Lest beides in Ruhe durch, ändert was nicht stimmt, und gebt es frei, wenn es euch trifft.',
+  'schritt2.wozu':
+    'Die DNA ist die Grundlage jedes Vorschlags und jedes Gesuchs. Was hier steht, entscheidet, welche Stiftungen wir euch zeigen — darum lohnt sich das genaue Lesen mehr als alles andere in diesem Portal.',
+  'schritt3.titel': 'Eure passenden Stiftungen',
+  'schritt3.text':
+    'Hier stehen die Stiftungen, die zu eurem Profil passen, mit einer kurzen Begründung. Mit «Anschreiben» sagt ihr uns, für welche wir ein Gesuch vorbereiten sollen. Passt eine überhaupt nicht, schreibt uns eine Rückmeldung — das verbessert eure nächsten Vorschläge.',
+  'schritt3.wozu':
+    'Wir prüfen jede Liste von Hand, bevor ihr sie sieht. So landen keine Stiftungen bei euch, die euch Zeit kosten würden.',
+  'schritt4.titel': 'Eure Gesuche',
+  'schritt4.text':
+    'Für jede Stiftung, die ihr gewählt habt, bereiten wir einen Gesuchsentwurf vor. Ihr lest ihn, ändert den Text wo nötig, und gebt ihn final frei. Eingereicht wird von euch — sagt uns danach kurz Bescheid.',
+  'schritt4.wozu':
+    'So bleibt die Verantwortung für den Antrag bei euch, und wir sehen, wo wir nachfassen müssen.',
+  'uebersicht.info_titel': 'So läuft euer Fundraising',
+  'uebersicht.info_text':
+    'Vier Schritte, in dieser Reihenfolge: Unterlagen hochladen, Profil prüfen und freigeben, Treffer ansehen und wählen, Gesuche prüfen. Ihr könnt jederzeit zu einem früheren Schritt zurück und etwas ergänzen — alles bleibt gespeichert.',
+
+  // Wartezustände auf noch nicht freigeschalteten Schritten: die Reiter sind
+  // anklickbar (Wunsch Ramona), also braucht jede Seite eine Erklärung.
+  'treffer.warten_titel': 'Wir stellen eure Trefferliste zusammen',
+  'treffer.warten_text':
+    'Sobald ihr eure DNA freigegeben habt, prüfen wir die Vorschläge von Hand und schalten eine Auswahl passender Stiftungen für euch frei. Das dauert in der Regel ein bis zwei Arbeitstage. Ihr bekommt eine Meldung in eurem Slack-Kanal, sobald es soweit ist.',
+  'dna.warten_titel': 'Eure DNA entsteht aus euren Unterlagen',
+  'dna.warten_text':
+    'Sobald ihr im Schritt «1. Unterlagen» euer Logo und erste Dokumente hochgeladen habt, erstellen wir hier euer Profil. Das dauert etwa zehn bis zwanzig Minuten.',
 
   // Rückmeldung zu EINEM Treffer (29.07.2026): beschreibt der Match-Engine,
   // warum die Stiftung nicht passt. Wirkt nach der Freigabe durch We.Publish.

@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { GesuchEditor } from '@/components/portal/GesuchEditor'
 import { PORTAL_TEXTE } from '@/lib/portal-texte'
+import { SchrittInfo } from '@/components/portal/SchrittInfo'
 import type { GesuchPortalStatus, GesuchVersion } from '@/lib/portal-status'
 
 /**
@@ -280,8 +281,13 @@ export default function PortalGesucheSeite() {
     <div className="space-y-6">
       <div>
         {/* Kurzes Seiten-Label, kein Fliesstext-Satz: analog STATION_LABEL bewusst nicht in PORTAL_TEXTE. */}
-        <h1 className="text-xl font-bold text-slate-900">Gesuche</h1>
+        <h1 className="text-xl font-bold text-slate-900">4. Gesuche</h1>
       </div>
+
+      <SchrittInfo schritt="4" titel={PORTAL_TEXTE['schritt4.titel']}>
+        <p>{PORTAL_TEXTE['schritt4.text']}</p>
+        <p>{PORTAL_TEXTE['schritt4.wozu']}</p>
+      </SchrittInfo>
 
       {status === 'laden' && <p className="text-sm text-slate-400">Wird geladen …</p>}
       {status === 'fehler' && <p className="text-sm text-slate-500">{PORTAL_TEXTE['fehler.daten_nicht_verfuegbar']}</p>}

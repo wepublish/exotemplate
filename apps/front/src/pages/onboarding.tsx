@@ -44,6 +44,7 @@ import DnaGenerieren from '@/components/DnaGenerieren'
 import { MediumLogo } from '@/components/MediumLogo'
 import { MailEntwurfButton } from '@/components/MailEntwurfButton'
 import { OnboardingSlackButton } from '@/components/OnboardingSlackButton'
+import { EinladungSlackButton } from '@/components/EinladungSlackButton'
 import { LOGIN_TTL_STUNDEN_STANDARD, MAIL_EINLADUNG, baueSlackVerweis, fuelleVorlage } from '@/lib/portal-texte'
 import { ABSENDER_STANDARD, baueAnrede } from '@/lib/mail-vorlagen'
 import type { ArbeitsDnaGespeichert } from '@/pages/api/medium-knowledge/working-dna'
@@ -1723,6 +1724,11 @@ export default function OnboardingPage() {
               Anmeldelink holt. Absender ist Ramona, Anrede «Liebe Redaktion von {willkommen.name}» —
               beides beim Redigieren anpassbar.
             </span>
+            <EinladungSlackButton
+              mediumSlug={willkommen.slug}
+              mediumName={willkommen.name}
+              variant="default"
+            />
             <MailEntwurfButton
               betreff={einladung.betreff}
               text={einladung.text}
@@ -1782,6 +1788,10 @@ export default function OnboardingPage() {
                 >
                   {willkommenLaedt ? 'Link wird erzeugt…' : 'Willkommensmail'}
                 </Button>
+                <EinladungSlackButton
+                  mediumSlug={ausgewaehltesMedium.slug}
+                  mediumName={ausgewaehltesMedium.name}
+                />
                 <OnboardingSlackButton
                   mediumSlug={ausgewaehltesMedium.slug}
                   mediumName={ausgewaehltesMedium.name}

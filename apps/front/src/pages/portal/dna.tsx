@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import DnaPdf from '@/components/DnaPdf'
 import { usePortalMe } from '@/components/portal/PortalLayout'
+import { SchrittInfo } from '@/components/portal/SchrittInfo'
 import { PORTAL_TEXTE } from '@/lib/portal-texte'
 import { DNA_JOB_STUFEN, DNA_JOB_STUFE_LABEL, stufeAusPhase } from '@/lib/portal-dna'
 import type { GenerateDnaResult } from '@/lib/generate-dna-jobs'
@@ -224,9 +225,13 @@ export default function PortalDnaSeite() {
     <div className="space-y-6">
       <div>
         {/* Kurzes Seiten-Label, kein Fliesstext-Satz: analog STATION_LABEL bewusst nicht in PORTAL_TEXTE. */}
-        <h1 className="text-xl font-bold text-slate-900">DNA</h1>
-        <p className="mt-1 text-sm text-slate-500">{PORTAL_TEXTE['dna.intro']}</p>
+        <h1 className="text-xl font-bold text-slate-900">2. DNA</h1>
       </div>
+
+      <SchrittInfo schritt="2" titel={PORTAL_TEXTE['schritt2.titel']}>
+        <p>{PORTAL_TEXTE['schritt2.text']}</p>
+        <p>{PORTAL_TEXTE['schritt2.wozu']}</p>
+      </SchrittInfo>
 
       {logoFehlt && (
         <div className="space-y-3 rounded-xl border border-amber-200 bg-amber-50 p-6">

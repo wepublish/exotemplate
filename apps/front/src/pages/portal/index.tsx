@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { usePortalMe } from '@/components/portal/PortalLayout'
 import { PORTAL_TEXTE, baueSlackVerweis, fuelleText } from '@/lib/portal-texte'
+import { SchrittInfo } from '@/components/portal/SchrittInfo'
 import { STATION_REIHENFOLGE, STATION_LABEL, type Station, type Reminder } from '@/lib/portal-status'
 
 /**
@@ -99,6 +100,10 @@ export default function PortalUebersichtSeite() {
         <h1 className="text-xl font-bold text-slate-900">{willkommen}</h1>
         <p className="mt-1 text-sm text-slate-500">{PORTAL_TEXTE['uebersicht.stationen_intro']}</p>
       </div>
+
+      <SchrittInfo titel={PORTAL_TEXTE['uebersicht.info_titel']}>
+        <p>{PORTAL_TEXTE['uebersicht.info_text']}</p>
+      </SchrittInfo>
 
       {status === 'laden' && <p className="text-sm text-slate-400">Wird geladen …</p>}
       {status === 'fehler' && <p className="text-sm text-slate-500">{PORTAL_TEXTE['fehler.daten_nicht_verfuegbar']}</p>}

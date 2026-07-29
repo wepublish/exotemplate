@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { MediumLogo } from '@/components/MediumLogo'
+import { SchrittInfo } from '@/components/portal/SchrittInfo'
+import { UnterlagenListe } from '@/components/portal/UnterlagenListe'
 import { PORTAL_TEXTE } from '@/lib/portal-texte'
-import { kategorieLabelFromKey } from '@/lib/knowledge-score'
 import {
   FOERDERHISTORIE_TYPEN,
   foerderhistorieTypLabel,
@@ -756,7 +757,6 @@ export default function PortalUnterlagenSeite() {
   }, [laden, ladeLogoStatus])
 
   const eintraege = wissen?.eintraege ?? []
-  const wepublishEintraege = eintraege.filter((e) => e.quelle === 'We.Publish')
   const hatEintraege = eintraege.length > 0
   const hatLogo = logoStatus?.hatLogo ?? false
   const kannWeiter = hatEintraege && hatLogo
@@ -765,24 +765,17 @@ export default function PortalUnterlagenSeite() {
     <div className="space-y-6">
       <div>
         {/* Kurzes Seiten-Label, kein Fliesstext-Satz: analog STATION_LABEL bewusst nicht in PORTAL_TEXTE. */}
-        <h1 className="text-xl font-bold text-slate-900">Unterlagen</h1>
-        <p className="mt-1 text-sm text-slate-500">{PORTAL_TEXTE['unterlagen.intro']}</p>
+        <h1 className="text-xl font-bold text-slate-900">1. Unterlagen</h1>
       </div>
 
-      {status === 'fehler' && <p className="text-sm text-slate-500">{PORTAL_TEXTE['fehler.daten_nicht_verfuegbar']}</p>}
+      <SchrittInfo schritt="1" titel={PORTAL_TEXTE['schritt1.titel']}>
+        <p>{PORTAL_TEXTE['schritt1.text']}</p>
+        <p>{PORTAL_TEXTE['schritt1.wozu']}</p>
+      </SchrittInfo>
 
-      <LogoBlock hatLogo={hatLogo} slug={logoStatus?.slug ?? null} name={logoStatus?.name ?? ''} onErfolg={ladeLogoStatus} />
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <UploadBlock onErfolg={laden} />
-        <UrlBlock onErfolg={laden} />
-      </div>
-
-      <FragebogenBlock gespeichert={wissen?.fragebogen ?? null} onErfolg={laden} />
-
-      <FoerderhistorieBlock onWissenGeaendert={laden} />
-
-      {/* Wissens-Stand */}
+      {/* Was schon da ist, steht OBEN (Wunsch Ramona 29.07.2026): vorher war
+          unklar, wohin Uploads und URLs verschwinden. Mit Vollständigkeits-
+          Balken, damit sichtbar ist, was noch fehlt. */}
       <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-900">{PORTAL_TEXTE['unterlagen.liste_titel']}</h2>
@@ -799,40 +792,26 @@ export default function PortalUnterlagenSeite() {
         )}
 
         {status === 'laden' && <p className="text-sm text-slate-400">Wird geladen …</p>}
-
-        {status === 'bereit' && !hatEintraege && (
-          <p className="text-sm text-slate-400">{PORTAL_TEXTE['unterlagen.liste_leer']}</p>
-        )}
-
-        {hatEintraege && (
-          <ul className="space-y-2">
-            {eintraege.map((e) => (
-              <li
-                key={e.id}
-                className="flex items-center justify-between gap-3 rounded-lg border border-slate-100 px-3 py-2"
-              >
-                <p className="min-w-0 truncate text-sm font-medium text-slate-800">{e.title}</p>
-                <p className="shrink-0 whitespace-nowrap text-xs text-slate-400">
-                  {kategorieLabelFromKey(e.category)} · {e.quelle} · {formatDatum(e.datum)}
-                </p>
-              </li>
-            ))}
-          </ul>
+        {status !== 'laden' && (
+          <UnterlagenListe
+            eintraege={eintraege.map((e) => ({ ...e, datum: formatDatum(e.datum) }))}
+            onGeaendert={laden}
+          />
         )}
       </div>
 
-      {wepublishEintraege.length > 0 && (
-        <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-2">
-          <h2 className="text-sm font-semibold text-slate-900">{PORTAL_TEXTE['unterlagen.wepublish_titel']}</h2>
-          <ul className="space-y-1.5">
-            {wepublishEintraege.map((e) => (
-              <li key={e.id} className="text-sm text-slate-600">
-                {e.title} <span className="text-xs text-slate-400">· {formatDatum(e.datum)}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {status === 'fehler' && <p className="text-sm text-slate-500">{PORTAL_TEXTE['fehler.daten_nicht_verfuegbar']}</p>}
+
+      <LogoBlock hatLogo={hatLogo} slug={logoStatus?.slug ?? null} name={logoStatus?.name ?? ''} onErfolg={ladeLogoStatus} />
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <UploadBlock onErfolg={laden} />
+        <UrlBlock onErfolg={laden} />
+      </div>
+
+      <FragebogenBlock gespeichert={wissen?.fragebogen ?? null} onErfolg={laden} />
+
+      <FoerderhistorieBlock onWissenGeaendert={laden} />
 
       <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-5 space-y-3">
         <p className="text-sm text-indigo-900">{PORTAL_TEXTE['unterlagen.dna_knopf_hinweis']}</p>

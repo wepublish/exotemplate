@@ -1075,3 +1075,34 @@ export async function patcheWissensEintrag(id: number, data: Record<string, unkn
     throw new Error(`medium_knowledge aktualisieren fehlgeschlagen (${res.status}): ${text.slice(0, 200)}`)
   }
 }
+
+/**
+ * Lädt einen medium_knowledge-Eintrag per id UND prüft die Zugehörigkeit zum
+ * Session-Medium (Muster wie ladeApplicationFuerPortal: fremder oder
+ * fehlender Eintrag → null, die Route antwortet einheitlich 404, damit ein
+ * Aufrufer nicht herausfinden kann, ob eine fremde id existiert).
+ * `autoScraped` geht mit: automatisch eingelesene Einträge sind im Portal
+ * schreibgeschützt (siehe /api/portal/unterlage).
+ */
+export async function ladeWissensEintragFuerPortal(
+  id: number,
+  mediumSlug: string,
+): Promise<{ id: number; title: string; category: string; autoScraped: boolean } | null> {
+  const res = await fetch(`${base()}/items/medium_knowledge/${id}?fields=id,medium_id,title,category,auto_scraped`, {
+    headers: authHeaders(),
+    signal: AbortSignal.timeout(15_000),
+  })
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(`medium_knowledge/${id}: Directus antwortete ${res.status}`)
+  const json = (await res.json()) as {
+    data?: { id: number; medium_id?: string | null; title?: string | null; category?: string | null; auto_scraped?: boolean | null }
+  }
+  const row = json.data
+  if (!row || (row.medium_id ?? '') !== mediumSlug) return null
+  return {
+    id: Number(row.id),
+    title: row.title ?? '',
+    category: row.category ?? 'general_info',
+    autoScraped: !!row.auto_scraped,
+  }
+}

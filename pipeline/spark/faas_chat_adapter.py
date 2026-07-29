@@ -341,6 +341,41 @@ def onboarding_canvas(slug: str, name: str, markdown: str) -> dict:
     return {"ok": True, "canvas_id": cid, "neu": True}
 
 
+def slack_nachricht(slug: str, text: str) -> dict:
+    """Postet EINE Nachricht in den Slack-Channel des Mediums.
+
+    Sicherheitsregel wie faas_outbox.py und faas_roadmap_slack.py: Ziel ist
+    AUSSCHLIESSLICH `faas_medien.slack_channel` des angefragten Mediums. Es
+    gibt keinen Codepfad zu einem anderen Channel; ohne gesetzten Channel
+    passiert nichts. Die App (apps/front) hat bewusst keinen Slack-Token und
+    ruft nur hier an (Wunsch Ramona 29.07.2026: Einladung ueber Slack, damit
+    die Kommunikation von Anfang an dort liegt).
+    """
+    tok = _slack_token()
+    if not tok:
+        return {"ok": False, "note": "Kein Slack-Bot-Token (xoxb) in ~/.hermes/config.yaml."}
+    slug = (slug or "").strip()
+    text = (text or "").strip()
+    if not slug or not text:
+        return {"ok": False, "note": "medium_slug und text erforderlich."}
+    try:
+        rows = _dget(f"/items/faas_medien?filter[slug][_eq]={urllib.parse.quote(slug)}"
+                     f"&filter[mandant][_eq]={urllib.parse.quote(MANDANT)}"
+                     "&fields=slug,name,slack_channel&limit=1")
+    except Exception as e:
+        return {"ok": False, "note": f"Medium nicht ladbar: {e}"}
+    if not rows:
+        return {"ok": False, "note": f"Medium {slug} nicht gefunden."}
+    kanal = (rows[0].get("slack_channel") or "").strip()
+    if not kanal:
+        return {"ok": False, "note": f"Fuer {slug} ist kein slack_channel gesetzt."}
+    res = _slack("chat.postMessage", {"channel": kanal, "text": text[:3500]}, tok)
+    if not res.get("ok"):
+        return {"ok": False, "note": f"chat.postMessage: {res.get('error')}"}
+    _log_aktion(f"[slack-nachricht] {slug}: gepostet in {kanal}")
+    return {"ok": True, "channel": res.get("channel") or kanal, "ts": res.get("ts")}
+
+
 def starte_messung(slug: str) -> str:
     """Startet projekt_matcher --apply --projekt <slug> im Hintergrund (qwen-Messung ~5-6 Min)."""
     if not slug or not slug.replace("_", "").isalnum():
@@ -600,6 +635,9 @@ class Handler(BaseHTTPRequestHandler):
                                         (data.get("medium_name") or "").strip(),
                                         data.get("markdown") or "")
                 return self._send(200, res)
+            if self.path.rstrip("/").endswith("slack-nachricht"):
+                return self._send(200, slack_nachricht((data.get("medium_slug") or "").strip(),
+                                                       data.get("text") or ""))
             if self.path.rstrip("/").endswith("outbox-senden"):
                 return self._send(200, faas_outbox.sende(str(data.get("id") or ""),
                                                           str(data.get("user") or "team")))
