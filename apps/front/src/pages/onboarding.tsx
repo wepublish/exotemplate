@@ -33,6 +33,7 @@ import {
   UPDATE_MEDIUM_FELDER,
 } from '@/graphql/onboarding'
 import { slugify } from '@/graphql/projekte'
+import { baueFelderDiff, beschreibeDiff, pruefeMediumIdentitaet } from '@/lib/onboarding-felder'
 import {
   berechneKnowledgeScore,
   kategorieLabelFromKey,
@@ -615,10 +616,12 @@ function WepublishIngestBlock({ mediumId, hatApiUrl, onErfolg }: WepublishIngest
 
 interface OnboardingFelderProps {
   medium: FaasMedium
+  /** Der oben ausgewählte Slug — Notbremse gegen Fremddaten-Save, s.u. */
+  ausgewaehlterSlug: string
   onAktualisiert: () => void
 }
 
-function OnboardingFelder({ medium, onAktualisiert }: OnboardingFelderProps) {
+function OnboardingFelder({ medium, ausgewaehlterSlug, onAktualisiert }: OnboardingFelderProps) {
   const [website, setWebsite] = useState(medium.website ?? '')
   const [wepublishUrl, setWepublishUrl] = useState(medium.wepublish_api_url ?? '')
   const [mailchimpUrl, setMailchimpUrl] = useState(medium.mailchimp_archive_url ?? '')
@@ -628,28 +631,43 @@ function OnboardingFelder({ medium, onAktualisiert }: OnboardingFelderProps) {
   const [slackChannel, setSlackChannel] = useState(medium.slack_channel ?? '')
   const [speichern, setSpeichern] = useState(false)
 
+  // Zweiter Riegel neben dem `key` am Aufrufort: wechselt das Medium, werden die
+  // Felder auch dann neu gesetzt, wenn der Remount ausbleibt. Befund 29.07.2026
+  // (Screenshot Jolanda): oben stand «Zwölf», im Block lagen vmz-Werte.
+  useEffect(() => {
+    setWebsite(medium.website ?? '')
+    setWepublishUrl(medium.wepublish_api_url ?? '')
+    setMailchimpUrl(medium.mailchimp_archive_url ?? '')
+    setKontaktEmails((medium.kontakt_emails ?? []).join(', '))
+    setSlackChannel(medium.slack_channel ?? '')
+  }, [medium.slug, medium.website, medium.wepublish_api_url, medium.mailchimp_archive_url, medium.kontakt_emails, medium.slack_channel])
+
   const [updateMedium] = useMutation(UPDATE_MEDIUM_FELDER)
 
   async function handleSpeichern() {
+    // Notbremse: nie ein anderes Medium schreiben als das ausgewählte.
+    const identitaet = pruefeMediumIdentitaet(medium.slug, ausgewaehlterSlug)
+    if (!identitaet.ok) {
+      toast.error(identitaet.fehler)
+      return
+    }
+
+    // Nur Geändertes schicken. Vorher gingen immer alle fünf Felder raus, ein
+    // leeres Feld als `null` — ein unangetastetes Formular konnte damit
+    // bestehende Werte löschen.
+    const diff = baueFelderDiff(
+      { website, wepublishUrl, mailchimpUrl, kontaktEmails, slackChannel },
+      medium,
+    )
+    if (Object.keys(diff).length === 0) {
+      toast.info('Nichts geändert.')
+      return
+    }
+
     setSpeichern(true)
     try {
-      const emailListe = kontaktEmails
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean)
-      await updateMedium({
-        variables: {
-          id: String(medium.id),
-          data: {
-            website: website.trim() || null,
-            wepublish_api_url: wepublishUrl.trim() || null,
-            mailchimp_archive_url: mailchimpUrl.trim() || null,
-            kontakt_emails: emailListe.length > 0 ? emailListe : null,
-            slack_channel: slackChannel.trim() || null,
-          },
-        },
-      })
-      toast.success('Onboarding-Felder gespeichert.')
+      await updateMedium({ variables: { id: String(medium.id), data: diff } })
+      toast.success(`Gespeichert: ${beschreibeDiff(diff)}.`)
       onAktualisiert()
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
@@ -664,6 +682,9 @@ function OnboardingFelder({ medium, onAktualisiert }: OnboardingFelderProps) {
       <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-2">
         <Globe className="w-3.5 h-3.5" />
         Onboarding-Felder
+        <span className="ml-1 normal-case tracking-normal font-normal text-slate-400">
+          {medium.name}
+        </span>
       </h3>
 
       <div className="space-y-2">
@@ -1840,6 +1861,7 @@ export default function OnboardingPage() {
               // Werte des vorherigen Mediums behalten (Gefahr: Fremddaten-Save).
               key={ausgewaehltesMedium.slug}
               medium={ausgewaehltesMedium}
+              ausgewaehlterSlug={ausgewaehltesMediumSlug}
               onAktualisiert={handleAktualisiert}
             />
 
