@@ -7,11 +7,28 @@ on:
   # Manual trigger — rebuilds faas-front:main on demand (e.g. after a history
   # rewrite where the path filter didn't see the frontend changes).
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - 'apps/front/**'
+  # ─────────────────────────────────────────────────────────────────────────────
+  # PUSH-AUSLOESER STILLGELEGT am 29.07.2026.
+  #
+  # Grund: GitHub weist jeden Lauf ab mit «The job was not started because
+  # recent account payments have failed or your spending limit needs to be
+  # increased» — das Actions-Budget der Organisation wepublish ist erschoepft.
+  # Jeder Push loeste damit eine Fehlermail aus, ohne dass je ein Image
+  # entstanden waere. Der letzte erfolgreiche Lauf war am 29.07. um 09:52.
+  #
+  # Fuer unseren Betrieb ist der Workflow NICHT kritisch: `scripts/deploy-front.sh`
+  # baut das Image seit dem Vorfall vom 24.07. auf dem Mac und uebertraegt es
+  # direkt auf die VPS (nie Build auf der VPS, nie ueber GHCR).
+  #
+  # ZURUECKNEHMEN, sobald das Budget wieder steht: die vier Zeilen unter
+  # `# push:` entkommentieren. `workflow_dispatch` bleibt die ganze Zeit
+  # verfuegbar, der Workflow ist also weiter von Hand ausloesbar.
+  # ─────────────────────────────────────────────────────────────────────────────
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'apps/front/**'
 
 jobs:
   date_sha_tag:
