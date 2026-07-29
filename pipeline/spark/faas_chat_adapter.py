@@ -377,8 +377,15 @@ def slack_nachricht(slug: str, text: str) -> dict:
 
 
 def starte_messung(slug: str) -> str:
-    """Startet projekt_matcher --apply --projekt <slug> im Hintergrund (qwen-Messung ~5-6 Min)."""
-    if not slug or not slug.replace("_", "").isalnum():
+    """Startet projekt_matcher --apply --projekt <slug> im Hintergrund (qwen-Messung ~5-6 Min).
+
+    Slug-Guard erlaubt auch Bindestriche (Befund 29.07.2026): die Projekte, die
+    Medien seit heute selbst im Portal anlegen, heissen `<medium>-<projektname>`
+    und waeren sonst ALLE als "ungueltiger Slug" abgewiesen worden - still, denn
+    der Aufrufer sieht nur einen Status. Der Guard ist ohnehin nur ein zweiter
+    Riegel: Popen bekommt eine Argumentliste, keine Shell-Zeile.
+    """
+    if not slug or not slug.replace("_", "").replace("-", "").isalnum():
         return "ungueltiger Slug"
     if slug in _laufend:
         return "läuft bereits"
