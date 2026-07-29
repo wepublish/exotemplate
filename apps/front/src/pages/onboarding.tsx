@@ -1380,6 +1380,74 @@ function FinalesDnaBlock({ medium }: FinalesDnaBlockProps) {
 
 // ─── Hauptseite ───────────────────────────────────────────────────────────────
 
+// ─── Förderhistorie & Ausschlüsse (Operator-Lese-Sicht) ───────────────────────
+
+/**
+ * Zeigt, was das Medium im Portal unter «Bisherige Förderungen & Ausschlüsse»
+ * erfasst hat (/api/foerderhistorie, Operator-Route). Nur lesen: erfasst wird
+ * im Portal (oder direkt in Directus), hier zählt der Überblick — vor allem
+ * die Ausschlüsse, damit niemand eine ausgeschlossene Stiftung von Hand
+ * vorschlägt. Treffer-Seite und Match-Engine filtern sie automatisch.
+ */
+function FoerderhistorieOperatorBlock({ mediumSlug }: { mediumSlug: string }) {
+  const [eintraege, setEintraege] = useState<Array<{
+    id: number
+    stiftungName: string
+    typ: string
+    jahr: number | null
+    betrag: number | null
+    ausgeschlossen: boolean
+    ausschlussGrund: string | null
+  }> | null>(null)
+
+  useEffect(() => {
+    let aktiv = true
+    setEintraege(null)
+    fetch(`/api/foerderhistorie?medium=${encodeURIComponent(mediumSlug)}&cb=${Date.now()}`, { cache: 'no-store' })
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`foerderhistorie: Status ${res.status}`)
+        const daten = (await res.json()) as { eintraege: typeof eintraege }
+        if (aktiv) setEintraege(daten.eintraege ?? [])
+      })
+      .catch(() => {
+        if (aktiv) setEintraege([])
+      })
+    return () => {
+      aktiv = false
+    }
+  }, [mediumSlug])
+
+  if (eintraege === null || eintraege.length === 0) return null
+
+  const ausschluesse = eintraege.filter((e) => e.typ === 'ausgeschlossen' || e.ausgeschlossen)
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-2">
+      <div className="flex items-center justify-between">
+        <h3 className="text-xs font-semibold text-slate-700">Förderhistorie & Ausschlüsse (vom Medium)</h3>
+        {ausschluesse.length > 0 && (
+          <Badge variant="outline" className="border-red-200 bg-red-50 text-[10px] text-red-700">
+            {ausschluesse.length} ausgeschlossen
+          </Badge>
+        )}
+      </div>
+      <ul className="space-y-1.5">
+        {eintraege.map((e) => (
+          <li key={e.id} className="text-xs text-slate-600">
+            <span className="font-medium text-slate-800">{e.stiftungName}</span>
+            {' · '}
+            {e.typ === 'erhalten' ? 'Förderung erhalten' : e.typ === 'abgelehnt' ? 'Gesuch abgelehnt' : 'ausgeschlossen'}
+            {e.jahr ? ` ${e.jahr}` : ''}
+            {e.betrag !== null ? ` · CHF ${e.betrag.toLocaleString('de-CH')}` : ''}
+            {e.typ !== 'ausgeschlossen' && e.ausgeschlossen ? ' · kommt nicht mehr in Frage' : ''}
+            {e.ausschlussGrund ? ` (${e.ausschlussGrund})` : ''}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 export default function OnboardingPage() {
   const [ausgewaehltesMediumSlug, setAusgewaehltesMediumSlug] = useState<string>('')
   const [loescheId, setLoescheId] = useState<number | null>(null)
@@ -1722,6 +1790,8 @@ export default function OnboardingPage() {
           {/* Linke Spalte: Score + Onboarding-Felder + Upload + Manuell */}
           <div className="space-y-4">
             <KnowledgeScoreBlock items={wissensItems} />
+
+            <FoerderhistorieOperatorBlock mediumSlug={ausgewaehltesMediumSlug} />
 
             <OnboardingFelder
               // key erzwingt Remount beim Medienwechsel: die Feld-States werden

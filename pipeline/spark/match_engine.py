@@ -1114,6 +1114,73 @@ def cleanup_duplikat_match_results(existing_match_ids, duplikat_ids, batch=100):
     return len(ids)
 
 
+def load_medium_ausschluesse():
+    """{medium_id: set(stiftung_ids)} aller aktiven Medium-Ausschluesse aus
+    `medium_foerderhistorie` (Design 2026-07-29: das Medium erfasst im Portal,
+    welche Stiftungen fuer kuenftige Gesuche nicht mehr in Frage kommen —
+    typ 'ausgeschlossen' oder Flag `ausgeschlossen` auf erhalten/abgelehnt).
+
+    Nur Zeilen mit verknuepfter stiftung_id koennen wirken; reiner Freitext-
+    Name reicht nicht (Namens-Matching waere zu unscharf). Fehlt die
+    Collection (aeltere Umgebung), laeuft der Lauf ohne Ausschluesse weiter.
+    """
+    try:
+        res = directus_get("/items/medium_foerderhistorie", {
+            "filter[aktiv][_eq]": "true",
+            "filter[stiftung_id][_nnull]": "true",
+            "fields": "medium_id,stiftung_id,typ,ausgeschlossen",
+            "limit": -1,
+        })
+    except Exception as e:
+        print(f"  WARN: medium_foerderhistorie nicht lesbar ({e}) - Lauf ohne Medium-Ausschluesse", flush=True)
+        return {}
+    mapping = {}
+    for row in (res.get("data") or []):
+        if row.get("typ") != "ausgeschlossen" and not row.get("ausgeschlossen"):
+            continue
+        medium_id = row.get("medium_id")
+        sid = row.get("stiftung_id")
+        if not medium_id or sid is None:
+            continue
+        try:
+            mapping.setdefault(medium_id, set()).add(int(sid))
+        except (TypeError, ValueError):
+            continue
+    return mapping
+
+
+def cleanup_ausschluss_match_results(medium_id, ausschluss_ids, existing_match_ids, batch=100):
+    """Bestehende match_results des Mediums fuer ausgeschlossene Stiftungen
+    loeschen (alle DNA-Versionen, projektfreie Zeilen).
+
+    Ohne diesen Schritt wuerden Alt-Zeilen ausgeschlossener Stiftungen
+    einfrieren: der Kandidaten-Skip macht sie fuer den Lauf unerreichbar,
+    genau der Mechanismus, der am 27.07.2026 Duplikat-Zeilen mit altem Score
+    liegen liess. Entfernte Stiftungen fliegen auch aus der UPSERT-Map, damit
+    der Push-Loop nicht auf eine geloeschte Zeile patcht.
+    Rueckgabe: Anzahl entfernter Zeilen.
+    """
+    if not ausschluss_ids:
+        return 0
+    res = directus_get("/items/match_results", {
+        "filter[medium_id][_eq]": medium_id,
+        "filter[stiftung_id][_in]": ",".join(str(i) for i in sorted(ausschluss_ids)),
+        "filter[projekt_id][_null]": "true",
+        "fields": "id",
+        "limit": -1,
+    })
+    ids = [row["id"] for row in (res.get("data") or [])]
+    for i in range(0, len(ids), batch):
+        directus_delete_match_results(ids[i:i + batch])
+    for sid in list(existing_match_ids.keys()):
+        try:
+            if int(sid) in ausschluss_ids:
+                existing_match_ids.pop(sid, None)
+        except (TypeError, ValueError):
+            continue
+    return len(ids)
+
+
 def load_existing_match_result_ids(medium_id, medium_dna_version_id):
     """Lade Mapping {stiftung_id: row_id} aller existierenden match_results
     fuer (medium_id, medium_dna_version_id). Wird vor dem Push-Loop verwendet,
@@ -1256,6 +1323,12 @@ def run_match(args):
     stiftungen = load_stiftungen()
     print(f"  Stiftungen: {len(stiftungen)}", flush=True)
 
+    # Medium-Ausschluesse (Foerderhistorie, Design 2026-07-29): einmal pro Lauf.
+    ausschluss_map = load_medium_ausschluesse()
+    if ausschluss_map:
+        print(f"  Medium-Ausschluesse: " +
+              ", ".join(f"{m}={len(s)}" for m, s in sorted(ausschluss_map.items())), flush=True)
+
     # v0.5.1 (2026-05-19): Stiftungs-DNA-Map IMMER laden, weil compute_math_score
     # sie auch ohne LLM braucht (DNA-vs-DNA-Math). Vorher war der Load an
     # `not args.no_llm` gekoppelt, was bei `--no-llm`-Laeufen den DNA-Math
@@ -1307,8 +1380,27 @@ def run_match(args):
         except Exception as e:
             print(f"    WARN: Duplikat-Hygiene uebersprungen ({e})", flush=True)
 
+        # Ausschluss-Hygiene: das Medium hat diese Stiftungen im Portal
+        # ausgeschlossen — bestehende Zeilen weg, damit nichts einfriert.
+        medium_ausschluesse = ausschluss_map.get(medium, set())
+        if medium_ausschluesse:
+            try:
+                n_aus = cleanup_ausschluss_match_results(medium, medium_ausschluesse, existing_match_ids)
+                print(f"    Medium-Ausschluesse: {len(medium_ausschluesse)} Stiftung(en) uebersprungen, "
+                      f"{n_aus} bestehende Treffer-Zeile(n) entfernt", flush=True)
+            except Exception as e:
+                print(f"    WARN: Ausschluss-Hygiene uebersprungen ({e})", flush=True)
+
         candidates = []
         for stiftung in stiftungen:
+            # Vom Medium ausgeschlossene Stiftung: nie Kandidat, keine Zeile,
+            # kein LLM-Budget (Design 2026-07-29).
+            try:
+                if stiftung.get("id") is not None and int(stiftung.get("id")) in medium_ausschluesse:
+                    continue
+            except (TypeError, ValueError):
+                pass
+
             excluded, ex_info = check_exclusion(dna, stiftung)
             if excluded:
                 candidates.append({

@@ -149,9 +149,38 @@ describe('kuratiereTreffer', () => {
 
   it('das Ergebnis-Objekt hat exakt die PortalTreffer-Felder, kein score-/breakdown-Feld', () => {
     const [t] = kuratiereTreffer([match({ stiftungId: '1', score: 90 })], stiftungen, [])
-    expect(Object.keys(t).sort()).toEqual(['begruendung', 'label', 'name', 'sitz', 'status', 'stiftungId', 'themen', 'website'].sort())
+    expect(Object.keys(t).sort()).toEqual(
+      ['begruendung', 'fruehereFoerderung', 'label', 'name', 'sitz', 'status', 'stiftungId', 'themen', 'website'].sort(),
+    )
     expect(t).not.toHaveProperty('score')
     expect(t).not.toHaveProperty('score_breakdown')
+  })
+
+  describe('Förderhistorie (Ausschluss-Set + Badge-Labels)', () => {
+    it('ausgeschlossene Stiftungen fallen raus und geben ihren Platz im Limit-Fenster frei', () => {
+      const matches = [match({ stiftungId: '1', score: 90 }), match({ stiftungId: '2', score: 80 }), match({ stiftungId: '3', score: 10 })]
+      const ergebnis = kuratiereTreffer(matches, stiftungen, [], 2, new Set(['1']))
+      expect(ergebnis.map((t) => t.stiftungId)).toEqual(['2', '3'])
+    })
+
+    it('Historie-Label landet als fruehereFoerderung am Treffer, sonst null', () => {
+      const labels = new Map([['1', 'Frühere Förderung 2023 · CHF 20’000']])
+      const ergebnis = kuratiereTreffer(
+        [match({ stiftungId: '1', score: 90 }), match({ stiftungId: '2', score: 80 })],
+        stiftungen,
+        [],
+        20,
+        undefined,
+        labels,
+      )
+      expect(ergebnis[0].fruehereFoerderung).toBe('Frühere Förderung 2023 · CHF 20’000')
+      expect(ergebnis[1].fruehereFoerderung).toBeNull()
+    })
+
+    it('ohne die optionalen Parameter verhält sich alles wie bisher', () => {
+      const [t] = kuratiereTreffer([match({ stiftungId: '1', score: 90 })], stiftungen, [])
+      expect(t.fruehereFoerderung).toBeNull()
+    })
   })
 
   describe('Status-Ableitung', () => {

@@ -1,13 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { UploadCloud, Link as LinkIcon, Loader2 } from 'lucide-react'
+import { UploadCloud, Link as LinkIcon, Loader2, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { MediumLogo } from '@/components/MediumLogo'
 import { PORTAL_TEXTE } from '@/lib/portal-texte'
 import { kategorieLabelFromKey } from '@/lib/knowledge-score'
+import {
+  FOERDERHISTORIE_TYPEN,
+  foerderhistorieTypLabel,
+  formatBetragChf,
+  type FoerderhistorieTyp,
+  type FoerderhistorieZeile,
+} from '@/lib/foerderhistorie'
 
 /**
  * /portal/onboarding (Unterlagen): Selbstservice-Seite, auf der ein Medium
@@ -344,6 +351,298 @@ function FragebogenBlock({ onErfolg }: { onErfolg: () => void }) {
   )
 }
 
+// ─── Förderhistorie-Block (bisherige Förderungen + Ausschlüsse) ───────────────
+
+interface StiftungsVorschlag {
+  id: string
+  name: string
+  sitz: string | null
+}
+
+/**
+ * Erfassung der Förderhistorie und der Ausschlüsse (Design 2026-07-29):
+ * Typeahead gegen /api/portal/stiftung-suche (verknüpft die Stiftung, wenn
+ * gefunden — nur dann können Treffer-Filter und Engine wirken), Freitext-Name
+ * als Fallback. `onWissenGeaendert` lädt die Unterlagen-Liste neu, weil
+ * erhalten/abgelehnt-Einträge serverseitig einen Wissens-Eintrag miterzeugen.
+ */
+function FoerderhistorieBlock({ onWissenGeaendert }: { onWissenGeaendert: () => void }) {
+  const [eintraege, setEintraege] = useState<FoerderhistorieZeile[] | null>(null)
+  const [typ, setTyp] = useState<FoerderhistorieTyp>('erhalten')
+  const [stiftungName, setStiftungName] = useState('')
+  const [stiftungId, setStiftungId] = useState<string | null>(null)
+  const [vorschlaege, setVorschlaege] = useState<StiftungsVorschlag[]>([])
+  const [jahr, setJahr] = useState('')
+  const [betrag, setBetrag] = useState('')
+  const [zweck, setZweck] = useState('')
+  const [ausschluss, setAusschluss] = useState(false)
+  const [grund, setGrund] = useState('')
+  const [speichert, setSpeichert] = useState(false)
+  const [entferntId, setEntferntId] = useState<number | null>(null)
+  const sucheTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const laden = useCallback(() => {
+    fetch(`/api/portal/foerderhistorie?cb=${Date.now()}`, { cache: 'no-store' })
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`foerderhistorie: Status ${res.status}`)
+        const daten = (await res.json()) as { eintraege: FoerderhistorieZeile[] }
+        setEintraege(daten.eintraege)
+      })
+      .catch((err: unknown) => {
+        console.error('Unterlagen: /api/portal/foerderhistorie nicht erreichbar', err)
+        setEintraege([])
+      })
+  }, [])
+
+  useEffect(() => {
+    laden()
+  }, [laden])
+
+  // Typeahead: erst ab 2 Zeichen, entprellt; eine gewählte Stiftung (stiftungId
+  // gesetzt) unterdrückt die Suche, bis der Name wieder verändert wird.
+  function handleNameEingabe(wert: string) {
+    setStiftungName(wert)
+    setStiftungId(null)
+    if (sucheTimer.current) clearTimeout(sucheTimer.current)
+    const begriff = wert.trim()
+    if (begriff.length < 2) {
+      setVorschlaege([])
+      return
+    }
+    sucheTimer.current = setTimeout(() => {
+      fetch(`/api/portal/stiftung-suche?q=${encodeURIComponent(begriff)}&cb=${Date.now()}`, { cache: 'no-store' })
+        .then(async (res) => {
+          if (!res.ok) return
+          const daten = (await res.json()) as { treffer: StiftungsVorschlag[] }
+          setVorschlaege(daten.treffer)
+        })
+        .catch(() => setVorschlaege([]))
+    }, 250)
+  }
+
+  function waehleVorschlag(v: StiftungsVorschlag) {
+    setStiftungName(v.name)
+    setStiftungId(v.id)
+    setVorschlaege([])
+  }
+
+  function formularLeeren() {
+    setStiftungName('')
+    setStiftungId(null)
+    setVorschlaege([])
+    setJahr('')
+    setBetrag('')
+    setZweck('')
+    setAusschluss(false)
+    setGrund('')
+  }
+
+  async function handleSpeichern() {
+    if (stiftungName.trim().length < 2) {
+      toast.error('Bitte den Namen der Stiftung angeben.')
+      return
+    }
+    setSpeichert(true)
+    try {
+      const res = await fetch('/api/portal/foerderhistorie', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          typ,
+          stiftung_id: stiftungId,
+          stiftung_name: stiftungName,
+          jahr: jahr.trim() || null,
+          betrag: betrag.trim() || null,
+          zweck: zweck.trim() || null,
+          ausgeschlossen: typ === 'ausgeschlossen' ? true : ausschluss,
+          ausschluss_grund: grund.trim() || null,
+        }),
+      })
+      const json = (await res.json()) as { id?: number; error?: string }
+      if (!res.ok || json.error) {
+        toast.error(json.error ?? `Fehlgeschlagen (${res.status})`)
+        return
+      }
+      toast.success(PORTAL_TEXTE['foerderhistorie.gespeichert'])
+      formularLeeren()
+      laden()
+      onWissenGeaendert()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : String(err))
+    } finally {
+      setSpeichert(false)
+    }
+  }
+
+  async function handleEntfernen(id: number) {
+    setEntferntId(id)
+    try {
+      const res = await fetch(`/api/portal/foerderhistorie?id=${id}`, { method: 'DELETE' })
+      const json = (await res.json()) as { status?: string; error?: string }
+      if (!res.ok || json.error) {
+        toast.error(json.error ?? `Fehlgeschlagen (${res.status})`)
+        return
+      }
+      toast.success(PORTAL_TEXTE['foerderhistorie.entfernt'])
+      laden()
+      onWissenGeaendert()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : String(err))
+    } finally {
+      setEntferntId(null)
+    }
+  }
+
+  const mitFoerderFeldern = typ !== 'ausgeschlossen'
+
+  function eintragBeschreibung(e: FoerderhistorieZeile): string {
+    const teile = [foerderhistorieTypLabel(e.typ)]
+    if (e.jahr) teile.push(String(e.jahr))
+    if (e.betrag !== null) teile.push(formatBetragChf(e.betrag))
+    if (e.typ !== 'ausgeschlossen' && e.ausgeschlossen) teile.push('kommt nicht mehr in Frage')
+    return teile.join(' · ')
+  }
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
+      <div>
+        <h2 className="text-sm font-semibold text-slate-900">{PORTAL_TEXTE['foerderhistorie.titel']}</h2>
+        <p className="mt-1 text-sm text-slate-500">{PORTAL_TEXTE['foerderhistorie.intro']}</p>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {FOERDERHISTORIE_TYPEN.map((t) => (
+          <Button
+            key={t.key}
+            type="button"
+            size="sm"
+            variant={typ === t.key ? 'default' : 'outline'}
+            onClick={() => setTyp(t.key)}
+          >
+            {t.label}
+          </Button>
+        ))}
+      </div>
+
+      <div className="space-y-3">
+        <div className="relative">
+          <label className="mb-1 block text-xs font-medium text-slate-600">
+            {PORTAL_TEXTE['foerderhistorie.stiftung_label']}
+          </label>
+          <Input
+            value={stiftungName}
+            onChange={(e) => handleNameEingabe(e.target.value)}
+            placeholder="Name der Stiftung"
+          />
+          <p className="mt-1 text-[11px] text-slate-400">{PORTAL_TEXTE['foerderhistorie.stiftung_hinweis']}</p>
+          {vorschlaege.length > 0 && stiftungId === null && (
+            <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-slate-200 bg-white shadow-md">
+              {vorschlaege.map((v) => (
+                <li key={v.id}>
+                  <button
+                    type="button"
+                    className="flex w-full items-baseline justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-indigo-50"
+                    onClick={() => waehleVorschlag(v)}
+                  >
+                    <span className="min-w-0 truncate font-medium text-slate-800">{v.name}</span>
+                    {v.sitz && <span className="shrink-0 text-xs text-slate-400">{v.sitz}</span>}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {mitFoerderFeldern && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-medium text-slate-600">
+                {PORTAL_TEXTE['foerderhistorie.jahr_label']}
+              </label>
+              <Input value={jahr} onChange={(e) => setJahr(e.target.value)} inputMode="numeric" placeholder="z.B. 2024" />
+            </div>
+            {typ === 'erhalten' && (
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-600">
+                  {PORTAL_TEXTE['foerderhistorie.betrag_label']}
+                </label>
+                <Input value={betrag} onChange={(e) => setBetrag(e.target.value)} inputMode="numeric" placeholder="z.B. 20000" />
+              </div>
+            )}
+          </div>
+        )}
+
+        {mitFoerderFeldern && (
+          <div>
+            <label className="mb-1 block text-xs font-medium text-slate-600">
+              {PORTAL_TEXTE['foerderhistorie.zweck_label']}
+            </label>
+            <Input value={zweck} onChange={(e) => setZweck(e.target.value)} placeholder="z.B. Recherchefonds Lokaljournalismus" />
+          </div>
+        )}
+
+        {mitFoerderFeldern && (
+          <label className="flex items-start gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={ausschluss}
+              onChange={(e) => setAusschluss(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-slate-300"
+            />
+            {PORTAL_TEXTE['foerderhistorie.ausschluss_haken']}
+          </label>
+        )}
+
+        {(ausschluss || typ === 'ausgeschlossen') && (
+          <div>
+            <label className="mb-1 block text-xs font-medium text-slate-600">
+              {PORTAL_TEXTE['foerderhistorie.ausschluss_grund_label']}
+            </label>
+            <Textarea value={grund} onChange={(e) => setGrund(e.target.value)} className="min-h-[60px]" />
+          </div>
+        )}
+      </div>
+
+      <Button onClick={() => void handleSpeichern()} disabled={speichert || stiftungName.trim().length < 2}>
+        {speichert ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
+        {PORTAL_TEXTE['foerderhistorie.hinzufuegen_knopf']}
+      </Button>
+
+      <div className="space-y-2">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          {PORTAL_TEXTE['foerderhistorie.liste_titel']}
+        </h3>
+        {eintraege === null && <p className="text-sm text-slate-400">Wird geladen …</p>}
+        {eintraege !== null && eintraege.length === 0 && (
+          <p className="text-sm text-slate-400">{PORTAL_TEXTE['foerderhistorie.liste_leer']}</p>
+        )}
+        {eintraege !== null && eintraege.length > 0 && (
+          <ul className="space-y-2">
+            {eintraege.map((e) => (
+              <li key={e.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-100 px-3 py-2">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-slate-800">{e.stiftungName}</p>
+                  <p className="text-xs text-slate-400">{eintragBeschreibung(e)}</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="shrink-0 text-slate-400 hover:text-red-600"
+                  onClick={() => void handleEntfernen(e.id)}
+                  disabled={entferntId === e.id}
+                  title={PORTAL_TEXTE['foerderhistorie.entfernen_knopf']}
+                >
+                  {entferntId === e.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── Hauptseite ───────────────────────────────────────────────────────────────
 
 interface LogoStatus {
@@ -415,6 +714,8 @@ export default function PortalUnterlagenSeite() {
       </div>
 
       <FragebogenBlock onErfolg={laden} />
+
+      <FoerderhistorieBlock onWissenGeaendert={laden} />
 
       {/* Wissens-Stand */}
       <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">

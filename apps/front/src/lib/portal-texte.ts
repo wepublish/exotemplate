@@ -226,6 +226,25 @@ export const PORTAL_TEXTE: Record<string, string> = {
   // Logo-Gate für denselben Knopf (Pflicht-Erststep, siehe Modul-Kommentar Logo-Block oben).
   'unterlagen.dna_knopf_gesperrt_logo': 'Ladet zuerst euer Logo hoch, dann könnt ihr eure DNA erstellen lassen.',
 
+  // Förderhistorie + Ausschlüsse (Design 2026-07-29, docs/superpowers/specs/
+  // 2026-07-29-foerderhistorie-und-ausschluesse-design.md).
+  'foerderhistorie.titel': 'Bisherige Förderungen & Ausschlüsse',
+  'foerderhistorie.intro':
+    'Sagt uns, welche Stiftungen euch schon gefördert haben, wo ein Gesuch abgelehnt wurde, und welche Stiftungen für euch nicht (mehr) in Frage kommen. Ausgeschlossene Stiftungen schlagen wir euch nicht mehr vor, alles andere macht eure Vorschläge treffsicherer.',
+  'foerderhistorie.stiftung_label': 'Stiftung',
+  'foerderhistorie.stiftung_hinweis': 'Tippt den Namen; wir schlagen passende Stiftungen aus unserer Datenbank vor. Kein Treffer? Der Name allein reicht auch.',
+  'foerderhistorie.jahr_label': 'Jahr',
+  'foerderhistorie.betrag_label': 'Betrag in CHF (optional)',
+  'foerderhistorie.zweck_label': 'Wofür (optional)',
+  'foerderhistorie.ausschluss_haken': 'Diese Stiftung kommt für künftige Gesuche nicht mehr in Frage',
+  'foerderhistorie.ausschluss_grund_label': 'Grund (hilft uns, ähnliche Fälle zu erkennen)',
+  'foerderhistorie.hinzufuegen_knopf': 'Eintrag speichern',
+  'foerderhistorie.liste_titel': 'Eure Einträge',
+  'foerderhistorie.liste_leer': 'Noch keine Einträge. Auch wenige helfen schon.',
+  'foerderhistorie.entfernen_knopf': 'Entfernen',
+  'foerderhistorie.gespeichert': 'Eintrag gespeichert.',
+  'foerderhistorie.entfernt': 'Eintrag entfernt.',
+
   'dna.intro': 'Das ist eure Fundraising-DNA, euer Profil in unseren Worten. Lest es in Ruhe durch und sagt uns, ob es euch trifft.',
   'dna.freigabe_hinweis':
     'Sobald ihr freigebt, schauen wir noch einmal darüber und schalten das Matching für euch frei. So stellen wir sicher, dass wirklich passt, was wir euch vorschlagen.',

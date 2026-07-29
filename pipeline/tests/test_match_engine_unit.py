@@ -381,3 +381,71 @@ class TestDuplikatHygiene(unittest.TestCase):
             ids = match_engine.load_duplikat_stiftung_ids()
         match_engine._DUPLIKAT_IDS_CACHE = None
         self.assertEqual(ids, {46988, 6645, 42254})
+
+
+class TestMediumAusschluesse(unittest.TestCase):
+    """Foerderhistorie-Ausschluesse (Design 2026-07-29): das Medium schliesst
+    Stiftungen im Portal aus; die Engine ueberspringt sie als Kandidaten und
+    raeumt bestehende Zeilen weg (sonst frieren sie ein, wie die Duplikate
+    am 27.07.)."""
+
+    def test_load_mapping_nur_wirkliche_ausschluesse(self):
+        def fake_get(endpoint, params=None):
+            self.assertEqual(endpoint, "/items/medium_foerderhistorie")
+            self.assertEqual(params.get("filter[aktiv][_eq]"), "true")
+            self.assertEqual(params.get("filter[stiftung_id][_nnull]"), "true")
+            return {"data": [
+                {"medium_id": "zwolf", "stiftung_id": 100, "typ": "ausgeschlossen", "ausgeschlossen": True},
+                {"medium_id": "zwolf", "stiftung_id": 200, "typ": "erhalten", "ausgeschlossen": True},
+                # erhalten OHNE Flag: Historie, KEIN Ausschluss
+                {"medium_id": "zwolf", "stiftung_id": 300, "typ": "erhalten", "ausgeschlossen": False},
+                {"medium_id": "bajour", "stiftung_id": "400", "typ": "ausgeschlossen", "ausgeschlossen": True},
+                # kaputte Zeilen: kein Medium / keine parsebare id -> ignoriert
+                {"medium_id": "", "stiftung_id": 500, "typ": "ausgeschlossen", "ausgeschlossen": True},
+                {"medium_id": "zwolf", "stiftung_id": "abc", "typ": "ausgeschlossen", "ausgeschlossen": True},
+            ]}
+
+        with mock.patch.object(match_engine, "directus_get", fake_get):
+            mapping = match_engine.load_medium_ausschluesse()
+        self.assertEqual(mapping, {"zwolf": {100, 200}, "bajour": {400}})
+
+    def test_load_fehlende_collection_ergibt_leer(self):
+        def fake_get(endpoint, params=None):
+            raise RuntimeError("HTTP 403: collection missing")
+
+        with mock.patch.object(match_engine, "directus_get", fake_get):
+            mapping = match_engine.load_medium_ausschluesse()
+        self.assertEqual(mapping, {})
+
+    def test_cleanup_loescht_und_bereinigt_upsert_map(self):
+        seen_params = {}
+        geloescht = []
+
+        def fake_get(endpoint, params=None):
+            seen_params.update(params or {})
+            return {"data": [{"id": 11}, {"id": 22}]}
+
+        def fake_delete(ids):
+            geloescht.extend(ids)
+            return True
+
+        existing = {100: "row-a", 300: "row-b"}
+        with mock.patch.object(match_engine, "directus_get", fake_get), \
+             mock.patch.object(match_engine, "directus_delete_match_results", fake_delete):
+            n = match_engine.cleanup_ausschluss_match_results("zwolf", {100, 200}, existing)
+
+        self.assertEqual(n, 2)
+        self.assertEqual(geloescht, [11, 22])
+        # 100 ist ausgeschlossen -> raus aus der UPSERT-Map; 300 bleibt.
+        self.assertEqual(existing, {300: "row-b"})
+        # Query trifft ALLE DNA-Versionen des Mediums, nur projektfreie Zeilen.
+        self.assertEqual(seen_params.get("filter[medium_id][_eq]"), "zwolf")
+        self.assertEqual(seen_params.get("filter[stiftung_id][_in]"), "100,200")
+        self.assertEqual(seen_params.get("filter[projekt_id][_null]"), "true")
+        self.assertNotIn("filter[medium_dna_version_id][_neq]", seen_params)
+
+    def test_cleanup_ohne_ausschluesse_ist_noop(self):
+        with mock.patch.object(match_engine, "directus_get",
+                               side_effect=AssertionError("darf nicht lesen")):
+            n = match_engine.cleanup_ausschluss_match_results("zwolf", set(), {1: "x"})
+        self.assertEqual(n, 0)

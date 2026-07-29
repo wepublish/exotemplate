@@ -64,6 +64,11 @@ export function TrefferKarte({ treffer, onAnschreiben, onNichtRelevant, disabled
         <Badge variant="outline" className={`text-[10px] ${LABEL_FARBE[treffer.label]}`}>
           {treffer.label}
         </Badge>
+        {treffer.fruehereFoerderung && (
+          <Badge variant="outline" className="border-amber-200 bg-amber-50 text-[10px] text-amber-700">
+            {treffer.fruehereFoerderung}
+          </Badge>
+        )}
       </div>
 
       <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-slate-500">

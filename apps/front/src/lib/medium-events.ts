@@ -29,6 +29,7 @@ export type MediumEventTyp =
   | 'gesuch_eingereicht'
   | 'zusage'
   | 'absage'
+  | 'foerderhistorie_erfasst'
 
 export interface MediumEvent {
   medium_id: string

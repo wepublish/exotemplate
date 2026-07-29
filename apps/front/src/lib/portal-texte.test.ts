@@ -231,6 +231,22 @@ describe('PORTAL_TEXTE', () => {
     'gesuche.antwort_knopf',
     // Gemeinsamer Fehlertext der Portal-Seiten (Task 5, siehe Task-5-Report).
     'fehler.daten_nicht_verfuegbar',
+    // Förderhistorie + Ausschlüsse (Design 2026-07-29).
+    'foerderhistorie.titel',
+    'foerderhistorie.intro',
+    'foerderhistorie.stiftung_label',
+    'foerderhistorie.stiftung_hinweis',
+    'foerderhistorie.jahr_label',
+    'foerderhistorie.betrag_label',
+    'foerderhistorie.zweck_label',
+    'foerderhistorie.ausschluss_haken',
+    'foerderhistorie.ausschluss_grund_label',
+    'foerderhistorie.hinzufuegen_knopf',
+    'foerderhistorie.liste_titel',
+    'foerderhistorie.liste_leer',
+    'foerderhistorie.entfernen_knopf',
+    'foerderhistorie.gespeichert',
+    'foerderhistorie.entfernt',
   ]
 
   it('enthält exakt die erwarteten Schlüssel aus portal-wording-final.md plus die in Task 5 ergänzten (uebersicht.naechster_schritt.*, fehler.*), keinen mehr, keinen weniger', () => {

@@ -866,3 +866,137 @@ export function baueLoginVorschlag(params: {
     dedup_key: params.dedupKey,
   }
 }
+
+// ─── Directus-REST-Helfer: medium_foerderhistorie (Förderhistorie + Ausschlüsse) ─
+
+/**
+ * Rohzeile aus Directus → FoerderhistorieZeile (lib/foerderhistorie.ts).
+ * stiftung_id wird zum String normalisiert (wie PortalTreffer.stiftungId,
+ * damit Ausschluss-Set und Badge-Map direkt vergleichbar sind).
+ */
+function baueFoerderhistorieZeile(row: Record<string, unknown>): import('./foerderhistorie').FoerderhistorieZeile {
+  return {
+    id: Number(row.id),
+    stiftungId: row.stiftung_id != null ? String(row.stiftung_id) : null,
+    stiftungName: typeof row.stiftung_name === 'string' ? row.stiftung_name : '',
+    typ: typeof row.typ === 'string' ? row.typ : '',
+    jahr: typeof row.jahr === 'number' ? row.jahr : null,
+    betrag: typeof row.betrag === 'number' ? row.betrag : null,
+    zweck: typeof row.zweck === 'string' && row.zweck.trim() ? row.zweck : null,
+    ausgeschlossen: row.ausgeschlossen === true,
+    ausschlussGrund: typeof row.ausschluss_grund === 'string' && row.ausschluss_grund.trim() ? row.ausschluss_grund : null,
+  }
+}
+
+const FOERDERHISTORIE_FELDER = 'id,stiftung_id,stiftung_name,typ,jahr,betrag,zweck,ausgeschlossen,ausschluss_grund'
+
+/** Lädt alle aktiven Förderhistorie-Zeilen eines Mediums (neueste zuerst). */
+export async function ladeFoerderhistorie(mediumSlug: string): Promise<import('./foerderhistorie').FoerderhistorieZeile[]> {
+  const filter = encodeURIComponent(JSON.stringify({ medium_id: { _eq: mediumSlug }, aktiv: { _eq: true } }))
+  const res = await fetch(
+    `${base()}/items/medium_foerderhistorie?filter=${filter}&limit=-1&sort=-date_created&fields=${FOERDERHISTORIE_FELDER}`,
+    { headers: authHeaders(), signal: AbortSignal.timeout(15_000) },
+  )
+  if (!res.ok) throw new Error(`medium_foerderhistorie: Directus antwortete ${res.status}`)
+  const json = (await res.json()) as { data?: Array<Record<string, unknown>> }
+  return (json.data ?? []).map(baueFoerderhistorieZeile)
+}
+
+/**
+ * Lädt eine Förderhistorie-Zeile per id UND prüft die Zugehörigkeit zum
+ * Session-Medium (dasselbe Muster wie ladeApplicationFuerPortal: fremde oder
+ * fehlende Zeile → null, die Route antwortet einheitlich 404).
+ */
+export async function ladeFoerderhistorieEintrag(
+  id: number,
+  mediumSlug: string,
+): Promise<{ id: number; knowledgeId: number | null } | null> {
+  const res = await fetch(`${base()}/items/medium_foerderhistorie/${id}?fields=id,medium_id,knowledge_id,aktiv`, {
+    headers: authHeaders(),
+    signal: AbortSignal.timeout(15_000),
+  })
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(`medium_foerderhistorie/${id}: Directus antwortete ${res.status}`)
+  const json = (await res.json()) as {
+    data?: { id: number; medium_id?: string | null; knowledge_id?: number | null; aktiv?: boolean }
+  }
+  const row = json.data
+  if (!row || (row.medium_id ?? '') !== mediumSlug || row.aktiv === false) return null
+  return { id: Number(row.id), knowledgeId: typeof row.knowledge_id === 'number' ? row.knowledge_id : null }
+}
+
+/** Legt eine medium_foerderhistorie-Zeile an (REST, liefert die neue id). */
+export async function legeFoerderhistorieAn(data: Record<string, unknown>): Promise<{ id: number }> {
+  const res = await fetch(`${base()}/items/medium_foerderhistorie`, {
+    method: 'POST',
+    headers: schreibHeaders(),
+    body: JSON.stringify(data),
+    signal: AbortSignal.timeout(15_000),
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new Error(`Förderhistorie anlegen fehlgeschlagen (${res.status}): ${text.slice(0, 200)}`)
+  }
+  const json = (await res.json()) as { data?: { id?: number } }
+  if (!json.data?.id) throw new Error('Directus: keine id nach Förderhistorie-Anlage')
+  return { id: json.data.id }
+}
+
+/** Patcht eine medium_foerderhistorie-Zeile (Soft-Delete: { aktiv: false }). */
+export async function patchFoerderhistorie(id: number, data: Record<string, unknown>): Promise<void> {
+  const res = await fetch(`${base()}/items/medium_foerderhistorie/${id}`, {
+    method: 'PATCH',
+    headers: schreibHeaders(),
+    body: JSON.stringify(data),
+    signal: AbortSignal.timeout(15_000),
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new Error(`Förderhistorie aktualisieren fehlgeschlagen (${res.status}): ${text.slice(0, 200)}`)
+  }
+}
+
+/**
+ * Löscht einen medium_knowledge-Eintrag (Aufräumen beim Entfernen einer
+ * Förderhistorie-Zeile mit verknüpftem Wissens-Eintrag). Ein 404 ist kein
+ * Fehler: der Eintrag kann bereits über das Operator-Cockpit entfernt sein.
+ */
+export async function loescheWissensEintrag(id: number): Promise<void> {
+  const res = await fetch(`${base()}/items/medium_knowledge/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+    signal: AbortSignal.timeout(15_000),
+  })
+  if (!res.ok && res.status !== 404) {
+    throw new Error(`medium_knowledge/${id} löschen fehlgeschlagen (${res.status})`)
+  }
+}
+
+// ─── Directus-REST-Helfer: stiftungen-Suche (Typeahead im Portal) ─────────────
+
+/**
+ * Namens-Typeahead für das Förderhistorie-Formular: liefert höchstens 8
+ * Stiftungen (id, Name, Sitz) für einen Suchbegriff ab 2 Zeichen. Bewusst
+ * minimal gehalten (kein Zweck, keine Beträge, keine DNA): das Medium nennt
+ * uns einen Namen, den es schon kennt — die Datenbank wird hier nicht
+ * durchblätterbar. Duplikat-Zeilen (duplicate_of gesetzt) sind ausgenommen,
+ * damit nie die Zweit-ID einer Stiftung verknüpft wird.
+ */
+export async function sucheStiftungenFuerPortal(q: string): Promise<Array<{ id: string; name: string; sitz: string | null }>> {
+  const filter = encodeURIComponent(
+    JSON.stringify({ _and: [{ Stiftungsname: { _icontains: q } }, { duplicate_of: { _null: true } }] }),
+  )
+  const res = await fetch(`${base()}/items/stiftungen?filter=${filter}&limit=8&sort=Stiftungsname&fields=id,Stiftungsname,sitz`, {
+    headers: authHeaders(),
+    signal: AbortSignal.timeout(15_000),
+  })
+  if (!res.ok) throw new Error(`stiftungen-Suche: Directus antwortete ${res.status}`)
+  const json = (await res.json()) as { data?: Array<{ id?: number | string; Stiftungsname?: string; sitz?: string | null }> }
+  return (json.data ?? [])
+    .filter((r) => r.id != null && typeof r.Stiftungsname === 'string' && r.Stiftungsname.trim())
+    .map((r) => ({
+      id: String(r.id),
+      name: (r.Stiftungsname as string).trim(),
+      sitz: typeof r.sitz === 'string' && r.sitz.trim() ? r.sitz.trim() : null,
+    }))
+}

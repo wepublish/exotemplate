@@ -33,6 +33,8 @@ export type PortalTreffer = {
   begruendung: string
   themen: string[]
   status: 'offen' | 'angefordert' | 'in_arbeit' | 'bereit' | 'abgeschickt' | 'nicht_relevant'
+  /** Badge-Text aus der Förderhistorie des Mediums (bauHistorieLabels), sonst null. */
+  fruehereFoerderung: string | null
 }
 
 // ─── Rohformen (von der Route aus Directus-JSON gebaut) ────────────────────────
@@ -162,9 +164,10 @@ function leiteStatusAb(app: PortalTrefferApplication | undefined): PortalTreffer
  * Zeilen haben, wenn die Medium-DNA mehrfach neu gemessen wurde, live gegen
  * Directus beobachtet, siehe Task-8-Report; ohne diese Dedup-Stufe erschiene
  * dieselbe Stiftung mehrfach in der Liste) → Zeilen mit ausgeblendet-
- * Application UND Zeilen ohne zugehörige Stiftung herausfiltern → auf
- * `limit` begrenzen → auf PortalTreffer abbilden. Die Ausblende-Filterung
- * läuft VOR dem Limit-Schnitt, damit ein niedrigerer Treffer den frei
+ * Application, Zeilen mit Förderhistorie-Ausschluss (`ausschluesse`, siehe
+ * lib/foerderhistorie.ts) UND Zeilen ohne zugehörige Stiftung herausfiltern →
+ * auf `limit` begrenzen → auf PortalTreffer abbilden. Beide Filterungen
+ * laufen VOR dem Limit-Schnitt, damit ein niedrigerer Treffer den frei
  * werdenden Platz im Top-N-Fenster einnimmt.
  */
 export function kuratiereTreffer(
@@ -172,6 +175,8 @@ export function kuratiereTreffer(
   stiftungen: PortalTrefferStiftung[],
   applications: PortalTrefferApplication[],
   limit: number = PORTAL_TREFFER_LIMIT_DEFAULT,
+  ausschluesse?: Set<string>,
+  historieLabels?: Map<string, string>,
 ): PortalTreffer[] {
   const stiftungById = new Map(stiftungen.map((s) => [s.id, s]))
   const appById = new Map(applications.map((a) => [a.stiftungId, a]))
@@ -190,6 +195,7 @@ export function kuratiereTreffer(
     .filter((m) => {
       const app = appById.get(m.stiftungId)
       if (app?.status === 'ausgeblendet') return false
+      if (ausschluesse?.has(m.stiftungId)) return false
       return stiftungById.has(m.stiftungId)
     })
     .slice(0, Math.max(0, limit))
@@ -206,6 +212,7 @@ export function kuratiereTreffer(
       begruendung: m.begruendung ?? '',
       themen: (m.topTags ?? []).slice(0, 5).map(humanisiereTag),
       status: leiteStatusAb(app),
+      fruehereFoerderung: historieLabels?.get(m.stiftungId) ?? null,
     }
   })
 }

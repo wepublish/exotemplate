@@ -17,7 +17,9 @@
  * Datenbeschaffung in zwei Schritten (siehe portal-treffer.ts, Modul-
  * Kommentar): (1) match_results (Gate wie MATCHES in graphql/queries.ts:
  * medium-Ebene, dna_quality_tier/score-Gate aus config/tenant) + applications
- * des Mediums in EINEM GraphQL-Request; (2) stiftungen-Stammdaten für die in
+ * + medium_foerderhistorie (Ausschluss-Filter und «Frühere Förderung»-Badge,
+ * lib/foerderhistorie.ts) des Mediums in EINEM GraphQL-Request; (2)
+ * stiftungen-Stammdaten für die in
  * (1) gefundenen stiftung_id in einem zweiten Request (dieselbe
  * Zwei-Schritt-Form wie der Client mit MATCHES/STIFTUNGEN, hier serverseitig
  * mit rohem fetch statt Apollo). `score_breakdown` wird NUR gelesen, um
@@ -34,6 +36,7 @@ import {
   type PortalTrefferStiftung,
   type PortalTrefferApplication,
 } from '@/lib/portal-treffer'
+import { bauAusschlussSet, bauHistorieLabels, type FoerderhistorieZeile } from '@/lib/foerderhistorie'
 import { tenant, MATCH_TIERS, MATCH_MIN_SCORE } from '../../../../config/tenant'
 
 const directusBase = () => (process.env.DIRECTUS_URL || 'http://localhost:8055').replace(/\/$/, '')
@@ -65,6 +68,15 @@ const QUERY_BASIS = `
       status
       portal
     }
+    medium_foerderhistorie(filter: { medium_id: { _eq: $medium }, aktiv: { _eq: true } }, limit: -1) {
+      id
+      stiftung_id
+      stiftung_name
+      typ
+      jahr
+      betrag
+      ausgeschlossen
+    }
   }
 `
 
@@ -82,6 +94,15 @@ const QUERY_STIFTUNGEN = `
 type RohMatchZeile = { stiftung_id?: unknown; score?: unknown; begruendung?: unknown; score_breakdown?: unknown }
 type RohApplicationZeile = { stiftung_id?: unknown; status?: unknown; portal?: unknown }
 type RohStiftungZeile = { id?: unknown; Stiftungsname?: unknown; webseite?: unknown; sitz?: unknown }
+type RohHistorieZeile = {
+  id?: unknown
+  stiftung_id?: unknown
+  stiftung_name?: unknown
+  typ?: unknown
+  jahr?: unknown
+  betrag?: unknown
+  ausgeschlossen?: unknown
+}
 
 async function directusGraphql<T>(query: string, variables: Record<string, unknown>): Promise<T> {
   const res = await fetch(`${directusBase()}/graphql`, {
@@ -123,6 +144,24 @@ function baueApplication(row: RohApplicationZeile): PortalTrefferApplication {
   }
 }
 
+/**
+ * Rohzeile → FoerderhistorieZeile (nur die Felder, die Filter und Badge
+ * brauchen; zweck/ausschluss_grund bleiben bewusst serverseitig).
+ */
+function baueHistorieZeile(row: RohHistorieZeile): FoerderhistorieZeile {
+  return {
+    id: Number(row.id ?? 0),
+    stiftungId: row.stiftung_id != null ? String(row.stiftung_id) : null,
+    stiftungName: typeof row.stiftung_name === 'string' ? row.stiftung_name : '',
+    typ: typeof row.typ === 'string' ? row.typ : '',
+    jahr: typeof row.jahr === 'number' ? row.jahr : null,
+    betrag: typeof row.betrag === 'number' ? row.betrag : null,
+    zweck: null,
+    ausgeschlossen: row.ausgeschlossen === true,
+    ausschlussGrund: null,
+  }
+}
+
 function baueStiftung(row: RohStiftungZeile): PortalTrefferStiftung {
   return {
     id: String(row.id ?? ''),
@@ -155,13 +194,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(403).json({ grund: 'noch_nicht_freigeschaltet' })
     }
 
-    const basis = await directusGraphql<{ match_results: RohMatchZeile[]; applications: RohApplicationZeile[] }>(QUERY_BASIS, {
+    const basis = await directusGraphql<{
+      match_results: RohMatchZeile[]
+      applications: RohApplicationZeile[]
+      medium_foerderhistorie: RohHistorieZeile[]
+    }>(QUERY_BASIS, {
       medium: session.mediumSlug,
       mandant: tenant.key,
     })
 
     const matches = (basis.match_results ?? []).map(baueMatch)
     const applications = (basis.applications ?? []).map(baueApplication)
+    const historie = (basis.medium_foerderhistorie ?? []).map(baueHistorieZeile)
 
     const ids = Array.from(new Set(matches.map((m) => m.stiftungId).filter((id) => id)))
     const stiftungen: PortalTrefferStiftung[] =
@@ -171,7 +215,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             await directusGraphql<{ stiftungen: RohStiftungZeile[] }>(QUERY_STIFTUNGEN, { ids })
           ).stiftungen.map(baueStiftung)
 
-    const treffer = kuratiereTreffer(matches, stiftungen, applications, holeLimit())
+    const treffer = kuratiereTreffer(
+      matches,
+      stiftungen,
+      applications,
+      holeLimit(),
+      bauAusschlussSet(historie),
+      bauHistorieLabels(historie),
+    )
 
     return res.status(200).json({ treffer })
   } catch (err: unknown) {
