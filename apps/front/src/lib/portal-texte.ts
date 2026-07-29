@@ -231,6 +231,16 @@ export const PORTAL_TEXTE: Record<string, string> = {
   'logo.hinweis': 'Ladet als Allererstes euer Logo hoch, als PNG oder JPG. Es erscheint dann auf eurem Gesuch und hier im Portal.',
   'logo.hochladen_knopf': 'Logo hochladen',
   'logo.kein_logo': 'Noch kein Logo hochgeladen.',
+  // Brief-/Dokumentvorlage neben dem Logo (Wunsch Ramona 29.07.2026).
+  'vorlage.titel': 'Textvorlage (optional)',
+  'vorlage.hinweis':
+    'Habt ihr eine eigene Brief- oder Dokumentvorlage, etwa mit eurem Briefkopf oder Layout? Ladet sie hier hoch, dann verwenden wir sie für eure Gesuche. Word, ODT, PDF, RTF, Text oder Markdown, bis 10 MB.',
+  'vorlage.hochladen_knopf': 'Textvorlage hochladen',
+  'vorlage.keine': 'Noch keine Textvorlage hinterlegt.',
+  'vorlage.ersetzen_knopf': 'Andere Vorlage hochladen',
+  'vorlage.entfernen_knopf': 'Entfernen',
+  'vorlage.gespeichert': 'Textvorlage gespeichert.',
+  'vorlage.entfernt': 'Textvorlage entfernt.',
 
   'unterlagen.intro':
     'Damit wir euch kennenlernen, sammeln wir hier, was euch ausmacht: Artikel, Newsletter, frühere Gesuche, Budgets und Selbstbeschriebe. Je mehr wir von euch sehen, desto genauer wird euer Profil und desto besser passen die Stiftungen, die wir für euch finden. Ladet einfach hoch, was ihr habt, unvollständig ist völlig in Ordnung.',

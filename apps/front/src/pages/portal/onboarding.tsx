@@ -145,6 +145,113 @@ function LogoBlock({ hatLogo, slug, name, onErfolg }: LogoBlockProps) {
   )
 }
 
+// ─── Textvorlage (optional, neben dem Logo) ───────────────────────────────────
+
+/**
+ * Brief-/Dokumentvorlage des Mediums (Wunsch Ramona 29.07.2026). Liegt neben
+ * dem Logo, weil es dieselbe Art Asset ist: Gestaltung, nicht Inhalt. Landet
+ * nicht im DNA-Korpus (siehe /api/portal/textvorlage).
+ */
+function TextvorlageBlock() {
+  const [stand, setStand] = useState<{ url: string | null; name: string | null } | null>(null)
+  const [laeuft, setLaeuft] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const laden = useCallback(() => {
+    fetch(`/api/portal/textvorlage?cb=${Date.now()}`, { cache: 'no-store' })
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`textvorlage: Status ${res.status}`)
+        setStand((await res.json()) as { url: string | null; name: string | null })
+      })
+      .catch(() => setStand({ url: null, name: null }))
+  }, [])
+
+  useEffect(() => {
+    laden()
+  }, [laden])
+
+  async function hochladen(datei: File) {
+    setLaeuft(true)
+    try {
+      const form = new FormData()
+      form.append('file', datei)
+      const res = await fetch('/api/portal/textvorlage', { method: 'POST', body: form })
+      const json = (await res.json()) as { url?: string; name?: string; error?: string }
+      if (!res.ok || json.error) {
+        toast.error(json.error ?? `Hochladen fehlgeschlagen (${res.status})`)
+        return
+      }
+      toast.success(PORTAL_TEXTE['vorlage.gespeichert'])
+      laden()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : String(err))
+    } finally {
+      setLaeuft(false)
+      if (fileRef.current) fileRef.current.value = ''
+    }
+  }
+
+  async function entfernen() {
+    setLaeuft(true)
+    try {
+      const res = await fetch('/api/portal/textvorlage', { method: 'DELETE' })
+      if (!res.ok) {
+        toast.error(`Fehlgeschlagen (${res.status})`)
+        return
+      }
+      toast.success(PORTAL_TEXTE['vorlage.entfernt'])
+      laden()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : String(err))
+    } finally {
+      setLaeuft(false)
+    }
+  }
+
+  const hatVorlage = !!stand?.url
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-3">
+      <h2 className="text-sm font-semibold text-slate-900">{PORTAL_TEXTE['vorlage.titel']}</h2>
+      <p className="text-sm text-slate-500">{PORTAL_TEXTE['vorlage.hinweis']}</p>
+
+      {hatVorlage ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="min-w-0 truncate rounded-lg border border-slate-100 bg-slate-50 px-3 py-1.5 text-sm text-slate-700">
+            {stand?.name ?? 'Vorlage'}
+          </span>
+          <Button variant="outline" size="sm" disabled={laeuft} onClick={() => fileRef.current?.click()}>
+            {PORTAL_TEXTE['vorlage.ersetzen_knopf']}
+          </Button>
+          <Button variant="ghost" size="sm" className="text-slate-500 hover:text-red-600" disabled={laeuft} onClick={() => void entfernen()}>
+            {laeuft ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
+            {PORTAL_TEXTE['vorlage.entfernen_knopf']}
+          </Button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-slate-400">{PORTAL_TEXTE['vorlage.keine']}</span>
+          <Button variant="outline" size="sm" disabled={laeuft} onClick={() => fileRef.current?.click()}>
+            {laeuft ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
+            {PORTAL_TEXTE['vorlage.hochladen_knopf']}
+          </Button>
+        </div>
+      )}
+
+      <input
+        ref={fileRef}
+        type="file"
+        accept=".docx,.doc,.odt,.pdf,.rtf,.txt,.md"
+        className="hidden"
+        onChange={(e) => {
+          const datei = e.target.files?.[0]
+          if (datei) void hochladen(datei)
+        }}
+      />
+    </div>
+  )
+}
+
 // ─── Upload-Block ─────────────────────────────────────────────────────────────
 
 function UploadBlock({ onErfolg }: { onErfolg: () => void }) {
@@ -803,6 +910,8 @@ export default function PortalUnterlagenSeite() {
       {status === 'fehler' && <p className="text-sm text-slate-500">{PORTAL_TEXTE['fehler.daten_nicht_verfuegbar']}</p>}
 
       <LogoBlock hatLogo={hatLogo} slug={logoStatus?.slug ?? null} name={logoStatus?.name ?? ''} onErfolg={ladeLogoStatus} />
+
+      <TextvorlageBlock />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <UploadBlock onErfolg={laden} />

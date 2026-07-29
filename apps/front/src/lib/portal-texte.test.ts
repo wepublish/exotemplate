@@ -238,6 +238,9 @@ describe('PORTAL_TEXTE', () => {
     'unterlagen.fragebogen_knopf_aendern',
     'unterlagen.fragebogen_gespeichert',
     'unterlagen.fragebogen_aktualisiert',
+    // Textvorlage neben dem Logo (Ramona-Feedback 29.07.2026).
+    'vorlage.titel', 'vorlage.hinweis', 'vorlage.hochladen_knopf', 'vorlage.keine',
+    'vorlage.ersetzen_knopf', 'vorlage.entfernen_knopf', 'vorlage.gespeichert', 'vorlage.entfernt',
     // Unterlagen-Verwaltung (Ramona-Feedback 29.07.2026).
     'unterlagen.eintrag_bearbeiten',
     'unterlagen.eintrag_entfernen',
