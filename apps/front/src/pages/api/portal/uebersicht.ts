@@ -33,6 +33,18 @@ async function hatMediumKnowledge(slug: string): Promise<boolean> {
   return (json.data?.length ?? 0) > 0
 }
 
+/** true, sobald mindestens eine aktive medium_foerderhistorie-Zeile existiert (Design 2026-07-29). */
+async function hatFoerderhistorieEintraege(slug: string): Promise<boolean> {
+  const filter = encodeURIComponent(JSON.stringify({ medium_id: { _eq: slug }, aktiv: { _eq: true } }))
+  const res = await fetch(`${base()}/items/medium_foerderhistorie?filter=${filter}&limit=1&fields=id`, {
+    headers: authHeaders(),
+    signal: AbortSignal.timeout(15_000),
+  })
+  if (!res.ok) throw new Error(`medium_foerderhistorie: Directus antwortete ${res.status}`)
+  const json = (await res.json()) as { data?: unknown[] }
+  return (json.data?.length ?? 0) > 0
+}
+
 type ApplicationRow = {
   id: string
   status: string | null
@@ -91,10 +103,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!session) return
 
   try {
-    const [medium, hatUnterlagen, applications] = await Promise.all([
+    const [medium, hatUnterlagen, applications, hatFoerderhistorie] = await Promise.all([
       ladePortalMedium(session.mediumSlug),
       hatMediumKnowledge(session.mediumSlug),
       ladeApplications(session.mediumSlug),
+      hatFoerderhistorieEintraege(session.mediumSlug),
     ])
     if (!medium) {
       return res.status(404).json({ error: 'Medium nicht gefunden.' })
@@ -131,6 +144,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         dnaFreigegeben: medium.dnaFreigabe != null,
         freigeschaltet: medium.matchingFreigeschaltet != null,
         hatGesuchUeberPortal,
+        hatFoerderhistorie,
       },
       reminderKandidaten,
       new Date(),

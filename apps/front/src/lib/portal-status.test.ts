@@ -171,6 +171,61 @@ describe('baueUebersicht (naechsterSchritt)', () => {
     expect(ergebnis.naechsterSchritt).toBe(PORTAL_TEXTE['uebersicht.naechster_schritt.treffer'])
   })
 
+  describe('Förderhistorie-Hinweis (Design 2026-07-29)', () => {
+    const hinweis = PORTAL_TEXTE['uebersicht.naechster_schritt.foerderhistorie_hinweis']
+
+    it('Unterlagen-Phase ohne Förderhistorie: Hinweis wird angehängt', () => {
+      const ergebnis = baueUebersicht(
+        { hatLogo: true, hatUnterlagen: false, dnaFreigegeben: false, freigeschaltet: false, hatGesuchUeberPortal: false, hatFoerderhistorie: false },
+        [],
+        new Date('2026-07-09T00:00:00Z'),
+      )
+      expect(ergebnis.naechsterSchritt).toBe(`${PORTAL_TEXTE['uebersicht.naechster_schritt.unterlagen']} ${hinweis}`)
+    })
+
+    it('DNA-Phase ohne Förderhistorie: Hinweis wird angehängt', () => {
+      const ergebnis = baueUebersicht(
+        { hatLogo: true, hatUnterlagen: true, dnaFreigegeben: false, freigeschaltet: false, hatGesuchUeberPortal: false, hatFoerderhistorie: false },
+        [],
+        new Date('2026-07-09T00:00:00Z'),
+      )
+      expect(ergebnis.naechsterSchritt).toBe(`${PORTAL_TEXTE['uebersicht.naechster_schritt.dna']} ${hinweis}`)
+    })
+
+    it('mit erfasster Förderhistorie: kein Hinweis', () => {
+      const ergebnis = baueUebersicht(
+        { hatLogo: true, hatUnterlagen: true, dnaFreigegeben: false, freigeschaltet: false, hatGesuchUeberPortal: false, hatFoerderhistorie: true },
+        [],
+        new Date('2026-07-09T00:00:00Z'),
+      )
+      expect(ergebnis.naechsterSchritt).toBe(PORTAL_TEXTE['uebersicht.naechster_schritt.dna'])
+    })
+
+    it('Logo-Phase und nach der Freischaltung: kein Hinweis, auch ohne Förderhistorie', () => {
+      const logoPhase = baueUebersicht(
+        { hatLogo: false, hatUnterlagen: false, dnaFreigegeben: false, freigeschaltet: false, hatGesuchUeberPortal: false, hatFoerderhistorie: false },
+        [],
+        new Date('2026-07-09T00:00:00Z'),
+      )
+      expect(logoPhase.naechsterSchritt).toBe(PORTAL_TEXTE['uebersicht.naechster_schritt.logo'])
+      const frei = baueUebersicht(
+        { hatLogo: true, hatUnterlagen: true, dnaFreigegeben: true, freigeschaltet: true, hatGesuchUeberPortal: false, hatFoerderhistorie: false },
+        [],
+        new Date('2026-07-09T00:00:00Z'),
+      )
+      expect(frei.naechsterSchritt).toBe(PORTAL_TEXTE['uebersicht.naechster_schritt.treffer'])
+    })
+
+    it('ohne das optionale Flag (alte Aufrufer): kein Hinweis', () => {
+      const ergebnis = baueUebersicht(
+        { hatLogo: true, hatUnterlagen: false, dnaFreigegeben: false, freigeschaltet: false, hatGesuchUeberPortal: false },
+        [],
+        new Date('2026-07-09T00:00:00Z'),
+      )
+      expect(ergebnis.naechsterSchritt).toBe(PORTAL_TEXTE['uebersicht.naechster_schritt.unterlagen'])
+    })
+  })
+
   it('liefert stationen, naechsterSchritt und reminder in einem Objekt', () => {
     const ergebnis = baueUebersicht(
       { hatLogo: true, hatUnterlagen: true, dnaFreigegeben: false, freigeschaltet: false, hatGesuchUeberPortal: false },

@@ -27,6 +27,14 @@ export type UebersichtFlags = {
   freigeschaltet: boolean
   /** ≥1 application mit zuletzt_geaendert_quelle 'portal'. */
   hatGesuchUeberPortal: boolean
+  /**
+   * ≥1 aktive medium_foerderhistorie-Zeile (Design 2026-07-29). Optional und
+   * nur bei EXPLIZITEM false wirksam: dann hängt der Nächste-Schritt-Satz in
+   * der Unterlagen-/DNA-Phase den Förderhistorie-Hinweis an. Kein harter
+   * Schritt in der Stationen-Kette — Förderhistorie ist freiwillig (nicht
+   * jedes Medium hat frühere Förderungen zu melden) und darf nichts blockieren.
+   */
+  hatFoerderhistorie?: boolean
 }
 
 export type ReminderKandidat = {
@@ -150,11 +158,21 @@ export function baueStationen(flags: UebersichtFlags): Station[] {
  * bewusst unerreichbar (es ist immer genau eine Station aktiv, und nach der
  * Freischaltung ist das dauerhaft 'treffer'); er bleibt als defensives Netz
  * stehen, falls die Stationen-Regel später ändert.
+ *
+ * Solange die Unterlagen- oder DNA-Phase aktiv ist und das Medium EXPLIZIT
+ * noch keine Förderhistorie erfasst hat (hatFoerderhistorie === false), wird
+ * der Hinweis auf den neuen Block angehängt — damit er im geführten Weg
+ * nicht übersehen wird (Wunsch 29.07.2026). Ab der Freischaltung entfällt
+ * der Hinweis: erfassen geht weiterhin jederzeit, aber genagt wird nicht.
  */
-export function baueNaechsterSchrittText(stationen: Station[]): string {
+export function baueNaechsterSchrittText(stationen: Station[], hatFoerderhistorie?: boolean): string {
   const aktive = stationen.find((s) => s.status === 'aktiv')
   const schluessel = NAECHSTER_SCHRITT_SCHLUESSEL[aktive?.key ?? 'gesuche']
-  return PORTAL_TEXTE[schluessel]
+  const basis = PORTAL_TEXTE[schluessel]
+  if (hatFoerderhistorie === false && (aktive?.key === 'unterlagen' || aktive?.key === 'dna')) {
+    return `${basis} ${PORTAL_TEXTE['uebersicht.naechster_schritt.foerderhistorie_hinweis']}`
+  }
+  return basis
 }
 
 // ─── Reminder-Ableitung ───────────────────────────────────────────────────────
@@ -189,7 +207,7 @@ export function baueUebersicht(flags: UebersichtFlags, reminderKandidaten: Remin
   const stationen = baueStationen(flags)
   return {
     stationen,
-    naechsterSchritt: baueNaechsterSchrittText(stationen),
+    naechsterSchritt: baueNaechsterSchrittText(stationen, flags.hatFoerderhistorie),
     reminder: baueReminder(reminderKandidaten, jetzt),
   }
 }

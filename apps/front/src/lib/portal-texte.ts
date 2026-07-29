@@ -189,6 +189,10 @@ export const PORTAL_TEXTE: Record<string, string> = {
   // die aktive Station (bewusst so, siehe baueNaechsterSchrittText in
   // portal-status.ts); der Satz bleibt als defensives Netz.
   'uebersicht.naechster_schritt.gesuche': 'Prüft eure Gesuchsentwürfe und meldet uns, wenn sie eingereicht sind.',
+  // Anhängsel in der Unterlagen-/DNA-Phase, solange keine Förderhistorie
+  // erfasst ist (Design 2026-07-29, siehe baueNaechsterSchrittText).
+  'uebersicht.naechster_schritt.foerderhistorie_hinweis':
+    'Erfasst dabei auch eure bisherigen Förderungen und Ausschlüsse im Block «Bisherige Förderungen & Ausschlüsse» auf der Unterlagen-Seite: das macht eure Vorschläge treffsicherer.',
 
   // Logo-Block (Pflicht-Erststep, ganz oben auf /portal/onboarding): das
   // Medium muss ein echtes PNG/JPG hochladen, bevor es weitergeht (siehe

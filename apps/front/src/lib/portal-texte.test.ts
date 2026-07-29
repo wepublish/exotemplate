@@ -232,6 +232,7 @@ describe('PORTAL_TEXTE', () => {
     // Gemeinsamer Fehlertext der Portal-Seiten (Task 5, siehe Task-5-Report).
     'fehler.daten_nicht_verfuegbar',
     // Förderhistorie + Ausschlüsse (Design 2026-07-29).
+    'uebersicht.naechster_schritt.foerderhistorie_hinweis',
     'foerderhistorie.titel',
     'foerderhistorie.intro',
     'foerderhistorie.stiftung_label',

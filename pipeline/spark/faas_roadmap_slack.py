@@ -19,9 +19,14 @@ Verhalten im Detail:
     Bereits vorhandene Alt-Ereignisse werden NICHT nachtraeglich in den Thread
     gepostet (Baseline = juengstes vorhandenes Ereignis); die Status-Nachricht
     zeigt den aktuellen Stand ohnehin.
-  - Folgelaeufe: chat.update auf dieselbe ts. Wechselt der konfigurierte
-    slack_channel oder wurde die Nachricht geloescht (message_not_found),
-    wird neu gepostet und der State erneuert.
+  - Folgelaeufe: chat.update auf dieselbe ts — aber NUR, wenn sich der
+    gerenderte Text seit dem letzten Post geaendert hat (text_hash im State;
+    Wunsch der Nutzerin vom 29.07.2026: «bitte nur updates schicken, wenns
+    updates gibt»). Einmal in 24 h wird trotzdem aktualisiert
+    (FORCE_UPDATE_SEK): so heilt sich eine von Hand geloeschte Nachricht
+    selbst, denn nur die Antwort von chat.update verraet message_not_found.
+    Wechselt der konfigurierte slack_channel oder wurde die Nachricht
+    geloescht (message_not_found), wird neu gepostet und der State erneuert.
   - Fehlt die Collection `medium_events` (legt der Hauptprozess parallel an),
     meldet das Skript «Collection medium_events fehlt», rendert nur den
     Stationen-Teil und endet mit Exit 0.
@@ -39,7 +44,7 @@ Quellen / Env:
   WAECHTER_MANDANT       (Default wepublish)
 
 State: ~/faas_classify/roadmap_slack_state.json
-       {slug: {ts, channel, kanal_konfig, letzter_event_ts}}
+       {slug: {ts, channel, kanal_konfig, letzter_event_ts, text_hash, text_ts}}
        `channel` ist die von Slack aufgeloeste Channel-ID (chat.update braucht
        eine ID, faas_medien.slack_channel kann auch ein #name sein);
        `kanal_konfig` ist der konfigurierte Wert zur Wechsel-Erkennung.
@@ -51,6 +56,7 @@ Cron-Empfehlung:  */15 * * * *  /usr/bin/python3 ~/faas-matching-wepublish/spark
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -87,6 +93,21 @@ TOKEN = os.environ.get("DIRECTUS_TOKEN", "")
 MANDANT = os.environ.get("WAECHTER_MANDANT", "wepublish")
 STATE = Path.home() / "faas_classify" / "roadmap_slack_state.json"
 MAX_THREAD_EVENTS = 10  # Deckel je Thread-Antwort, Rest nur als Zaehler
+# Unveraenderten Text ueberspringen, aber spaetestens nach 24 h trotzdem
+# aktualisieren: nur die chat.update-Antwort verraet eine geloeschte Nachricht.
+FORCE_UPDATE_SEK = 24 * 3600
+
+
+def text_fingerabdruck(text: str) -> str:
+    """Kurzer, stabiler Hash des gerenderten Status-Texts fuer den State.
+
+    Die «Stand: …»-Zeile bleibt draussen: sie traegt den Render-Zeitpunkt und
+    waere sonst bei jedem Lauf anders — der Skip griffe nie. Nebeneffekt,
+    bewusst so gewollt: «Stand» in der Nachricht zeigt damit, wann sich
+    zuletzt inhaltlich etwas geaendert hat (spaetestens alle 24 h erneuert,
+    siehe FORCE_UPDATE_SEK)."""
+    kern = "\n".join(z for z in text.splitlines() if not z.startswith("Stand: "))
+    return hashlib.sha256(kern.encode("utf-8")).hexdigest()[:16]
 
 # Fehler von chat.update, nach denen neu gepostet statt aufgegeben wird.
 REPOST_FEHLER = {"message_not_found", "channel_not_found", "is_archived",
@@ -281,9 +302,15 @@ def verarbeite_medium(m: dict, dna_set: set[str], apps: list[dict],
         seit = st.get("letzter_event_ts") or ""
         neue_events = [e for e in events if (e.get("date_created") or "") > seit]
 
+    fingerabdruck = text_fingerabdruck(text)
+    frisch = (time.time() - float(st.get("text_ts") or 0)) < FORCE_UPDATE_SEK
+    unveraendert = (not erstlauf and not kanal_wechsel
+                    and st.get("text_hash") == fingerabdruck and frisch)
+
     if not apply_:
         aktion = ("chat.postMessage (Erstlauf)" if erstlauf
                   else "chat.postMessage (Channel-Wechsel)" if kanal_wechsel
+                  else "NICHTS (Stand unveraendert)" if unveraendert
                   else f"chat.update auf ts {st.get('ts')}")
         print(f"{stamp()} | {slug}: wuerde {aktion} nach {kanal_konfig} ausfuehren, "
               f"{len(neue_events)} neue Ereignisse")
@@ -297,10 +324,13 @@ def verarbeite_medium(m: dict, dna_set: set[str], apps: list[dict],
 
     ts, channel_id = st.get("ts"), st.get("channel")
     repost = erstlauf or kanal_wechsel or not channel_id
-    if not repost:
+    if not repost and unveraendert:
+        print(f"{stamp()} | {slug}: Stand unveraendert, kein chat.update.")
+    elif not repost:
         r = slack_call("chat.update", {"channel": channel_id, "ts": ts, "text": text}, stok)
         if r.get("ok"):
             print(f"{stamp()} | {slug}: Status-Nachricht aktualisiert (ts {ts}).")
+            st.update({"text_hash": fingerabdruck, "text_ts": time.time()})
         elif r.get("error") in REPOST_FEHLER:
             print(f"{stamp()} | {slug}: chat.update meldet {r.get('error')}, poste neu.")
             repost = True
@@ -314,6 +344,7 @@ def verarbeite_medium(m: dict, dna_set: set[str], apps: list[dict],
         ts = r["ts"]
         channel_id = r.get("channel") or kanal_konfig
         print(f"{stamp()} | {slug}: Status-Nachricht gepostet (ts {ts}, channel {channel_id}).")
+        st.update({"text_hash": fingerabdruck, "text_ts": time.time()})
 
     # ts sofort merken, bevor der Thread-Post laufen kann: schlaegt der fehl,
     # geht die Nachricht beim naechsten Lauf nicht verloren (kein Doppel-Post).
