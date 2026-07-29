@@ -1,5 +1,6 @@
 import {
   baueStationen,
+  baueAnzeigeSchritte,
   baueReminder,
   baueUebersicht,
   STATION_LABEL,
@@ -653,5 +654,76 @@ describe('istFragebogenEintrag', () => {
     expect(istFragebogenEintrag({ title: 'Fragebogen 2026-07-29' })).toBe(true)
     expect(istFragebogenEintrag({ title: 'Förderhistorie: Volkart Stiftung' })).toBe(false)
     expect(istFragebogenEintrag({ title: null })).toBe(false)
+  })
+})
+
+// ─── Anzeige-Schritte (Befund beim Durchklicken 29.07.2026) ───────────────────
+
+describe('baueAnzeigeSchritte', () => {
+  function stationen(teil: Partial<Record<string, 'offen' | 'aktiv' | 'erledigt'>>) {
+    return (['logo', 'unterlagen', 'dna', 'freischaltung', 'treffer', 'gesuche'] as const).map((key) => ({
+      key,
+      status: teil[key] ?? 'offen',
+    }))
+  }
+
+  it('fasst die sechs Stationen auf vier Schritte zusammen — dieselbe Zählung wie die Reiter', () => {
+    const schritte = baueAnzeigeSchritte(stationen({ logo: 'aktiv' }))
+    expect(schritte.map((s) => `${s.nummer}. ${s.label}`)).toEqual([
+      '1. Unterlagen',
+      '2. DNA',
+      '3. Treffer',
+      '4. Gesuche',
+    ])
+  })
+
+  it('Schritt 1 ist erst erledigt, wenn Logo UND Unterlagen erledigt sind', () => {
+    const nurLogo = baueAnzeigeSchritte(stationen({ logo: 'erledigt', unterlagen: 'aktiv' }))
+    expect(nurLogo[0].status).toBe('aktiv')
+
+    const beides = baueAnzeigeSchritte(stationen({ logo: 'erledigt', unterlagen: 'erledigt', dna: 'aktiv' }))
+    expect(beides[0].status).toBe('erledigt')
+    expect(beides[1].status).toBe('aktiv')
+  })
+
+  it('das fehlende Logo lässt Schritt 1 aktiv, nicht erledigt', () => {
+    const schritte = baueAnzeigeSchritte(stationen({ logo: 'aktiv' }))
+    expect(schritte[0].status).toBe('aktiv')
+  })
+
+  it('die Freischaltung erscheint als Teil von Schritt 3 (Treffer)', () => {
+    const wartet = baueAnzeigeSchritte(
+      stationen({ logo: 'erledigt', unterlagen: 'erledigt', dna: 'erledigt', freischaltung: 'aktiv' }),
+    )
+    expect(wartet[1].status).toBe('erledigt')
+    expect(wartet[2].status).toBe('aktiv')
+
+    const frei = baueAnzeigeSchritte(
+      stationen({ logo: 'erledigt', unterlagen: 'erledigt', dna: 'erledigt', freischaltung: 'erledigt', treffer: 'aktiv' }),
+    )
+    expect(frei[2].status).toBe('aktiv')
+  })
+
+  it('Gesuche erledigt, sobald ein Gesuch über das Portal läuft', () => {
+    const schritte = baueAnzeigeSchritte(
+      stationen({
+        logo: 'erledigt', unterlagen: 'erledigt', dna: 'erledigt',
+        freischaltung: 'erledigt', treffer: 'aktiv', gesuche: 'erledigt',
+      }),
+    )
+    expect(schritte[3].status).toBe('erledigt')
+  })
+
+  it('höchstens ein Schritt ist gleichzeitig aktiv', () => {
+    const faelle = [
+      stationen({ logo: 'aktiv' }),
+      stationen({ logo: 'erledigt', unterlagen: 'aktiv' }),
+      stationen({ logo: 'erledigt', unterlagen: 'erledigt', dna: 'aktiv' }),
+      stationen({ logo: 'erledigt', unterlagen: 'erledigt', dna: 'erledigt', freischaltung: 'aktiv' }),
+      stationen({ logo: 'erledigt', unterlagen: 'erledigt', dna: 'erledigt', freischaltung: 'erledigt', treffer: 'aktiv' }),
+    ]
+    for (const fall of faelle) {
+      expect(baueAnzeigeSchritte(fall).filter((s) => s.status === 'aktiv')).toHaveLength(1)
+    }
   })
 })

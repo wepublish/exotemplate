@@ -23,6 +23,9 @@ import { PORTAL_TEXTE } from '@/lib/portal-texte'
  * We.Publish) sind schreibgeschützt und als solche gekennzeichnet — sie
  * entstehen bei jedem DNA-Lauf neu.
  */
+/** Wie viele Einträge je Kategorie ohne Klick sichtbar sind. */
+const SICHTBAR_JE_GRUPPE = 5
+
 export function UnterlagenListe({
   eintraege,
   onGeaendert,
@@ -34,6 +37,12 @@ export function UnterlagenListe({
   const [titelEntwurf, setTitelEntwurf] = useState('')
   const [kategorieEntwurf, setKategorieEntwurf] = useState('')
   const [laeuftId, setLaeuftId] = useState<number | null>(null)
+  // Pro Kategorie erst die jüngsten paar Einträge zeigen (Befund beim
+  // Durchklicken 29.07.2026): zwolf hatte 19 Einträge in einer Kategorie, die
+  // Seite war 5 Bildschirme lang und die Upload-Formulare darunter praktisch
+  // unerreichbar — bajour mit 140 Artikeln wären über 20 Bildschirme. Was DA
+  // ist, soll man sehen (Ramonas Punkt), aber nicht auf Kosten des Arbeitens.
+  const [aufgeklappt, setAufgeklappt] = useState<Set<string>>(new Set())
 
   const gruppen = gruppiereUnterlagen(eintraege)
 
@@ -102,7 +111,7 @@ export function UnterlagenListe({
           </div>
 
           <ul className="space-y-1.5">
-            {gruppe.eintraege.map((e) => {
+            {(aufgeklappt.has(gruppe.key) ? gruppe.eintraege : gruppe.eintraege.slice(0, SICHTBAR_JE_GRUPPE)).map((e) => {
               const bearbeitbar = istBearbeitbar(e)
               const imBearbeiten = bearbeiteId === e.id
               return (
@@ -175,6 +184,26 @@ export function UnterlagenListe({
               )
             })}
           </ul>
+
+          {gruppe.eintraege.length > SICHTBAR_JE_GRUPPE && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs text-slate-500 hover:text-slate-800"
+              onClick={() =>
+                setAufgeklappt((prev) => {
+                  const neu = new Set(prev)
+                  if (neu.has(gruppe.key)) neu.delete(gruppe.key)
+                  else neu.add(gruppe.key)
+                  return neu
+                })
+              }
+            >
+              {aufgeklappt.has(gruppe.key)
+                ? 'weniger zeigen'
+                : `alle ${gruppe.eintraege.length} zeigen`}
+            </Button>
+          )}
         </div>
       ))}
     </div>

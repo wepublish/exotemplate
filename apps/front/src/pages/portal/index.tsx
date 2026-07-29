@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { usePortalMe } from '@/components/portal/PortalLayout'
 import { PORTAL_TEXTE, baueSlackVerweis, fuelleText } from '@/lib/portal-texte'
 import { SchrittInfo } from '@/components/portal/SchrittInfo'
-import { STATION_REIHENFOLGE, STATION_LABEL, type Station, type Reminder } from '@/lib/portal-status'
+import { baueAnzeigeSchritte, type Station, type Reminder } from '@/lib/portal-status'
 
 /**
  * /portal (Übersicht): Fortschrittsleiste über die 5 Stationen, «Nächster
@@ -31,29 +31,30 @@ function stationStil(status: Station['status']): { kreis: string; label: string 
   return { kreis: 'bg-slate-100 text-slate-400', label: 'text-slate-400' }
 }
 
+/**
+ * Fortschrittsleiste über die VIER Schritte, die auch als Reiter oben stehen
+ * (baueAnzeigeSchritte). Vorher zeigte sie sechs Stationen und damit andere
+ * Nummern als die Reiter — «3. Treffer» im Reiter war hier die 5.
+ */
 function Fortschrittsleiste({ stationen }: { stationen: Station[] }) {
-  // Feste Anzeige-Reihenfolge statt der API-Reihenfolge zu vertrauen: die
-  // Leiste bleibt stabil, selbst wenn die Route irgendwann anders sortiert.
-  const geordnet = STATION_REIHENFOLGE.map((key) => stationen.find((s) => s.key === key)).filter(
-    (s): s is Station => s != null,
-  )
+  const schritte = baueAnzeigeSchritte(stationen)
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5">
       <div className="flex items-center">
-        {geordnet.map((station, i) => {
-          const stil = stationStil(station.status)
+        {schritte.map((schritt, i) => {
+          const stil = stationStil(schritt.status)
           return (
-            <div key={station.key} className="flex flex-1 items-center">
+            <div key={schritt.nummer} className="flex flex-1 items-center">
               <div className="flex min-w-0 flex-col items-center gap-1.5">
                 <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${stil.kreis}`}>
-                  {station.status === 'erledigt' ? '✓' : i + 1}
+                  {schritt.status === 'erledigt' ? '✓' : schritt.nummer}
                 </div>
                 <span className={`whitespace-nowrap text-center text-[11px] font-medium ${stil.label}`}>
-                  {STATION_LABEL[station.key]}
+                  {schritt.nummer}. {schritt.label}
                 </span>
               </div>
-              {i < geordnet.length - 1 && (
-                <div className={`mx-1 h-0.5 flex-1 ${station.status === 'erledigt' ? 'bg-indigo-500' : 'bg-slate-100'}`} />
+              {i < schritte.length - 1 && (
+                <div className={`mx-1 h-0.5 flex-1 ${schritt.status === 'erledigt' ? 'bg-indigo-500' : 'bg-slate-100'}`} />
               )}
             </div>
           )

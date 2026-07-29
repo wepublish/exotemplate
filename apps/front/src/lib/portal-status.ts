@@ -67,6 +67,51 @@ export const STATION_LABEL: Record<StationKey, string> = {
   gesuche: 'Gesuche',
 }
 
+// ─── Anzeige-Schritte (Wunsch Ramona 29.07.2026, Befund beim Durchklicken) ────
+//
+// Die LOGIK kennt sechs Stationen (logo, unterlagen, dna, freischaltung,
+// treffer, gesuche) — daran hängt der Nächster-Schritt-Satz, und daran wird
+// nicht gerührt. Die ANZEIGE zeigt dagegen genau die vier Schritte, die auch
+// als Reiter im Portal stehen. Vorher zählte die Fortschrittsleiste 1 bis 6,
+// während die Reiter 1 bis 4 zählten: «3. Treffer» im Reiter war in der Leiste
+// die Nummer 5. Genau solche Widersprüche fallen erst beim Selber-Durchklicken
+// auf.
+//
+// Abbildung: das Logo ist ein Block AUF der Unterlagen-Seite, also Teil von
+// Schritt 1. Die Freischaltung ist unser Prüfschritt, kein Schritt des
+// Mediums — sie erscheint als Wartezustand innerhalb von Schritt 3 (siehe
+// treffer.warten_titel).
+export const ANZEIGE_SCHRITTE = [
+  { nummer: 1, label: 'Unterlagen', stationen: ['logo', 'unterlagen'] as StationKey[] },
+  { nummer: 2, label: 'DNA', stationen: ['dna'] as StationKey[] },
+  { nummer: 3, label: 'Treffer', stationen: ['freischaltung', 'treffer'] as StationKey[] },
+  { nummer: 4, label: 'Gesuche', stationen: ['gesuche'] as StationKey[] },
+] as const
+
+export type AnzeigeSchritt = { nummer: number; label: string; status: StationStatus }
+
+/**
+ * Fasst die sechs Logik-Stationen zu den vier Anzeige-Schritten zusammen.
+ *
+ * Status eines Schritts: 'erledigt' nur, wenn ALLE seine Stationen erledigt
+ * sind (sonst wäre Schritt 1 abgehakt, während das Logo noch fehlt);
+ * 'aktiv', sobald eine seiner Stationen aktiv ist; sonst 'offen'.
+ */
+export function baueAnzeigeSchritte(stationen: Station[]): AnzeigeSchritt[] {
+  const nachKey = new Map(stationen.map((s) => [s.key, s.status]))
+  return ANZEIGE_SCHRITTE.map((schritt) => {
+    const eigene = schritt.stationen.map((k) => nachKey.get(k)).filter((s): s is StationStatus => s != null)
+    const status: StationStatus = eigene.length === 0
+      ? 'offen'
+      : eigene.some((s) => s === 'aktiv')
+        ? 'aktiv'
+        : eigene.every((s) => s === 'erledigt')
+          ? 'erledigt'
+          : 'offen'
+    return { nummer: schritt.nummer, label: schritt.label, status }
+  })
+}
+
 const NAECHSTER_SCHRITT_SCHLUESSEL: Record<StationKey, string> = {
   logo: 'uebersicht.naechster_schritt.logo',
   unterlagen: 'uebersicht.naechster_schritt.unterlagen',
