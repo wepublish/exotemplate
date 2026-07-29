@@ -231,6 +231,17 @@ describe('PORTAL_TEXTE', () => {
     'gesuche.antwort_knopf',
     // Gemeinsamer Fehlertext der Portal-Seiten (Task 5, siehe Task-5-Report).
     'fehler.daten_nicht_verfuegbar',
+    // Fragebogen: sichtbarer Speicher-Zustand + Bearbeiten (29.07.2026).
+    'unterlagen.fragebogen_stand',
+    'unterlagen.fragebogen_ungespeichert',
+    'unterlagen.fragebogen_knopf',
+    'unterlagen.fragebogen_knopf_aendern',
+    'unterlagen.fragebogen_gespeichert',
+    'unterlagen.fragebogen_aktualisiert',
+    // Rückmeldung zu einem Treffer (29.07.2026).
+    'treffer.rueckmeldung_knopf',
+    'treffer.rueckmeldung_hinweis',
+    'treffer.rueckmeldung_gesendet',
     // Rückmeldung zur DNA-Neu-Erzeugung (29.07.2026).
     'dna.rueckmeldung_titel',
     'dna.rueckmeldung_hinweis',

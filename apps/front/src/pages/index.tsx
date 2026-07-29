@@ -5,6 +5,7 @@ import { Accordion } from '@/components/ui/accordion'
 import { Button } from '@/components/ui/button'
 import { FilterBar } from '@/components/FilterBar'
 import { MatchRow } from '@/components/MatchRow'
+import { RueckmeldungFreigabe } from '@/components/RueckmeldungFreigabe'
 import type { ApplicationSnap } from '@/components/MatchRow'
 import { MatchingToolbar } from '@/components/MatchingToolbar'
 import { PdfDokument } from '@/components/PdfDokument'
@@ -155,6 +156,10 @@ export default function FoerderstiftungenPage() {
             </div>
           )}
         </div>
+
+        {/* Wartende Rückmeldungen der Medien (29.07.2026): rendert nur, wenn
+            wirklich etwas auf Freigabe wartet. */}
+        <RueckmeldungFreigabe />
 
         {loading && (
           <div className="w-full bg-slate-200 rounded-full h-1 overflow-hidden">

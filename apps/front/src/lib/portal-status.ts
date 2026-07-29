@@ -414,3 +414,36 @@ export function baueFragebogenEintrag(felder: FragebogenFelder, jetzt: Date): Fr
   const content = abschnitte.map((a) => `${a.titel}\n${a.text}`).join('\n\n')
   return { title: `Fragebogen ${datum}`, content }
 }
+
+/**
+ * Titel-Präfix, an dem der Fragebogen-Eintrag eines Mediums wiedererkannt
+ * wird (Wunsch 29.07.2026: Antworten später bearbeiten können, statt bei
+ * jedem Absenden einen weiteren Eintrag anzulegen).
+ */
+export const FRAGEBOGEN_TITEL_PREFIX = 'Fragebogen'
+
+export function istFragebogenEintrag(item: { title?: string | null }): boolean {
+  return (item.title ?? '').startsWith(FRAGEBOGEN_TITEL_PREFIX)
+}
+
+/**
+ * Liest die drei Felder aus dem gespeicherten `content` zurück (Umkehrung von
+ * baueFragebogenEintrag): Abschnitte sind durch Leerzeilen getrennt, die
+ * erste Zeile jedes Abschnitts ist der bekannte Titel. Unbekannte oder
+ * fehlende Abschnitte ergeben leere Felder — nie einen Fehler, damit ein von
+ * Hand in Directus bearbeiteter Eintrag die Seite nicht lahmlegt.
+ */
+export function parseFragebogenEintrag(content: string | null | undefined): FragebogenFelder {
+  const felder: FragebogenFelder = { selbstbeschrieb: '', fokus: '', nogos: '' }
+  const text = (content ?? '').replace(/\r\n/g, '\n')
+  if (!text.trim()) return felder
+
+  for (const block of text.split(/\n\s*\n/)) {
+    const zeilen = block.split('\n')
+    const kopf = (zeilen[0] ?? '').trim()
+    const treffer = FRAGEBOGEN_ABSCHNITTE.find((a) => a.titel === kopf)
+    if (!treffer) continue
+    felder[treffer.key] = zeilen.slice(1).join('\n').trim()
+  }
+  return felder
+}

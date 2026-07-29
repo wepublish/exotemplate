@@ -55,6 +55,7 @@ Autor: Jolanda Spiess + Claude (Anthropic), 2026-04-30 / 2026-05-07
 import os
 import re
 import sys
+import hashlib
 import json
 import uuid
 import argparse
@@ -235,7 +236,7 @@ def _psql_run(sql, timeout=30, remote=False):
     return proc.stdout
 
 
-def cache_lookup(medium_dna_version_id, stiftung_id, current_stiftung_dna_version_id):
+def cache_lookup(medium_dna_version_id, stiftung_id, current_stiftung_dna_version_id, model=None):
     """Cache-Lookup. Nur Hit, wenn cached_dna_v == current_dna_v (Auto-Invalidierung).
 
     Stiftungen ohne aktive DNA werden ueber NO_DNA_SENTINEL gematcht.
@@ -246,7 +247,7 @@ def cache_lookup(medium_dna_version_id, stiftung_id, current_stiftung_dna_versio
            f"FROM match_llm_cache "
            f"WHERE medium_dna_version_id = {_quote_pg(medium_dna_version_id)} "
            f"AND stiftung_id = {int(stiftung_id)} "
-           f"AND model = {_quote_pg(ACTIVE_MODEL)} LIMIT 1;")
+           f"AND model = {_quote_pg(model or ACTIVE_MODEL)} LIMIT 1;")
     try:
         out = _psql_run(sql).strip()
     except Exception:
@@ -664,7 +665,59 @@ def _llm_call_ollama(prompt):
         return None
 
 
-def build_match_prompt(dna, stiftung, math_score, sdna_full=None):
+def _fmt_rueckmeldungen(rueckmeldungen, max_items=5):
+    """Rueckmeldungs-Block fuer den Prompt. Leer -> leerer String (kein Block)."""
+    texte = [str(r).strip().replace("\n", " ")[:500] for r in (rueckmeldungen or []) if str(r).strip()]
+    if not texte:
+        return ""
+    zeilen = "\n".join(f"  - {t}" for t in texte[:max_items])
+    return ("RUECKMELDUNG ZU GENAU DIESEM PAAR (von We.Publish bzw. dem Medium selbst, "
+            "verbindlich - schlaegt jede DNA-Heuristik):\n"
+            f"{zeilen}\n\n")
+
+
+_RUECKMELDUNGEN_CACHE = None
+
+
+def load_match_rueckmeldungen():
+    """{(medium_id, stiftung_id:int): [notiz, ...]} aller AKTIVEN Treffer-
+    Rueckmeldungen aus `agent_lessons` (kategorie 'match_rueckmeldung').
+
+    Operator-Rueckmeldungen sind ab dem Schreiben aktiv; Rueckmeldungen aus dem
+    Medien-Portal erst nach der Freigabe durch We.Publish (Entscheid der
+    Nutzerin 29.07.2026) - `aktiv = false` bleibt hier folgenlos. Einmal pro
+    Lauf gelesen. Fehlt die Collection oder das Feld, laeuft der Lauf ohne
+    Rueckmeldungen weiter.
+    """
+    global _RUECKMELDUNGEN_CACHE
+    if _RUECKMELDUNGEN_CACHE is not None:
+        return _RUECKMELDUNGEN_CACHE
+    mapping = {}
+    try:
+        res = directus_get("/items/agent_lessons", {
+            "filter[kategorie][_eq]": "match_rueckmeldung",
+            "filter[aktiv][_eq]": "true",
+            "fields": "medium_id,stiftung_id,notiz,ts",
+            "sort": "-ts",
+            "limit": -1,
+        })
+        for row in (res.get("data") or []):
+            medium_id = row.get("medium_id")
+            notiz = (row.get("notiz") or "").strip()
+            if not medium_id or not notiz:
+                continue
+            try:
+                sid = int(row.get("stiftung_id"))
+            except (TypeError, ValueError):
+                continue
+            mapping.setdefault((medium_id, sid), []).append(notiz)
+    except Exception as e:
+        print(f"  WARN: Treffer-Rueckmeldungen nicht lesbar ({e}) - Lauf ohne Rueckmeldungen", flush=True)
+    _RUECKMELDUNGEN_CACHE = mapping
+    return mapping
+
+
+def build_match_prompt(dna, stiftung, math_score, sdna_full=None, rueckmeldungen=None):
     """Bewertungs-Prompt Medium-DNA vs. Stiftungs-DNA bauen (reine Funktion, testbar).
 
     Prompt-Version: siehe PROMPT_VERSION (Cache-Key). Bei jeder inhaltlichen
@@ -672,6 +725,13 @@ def build_match_prompt(dna, stiftung, math_score, sdna_full=None):
     p2 (2026-07-24): Preis-/Einzelpersonen-Malus + Institutionalitaets-Check.
     Ausloeser: Ramonas Praezisions-Feedback - kleine Kunstpreis-Stiftungen rankten
     vor institutionellen Geldgebern (Migros-Kulturprozent Platz 33 bei cueltuer).
+
+    `rueckmeldungen` (Liste Strings, 2026-07-29): freigegebene Rueckmeldungen zu
+    GENAU diesem Medium-Stiftung-Paar aus agent_lessons (Operator sofort, Medium
+    nach Freigabe). Sie stehen als eigener, verbindlicher Block im Prompt - ein
+    Mensch, der das Paar kennt, schlaegt jede DNA-Heuristik. Der Cache-Key traegt
+    ihren Fingerabdruck (compute_llm_score), damit eine neue Rueckmeldung den
+    alten Score sofort invalidiert.
     """
     def _fmt_tag_list(tag_list, max_items=30):
         lines = []
@@ -748,9 +808,14 @@ def build_match_prompt(dna, stiftung, math_score, sdna_full=None):
         f"{stiftung_block}\n"
         "KONTEXT (technische Hilfsgroessen):\n"
         f"  Math-Score (Tag-Overlap): {math_score}/100\n\n"
+        f"{_fmt_rueckmeldungen(rueckmeldungen)}"
         "Bewertungsaufgabe:\n"
         "Bewerte die Passgenauigkeit auf einer Skala 0-100. Der Antragsteller ist immer eine "
         "ORGANISATION (ein Medium bzw. dessen Traegerschaft), nie eine Einzelperson. Pruefkaskade:\n"
+        "  0. Rueckmeldungs-Check: Liegt oben eine RUECKMELDUNG zu diesem Paar vor, ist sie "
+        "verbindlich und schlaegt jede andere Einschaetzung. Sagt sie, die Stiftung passe nicht "
+        "(falsche Foerderpraxis, kein Medienbezug, Absage erhalten, Region falsch): Score <= 15 und "
+        "nenne die Rueckmeldung als Grund. Nennt sie eine Einschraenkung, senke entsprechend.\n"
         "  1. Tabu-Check: Wenn ein Tabu-Thema der Stiftung das Kerngeschaeft des Mediums trifft, "
         "oder umgekehrt das Medium ein Tabu der Stiftung im Kern hat: Score <= 20.\n"
         "  2. Antragstyp-Check: Kann eine Organisation (Medium, Verlag, Redaktion) bei diesem "
@@ -782,7 +847,7 @@ def build_match_prompt(dna, stiftung, math_score, sdna_full=None):
 
 
 def compute_llm_score(dna, stiftung, math_score, stiftung_dna_version_id,
-                      sdna_full=None, use_cache=True):
+                      sdna_full=None, use_cache=True, rueckmeldungen=None):
     """LLM-Score 0-100 + Begruendung. DNA-vs-DNA-Bewertung.
 
     Wenn sdna_full uebergeben wird, fliesst die volle veredelte Stiftungs-DNA in den
@@ -795,12 +860,21 @@ def compute_llm_score(dna, stiftung, math_score, stiftung_dna_version_id,
     medium_dna_version_id = dna.get("version_id")
     stiftung_id = stiftung.get("id")
 
+    # Rueckmeldungen wandern in den Cache-Key (wie die PROMPT_VERSION): eine
+    # neue oder geaenderte Rueckmeldung invalidiert den alten Score sofort,
+    # statt ihn bis zur naechsten DNA-Version weiterzuschleppen.
+    modell = ACTIVE_MODEL
+    if rueckmeldungen:
+        fp = hashlib.sha256("\u0000".join(str(r) for r in rueckmeldungen).encode("utf-8")).hexdigest()[:8]
+        modell = f"{ACTIVE_MODEL}+fb{fp}"
+
     if use_cache and medium_dna_version_id and stiftung_id is not None:
-        hit = cache_lookup(medium_dna_version_id, stiftung_id, stiftung_dna_version_id)
+        hit = cache_lookup(medium_dna_version_id, stiftung_id, stiftung_dna_version_id, model=modell)
         if hit is not None:
             return hit[0], hit[1], "cache"
 
-    prompt = build_match_prompt(dna, stiftung, math_score, sdna_full=sdna_full)
+    prompt = build_match_prompt(dna, stiftung, math_score, sdna_full=sdna_full,
+                               rueckmeldungen=rueckmeldungen)
 
     obj = _llm_call_ollama(prompt)
     if not isinstance(obj, dict):
@@ -814,7 +888,7 @@ def compute_llm_score(dna, stiftung, math_score, stiftung_dna_version_id,
 
     if use_cache and medium_dna_version_id and stiftung_id is not None:
         cache_write(medium_dna_version_id, stiftung_id, _norm_sdna(stiftung_dna_version_id),
-                    score, begruendung, ACTIVE_MODEL)
+                    score, begruendung, modell)
 
     return score, begruendung, "llm"
 
@@ -1325,6 +1399,10 @@ def run_match(args):
 
     # Medium-Ausschluesse (Foerderhistorie, Design 2026-07-29): einmal pro Lauf.
     ausschluss_map = load_medium_ausschluesse()
+    # Treffer-Rueckmeldungen (aktiv = freigegeben), einmal pro Lauf.
+    rueckmeldungs_map = load_match_rueckmeldungen()
+    if rueckmeldungs_map:
+        print(f"  Treffer-Rueckmeldungen (aktiv): {len(rueckmeldungs_map)} Paar(e)", flush=True)
     if ausschluss_map:
         print(f"  Medium-Ausschluesse: " +
               ", ".join(f"{m}={len(s)}" for m, s in sorted(ausschluss_map.items())), flush=True)
@@ -1460,10 +1538,12 @@ def run_match(args):
                 _entry = sdna_map.get(sid)
                 sdna_v = _entry["version_id"] if _entry else None
                 _sdna_klass = _entry["klassifiziert_by"] if _entry else ""
+                _rm = rueckmeldungs_map.get((medium, int(sid))) if sid is not None else None
                 llm_score, begruendung, source = compute_llm_score(
                     dna, c["stiftung"], c["math_score"], sdna_v,
                     sdna_full=sdna_full_map.get(sid),
                     use_cache=not args.no_cache,
+                    rueckmeldungen=_rm,
                 )
                 if source == "cache":
                     cache_hits += 1

@@ -24,6 +24,10 @@ jest.mock('./portal-guard', () => {
     hatAktiveMediumDna: jest.fn(),
     ladeWissenFuerMedium: jest.fn(),
     legeWissensEintragAn: jest.fn(),
+    // Fragebogen bearbeiten (29.07.2026): die Route liest den bestehenden
+    // Eintrag und patcht ihn statt einen zweiten anzulegen.
+    ladeFragebogenEintrag: jest.fn(),
+    patcheWissensEintrag: jest.fn(),
   }
 })
 
@@ -42,6 +46,8 @@ import {
   hatAktiveMediumDna,
   ladeWissenFuerMedium,
   legeWissensEintragAn,
+  ladeFragebogenEintrag,
+  patcheWissensEintrag,
 } from './portal-guard'
 import { schreibeMediumEvent } from './medium-events'
 import loginAnfordern from '../pages/api/portal/login-anfordern'
@@ -60,6 +66,8 @@ const ladeMock = ladePortalMedium as jest.Mock
 const hatDnaMock = hatAktiveMediumDna as jest.Mock
 const ladeWissenMock = ladeWissenFuerMedium as jest.Mock
 const legeWissenMock = legeWissensEintragAn as jest.Mock
+const ladeFragebogenMock = ladeFragebogenEintrag as jest.Mock
+const patcheWissenMock = patcheWissensEintrag as jest.Mock
 const eventMock = schreibeMediumEvent as jest.Mock
 
 const SECRET = 'routen-test-geheimnis-4711'
@@ -460,6 +468,7 @@ describe('/api/portal/wissen', () => {
       { id: 1, title: 'Artikel A', category: 'published_article', sourceUrl: 'https://bajour.ch/a', autoScraped: true, dateCreated: '2026-07-01T00:00:00Z' },
       { id: 2, title: 'Eigener Text', category: 'general_info', sourceUrl: null, autoScraped: false, dateCreated: '2026-07-02T00:00:00Z' },
     ])
+    ladeFragebogenMock.mockResolvedValue(null)
     const { res, getStatus, getJson } = makeRes()
     await wissen(makeReq({ method: 'GET', cookie: sessionCookie() }), res)
     expect(ladeWissenMock).toHaveBeenCalledWith('bajour')
@@ -471,11 +480,51 @@ describe('/api/portal/wissen', () => {
       ],
       zaehler: { published_article: 1, newsletter: 0, previous_application: 0, general_info: 1 },
       score: 67,
+      fragebogen: null,
     })
+  })
+
+  it('GET: gespeicherte Fragebogen-Antworten kommen zerlegt mit (Vorbefüllung, 29.07.2026)', async () => {
+    ladeWissenMock.mockResolvedValue([])
+    ladeFragebogenMock.mockResolvedValue({
+      id: 7,
+      content: 'Selbstbeschrieb\nWir sind ein Lokalmedium.\n\nNo-Gos\nKeine Werbung.',
+      dateUpdated: '2026-07-29T09:00:00Z',
+    })
+    const { res, getStatus, getJson } = makeRes()
+    await wissen(makeReq({ method: 'GET', cookie: sessionCookie() }), res)
+    expect(getStatus()).toBe(200)
+    expect(getJson().fragebogen).toEqual({
+      felder: { selbstbeschrieb: 'Wir sind ein Lokalmedium.', fokus: '', nogos: 'Keine Werbung.' },
+      gespeichertAm: '2026-07-29T09:00:00Z',
+    })
+  })
+
+  it('POST mit bestehendem Fragebogen → überschreibt ihn, legt KEINEN zweiten an', async () => {
+    ladeFragebogenMock.mockResolvedValue({ id: 7, content: 'Selbstbeschrieb\nAlt.', dateUpdated: '2026-07-28T09:00:00Z' })
+    patcheWissenMock.mockResolvedValue(undefined)
+    const { res, getStatus, getJson } = makeRes()
+    await wissen(
+      makeReq({
+        method: 'POST',
+        body: { fragebogen: { selbstbeschrieb: 'Neu und besser.', fokus: '', nogos: '' } },
+        cookie: sessionCookie(),
+      }),
+      res,
+    )
+    expect(getStatus()).toBe(200)
+    expect(getJson().aktualisiert).toBe(true)
+    expect(getJson().id).toBe(7)
+    expect(patcheWissenMock).toHaveBeenCalledTimes(1)
+    const [id, data] = patcheWissenMock.mock.calls[0] as [number, Record<string, unknown>]
+    expect(id).toBe(7)
+    expect(String(data.content)).toContain('Neu und besser.')
+    expect(legeWissenMock).not.toHaveBeenCalled()
   })
 
   it('GET: Directus nicht erreichbar → 502 statt Next-500', async () => {
     ladeWissenMock.mockRejectedValue(new Error('Netz weg'))
+    ladeFragebogenMock.mockResolvedValue(null)
     const { res, getStatus, getJson } = makeRes()
     await wissen(makeReq({ method: 'GET', cookie: sessionCookie() }), res)
     expect(getStatus()).toBe(502)
@@ -509,6 +558,7 @@ describe('/api/portal/wissen', () => {
 
   it('POST mit gefülltem Fragebogen → legt medium_knowledge-Eintrag des Session-Mediums an (category general_info, auto_scraped false)', async () => {
     legeWissenMock.mockResolvedValue({ id: 42 })
+    ladeFragebogenMock.mockResolvedValue(null)
     const { res, getStatus, getJson } = makeRes()
     await wissen(
       makeReq({
@@ -519,7 +569,11 @@ describe('/api/portal/wissen', () => {
       res,
     )
     expect(getStatus()).toBe(200)
-    expect(getJson()).toEqual({ id: 42, title: expect.stringMatching(/^Fragebogen \d{4}-\d{2}-\d{2}$/) })
+    expect(getJson()).toEqual({
+      id: 42,
+      title: expect.stringMatching(/^Fragebogen \d{4}-\d{2}-\d{2}$/),
+      aktualisiert: false,
+    })
     expect(legeWissenMock).toHaveBeenCalledTimes(1)
     const [data] = legeWissenMock.mock.calls[0] as [Record<string, unknown>]
     expect(data.medium_id).toBe('bajour')

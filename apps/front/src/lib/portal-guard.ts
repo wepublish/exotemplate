@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { leseSessionAusCookie, erzeugeLoginToken, type PortalSession } from './portal-session'
 import type { DnaProfil } from './generate-dna-jobs'
 import type { PortalAktiveDnaRoh } from './portal-dna'
-import type { GesuchVersion } from './portal-status'
+import { FRAGEBOGEN_TITEL_PREFIX, type GesuchVersion } from './portal-status'
 
 /**
  * portal-guard.ts: Zugriffsschutz für das Medien-Selbstbedienungsportal.
@@ -821,14 +821,35 @@ export async function legeConsentLogAn(data: Record<string, unknown>): Promise<{
 
 // ─── Directus-REST-Helfer: agent_lessons (Lern-Loop, Task 9) ──────────────────
 
-/** Legt eine agent_lessons-Zeile an (z. B. bauAusblendeLesson beim Ausblenden übers Portal). */
-export async function legeAgentLessonAn(data: Record<string, unknown>): Promise<void> {
-  await fetch(`${base()}/items/agent_lessons`, {
+/**
+ * Legt eine agent_lessons-Zeile an (z. B. bauAusblendeLesson beim Ausblenden
+ * übers Portal). Standardmässig fire-and-forget wie bisher: der Lern-Loop darf
+ * die eigentliche Aktion nie scheitern lassen.
+ *
+ * Mit `{ mitId: true }` wird die Antwort ausgewertet und die neue id
+ * zurückgegeben (Treffer-Rückmeldung: sie braucht die id für den
+ * Freigabe-Vorschlag). Dann wirft die Funktion auch, wenn Directus die Zeile
+ * ablehnt — eine Rückmeldung, die nicht liegt, darf nicht als gespeichert
+ * gemeldet werden.
+ */
+export async function legeAgentLessonAn(
+  data: Record<string, unknown>,
+  opts?: { mitId?: boolean },
+): Promise<{ id: string } | undefined> {
+  const res = await fetch(`${base()}/items/agent_lessons`, {
     method: 'POST',
     headers: schreibHeaders(),
     body: JSON.stringify(data),
     signal: AbortSignal.timeout(15_000),
   })
+  if (!opts?.mitId) return undefined
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new Error(`agent_lessons anlegen fehlgeschlagen (${res.status}): ${text.slice(0, 200)}`)
+  }
+  const json = (await res.json()) as { data?: { id?: string } }
+  if (!json.data?.id) throw new Error('Directus: keine id nach agent_lessons-Anlage')
+  return { id: String(json.data.id) }
 }
 
 /**
@@ -999,4 +1020,51 @@ export async function sucheStiftungenFuerPortal(q: string): Promise<Array<{ id: 
       name: (r.Stiftungsname as string).trim(),
       sitz: typeof r.sitz === 'string' && r.sitz.trim() ? r.sitz.trim() : null,
     }))
+}
+
+// ─── Directus-REST-Helfer: Fragebogen bearbeiten (Wunsch 29.07.2026) ──────────
+
+/**
+ * Lädt den bestehenden Fragebogen-Eintrag eines Mediums (jüngster, falls aus
+ * der Zeit vor der Bearbeitbarkeit mehrere existieren) samt Inhalt, damit die
+ * Portal-Seite die Antworten vorbefüllen und ein POST sie überschreiben kann
+ * statt einen weiteren Eintrag anzulegen. Erkennung über den Titel-Präfix
+ * (istFragebogenEintrag in portal-status.ts) — die Kategorie general_info
+ * tragen auch andere Einträge.
+ */
+export async function ladeFragebogenEintrag(
+  slug: string,
+): Promise<{ id: number; content: string; dateUpdated: string } | null> {
+  const filter = encodeURIComponent(
+    JSON.stringify({ medium_id: { _eq: slug }, title: { _starts_with: FRAGEBOGEN_TITEL_PREFIX } }),
+  )
+  const res = await fetch(
+    `${base()}/items/medium_knowledge?filter=${filter}&sort=-date_created&limit=1&fields=id,content,date_created,date_updated`,
+    { headers: authHeaders(), signal: AbortSignal.timeout(15_000) },
+  )
+  if (!res.ok) throw new Error(`medium_knowledge (Fragebogen): Directus antwortete ${res.status}`)
+  const json = (await res.json()) as {
+    data?: Array<{ id: number; content?: string | null; date_created?: string | null; date_updated?: string | null }>
+  }
+  const row = json.data?.[0]
+  if (!row) return null
+  return {
+    id: row.id,
+    content: row.content ?? '',
+    dateUpdated: row.date_updated ?? row.date_created ?? '',
+  }
+}
+
+/** Patcht einen medium_knowledge-Eintrag (Fragebogen-Überschreiben). */
+export async function patcheWissensEintrag(id: number, data: Record<string, unknown>): Promise<void> {
+  const res = await fetch(`${base()}/items/medium_knowledge/${id}`, {
+    method: 'PATCH',
+    headers: schreibHeaders(),
+    body: JSON.stringify(data),
+    signal: AbortSignal.timeout(15_000),
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new Error(`medium_knowledge aktualisieren fehlgeschlagen (${res.status}): ${text.slice(0, 200)}`)
+  }
 }

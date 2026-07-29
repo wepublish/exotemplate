@@ -219,6 +219,14 @@ export const PORTAL_TEXTE: Record<string, string> = {
   'unterlagen.url_hinweis':
     'Ein Link zu einem Artikel, eurer Website oder etwas anderem, das euch beschreibt. Wir lesen die Seite für euch ein.',
   'unterlagen.fragebogen_titel': 'Fragebogen',
+  // Sichtbarer Speicher-Zustand + Bearbeiten (Wunsch 29.07.2026): vorher war
+  // nicht erkennbar, dass die Antworten liegen und einfliessen.
+  'unterlagen.fragebogen_stand': 'Gespeichert am',
+  'unterlagen.fragebogen_ungespeichert': 'Ungespeicherte Änderungen',
+  'unterlagen.fragebogen_knopf': 'Antworten speichern',
+  'unterlagen.fragebogen_knopf_aendern': 'Antworten aktualisieren',
+  'unterlagen.fragebogen_gespeichert': 'Danke, eure Antworten sind gespeichert und fliessen in eure DNA ein.',
+  'unterlagen.fragebogen_aktualisiert': 'Eure Antworten sind aktualisiert und fliessen in die nächste DNA-Messung ein.',
   'unterlagen.fragebogen_selbstbeschrieb_label': 'Wie beschreibt ihr euch selbst?',
   'unterlagen.fragebogen_fokus_label': 'Fokus, was ihr erreichen wollt',
   'unterlagen.fragebogen_nogos_label': 'No-Gos',
@@ -229,6 +237,13 @@ export const PORTAL_TEXTE: Record<string, string> = {
   'unterlagen.dna_knopf_gesperrt': 'Ladet zuerst eine Unterlage hoch, dann könnt ihr eure DNA erstellen lassen.',
   // Logo-Gate für denselben Knopf (Pflicht-Erststep, siehe Modul-Kommentar Logo-Block oben).
   'unterlagen.dna_knopf_gesperrt_logo': 'Ladet zuerst euer Logo hoch, dann könnt ihr eure DNA erstellen lassen.',
+
+  // Rückmeldung zu EINEM Treffer (29.07.2026): beschreibt der Match-Engine,
+  // warum die Stiftung nicht passt. Wirkt nach der Freigabe durch We.Publish.
+  'treffer.rueckmeldung_knopf': 'Passt nicht? Rückmeldung',
+  'treffer.rueckmeldung_hinweis':
+    'Sagt uns, warum diese Stiftung nicht passt. Wir schauen die Rückmeldung an, geben sie frei, und danach berücksichtigt sie unser Matching bei euren nächsten Vorschlägen.',
+  'treffer.rueckmeldung_gesendet': 'Danke, eure Rückmeldung ist bei uns. Wir schauen sie an und berücksichtigen sie im Matching.',
 
   // Rückmeldung zur DNA-Neu-Erzeugung (Wunsch 29.07.2026): wenn die DNA dem
   // Medium «zu fern» ist, beschreibt es hier, was fehlt, und stösst damit

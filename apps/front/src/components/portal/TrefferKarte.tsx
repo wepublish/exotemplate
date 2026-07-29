@@ -50,11 +50,18 @@ interface TrefferKarteProps {
   treffer: PortalTreffer
   onAnschreiben: (treffer: PortalTreffer) => void
   onNichtRelevant: (treffer: PortalTreffer) => void
+  /**
+   * Rückmeldung «passt überhaupt nicht» (29.07.2026). Anders als «Nicht
+   * relevant» (blendet den Treffer nur aus) beschreibt sie den Grund für die
+   * Match-Engine — darum steht sie bei JEDEM Status zur Verfügung, auch wenn
+   * schon ein Gesuch läuft.
+   */
+  onRueckmeldung: (treffer: PortalTreffer) => void
   /** Doppel-Submit-Schutz (Task 9): true, solange irgendeine Aktion auf der Seite läuft. */
   disabled?: boolean
 }
 
-export function TrefferKarte({ treffer, onAnschreiben, onNichtRelevant, disabled }: TrefferKarteProps) {
+export function TrefferKarte({ treffer, onAnschreiben, onNichtRelevant, onRueckmeldung, disabled }: TrefferKarteProps) {
   const laeuftBereits = treffer.status !== 'offen'
 
   return (
@@ -103,7 +110,7 @@ export function TrefferKarte({ treffer, onAnschreiben, onNichtRelevant, disabled
         </div>
       )}
 
-      <div className="mt-4 flex items-center gap-2">
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         {laeuftBereits ? (
           <Badge variant="outline" className={`text-xs ${STATUS_FARBE[treffer.status]}`}>
             {STATUS_LABEL[treffer.status]}
@@ -118,6 +125,9 @@ export function TrefferKarte({ treffer, onAnschreiben, onNichtRelevant, disabled
             </Button>
           </>
         )}
+        <Button size="sm" variant="ghost" className="text-slate-500" onClick={() => onRueckmeldung(treffer)} disabled={disabled}>
+          {PORTAL_TEXTE['treffer.rueckmeldung_knopf']}
+        </Button>
       </div>
     </Card>
   )

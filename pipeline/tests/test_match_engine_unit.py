@@ -449,3 +449,109 @@ class TestMediumAusschluesse(unittest.TestCase):
                                side_effect=AssertionError("darf nicht lesen")):
             n = match_engine.cleanup_ausschluss_match_results("zwolf", set(), {1: "x"})
         self.assertEqual(n, 0)
+
+
+class TestTrefferRueckmeldungen(unittest.TestCase):
+    """Rueckmeldungen zu einem Treffer (29.07.2026): Operator sofort aktiv,
+    Portal erst nach Freigabe. Nur aktive Zeilen wirken; sie stehen verbindlich
+    im Prompt und tragen ihren Fingerabdruck im Cache-Key."""
+
+    def setUp(self):
+        match_engine._RUECKMELDUNGEN_CACHE = None
+
+    def tearDown(self):
+        match_engine._RUECKMELDUNGEN_CACHE = None
+
+    def _dna(self):
+        return {"medium_id": "cueltuer", "medium_name": "Cueltuer", "version_id": "v-test",
+                "sound_feeling": "Kulturjournalismus", "tags": [], "exclusion_tags": [],
+                "foerderpraxis": {}}
+
+    def _stiftung(self):
+        return {"id": 11991, "Stiftungsname": "Media Forward Fund", "sitz": "Bern",
+                "land": "CH", "zwecktext": "Medienfoerderung", "foerderbedingungen": ""}
+
+    def test_loader_nimmt_nur_aktive_und_filtert_kategorie(self):
+        gesehen = {}
+
+        def fake_get(endpoint, params=None):
+            gesehen.update(params or {})
+            return {"data": [
+                {"medium_id": "cueltuer", "stiftung_id": "11991", "notiz": "Foerdert nur Print.", "ts": "2026-07-29T10:00:00"},
+                {"medium_id": "cueltuer", "stiftung_id": "11991", "notiz": "Zweite Notiz.", "ts": "2026-07-28T10:00:00"},
+                {"medium_id": "zwolf", "stiftung_id": "6651", "notiz": "Region passt nicht.", "ts": "2026-07-29T09:00:00"},
+                # unbrauchbar: leere Notiz / kaputte id -> ignoriert
+                {"medium_id": "zwolf", "stiftung_id": "6651", "notiz": "  ", "ts": "2026-07-29T08:00:00"},
+                {"medium_id": "zwolf", "stiftung_id": "abc", "notiz": "kaputt", "ts": "2026-07-29T08:00:00"},
+            ]}
+
+        with mock.patch.object(match_engine, "directus_get", fake_get):
+            mapping = match_engine.load_match_rueckmeldungen()
+
+        # Der Filter muss BEIDES verlangen: die Kategorie und aktiv=true
+        # (sonst wirkten nicht freigegebene Portal-Rueckmeldungen mit).
+        self.assertEqual(gesehen.get("filter[kategorie][_eq]"), "match_rueckmeldung")
+        self.assertEqual(gesehen.get("filter[aktiv][_eq]"), "true")
+        self.assertEqual(mapping[("cueltuer", 11991)], ["Foerdert nur Print.", "Zweite Notiz."])
+        self.assertEqual(mapping[("zwolf", 6651)], ["Region passt nicht."])
+
+    def test_loader_ohne_collection_ergibt_leer(self):
+        with mock.patch.object(match_engine, "directus_get", side_effect=RuntimeError("HTTP 403")):
+            self.assertEqual(match_engine.load_match_rueckmeldungen(), {})
+
+    def test_prompt_traegt_rueckmeldung_und_kriterium_null(self):
+        prompt = match_engine.build_match_prompt(
+            self._dna(), self._stiftung(), math_score=80,
+            rueckmeldungen=["Foerdert ausschliesslich Print, wir sind rein digital."])
+        self.assertIn("RUECKMELDUNG ZU GENAU DIESEM PAAR", prompt)
+        self.assertIn("Foerdert ausschliesslich Print", prompt)
+        self.assertIn("Rueckmeldungs-Check", prompt)
+        self.assertIn("Score <= 15", prompt)
+
+    def test_prompt_ohne_rueckmeldung_unveraendert(self):
+        ohne = match_engine.build_match_prompt(self._dna(), self._stiftung(), math_score=80)
+        leer = match_engine.build_match_prompt(self._dna(), self._stiftung(), math_score=80, rueckmeldungen=[])
+        self.assertEqual(ohne, leer)
+        self.assertNotIn("RUECKMELDUNG ZU GENAU DIESEM PAAR", ohne)
+
+    def test_fmt_deckelt_und_ueberspringt_leere(self):
+        block = match_engine._fmt_rueckmeldungen(["  ", "eins", "", "zwei", "drei", "vier", "fuenf", "sechs"])
+        self.assertIn("- eins", block)
+        self.assertIn("- fuenf", block)
+        self.assertNotIn("- sechs", block)
+
+    def test_cache_key_traegt_rueckmeldungs_fingerabdruck(self):
+        """Neue Rueckmeldung -> anderer Cache-Key -> alter Score gilt nicht mehr."""
+        gesehene_modelle = []
+
+        def fake_lookup(mdv, sid, sdv, model=None):
+            gesehene_modelle.append(model)
+            return None
+
+        def fake_llm(prompt):
+            return {"score": 12, "begruendung": "Passt nicht."}
+
+        with mock.patch.object(match_engine, "cache_lookup", fake_lookup), \
+             mock.patch.object(match_engine, "cache_write", lambda *a, **k: True), \
+             mock.patch.object(match_engine, "_llm_call_ollama", fake_llm):
+            match_engine.compute_llm_score(self._dna(), self._stiftung(), 80, "sdna-1")
+            match_engine.compute_llm_score(self._dna(), self._stiftung(), 80, "sdna-1",
+                                           rueckmeldungen=["Foerdert nur Print."])
+            match_engine.compute_llm_score(self._dna(), self._stiftung(), 80, "sdna-1",
+                                           rueckmeldungen=["Andere Rueckmeldung."])
+
+        ohne, mit_a, mit_b = gesehene_modelle
+        self.assertEqual(ohne, match_engine.ACTIVE_MODEL)
+        self.assertTrue(mit_a.startswith(match_engine.ACTIVE_MODEL + "+fb"))
+        self.assertNotEqual(mit_a, mit_b, "verschiedene Rueckmeldungen brauchen verschiedene Cache-Keys")
+
+    def test_cache_key_stabil_bei_gleicher_rueckmeldung(self):
+        """Gleiche Rueckmeldung im naechsten Lauf -> Cache greift wieder."""
+        modelle = []
+        with mock.patch.object(match_engine, "cache_lookup",
+                               lambda mdv, sid, sdv, model=None: modelle.append(model) or None), \
+             mock.patch.object(match_engine, "cache_write", lambda *a, **k: True), \
+             mock.patch.object(match_engine, "_llm_call_ollama", lambda p: {"score": 12, "begruendung": "x"}):
+            match_engine.compute_llm_score(self._dna(), self._stiftung(), 80, "s1", rueckmeldungen=["gleich"])
+            match_engine.compute_llm_score(self._dna(), self._stiftung(), 80, "s1", rueckmeldungen=["gleich"])
+        self.assertEqual(modelle[0], modelle[1])

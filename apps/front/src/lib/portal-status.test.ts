@@ -5,6 +5,8 @@ import {
   STATION_LABEL,
   berechneWissensScore,
   baueFragebogenEintrag,
+  parseFragebogenEintrag,
+  istFragebogenEintrag,
   bestimmeWissensQuelle,
   gesuchPortalStatus,
   fuegeGesuchVersionHinzu,
@@ -607,5 +609,49 @@ describe('parsePortal (Task 11, Operator-Warteschlange)', () => {
       betrag_eingereicht_chf: 20000,
     }
     expect(parsePortal(roh)).toEqual(roh)
+  })
+})
+
+// ─── Fragebogen bearbeiten (Wunsch 29.07.2026) ────────────────────────────────
+
+describe('parseFragebogenEintrag (Umkehrung von baueFragebogenEintrag)', () => {
+  it('liest alle drei Felder aus einem selbst gebauten Eintrag zurück', () => {
+    const felder = { selbstbeschrieb: 'Wir sind ein Kulturmagazin.', fokus: 'Mehr Recherche.', nogos: 'Keine Werbung.' }
+    const eintrag = baueFragebogenEintrag(felder, new Date('2026-07-29T10:00:00Z'))
+    expect(eintrag).not.toBeNull()
+    expect(parseFragebogenEintrag(eintrag!.content)).toEqual(felder)
+  })
+
+  it('mehrzeilige Antworten bleiben erhalten', () => {
+    const felder = { selbstbeschrieb: 'Zeile eins\nZeile zwei', fokus: '', nogos: '' }
+    const eintrag = baueFragebogenEintrag(felder, new Date('2026-07-29T10:00:00Z'))
+    expect(parseFragebogenEintrag(eintrag!.content).selbstbeschrieb).toBe('Zeile eins\nZeile zwei')
+  })
+
+  it('fehlende Abschnitte ergeben leere Felder', () => {
+    const eintrag = baueFragebogenEintrag({ selbstbeschrieb: '', fokus: 'Nur Fokus.', nogos: '' }, new Date())
+    const felder = parseFragebogenEintrag(eintrag!.content)
+    expect(felder).toEqual({ selbstbeschrieb: '', fokus: 'Nur Fokus.', nogos: '' })
+  })
+
+  it('leerer, null- oder unbekannter Inhalt ergibt leere Felder statt Fehler', () => {
+    const leer = { selbstbeschrieb: '', fokus: '', nogos: '' }
+    expect(parseFragebogenEintrag('')).toEqual(leer)
+    expect(parseFragebogenEintrag(null)).toEqual(leer)
+    expect(parseFragebogenEintrag(undefined)).toEqual(leer)
+    expect(parseFragebogenEintrag('Irgendwas von Hand\nohne Abschnittstitel')).toEqual(leer)
+  })
+
+  it('verkraftet CRLF-Zeilenenden (von Hand in Directus bearbeitet)', () => {
+    const inhalt = 'Selbstbeschrieb\r\nEin Text.\r\n\r\nNo-Gos\r\nKeine Werbung.'
+    expect(parseFragebogenEintrag(inhalt)).toEqual({ selbstbeschrieb: 'Ein Text.', fokus: '', nogos: 'Keine Werbung.' })
+  })
+})
+
+describe('istFragebogenEintrag', () => {
+  it('erkennt den Fragebogen am Titel-Präfix', () => {
+    expect(istFragebogenEintrag({ title: 'Fragebogen 2026-07-29' })).toBe(true)
+    expect(istFragebogenEintrag({ title: 'Förderhistorie: Volkart Stiftung' })).toBe(false)
+    expect(istFragebogenEintrag({ title: null })).toBe(false)
   })
 })

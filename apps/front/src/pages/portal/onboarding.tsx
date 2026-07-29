@@ -55,10 +55,17 @@ interface WissensZaehler {
   general_info: number
 }
 
+interface FragebogenFelderAnsicht {
+  selbstbeschrieb: string
+  fokus: string
+  nogos: string
+}
+
 interface WissenAntwort {
   eintraege: WissensEintrag[]
   zaehler: WissensZaehler
   score: number
+  fragebogen: { felder: FragebogenFelderAnsicht; gespeichertAm: string } | null
 }
 
 type LadeStatus = 'laden' | 'bereit' | 'fehler'
@@ -298,11 +305,41 @@ function UrlBlock({ onErfolg }: { onErfolg: () => void }) {
 
 // ─── Fragebogen-Block ─────────────────────────────────────────────────────────
 
-function FragebogenBlock({ onErfolg }: { onErfolg: () => void }) {
+/**
+ * Die drei Fragen. Gespeicherte Antworten kommen als `gespeichert` herein
+ * (aus /api/portal/wissen GET) und befüllen die Felder vor — das Medium sieht
+ * damit, dass die Antworten wirklich liegen, und kann sie später bearbeiten
+ * (Wunsch 29.07.2026). Ein Absenden überschreibt den bestehenden Eintrag.
+ */
+function FragebogenBlock({
+  gespeichert,
+  onErfolg,
+}: {
+  gespeichert: { felder: FragebogenFelderAnsicht; gespeichertAm: string } | null
+  onErfolg: () => void
+}) {
   const [selbstbeschrieb, setSelbstbeschrieb] = useState('')
   const [fokus, setFokus] = useState('')
   const [nogos, setNogos] = useState('')
   const [speichert, setSpeichert] = useState(false)
+  const [geaendert, setGeaendert] = useState(false)
+
+  // Vorbefüllen, sobald die gespeicherten Antworten geladen sind — aber nie
+  // über eine begonnene Bearbeitung hinweg (sonst überschreibt ein Reload der
+  // Liste, etwa nach einem Upload, gerade getippten Text).
+  useEffect(() => {
+    if (geaendert) return
+    setSelbstbeschrieb(gespeichert?.felder.selbstbeschrieb ?? '')
+    setFokus(gespeichert?.felder.fokus ?? '')
+    setNogos(gespeichert?.felder.nogos ?? '')
+  }, [gespeichert, geaendert])
+
+  function aendere(setter: (wert: string) => void) {
+    return (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setGeaendert(true)
+      setter(e.target.value)
+    }
+  }
 
   async function handleAbsenden() {
     if (!selbstbeschrieb.trim() && !fokus.trim() && !nogos.trim()) {
@@ -316,15 +353,19 @@ function FragebogenBlock({ onErfolg }: { onErfolg: () => void }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fragebogen: { selbstbeschrieb, fokus, nogos } }),
       })
-      const json = (await res.json()) as { id?: number; error?: string }
+      const json = (await res.json()) as { id?: number; error?: string; aktualisiert?: boolean }
       if (!res.ok || json.error) {
         toast.error(json.error ?? `Fehlgeschlagen (${res.status})`)
         return
       }
-      toast.success('Danke, eure Antworten sind gespeichert.')
-      setSelbstbeschrieb('')
-      setFokus('')
-      setNogos('')
+      toast.success(
+        json.aktualisiert
+          ? PORTAL_TEXTE['unterlagen.fragebogen_aktualisiert']
+          : PORTAL_TEXTE['unterlagen.fragebogen_gespeichert'],
+      )
+      // Felder NICHT leeren: die Antworten bleiben stehen, damit sichtbar ist,
+      // was gespeichert wurde, und ein zweiter Durchgang daran anschliesst.
+      setGeaendert(false)
       onErfolg()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : String(err))
@@ -335,7 +376,15 @@ function FragebogenBlock({ onErfolg }: { onErfolg: () => void }) {
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-3">
-      <h2 className="text-sm font-semibold text-slate-900">{PORTAL_TEXTE['unterlagen.fragebogen_titel']}</h2>
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="text-sm font-semibold text-slate-900">{PORTAL_TEXTE['unterlagen.fragebogen_titel']}</h2>
+        {gespeichert && !geaendert && (
+          <span className="text-xs text-emerald-700">
+            {PORTAL_TEXTE['unterlagen.fragebogen_stand']} {formatDatum(gespeichert.gespeichertAm)}
+          </span>
+        )}
+        {geaendert && <span className="text-xs text-amber-700">{PORTAL_TEXTE['unterlagen.fragebogen_ungespeichert']}</span>}
+      </div>
       <p className="text-sm text-slate-500">{PORTAL_TEXTE['unterlagen.fragebogen_intro']}</p>
 
       <div className="space-y-3">
@@ -343,25 +392,25 @@ function FragebogenBlock({ onErfolg }: { onErfolg: () => void }) {
           <label className="mb-1 block text-xs font-medium text-slate-600">
             {PORTAL_TEXTE['unterlagen.fragebogen_selbstbeschrieb_label']}
           </label>
-          <Textarea value={selbstbeschrieb} onChange={(e) => setSelbstbeschrieb(e.target.value)} className="min-h-[90px]" />
+          <Textarea value={selbstbeschrieb} onChange={aendere(setSelbstbeschrieb)} className="min-h-[90px]" />
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-600">
             {PORTAL_TEXTE['unterlagen.fragebogen_fokus_label']}
           </label>
-          <Textarea value={fokus} onChange={(e) => setFokus(e.target.value)} className="min-h-[90px]" />
+          <Textarea value={fokus} onChange={aendere(setFokus)} className="min-h-[90px]" />
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-600">
             {PORTAL_TEXTE['unterlagen.fragebogen_nogos_label']}
           </label>
-          <Textarea value={nogos} onChange={(e) => setNogos(e.target.value)} className="min-h-[90px]" />
+          <Textarea value={nogos} onChange={aendere(setNogos)} className="min-h-[90px]" />
         </div>
       </div>
 
       <Button onClick={() => void handleAbsenden()} disabled={speichert}>
         {speichert ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
-        Absenden
+        {gespeichert ? PORTAL_TEXTE['unterlagen.fragebogen_knopf_aendern'] : PORTAL_TEXTE['unterlagen.fragebogen_knopf']}
       </Button>
     </div>
   )
@@ -729,7 +778,7 @@ export default function PortalUnterlagenSeite() {
         <UrlBlock onErfolg={laden} />
       </div>
 
-      <FragebogenBlock onErfolg={laden} />
+      <FragebogenBlock gespeichert={wissen?.fragebogen ?? null} onErfolg={laden} />
 
       <FoerderhistorieBlock onWissenGeaendert={laden} />
 

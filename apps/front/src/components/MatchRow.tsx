@@ -31,6 +31,7 @@ import { GesuchPromptButton } from '@/components/GesuchPromptButton'
 import { FormularErfassung } from '@/components/FormularErfassung'
 import { AusblendenDialog } from '@/components/AusblendenDialog'
 import { NichtFoerderstiftungButton } from '@/components/NichtFoerderstiftungButton'
+import { RueckmeldungDialog } from '@/components/RueckmeldungDialog'
 import { bauAusblendeNotiz, bauAusblendeLesson, type AusblendeGrund } from '@/lib/ausblenden'
 
 // ─── Betrag-Recherche Typen ──────────────────────────────────────────────────
@@ -313,6 +314,9 @@ function AktionsBereich({ row, medium, application, onCreated }: AktionsBereichP
   // Nachträgliches Ausblenden: Dialog für bestehende Funnel-Anträge
   const [funnelDialogOffen, setFunnelDialogOffen] = useState(false)
   const [funnelBeschaeftigt, setFunnelBeschaeftigt] = useState(false)
+  // Rückmeldung zum Treffer (29.07.2026): wirkt beim nächsten Engine-Lauf
+  const [rueckmeldungOffen, setRueckmeldungOffen] = useState(false)
+  const [rueckmeldungLaeuft, setRueckmeldungLaeuft] = useState(false)
 
   const beschaeftigt = createLoading || updateLoading
 
@@ -416,6 +420,36 @@ function AktionsBereich({ row, medium, application, onCreated }: AktionsBereichP
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err)
       toast.error(`Fehler: ${msg}`)
+    }
+  }
+
+  // Operator-Rückmeldung: geht sofort scharf (aktiv true) und senkt den Score
+  // beim nächsten Lauf über den Rückmeldungs-Check im Prompt.
+  async function handleRueckmeldung(notiz: string) {
+    setRueckmeldungLaeuft(true)
+    try {
+      const res = await fetch('/api/match-rueckmeldung', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          aktion: 'anlegen',
+          medium_id: medium,
+          stiftung_id: row.stiftungId,
+          stiftung_name: row.name,
+          notiz,
+        }),
+      })
+      const json = (await res.json()) as { id?: string | null; error?: string }
+      if (!res.ok || json.error) {
+        toast.error(json.error ?? `Fehlgeschlagen (${res.status})`)
+        return
+      }
+      toast.success('Rückmeldung gespeichert — sie wirkt beim nächsten Matching-Lauf.')
+      setRueckmeldungOffen(false)
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : String(err))
+    } finally {
+      setRueckmeldungLaeuft(false)
     }
   }
 
@@ -533,6 +567,16 @@ function AktionsBereich({ row, medium, application, onCreated }: AktionsBereichP
               stiftungName={row.name}
               onDone={onCreated}
             />
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-slate-600 border-slate-200 hover:bg-slate-50 text-xs h-8"
+              disabled={beschaeftigt}
+              onClick={() => setRueckmeldungOffen(true)}
+              title="Passt nicht? Rückmeldung schreiben, die beim nächsten Matching zählt"
+            >
+              Rückmeldung
+            </Button>
           </div>
           {s === 'ausgeblendet' && application.bemerkung && (
             <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
@@ -542,6 +586,15 @@ function AktionsBereich({ row, medium, application, onCreated }: AktionsBereichP
         </div>
 
         {/* Dialog für nachträgliches Ausblenden aus dem Funnel */}
+        <RueckmeldungDialog
+          offen={rueckmeldungOffen}
+          stiftungName={row.name}
+          hinweis="Die Rückmeldung wird sofort gespeichert und beim nächsten Matching-Lauf berücksichtigt."
+          beschaeftigt={rueckmeldungLaeuft}
+          onAbbrechen={() => setRueckmeldungOffen(false)}
+          onBestaetigen={(notiz) => void handleRueckmeldung(notiz)}
+        />
+
         <AusblendenDialog
           offen={funnelDialogOffen}
           stiftungName={row.name}
@@ -580,6 +633,16 @@ function AktionsBereich({ row, medium, application, onCreated }: AktionsBereichP
           stiftungName={row.name}
           onDone={onCreated}
         />
+        <Button
+          size="sm"
+          variant="outline"
+          className="text-slate-600 border-slate-200 hover:bg-slate-50 text-xs h-8"
+          disabled={beschaeftigt}
+          onClick={() => setRueckmeldungOffen(true)}
+          title="Passt nicht? Rückmeldung schreiben, die beim nächsten Matching zählt"
+        >
+          Rückmeldung
+        </Button>
       </div>
 
       <AusblendenDialog
@@ -588,6 +651,15 @@ function AktionsBereich({ row, medium, application, onCreated }: AktionsBereichP
         beschaeftigt={beschaeftigt}
         onAbbrechen={() => setDialogOffen(false)}
         onBestaetigen={handleAusblenden}
+      />
+
+      <RueckmeldungDialog
+        offen={rueckmeldungOffen}
+        stiftungName={row.name}
+        hinweis="Die Rückmeldung wird sofort gespeichert und beim nächsten Matching-Lauf berücksichtigt."
+        beschaeftigt={rueckmeldungLaeuft}
+        onAbbrechen={() => setRueckmeldungOffen(false)}
+        onBestaetigen={(notiz) => void handleRueckmeldung(notiz)}
       />
     </>
   )

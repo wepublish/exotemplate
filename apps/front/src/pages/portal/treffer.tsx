@@ -8,6 +8,7 @@ import { TrefferKarte } from '@/components/portal/TrefferKarte'
 import { ConsentDialog } from '@/components/portal/ConsentDialog'
 import { PORTAL_TEXTE } from '@/lib/portal-texte'
 import { AUSBLENDE_GRUENDE, type AusblendeGrund } from '@/lib/ausblenden'
+import { RueckmeldungDialog } from '@/components/RueckmeldungDialog'
 import type { PortalTreffer } from '@/lib/portal-treffer'
 
 /**
@@ -54,6 +55,11 @@ export default function PortalTrefferSeite() {
   // Seitenweiter Doppel-Submit-Schutz (TrefferKarte.disabled): bleibt gesetzt,
   // solange irgendeine Aktion läuft ODER der ConsentDialog offen ist.
   const [aktionLaeuft, setAktionLaeuft] = useState(false)
+
+  // Rückmeldung zu einem Treffer (29.07.2026): wird gespeichert und wirkt,
+  // sobald We.Publish sie freigibt.
+  const [rueckmeldungTreffer, setRueckmeldungTreffer] = useState<PortalTreffer | null>(null)
+  const [rueckmeldungLaeuft, setRueckmeldungLaeuft] = useState(false)
 
   const [consentTreffer, setConsentTreffer] = useState<PortalTreffer | null>(null)
   const [consentText, setConsentText] = useState('')
@@ -183,6 +189,29 @@ export default function PortalTrefferSeite() {
     }
   }
 
+  async function handleRueckmeldung(notiz: string) {
+    if (!rueckmeldungTreffer) return
+    setRueckmeldungLaeuft(true)
+    try {
+      const res = await fetch('/api/portal/match-rueckmeldung', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stiftung_id: rueckmeldungTreffer.stiftungId, stiftung_name: rueckmeldungTreffer.name, notiz }),
+      })
+      const json = (await res.json().catch(() => ({}))) as { error?: string; grund?: string }
+      if (!res.ok) {
+        toast.error(json.error ?? `Fehlgeschlagen (${res.status})`)
+        return
+      }
+      toast.success(PORTAL_TEXTE['treffer.rueckmeldung_gesendet'])
+      setRueckmeldungTreffer(null)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : String(err))
+    } finally {
+      setRueckmeldungLaeuft(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -216,11 +245,21 @@ export default function PortalTrefferSeite() {
               treffer={t}
               onAnschreiben={handleAnschreiben}
               onNichtRelevant={oeffneNichtRelevantDialog}
+              onRueckmeldung={setRueckmeldungTreffer}
               disabled={aktionLaeuft}
             />
           ))}
         </div>
       )}
+
+      <RueckmeldungDialog
+        offen={!!rueckmeldungTreffer}
+        stiftungName={rueckmeldungTreffer?.name ?? ''}
+        hinweis={PORTAL_TEXTE['treffer.rueckmeldung_hinweis']}
+        beschaeftigt={rueckmeldungLaeuft}
+        onAbbrechen={() => setRueckmeldungTreffer(null)}
+        onBestaetigen={(notiz) => void handleRueckmeldung(notiz)}
+      />
 
       <Dialog open={!!nichtRelevantTreffer} onOpenChange={(open) => !open && schliesseNichtRelevantDialog()}>
         <DialogContent className="max-w-md">

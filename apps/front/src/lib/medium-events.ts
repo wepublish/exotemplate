@@ -30,6 +30,7 @@ export type MediumEventTyp =
   | 'zusage'
   | 'absage'
   | 'foerderhistorie_erfasst'
+  | 'match_rueckmeldung'
 
 export interface MediumEvent {
   medium_id: string
