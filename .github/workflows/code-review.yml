@@ -9,12 +9,14 @@ name: Code review
 # Needs a GEMINI_API_KEY secret on the repository or the organisation
 # (https://aistudio.google.com/apikey).
 #
-# The whole tree is reviewed on every run, not just the diff, so this stays on
-# pull requests only. While you tune the rules, set `fail-on: never` below to
-# get the report without blocking merges.
+# The whole tree is reviewed on every run, not just the diff, so this runs on
+# pull requests and on every push to main. While you tune the rules, set
+# `fail-on: never` below to get the report without blocking merges.
 
 on:
   pull_request:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
