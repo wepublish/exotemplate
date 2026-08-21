@@ -1,27 +1,23 @@
 import type { Knex } from 'knex'
 
 /**
- * Example migration — the template's demo collection.
+ * Example migration — the template's demo collection. **Do not copy this shape.**
  *
- * It exists so a fresh `docker compose up` produces a database the frontend can
- * actually read from. Delete it once you have your own collections.
+ * The data model is schema-as-code: collections, fields and relations are built in
+ * the Directus admin UI and committed with `npm run schema:dump` (directus-sync
+ * writes ./schema), never in a migration. See apps/directus/CLAUDE.md.
  *
- * Note which mechanism does what (see apps/directus/CLAUDE.md):
- *   - Everyday data-model work happens in the Directus admin UI and is then
- *     committed with `npm run schema:dump` (directus-sync writes ./schema).
- *   - Migrations like this one are for changes that must be reproducible
- *     without a human clicking through the UI: bootstrapping a collection on
- *     a fresh install, backfills, data repairs, non-Directus tables.
+ * This file is the single exception, and only because the template ships without a
+ * dump: it bootstraps `notes` so the very first `docker compose up` gives the
+ * frontend something to read. It goes away with the rest of the example feature.
  *
- * A migration that creates a table has to register it as a collection too. The
- * table alone is enough for REST and GraphQL — Directus reads the schema from the
- * database — but the admin UI only lists collections that have a
- * `directus_collections` row, and it renders plain text inputs for fields with no
- * `directus_fields` row. Creating a table without those rows gives you a
- * collection your colleagues cannot see or edit.
+ * It also shows why structure does not belong in a migration: the table alone is
+ * enough for REST and GraphQL — Directus reads the schema from the database — but
+ * the admin UI only lists collections that have a `directus_collections` row, and it
+ * renders plain text inputs for fields with no `directus_fields` row. Every one of
+ * those inserts below is metadata Directus would have written for you.
  *
- * This is the reason for the ownership rule: whichever mechanism creates a
- * collection also owns its metadata. Never split the two.
+ * Your own migrations touch rows, not structure.
  */
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable('notes', (table) => {

@@ -40,8 +40,8 @@ cp .env.example .env      # then put your ANTHROPIC_API_KEY in .env
 docker compose up --build
 ```
 
-First boot takes a few minutes: it builds both images, creates the database, runs the
-migrations, applies the versioned schema and creates the admin user.
+First boot takes a few minutes: it builds both images, creates the database, applies
+the versioned schema from `apps/directus/schema/` and creates the admin user.
 
 - **Frontend:** http://localhost:3000 — sign in with the admin below
 - **Directus admin:** http://localhost:8055 — `admin@wepublish.ch` / `admin123`
@@ -53,7 +53,9 @@ Stop with `docker compose down`; add `-v` to also delete the database.
 The example feature is a **notes** collection with an AI summary. It shows every
 pattern in the stack end to end:
 
-- a collection created by a **TypeScript migration** (`apps/directus/migrations/`)
+- a **notes** collection (bootstrapped by a migration so the first `docker compose up`
+  has data — your own collections are built in the admin UI and committed with
+  `npm run schema:dump`)
 - an **MUI** page that lists and creates notes over **GraphQL** via Apollo
 - a **Directus extension endpoint** that summarises a note with the **Claude API**
 - a **hook** that clears the summary when the note text changes
@@ -110,7 +112,8 @@ npm run db:reset         # DESTRUCTIVE: drops the dev database
 
 The single most important habit: **after changing the data model in the Directus admin
 UI, run `npm run schema:dump` and commit `apps/directus/schema/`.** Otherwise the
-change exists only on your machine.
+change exists only on your machine. The model always travels this way — never in a
+migration.
 
 ---
 

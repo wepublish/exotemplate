@@ -70,18 +70,23 @@ them is wrong even if it works.
    [Trigger docs](https://directus.com/docs/guides/flows/triggers). No system cron,
    no `setInterval` in a hook, no scheduler container. The Flow calls a custom
    operation from the bundle; the Flow itself is committed via `schema:dump`.
+9. **The data model is synced, never migrated.** Collections, fields, relations,
+   roles, permissions and Flows are built in the Directus admin UI and committed with
+   `npm run schema:dump` (directus-sync → `apps/directus/schema/`). A migration must
+   never create or alter structure; `apps/directus/migrations/` is a last resort for
+   row data — see [apps/directus/CLAUDE.md](apps/directus/CLAUDE.md).
 
 ## Where does this feature go?
 
 | The change is…                             | Goes to                                                                             |
 | ------------------------------------------ | ----------------------------------------------------------------------------------- |
-| a new collection or field                  | Directus admin UI, then `npm run schema:dump` — [apps/directus](apps/directus/)     |
+| a new collection, field, relation or role  | Directus admin UI, then `npm run schema:dump` — [apps/directus](apps/directus/)     |
 | a calculation, validation or business rule | extension bundle (endpoint or hook)                                                 |
 | anything that calls Claude                 | extension bundle, via `shared/claude.ts`                                            |
 | something that must run nightly/hourly     | Flow with a Schedule trigger + a custom operation in the bundle                     |
 | a screen, a form, a list, a chart          | [apps/front](apps/front/) — MUI components, Apollo for data                         |
 | a new query the UI needs                   | `apps/front/src/graphql/*.ts`                                                       |
-| a one-off data repair or backfill          | `apps/directus/migrations/*.mts`                                                    |
+| a one-off data repair or backfill          | rows only: a one-shot Flow, else `apps/directus/migrations/*.mts` as a last resort  |
 | a new environment variable                 | `apps/directus/.env.example` **and** root `.env.example` **and** docker-compose.yml |
 
 A change that spans both apps starts in `apps/directus` — data model first, then the
@@ -152,7 +157,9 @@ exists to show the patterns end to end. To make the repo yours:
 4. Keep `shared/claude.ts`, `shared/env.ts`, `shared/http.ts`, the auth/session and
    proxy code in `apps/front/src/lib`, and `AppShell`/`LoginForm` — that is the
    scaffolding, not the example.
-5. Build your first feature by copying the shape of what you deleted.
+5. Build your first feature by copying the shape of what you deleted — but start its
+   data model in the admin UI and `npm run schema:dump`, not in a migration. After
+   step 3 the repo has no migrations, and a healthy project keeps it that way.
 
 ## Deployment
 

@@ -29,7 +29,8 @@ schema/
 
 ## The one rule
 
-Every collection is owned by exactly one mechanism — either this folder or
-`../migrations/`. Never both: a `schema:load` that tries to create a collection a
-migration already created fails with "collection already exists". See
-`apps/directus/CLAUDE.md` for which to pick.
+This folder owns the entire data model. `../migrations/` never creates or alters a
+collection, field or relation — it exists for row data (backfills, repairs) and is a
+last resort even for that. Two owners break a fresh boot: a `schema:load` that tries
+to create a collection a migration already created fails with "collection already
+exists". See `apps/directus/CLAUDE.md`.

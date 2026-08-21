@@ -19,8 +19,8 @@ apps/directus/
 │       ├── operations/      steps a Flow can call (this is how cron works)
 │       └── types/schema.ts  typed view of the collections
 ├── extensions/.registry/    marketplace extension: TypeScript type generator
-├── migrations/*.mts         TypeScript migrations, compiled to *.mjs on every run
-├── schema/                  directus-sync dump — the data model in version control
+├── migrations/*.mts         escape hatch for row data only — never the model
+├── schema/                  directus-sync dump — the data model, single source of truth
 ├── templates/*.liquid       invite/reset emails; name and logo come from project settings
 ├── docker/entrypoint.sh     container boot: migrate → bootstrap → start → schema push
 └── docker-compose.yaml      LOCAL DEV DATABASE ONLY (the full stack is at the repo root)
@@ -37,7 +37,7 @@ apps/directus/
 | `npm run build`            | Compile migrations and every extension bundle (`npm ci` per bundle)       |
 | `npm test`                 | Vitest in the extension bundle                                            |
 | `npm run typecheck`        | `tsc --noEmit` for migrations and the bundle                              |
-| `npm run database:migrate` | Compile `*.mts`, then `directus database migrate:latest`                  |
+| `npm run database:migrate` | Compile `*.mts`, then `directus database migrate:latest` (rare)           |
 | `npm run schema:dump`      | Live Directus → `schema/` (**run this after every model change**)         |
 | `npm run schema:diff`      | What a push would change                                                  |
 | `npm run schema:load`      | `schema/` → live Directus (diff-and-apply, safe to repeat)                |
@@ -48,25 +48,46 @@ apps/directus/
 
 ## Changing the data model
 
-Two mechanisms, and **every collection is owned by exactly one of them**. Owning a
-collection in both breaks a fresh boot: the migration creates it, then `schema:load`
-tries to create it again and fails.
+**Always through schema sync.** `schema/` is the single source of truth for the whole
+model: collections, fields, relations, roles, policies, permissions, presets,
+dashboards, translations and Flows. The loop never changes:
 
-**Default — the admin UI + `schema:dump`:**
-
-1. Create/change the collection or field at http://localhost:8055.
+1. Create/change it at http://localhost:8055 (admin UI).
 2. `npm run schema:dump`.
-3. Commit `schema/`. Colleagues and the container get it via `schema:load`.
+3. Commit `schema/`. Colleagues and every container get it via `schema:load` — a
+   diff-and-apply, safe to repeat, and the last step of the container boot.
 
-This is right for anything with presentation metadata: interfaces, field order,
-icons, translations, roles, permissions, dashboards, Flows.
+A fresh database reaches the current model with `schema:load` alone. That is the whole
+mechanism, and it is also the reason it stays reliable: one owner, one artefact to
+review in a diff.
 
-**Migrations (`migrations/*.mts`) — for what must happen without a human clicking:**
+Use it for structure _and_ for everything with presentation metadata — interfaces,
+field order, icons, translations, roles, permissions, dashboards, Flows. Directus
+writes that metadata for you; hand-written SQL does not.
 
-- bootstrapping a table on a fresh install (the template's `notes` example)
-- data backfills and repairs, index tuning, tables Directus should not manage
+After changing the model, update `extensions/app/src/types/schema.ts` and the
+frontend's GraphQL documents (`apps/front/src/graphql/`).
 
-Rules for migrations:
+### Migrations are the exception, not the alternative
+
+**Never create or alter a collection, field or relation in a migration.** Two owners
+break a fresh boot — the migration creates the table, then `schema:load` tries to
+create it again and fails with "collection already exists" — and a table without
+`directus_collections`/`directus_fields` rows is a collection your colleagues can
+neither see nor edit in the admin UI. If a model change _feels_ like it needs a
+migration, the answer is still: do it in the admin UI and dump.
+
+`migrations/*.mts` is for **rows, not structure**: a backfill after a new field was
+dumped, a one-off data repair, recomputing a derived column. Even there, prefer in
+this order:
+
+1. Admin UI + `schema:dump` — anything structural, no exceptions.
+2. A Flow operation triggered once from the Flow editor — data work that should go
+   through Directus services (hooks, permissions, an LLM call) or be re-runnable.
+3. A migration — only when 1 and 2 genuinely cannot do it: a bulk `UPDATE` over a
+   large table, or an index Directus does not manage. Say why in the file header.
+
+Rules for the rare migration you do write:
 
 - Filename `YYYYMMDDA-description.mts` — the leading number must be unique and sorts
   the run order. Directus records applied versions in `directus_migrations`.
@@ -75,19 +96,15 @@ Rules for migrations:
   compiled files are gitignored.
 - Export `up(knex)` and `down(knex)`. Assume it may run against a database that
   already has data.
-- **A migration that creates a table must also register the collection.** Creating
-  the table alone is enough for REST and GraphQL — Directus reads the schema from the
-  database — but the admin UI only lists collections that have a
-  `directus_collections` row, and it renders a plain text input for every field with
-  no `directus_fields` row. Skip those inserts and you ship a collection your
-  colleagues can neither see nor edit. `20260729A-example-notes-collection.mts` shows
-  the full shape, including the `date-created`/`date-updated` specials and the JSON
-  columns (pass them as JSON strings — knex does not serialise objects into a `json`
-  column).
+- Touch data only. No `schema.createTable`, no added or dropped columns, no inserts
+  into `directus_collections` / `directus_fields` / `directus_relations`.
 - Never edit a migration that has run somewhere. Add a new one.
 
-After changing the model, update `extensions/app/src/types/schema.ts` and the
-frontend's GraphQL documents (`apps/front/src/graphql/`).
+The template's `20260729A-example-notes-collection.mts` is the one exception in the
+repo: it bootstraps the `notes` demo collection so a fresh `docker compose up` has
+something to show without a first `schema:dump`. Do not copy its shape — it goes away
+with the rest of the example (root [CLAUDE.md](../../CLAUDE.md)), and your own
+collections start in the admin UI.
 
 ## Adding server-side logic
 
@@ -222,4 +239,7 @@ not import it; it generates its own types from GraphQL.
 `docker/entrypoint.sh`, in order: compile migrations → `directus bootstrap` (installs
 on an empty database, migrates otherwise) → start Directus → wait for
 `/server/health` → `directus-sync push`. It is idempotent: a redeploy re-runs all of
-it against the existing database. `RUN_SCHEMA_SYNC=false` skips the schema push.
+it against the existing database. The last step is the one that matters — it is how
+every environment gets the model in `schema/`; the migration step is a no-op in a
+project that has none. `RUN_SCHEMA_SYNC=false` skips the schema push, which means
+deploying code against an unchanged model.
