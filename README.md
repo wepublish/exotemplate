@@ -53,9 +53,8 @@ Stop with `docker compose down`; add `-v` to also delete the database.
 The example feature is a **notes** collection with an AI summary. It shows every
 pattern in the stack end to end:
 
-- a **notes** collection (bootstrapped by a migration so the first `docker compose up`
-  has data — your own collections are built in the admin UI and committed with
-  `npm run schema:dump`)
+- a **notes** collection that lives in `apps/directus/schema/` as schema-as-code —
+  built in the admin UI, committed with `npm run schema:dump`, applied on every boot
 - an **MUI** page that lists and creates notes over **GraphQL** via Apollo
 - a **Directus extension endpoint** that summarises a note with the **Claude API**
 - a **hook** that clears the summary when the note text changes

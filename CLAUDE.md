@@ -152,14 +152,16 @@ exists to show the patterns end to end. To make the repo yours:
    - `apps/directus/extensions/app/src/endpoints/notes-summary/`,
      `.../hooks/notes-normalize/`, `.../operations/notes-summarize-pending/`, and
      their entries in `apps/directus/extensions/app/package.json`
-   - `apps/directus/migrations/20260729A-example-notes-collection.mts`
    - `notes` from `apps/directus/extensions/app/src/types/schema.ts`
+   - the `notes` collection itself: delete it in the admin UI, then
+     `npm run schema:dump` — it lives in `apps/directus/schema/snapshot/`, not in a
+     migration
 4. Keep `shared/claude.ts`, `shared/env.ts`, `shared/http.ts`, the auth/session and
    proxy code in `apps/front/src/lib`, and `AppShell`/`LoginForm` — that is the
    scaffolding, not the example.
 5. Build your first feature by copying the shape of what you deleted — but start its
-   data model in the admin UI and `npm run schema:dump`, not in a migration. After
-   step 3 the repo has no migrations, and a healthy project keeps it that way.
+   data model in the admin UI and `npm run schema:dump`, not in a migration. The repo
+   ships with no migrations at all, and a healthy project keeps it that way.
 
 ## Deployment
 

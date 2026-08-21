@@ -409,10 +409,8 @@ rules:
       migration already created.
 
       Not a violation: `INSERT`/`UPDATE`/`DELETE` on application rows
-      (backfills, repairs, recomputing a derived column), an index or constraint
-      Directus does not manage with a comment saying why, and the template's
-      `20260729A-example-notes-collection.mts` for as long as the example
-      feature is still in the repo.
+      (backfills, repairs, recomputing a derived column), and an index or
+      constraint Directus does not manage with a comment saying why.
 
   - id: migrations-reversible-mts
     title: Migrations are `.mts` and export both up and down

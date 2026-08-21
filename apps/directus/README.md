@@ -9,7 +9,7 @@ Working instructions for agents and developers: [CLAUDE.md](CLAUDE.md).
 ## First run
 
 ```bash
-npm run setup            # .env from .env.example, install, build bundle + migrations
+npm run setup            # .env from .env.example, install, build the extension bundle
 npm run db:start         # Postgres 16 in Docker
 npm run directus:init    # bootstrap + apply the committed schema — fresh database only
 npm run dev              # Postgres + Directus
@@ -53,8 +53,8 @@ npm run database:migrate   # compiles *.mts → *.mjs, then runs directus databa
 
 ```bash
 npm test           # vitest, in extensions/app
-npm run typecheck  # migrations + bundle
-npm run build      # compile migrations and every extension bundle
+npm run typecheck  # extension bundle (+ migrations, if the project has any)
+npm run build      # compile every extension bundle (and any migrations)
 ```
 
 ## Deployment

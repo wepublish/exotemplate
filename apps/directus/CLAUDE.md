@@ -19,7 +19,7 @@ apps/directus/
 │       ├── operations/      steps a Flow can call (this is how cron works)
 │       └── types/schema.ts  typed view of the collections
 ├── extensions/.registry/    marketplace extension: TypeScript type generator
-├── migrations/*.mts         escape hatch for row data only — never the model
+├── migrations/              empty by design — row data only, never the model
 ├── schema/                  directus-sync dump — the data model, single source of truth
 ├── templates/*.liquid       invite/reset emails; name and logo come from project settings
 ├── docker/entrypoint.sh     container boot: migrate → bootstrap → start → schema push
@@ -30,13 +30,13 @@ apps/directus/
 
 | Command                    | What it does                                                              |
 | -------------------------- | ------------------------------------------------------------------------- |
-| `npm run setup`            | `.env` from the example, install, build migrations + bundle               |
+| `npm run setup`            | `.env` from the example, install, build the extension bundle              |
 | `npm run db:start`         | Postgres in Docker (detached)                                             |
 | `npm run directus:init`    | Bootstrap a fresh database, migrate, apply the schema. **First run only** |
 | `npm run dev`              | Postgres + Directus on the host                                           |
-| `npm run build`            | Compile migrations and every extension bundle (`npm ci` per bundle)       |
+| `npm run build`            | Compile every extension bundle (`npm ci` per bundle) and any migrations   |
 | `npm test`                 | Vitest in the extension bundle                                            |
-| `npm run typecheck`        | `tsc --noEmit` for migrations and the bundle                              |
+| `npm run typecheck`        | `tsc --noEmit` for the bundle (and migrations, if any)                    |
 | `npm run database:migrate` | Compile `*.mts`, then `directus database migrate:latest` (rare)           |
 | `npm run schema:dump`      | Live Directus → `schema/` (**run this after every model change**)         |
 | `npm run schema:diff`      | What a push would change                                                  |
@@ -71,9 +71,11 @@ frontend's GraphQL documents (`apps/front/src/graphql/`).
 ### Migrations are the exception, not the alternative
 
 **Never create or alter a collection, field or relation in a migration.** Two owners
-break a fresh boot — the migration creates the table, then `schema:load` tries to
-create it again and fails with "collection already exists" — and a table without
-`directus_collections`/`directus_fields` rows is a collection your colleagues can
+drift, quietly: on a fresh boot the migration runs first, so the schema push then
+diffs against whatever the migration built instead of creating its own version — a
+detail the migration got wrong or left out can survive the push, and the same
+collection is now defined twice, in two files that no longer agree. A table without
+`directus_collections`/`directus_fields` rows is also a collection your colleagues can
 neither see nor edit in the admin UI. If a model change _feels_ like it needs a
 migration, the answer is still: do it in the admin UI and dump.
 
@@ -100,11 +102,10 @@ Rules for the rare migration you do write:
   into `directus_collections` / `directus_fields` / `directus_relations`.
 - Never edit a migration that has run somewhere. Add a new one.
 
-The template's `20260729A-example-notes-collection.mts` is the one exception in the
-repo: it bootstraps the `notes` demo collection so a fresh `docker compose up` has
-something to show without a first `schema:dump`. Do not copy its shape — it goes away
-with the rest of the example (root [CLAUDE.md](../../CLAUDE.md)), and your own
-collections start in the admin UI.
+`migrations/` is empty in this repo, and that is the healthy state — `notes` and
+everything else comes from `schema/`. `npm run build:migrations` and
+`npm run typecheck` skip the folder while it holds no `*.mts`, so nothing breaks by
+leaving it empty (`tsconfig.json` stays for the day you do need one).
 
 ## Adding server-side logic
 

@@ -43,6 +43,7 @@ the `directus-extension-sync` dependency is for). There is no id-map file to com
 
 This folder owns the entire data model. `../migrations/` never creates or alters a
 collection, field or relation — it exists for row data (backfills, repairs) and is a
-last resort even for that. Two owners break a fresh boot: a `schema:load` that tries
-to create a collection a migration already created fails with "collection already
-exists". See `apps/directus/CLAUDE.md`.
+last resort even for that. Two owners drift silently: on a fresh boot the migration
+runs before the push, so `schema:load` diffs against the migration's version of the
+collection instead of creating its own, and the two definitions disagree from then on.
+`../migrations/` is empty in this repo. See `apps/directus/CLAUDE.md`.
