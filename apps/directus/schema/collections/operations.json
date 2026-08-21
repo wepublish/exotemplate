@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Log to Console",
+    "key": "log_wkbyh",
+    "type": "log",
+    "position_x": 19,
+    "position_y": 1,
+    "options": {
+      "message": "Hello"
+    },
+    "resolve": null,
+    "reject": null,
+    "flow": "c385f233-c13e-4d46-960f-270f8dd5b2e4",
+    "_syncId": "2eb791ba-a8bb-48e6-a09d-2b4f81f6bb71"
+  }
+]

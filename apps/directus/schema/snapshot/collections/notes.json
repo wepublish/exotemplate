@@ -1,0 +1,28 @@
+{
+  "collection": "notes",
+  "meta": {
+    "accountability": "all",
+    "archive_app_filter": true,
+    "archive_field": "status",
+    "archive_value": "archived",
+    "collapse": "open",
+    "collection": "notes",
+    "color": null,
+    "display_template": "{{ title }}",
+    "group": null,
+    "hidden": false,
+    "icon": "sticky_note_2",
+    "item_duplication_fields": null,
+    "note": "Beispiel-Collection der Vorlage: Notizen mit KI-Zusammenfassung.",
+    "preview_url": null,
+    "singleton": false,
+    "sort": null,
+    "sort_field": null,
+    "translations": null,
+    "unarchive_value": "draft",
+    "versioning": false
+  },
+  "schema": {
+    "name": "notes"
+  }
+}

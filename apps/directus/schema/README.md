@@ -17,13 +17,25 @@ After the first `schema:dump` you get:
 
 ```
 schema/
-├── snapshot/          collections, fields, relations
-├── flows/             Flows incl. their Schedule (cron) triggers
-├── operations/        the steps inside those Flows
-├── roles/  policies/  permissions/
-├── settings/ presets/ dashboards/ panels/ translations/
-└── directus-sync.id-map.json   maps local ids to remote ids — commit it
+├── snapshot/          the database structure Directus manages
+│   ├── info.json      directus + vendor version the snapshot was taken with
+│   ├── collections/   one file per collection
+│   ├── fields/        one file per field, incl. interface, options, display
+│   └── relations/     one file per relation
+├── collections/       the system collections directus-sync tracks, one file each
+│   ├── flows.json         Flows incl. their trigger and its options (the cron string)
+│   ├── operations.json    the steps inside those Flows, wired by resolve/reject
+│   ├── roles.json  policies.json  permissions.json
+│   ├── settings.json  presets.json  translations.json
+│   ├── dashboards.json  panels.json  folders.json
+└── specs/             generated openapi.json + *.graphql — reference, not applied
 ```
+
+**Flows are in `collections/flows.json`, not in `snapshot/`.** The snapshot is only what
+Directus' own schema API covers — collections, fields, relations. Everything else above
+is a row in a `directus_*` system table, which directus-sync dumps separately and
+matches across environments through an id map it keeps _inside_ Directus (that is what
+the `directus-extension-sync` dependency is for). There is no id-map file to commit.
 
 `npm run schema:load` is a **diff-and-apply**, so it is safe to run repeatedly.
 
