@@ -9,10 +9,28 @@
 #
 # State lives in exactly two named volumes below. Nothing else on the host is
 # written to — that is the "no persistent file storage outside Directus" rule.
+#
+# ---------------------------------------------------------------------------------
+# RENAME `appname-` BEFORE YOU DEPLOY. It is a placeholder, and leaving it is not a
+# cosmetic mistake.
+#
+# Compose gives every service a network alias equal to its own name, and a PaaS that
+# hosts several stacks (Dokploy, Coolify, Caprover) puts every stack that owns a
+# domain on ONE shared Docker network. Two stacks that both call a service
+# `directus` therefore publish the same alias: `http://directus:8055` resolves to
+# both containers and Docker's DNS round-robins between them. Half your requests
+# reach a different application's Directus — which answers them with a valid-looking
+# 400 (its database has none of your collections) or a 403 (it signs tokens with a
+# different SECRET), while the other half work. Nothing in the logs says "wrong
+# host".
+#
+# The names have to be unique across the whole deploy host, not just within this
+# file. See "Starting a new project from this template" in CLAUDE.md.
+# ---------------------------------------------------------------------------------
 name: app
 
 services:
-  postgres:
+  appname-postgres:
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: ${DB_DATABASE:-directus}
@@ -27,11 +45,11 @@ services:
       retries: 20
     restart: unless-stopped
 
-  directus:
+  appname-directus:
     build:
       context: ./apps/directus
     depends_on:
-      postgres:
+      appname-postgres:
         condition: service_healthy
     environment:
       # The entrypoint uses these to create the first admin on an empty database.
@@ -42,7 +60,7 @@ services:
       SECRET: ${SECRET:?set SECRET in .env — openssl rand -hex 32}
 
       DB_CLIENT: pg
-      DB_HOST: postgres
+      DB_HOST: appname-postgres
       DB_PORT: '5432'
       DB_DATABASE: ${DB_DATABASE:-directus}
       DB_USER: ${DB_USER:-postgres}
@@ -94,16 +112,16 @@ services:
       start_period: 40s
     restart: unless-stopped
 
-  front:
+  appname-front:
     build:
       context: ./apps/front
     depends_on:
-      directus:
+      appname-directus:
         condition: service_healthy
     environment:
       # Inside the compose network, not localhost. The browser never uses this URL —
       # it only talks to this app's own /api routes.
-      DIRECTUS_URL: http://directus:8055
+      DIRECTUS_URL: http://appname-directus:8055
       NODE_ENV: production
     healthcheck:
       test:
