@@ -48,6 +48,12 @@ the versioned schema from `apps/directus/schema/` and creates the admin user.
 
 Stop with `docker compose down`; add `-v` to also delete the database.
 
+The compose services are called `appname-postgres`, `appname-directus` and
+`appname-front`. Locally the placeholder is harmless; **rename it before you deploy**
+— see [Deployment](#6--deployment). It is the one step in
+[CLAUDE.md](CLAUDE.md#starting-a-new-project-from-this-template) that costs you an
+outage if you skip it.
+
 ### What you get
 
 The example feature is a **notes** collection with an AI summary. It shows every
@@ -150,16 +156,37 @@ hostnames, and put a reverse proxy in front for TLS.
 State lives in two named volumes: `db_data` (Postgres) and `directus_uploads`
 (Directus Files). Back those up — nothing else on the host holds application state.
 
+### Service names must be unique across the deploy host
+
+Rename the `appname-` prefix in `docker-compose.yml` (three service keys, both
+`depends_on` blocks, `DB_HOST`, `DIRECTUS_URL`, and the same keys in
+`docker-compose.override.yml`) to something specific to this project.
+
+Compose gives each service a network alias equal to its name, and a PaaS that hosts
+several stacks — Dokploy, Coolify, Caprover — puts every stack that owns a domain on
+one shared Docker network. Two stacks that both ship a service named `directus`
+publish the same alias there, so `http://directus:8055` resolves to both containers
+and Docker's DNS round-robins between them: half your requests reach the other
+application's Directus. Unique names are the only fix inside the compose file —
+Compose validates service keys before it interpolates variables, so the name cannot
+be built from an environment variable.
+
+On Dokploy specifically, the domain is bound to a service by name, so **update the
+Service Name on each domain in the same change** (`appname-front` → port 3000,
+`appname-directus` → port 8055). Rename the services without it and Traefik has
+nothing to attach the hostname to.
+
 ---
 
 ## 7 · Troubleshooting
 
-| Symptom                                          | Cause / fix                                                                                               |
-| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| `KEY variable is not set`                        | You skipped `cp .env.example .env`.                                                                       |
-| Port 3000 / 8055 / 5432 already in use           | Change `FRONT_PORT` / `DIRECTUS_PORT` in `.env`, or stop the other process.                               |
-| Directus starts but a custom route 404s          | The extension bundle was not built: `cd apps/directus && npm run build:extensions`.                       |
-| AI feature returns "konnte nicht erzeugt werden" | `ANTHROPIC_API_KEY` missing or invalid — it belongs in the **backend** environment.                       |
-| Frontend keeps showing the login form            | Cookies blocked, or `DIRECTUS_URL` unreachable from the Next process (in Docker: `http://directus:8055`). |
-| A colleague's collection is missing locally      | `cd apps/directus && npm run schema:load`.                                                                |
-| `Cannot connect to the Docker daemon`            | Docker isn't running.                                                                                     |
+| Symptom                                                                                                                     | Cause / fix                                                                                                                                                             |
+| --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `KEY variable is not set`                                                                                                   | You skipped `cp .env.example .env`.                                                                                                                                     |
+| Port 3000 / 8055 / 5432 already in use                                                                                      | Change `FRONT_PORT` / `DIRECTUS_PORT` in `.env`, or stop the other process.                                                                                             |
+| Directus starts but a custom route 404s                                                                                     | The extension bundle was not built: `cd apps/directus && npm run build:extensions`.                                                                                     |
+| AI feature returns "konnte nicht erzeugt werden"                                                                            | `ANTHROPIC_API_KEY` missing or invalid — it belongs in the **backend** environment.                                                                                     |
+| Frontend keeps showing the login form                                                                                       | Cookies blocked, or `DIRECTUS_URL` unreachable from the Next process (in Docker: `http://appname-directus:8055`).                                                       |
+| After login, parallel requests come back a mix of `400 GRAPHQL_VALIDATION` ("Cannot query field …") and `403 INVALID_TOKEN` | Two stacks on the deploy host share a compose service name, so `DIRECTUS_URL` round-robins between two different Directus instances — see [Deployment](#6--deployment). |
+| A colleague's collection is missing locally                                                                                 | `cd apps/directus && npm run schema:load`.                                                                                                                              |
+| `Cannot connect to the Docker daemon`                                                                                       | Docker isn't running.                                                                                                                                                   |

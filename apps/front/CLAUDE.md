@@ -148,5 +148,6 @@ replayed after a token refresh.
 come from the root `.env` via `docker-compose.yml`.
 
 - `DIRECTUS_URL` — where Directus is reachable **from this server process**
-  (`http://directus:8055` in Docker). The browser never uses it.
+  (`http://appname-directus:8055` in Docker — the service name, renamed per
+  project). The browser never uses it.
 - No token, no Claude key. Both live in the backend.

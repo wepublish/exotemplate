@@ -49,7 +49,10 @@ them is wrong even if it works.
    a second SDK, or a direct `fetch` to an inference endpoint.
 3. **Runs with Docker.** `cp .env.example .env && docker compose up --build` starts
    the entire application. Anything a feature needs at runtime is a service or an
-   environment variable in [docker-compose.yml](docker-compose.yml).
+   environment variable in [docker-compose.yml](docker-compose.yml). Service names
+   must be unique **across the deploy host**, not just within the file — see step 3
+   of the checklist below. Never rename one back to a bare `directus`, `postgres` or
+   `front`.
 4. **Self-contained.** Postgres, Directus and the frontend are the only services. No
    Redis, no queue broker, no external cron host, no side-car. The Claude API is the
    single outbound dependency; a new one needs a deliberate decision, not a commit.
@@ -146,8 +149,20 @@ exists to show the patterns end to end. To make the repo yours:
 1. Read this file and both app `CLAUDE.md` files.
 2. Rename the images/description: root `package.json` (name, description). CI image
    names derive from the repo name automatically.
-3. Rename the services in the `docker-compose.yml` file so they have the form
-   `appname-directus`, `appname-postgres` etc.
+3. Rename the services in `docker-compose.yml` (and `docker-compose.override.yml`)
+   from the `appname-` placeholder to `<yourapp>-directus`, `<yourapp>-postgres`,
+   `<yourapp>-front`, and with them both `depends_on` blocks, `DB_HOST` and
+   `DIRECTUS_URL`. **This one is load-bearing, not tidiness.** Compose gives every
+   service a network alias equal to its name, and a PaaS that hosts several stacks
+   puts every stack that owns a domain on one shared Docker network — so two
+   projects that both kept `directus` publish the same alias, and
+   `http://directus:8055` round-robins between them. Half the requests then reach
+   the other project's Directus, which answers `400` (its database has none of your
+   collections) or `403 INVALID_TOKEN` (it signs with a different `SECRET`), while
+   the other half succeed. The name cannot be derived from an environment variable:
+   Compose validates service keys before interpolating. If the PaaS binds domains to
+   a service by name (Dokploy does), update those in the same change or the
+   hostnames stop routing.
 4. Delete the example, in this order:
    - `apps/front/src/components/Note*.tsx`, `apps/front/src/graphql/notes.ts`,
      `apps/front/src/lib/notes.ts` (+ tests), `apps/front/src/app/api/notes/`
