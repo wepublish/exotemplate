@@ -147,7 +147,7 @@ exists to show the patterns end to end. To make the repo yours:
 2. Rename the images/description: root `package.json` (name, description). CI image
    names derive from the repo name automatically.
 3. Rename the services in the `docker-compose.yml` file so they have the form
-   `appname-directus`, `appname-postgresql` etc.
+   `appname-directus`, `appname-postgres` etc.
 4. Delete the example, in this order:
    - `apps/front/src/components/Note*.tsx`, `apps/front/src/graphql/notes.ts`,
      `apps/front/src/lib/notes.ts` (+ tests), `apps/front/src/app/api/notes/`
