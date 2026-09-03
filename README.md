@@ -99,6 +99,9 @@ are never picked up.
 Put your `ANTHROPIC_API_KEY` in `apps/directus/.env`, and
 `cp .env.local.example .env.local` in `apps/front`.
 
+If a service can not be started because the port is already occuped, select a
+different port for that service to listen to.
+
 ---
 
 ## 4 · Everyday commands
