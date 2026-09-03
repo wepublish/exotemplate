@@ -179,6 +179,8 @@ exists to show the patterns end to end. To make the repo yours:
 6. Build your first feature by copying the shape of what you deleted — but start its
    data model in the admin UI and `npm run schema:dump`, not in a migration. The repo
    ships with no migrations at all, and a healthy project keeps it that way.
+7. By default, work on the 'main' branch. Only if it is really needed create a new
+   branch. Only the main branch is deployed on Dokploy.
 
 ## Deployment
 
